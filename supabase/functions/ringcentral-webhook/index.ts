@@ -1,0 +1,146 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+// RingCentral sends webhook validation requests
+Deno.serve(async (req) => {
+  // Handle CORS preflight
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // RingCentral webhook validation - they send a validation token
+    const validationToken = req.headers.get("Validation-Token");
+    if (validationToken) {
+      console.log("RingCentral webhook validation request");
+      return new Response(null, {
+        status: 200,
+        headers: {
+          ...corsHeaders,
+          "Validation-Token": validationToken,
+        },
+      });
+    }
+
+    const body = await req.json();
+    console.log("RingCentral webhook received:", JSON.stringify(body, null, 2));
+
+    // Handle SMS notification
+    if (body.event && body.event.includes("/message-store")) {
+      const message = body.body;
+      
+      if (!message || message.type !== "SMS") {
+        return new Response(JSON.stringify({ received: true }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const isInbound = message.direction === "Inbound";
+      const phoneNumber = isInbound 
+        ? message.from?.phoneNumber 
+        : message.to?.[0]?.phoneNumber;
+
+      if (!phoneNumber) {
+        console.log("No phone number found in message");
+        return new Response(JSON.stringify({ received: true }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const normalizedPhone = phoneNumber.replace(/\D/g, "").slice(-10);
+
+      // Find customer by phone number
+      const { data: customers } = await supabase
+        .from("customers")
+        .select("id, name, phone, phone2")
+        .or(`phone.ilike.%${normalizedPhone}%,phone2.ilike.%${normalizedPhone}%`);
+
+      const customer = customers?.[0];
+
+      if (!customer) {
+        console.log("No customer found for phone:", phoneNumber);
+        return new Response(JSON.stringify({ received: true, no_customer: true }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Find or create conversation
+      let { data: conversation } = await supabase
+        .from("conversations")
+        .select("id")
+        .eq("customer_id", customer.id)
+        .single();
+
+      if (!conversation) {
+        const { data: newConv, error: convError } = await supabase
+          .from("conversations")
+          .insert({
+            customer_id: customer.id,
+            last_message: message.subject || "",
+            last_message_at: message.creationTime || new Date().toISOString(),
+            unread: isInbound,
+          })
+          .select("id")
+          .single();
+
+        if (convError) {
+          console.error("Failed to create conversation:", convError);
+          return new Response(JSON.stringify({ error: "Failed to create conversation" }), {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        conversation = newConv;
+      }
+
+      // Insert message
+      const { error: msgError } = await supabase
+        .from("messages")
+        .insert({
+          conversation_id: conversation.id,
+          content: message.subject || "",
+          sender_type: isInbound ? "customer" : "user",
+          created_at: message.creationTime || new Date().toISOString(),
+          read: !isInbound,
+        });
+
+      if (msgError) {
+        console.error("Failed to insert message:", msgError);
+      }
+
+      // Update conversation
+      await supabase
+        .from("conversations")
+        .update({
+          last_message: message.subject || "",
+          last_message_at: message.creationTime || new Date().toISOString(),
+          unread: isInbound,
+        })
+        .eq("id", conversation.id);
+
+      console.log("Message processed successfully for customer:", customer.name);
+
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    return new Response(JSON.stringify({ received: true }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    console.error("Webhook error:", error);
+    return new Response(
+      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+});
