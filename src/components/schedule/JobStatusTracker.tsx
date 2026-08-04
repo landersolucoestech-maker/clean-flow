@@ -30,6 +30,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface JobStatusTrackerProps {
   jobId: string;
@@ -37,7 +38,7 @@ interface JobStatusTrackerProps {
   onOurWayTime: string | null;
   timeStarted: string | null;
   timeFinished: string | null;
-  staffId: string;
+  staffId: string | null;
   userRole: string;
   jobAddress?: string | null;
   customerId?: string;
@@ -293,8 +294,15 @@ export const JobStatusTracker: React.FC<JobStatusTrackerProps> = ({
   const triggerAutomation = useJobAutomations();
 
   const canOnlyTrigger = canOnlyTriggerStatus(userRole);
+  const canEdit = canEditStatusManually(userRole);
+  const canTrackStatus = Boolean(staffId && (canEdit || canOnlyTrigger));
 
   const handleTriggerStatus = (statusType: StatusType) => {
+    if (!staffId) {
+      toast.error("Your login is not linked to an active staff member.");
+      return;
+    }
+
     setLoadingStatus(statusType);
     trackStatus.mutate({
       jobId,
@@ -340,12 +348,13 @@ export const JobStatusTracker: React.FC<JobStatusTrackerProps> = ({
     },
   ];
 
-  const canEdit = canEditStatusManually(userRole);
-
   const getStatusIndex = () => {
     if (timeFinished) return 3;
     if (timeStarted) return 2;
     if (onOurWayTime) return 1;
+    if (currentStatus === "completed") return 3;
+    if (currentStatus === "in-progress") return 2;
+    if (currentStatus === "on-the-way") return 1;
     return 0;
   };
 
@@ -387,9 +396,16 @@ export const JobStatusTracker: React.FC<JobStatusTrackerProps> = ({
             <span>Your profile can only mark steps.</span>
           </div>
         )}
+
+        {!staffId && (
+          <div className="flex items-center gap-2 text-xs text-destructive mt-1">
+            <AlertCircle className="h-3 w-3" />
+            <span>Link this login email to an active staff member to update status.</span>
+          </div>
+        )}
       </CardHeader>
 
-      {canEdit && (
+      {canTrackStatus && (
         <CardContent className="px-4 pb-3 pt-0">
           <div className="grid gap-2 md:grid-cols-3">
             {statusConfig.map((status, index) => (
@@ -403,7 +419,7 @@ export const JobStatusTracker: React.FC<JobStatusTrackerProps> = ({
                 isCompleted={index < currentIndex}
                 onTrigger={() => handleTriggerStatus(status.type)}
                 isLoading={loadingStatus === status.type}
-                disabled={index > currentIndex}
+                disabled={!staffId || index > currentIndex}
               />
             ))}
           </div>
