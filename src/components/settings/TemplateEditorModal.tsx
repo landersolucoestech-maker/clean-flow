@@ -212,7 +212,7 @@ export function TemplateEditorModal({
     }
   }, [open, templateType]);
 
-  const updateConfig = (key: keyof TemplateConfig, value: any) => {
+  const updateConfig = <Key extends keyof TemplateConfig>(key: Key, value: TemplateConfig[Key]) => {
     setConfig(prev => ({ ...prev, [key]: value }));
   };
 
@@ -283,7 +283,7 @@ export function TemplateEditorModal({
                       <Label>Logo Position</Label>
                       <Select 
                         value={config.logoPosition} 
-                        onValueChange={(v) => updateConfig("logoPosition", v)}
+                        onValueChange={(v) => updateConfig("logoPosition", v as TemplateConfig["logoPosition"])}
                       >
                         <SelectTrigger>
                           <SelectValue />
