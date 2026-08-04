@@ -62,6 +62,32 @@ export function useStaff() {
   });
 }
 
+// Resolve the authenticated account to an active staff record. Staff email is
+// the current schema's identity link until a dedicated auth user ID is added.
+export function useCurrentStaff() {
+  return useQuery({
+    queryKey: ["staff", "current"],
+    queryFn: async () => {
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      if (authError) throw authError;
+
+      const email = authData.user?.email;
+      if (!email) return null;
+
+      const { data, error } = await supabase
+        .from("staff")
+        .select("*, staff_roles(role)")
+        .ilike("email", email)
+        .eq("is_active", true)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data ? normalizeStaff(data as StaffQueryRow) : null;
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
 // Fetch only staff members that should appear in the Schedule sidebar
 // (cleaners + drivers). Uses a single query and filters client-side.
 export function useCleanersAndDrivers() {
