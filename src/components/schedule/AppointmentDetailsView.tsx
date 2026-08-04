@@ -19,7 +19,7 @@ import { useQuickBooksStore } from "@/stores/quickbooks.store";
 import { JobStatusTracker } from "./JobStatusTracker";
 import { ReviewRequestPreviewModal } from "./ReviewRequestPreviewModal";
 import { canEditStatusManually } from "@/hooks/useJobStatusTracking";
-import { useStaffByTeam } from "@/hooks/useStaff";
+import { useCurrentStaff, useStaffByTeam } from "@/hooks/useStaff";
 import { useSendNotificationSMS } from "@/hooks/useSendNotificationSMS";
 import { useCompanySettings } from "@/hooks/useCompanySettings";
 import {
@@ -199,6 +199,9 @@ export function AppointmentDetailsView({
   const { customerMapping } = useQuickBooksStore();
   const sendNotification = useSendNotificationSMS();
   const { data: companySettings } = useCompanySettings();
+  const { data: currentStaff } = useCurrentStaff();
+  const currentUserRole = currentStaff?.staff_roles?.role ?? "unauthorized";
+  const canManuallyEditTime = canEditStatusManually(currentUserRole);
   
   const [notesPage, setNotesPage] = useState(1);
   const [additionalNotesPage, setAdditionalNotesPage] = useState(1);
@@ -444,16 +447,8 @@ export function AppointmentDetailsView({
   };
 
   const handleSendReview = (message: string) => {
-    console.log("handleSendReview called with:", {
-      customerId: appointment.customerId,
-      customerPhone: appointment.customerPhone,
-      customer: appointment.customer,
-      message: message.substring(0, 50) + "...",
-    });
-    
     // Send SMS and log to conversation if customer has phone and ID
     if (appointment.customerId && appointment.customerPhone) {
-      console.log("Sending review via sendNotification.mutate...");
       sendNotification.mutate({
         customerId: appointment.customerId,
         customerPhone: appointment.customerPhone,
@@ -463,7 +458,6 @@ export function AppointmentDetailsView({
         showToast: true,
       }, {
         onSuccess: () => {
-          console.log("Review notification sent successfully!");
           setReviewPreviewOpen(false);
         },
         onError: (error) => {
@@ -471,12 +465,9 @@ export function AppointmentDetailsView({
         },
       });
     } else {
-      console.warn("Missing customerId or customerPhone, using fallback toast");
-      // Fallback: just show toast
-      toast.success(`Review request sent to ${appointment.customer}!`, {
-        description: "Message logged to communications.",
+      toast.error("Review request was not sent", {
+        description: "This customer needs a saved phone number first.",
       });
-      setReviewPreviewOpen(false);
     }
   };
 
@@ -927,8 +918,8 @@ export function AppointmentDetailsView({
               onOurWayTime={appointment.onOurWayTime || null}
               timeStarted={appointment.timeStarted || null}
               timeFinished={appointment.timeFinished || null}
-              staffId="current-user-staff-id" // TODO: Get from auth context
-              userRole="admin" // TODO: Get from auth context
+              staffId={currentStaff?.id ?? null}
+              userRole={currentUserRole}
               jobAddress={appointment.address || null}
               customerId={appointment.customerId}
               customerPhone={appointment.customerPhone}
@@ -937,10 +928,12 @@ export function AppointmentDetailsView({
             />
           </section>
 
-          <Separator />
+          {canManuallyEditTime && (
+            <>
+              <Separator />
 
-          {/* Legacy Timeline - For managers who can manually edit */}
-          <section aria-label="Job timeline" className="space-y-3">
+              {/* Manual timeline is restricted to management roles. */}
+              <section aria-label="Job timeline" className="space-y-3">
             <div className="flex items-center gap-2 mb-2">
               <span className="text-sm font-semibold text-foreground">Manual Time Editing</span>
             </div>
@@ -1022,7 +1015,9 @@ export function AppointmentDetailsView({
                 </div>
               );
             })}
-          </section>
+              </section>
+            </>
+          )}
 
           <Separator />
 
