@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { TablesInsert } from "@/integrations/supabase/types";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Button } from "@/components/ui/button";
@@ -188,7 +189,7 @@ export function Leads() {
       totalPending: number;
     }>();
     
-    invoicesData.forEach((invoice: any) => {
+    invoicesData.forEach((invoice) => {
       if (!invoice.lead_id) return;
       
       const current = statusMap.get(invoice.lead_id) || { 
@@ -342,7 +343,7 @@ export function Leads() {
 
   const jobsByLeadId = useMemo(() => {
     const set = new Set<string>();
-    (jobsForLeads as any[]).forEach((job) => {
+    jobsForLeads.forEach((job) => {
       if (job?.lead_id) set.add(job.lead_id);
     });
     return set;
@@ -484,7 +485,7 @@ export function Leads() {
           const state = (a.state || "").trim();
           const postalCode = (a.postalCode || "").trim();
 
-          const row: any = {
+          const row: TablesInsert<"lead_addresses"> & { id?: string } = {
             lead_id: dbId,
             name: (a.addressName || "").trim() || "Home",
             address: formatFullAddress(street, city, state, postalCode),
@@ -498,7 +499,7 @@ export function Leads() {
           if (a.id && uuidRegex.test(a.id)) row.id = a.id;
           return row;
         })
-        .filter(Boolean) as any[];
+        .filter((row): row is TablesInsert<"lead_addresses"> & { id?: string } => row !== null);
 
       const { data: existingAddrRows, error: existingAddrErr } = await supabase
         .from("lead_addresses")
@@ -507,8 +508,8 @@ export function Leads() {
 
       if (existingAddrErr) throw existingAddrErr;
 
-      const existingIds = (existingAddrRows || []).map((r: any) => r.id);
-      const keepIds = uiAddresses.filter((r: any) => r.id).map((r: any) => r.id);
+      const existingIds = (existingAddrRows || []).map((row) => row.id);
+      const keepIds = uiAddresses.flatMap((row) => row.id ? [row.id] : []);
       const deleteIds = existingIds.filter((id: string) => !keepIds.includes(id));
 
       if (deleteIds.length > 0) {
@@ -519,8 +520,8 @@ export function Leads() {
         if (delErr) throw delErr;
       }
 
-      const upsertRows = uiAddresses.filter((r: any) => r.id);
-      const insertRows = uiAddresses.filter((r: any) => !r.id);
+      const upsertRows = uiAddresses.filter((row) => row.id);
+      const insertRows = uiAddresses.filter((row) => !row.id);
 
       if (upsertRows.length > 0) {
         const { error: upsertErr } = await supabase
