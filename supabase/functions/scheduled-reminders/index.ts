@@ -459,10 +459,11 @@ serve(async (req) => {
       JSON.stringify({ error: "Invalid action. Use 'job-reminders' or 'invoice-reminders'" }),
       { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Scheduled reminders error:", error);
+    const message = error instanceof Error ? error.message : "Unknown scheduled reminder error";
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: message }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
