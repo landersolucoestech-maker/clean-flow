@@ -1,4 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { authorizeStaffRequest } from "../_shared/authorize.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,6 +15,15 @@ interface MapByAddressRequest {
 
 async function geocodeAddress(address: string, apiKey: string): Promise<{ lat: number; lon: number } | null> {
   try {
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
+    const authError = await authorizeStaffRequest(req, supabase, [
+      "admin", "cleaner", "driver", "cleaning_manager", "office_manager", "virtual_assistant",
+    ]);
+    if (authError) return authError;
+
     const url = `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(address)}&apiKey=${apiKey}`;
     const res = await fetch(url);
     const data = await res.json();

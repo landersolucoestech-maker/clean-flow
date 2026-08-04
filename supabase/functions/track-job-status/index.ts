@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getAuthorizedStaffIdentity } from "../_shared/authorize.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -77,23 +78,10 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const authorization = req.headers.get("Authorization");
-    const accessToken = authorization?.match(/^Bearer\s+(.+)$/i)?.[1];
-    if (!accessToken) {
-      return new Response(
-        JSON.stringify({ error: "Authentication required", code: "UNAUTHENTICATED" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    }
-
-    const { data: authData, error: authError } = await supabase.auth.getUser(accessToken);
-    const authenticatedEmail = authData.user?.email;
-    if (authError || !authenticatedEmail) {
-      return new Response(
-        JSON.stringify({ error: "Invalid authentication token", code: "UNAUTHENTICATED" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    }
+    const authorization = await getAuthorizedStaffIdentity(req, supabase, [
+      "admin", "cleaner", "driver", "cleaning_manager", "office_manager", "virtual_assistant",
+    ]);
+    if (authorization.error) return authorization.error;
 
     const body: TrackStatusRequest = await req.json();
     const { 
@@ -116,24 +104,20 @@ serve(async (req) => {
       );
     }
 
-    const { data: staffMatches, error: staffError } = await supabase
+    const { data: authenticatedStaff, error: staffError } = await supabase
       .from("staff")
-      .select("id, name, email, team, is_active, staff_roles(role)")
-      .ilike("email", authenticatedEmail)
+      .select("id, name, team")
+      .eq("id", authorization.identity.staffId)
       .eq("is_active", true)
-      .limit(2);
+      .single();
 
-    if (staffError || staffMatches?.length !== 1) {
+    if (staffError || !authenticatedStaff) {
       return new Response(
-        JSON.stringify({
-          error: "The authenticated account is not linked to exactly one active staff member",
-          code: "STAFF_IDENTITY_REQUIRED",
-        }),
+        JSON.stringify({ error: "Active staff identity not found", code: "STAFF_IDENTITY_REQUIRED" }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
-    const authenticatedStaff = staffMatches[0];
     if (staffId && staffId !== authenticatedStaff.id) {
       return new Response(
         JSON.stringify({ error: "Staff identity mismatch", code: "PERMISSION_DENIED" }),
@@ -141,10 +125,7 @@ serve(async (req) => {
       );
     }
 
-    const joinedRole = Array.isArray(authenticatedStaff.staff_roles)
-      ? authenticatedStaff.staff_roles[0]?.role
-      : authenticatedStaff.staff_roles?.role;
-    const role = joinedRole || "cleaner";
+    const role = authorization.identity.role;
     const staffIdUuid = authenticatedStaff.id;
     const canEdit = ["admin", "virtual_assistant", "office_manager", "cleaning_manager"].includes(role);
     const canTrigger = canEdit || ["driver", "cleaner"].includes(role);
@@ -321,7 +302,7 @@ serve(async (req) => {
                     },
                   });
                   
-                  console.log(`GPS alert SMS sent to ${gpsAlertSmsTo}`);
+                  console.log("GPS alert SMS sent");
                 } catch (smsError) {
                   console.error("Failed to send GPS alert SMS:", smsError);
                 }
@@ -490,7 +471,7 @@ serve(async (req) => {
               
               if (teamMembers && teamMembers.length > 0) {
                 resolvedStaffList.push(...teamMembers);
-                console.log(`Expanded Team ${staffIdentifier} to ${teamMembers.length} individual staff members`);
+                console.log(`Expanded assigned team to ${teamMembers.length} staff members`);
               }
             } else {
               // Try to find by name
@@ -517,7 +498,7 @@ serve(async (req) => {
 
             // Skip if payroll already exists for this staff/job combination
             if (existingStaffIds.has(staffData.id)) {
-              console.log(`Payroll already exists for staff ${staffData.name} on job ${jobId}`);
+              console.log(`Payroll record already exists for job ${jobId}`);
               continue;
             }
 
@@ -553,7 +534,7 @@ serve(async (req) => {
             if (payrollError) {
               console.error(`Error creating payroll for ${staffData.name}:`, payrollError);
             } else {
-              console.log(`Created payroll record for ${staffData.name} - Job ${jobId}`);
+              console.log(`Created payroll record for job ${jobId}`);
             }
           }
         }
@@ -627,7 +608,6 @@ serve(async (req) => {
 
                 const remainingBalance = Math.max(0, totalContractValue - paidAmount);
                 
-                console.log(`Invoice calculation: Total=${totalContractValue}, Paid=${paidAmount}, Remaining=${remainingBalance}`);
                 
                 if (remainingBalance > 0) {
                   // Get next invoice number
@@ -669,7 +649,7 @@ serve(async (req) => {
                   if (invoiceError) {
                     console.error("Error creating balance invoice:", invoiceError);
                   } else {
-                    console.log(`Created balance invoice ${newInvoiceNumber} for remaining amount: $${remainingBalance}`);
+                    console.log("Created balance invoice");
                     
                     // Create pending transaction for this invoice
                     const customerName = (jobForInvoice.customers as { name?: string } | null)?.name || "Customer";

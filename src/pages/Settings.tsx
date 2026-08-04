@@ -11,25 +11,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { ViewPermissionsModal } from "@/components/settings/ViewPermissionsModal";
-import { CreateRoleModal } from "@/components/settings/CreateRoleModal";
-import { EditRoleModal } from "@/components/settings/EditRoleModal";
-import { DeleteRoleDialog } from "@/components/settings/DeleteRoleDialog";
 import { TeamUserModal } from "@/components/settings/TeamUserModal";
 import { AutomationsTab } from "@/components/settings/AutomationsTab";
 import { IntegrationsTab } from "@/components/settings/IntegrationsTab";
-import { TemplatesTab } from "@/components/settings/TemplatesTab";
 import { AuditTab } from "@/components/settings/AuditTab";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { PricingPlansCard } from "@/components/settings/PricingPlansCard";
-import { useStaff, useDeleteStaff, Staff } from "@/hooks/useStaff";
-import { useRoles, useDeleteRole, Role } from "@/hooks/useRoles";
+import { useStaff, useCurrentStaff, Staff } from "@/hooks/useStaff";
 import { useCompanySettings, useUpdateCompanySettings, BusinessHours } from "@/hooks/useCompanySettings";
+import { supabase } from "@/integrations/supabase/client";
+import { useLocation, useSearchParams } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   User,
   Building2,
   Bell,
-  CreditCard,
   Users,
   Shield,
   Globe,
@@ -39,65 +34,73 @@ import {
   Lock,
   Eye,
   EyeOff,
-  Trash2,
   Edit,
   Clock,
   Phone,
   MapPin,
-  Upload,
   Plus,
-  Landmark,
-  UserPlus,
   AlertTriangle,
   Zap,
   Link2,
-  FileText,
   ClipboardList,
   Star,
   Wallet,
   DollarSign,
 } from "lucide-react";
 
-type SettingsTab = "profile" | "company" | "notifications" | "billing" | "team" | "security" | "automations" | "integrations" | "templates" | "audit";
+type SettingsTab = "profile" | "company" | "notifications" | "team" | "security" | "automations" | "integrations" | "audit";
 
-interface TeamMember {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  status: "active" | "pending" | "inactive";
+const SETTINGS_TABS: SettingsTab[] = ["profile", "company", "notifications", "team", "security", "automations", "integrations", "audit"];
+
+function isSettingsTab(value: string | null): value is SettingsTab {
+  return value !== null && SETTINGS_TABS.includes(value as SettingsTab);
 }
 
-interface PaymentMethod {
-  id: string;
-  type: "credit_card" | "bank_account";
-  last4: string;
-  expiryDate?: string;
-  isDefault: boolean;
-  bankName?: string;
-}
-
-
+const STAFF_ROLE_OPTIONS = [
+  { value: "admin", label: "Admin" },
+  { value: "cleaner", label: "Cleaner" },
+  { value: "driver", label: "Driver" },
+  { value: "cleaning_manager", label: "Cleaning Manager Team" },
+  { value: "office_manager", label: "Office Manager" },
+  { value: "virtual_assistant", label: "Virtual Assistant" },
+] as const;
 
 export function Settings() {
   const { t } = useLanguage();
+  const queryClient = useQueryClient();
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedTab = searchParams.get("tab");
   const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
   
-  // Fetch staff and roles from database
+  // Fetch staff from database
   const { data: staffMembers = [], isLoading: isLoadingStaff } = useStaff();
-  const deleteStaff = useDeleteStaff();
-  const { data: roles = [], isLoading: isLoadingRoles } = useRoles();
-  const deleteRoleMutation = useDeleteRole();
+  const { data: currentStaff } = useCurrentStaff();
+  const currentRole = currentStaff?.staff_roles?.role;
+  const canManageTeam = currentRole === "admin" || currentRole === "office_manager";
+  const canManageAutomations = canManageTeam || currentRole === "cleaning_manager" || currentRole === "virtual_assistant";
+
+  useEffect(() => {
+    if (!currentRole) return;
+    const desiredTab = location.pathname === "/integrations" ? "integrations" : requestedTab;
+    if (!isSettingsTab(desiredTab)) {
+      setActiveTab("profile");
+      return;
+    }
+    const baseTab = ["profile", "notifications", "security"].includes(desiredTab);
+    const automationTab = desiredTab === "automations" && canManageAutomations;
+    const administrativeTab = ["company", "team", "integrations", "audit"].includes(desiredTab) && canManageTeam;
+    setActiveTab(baseTab || automationTab || administrativeTab ? desiredTab : "profile");
+  }, [canManageAutomations, canManageTeam, currentRole, location.pathname, requestedTab]);
   
   // Company settings from database
   const { data: companySettings, isLoading: isLoadingCompany } = useCompanySettings();
   const updateCompanySettings = useUpdateCompanySettings();
   
   // Profile Settings
-  const [profileImage, setProfileImage] = useState("");
-  const [fullName, setFullName] = useState("Deyvisson Lander");
-  const [userEmail, setUserEmail] = useState("deyvisson@cleanpro.com");
-  const [userPhone, setUserPhone] = useState("(00) 00000-0000");
+  const [fullName, setFullName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
+  const [userPhone, setUserPhone] = useState("");
 
   // Company Settings (local state synced with database)
   const [companyName, setCompanyName] = useState("");
@@ -155,47 +158,49 @@ export function Settings() {
     }
   }, [companySettings]);
 
+  useEffect(() => {
+    if (!currentStaff) return;
+    setFullName(currentStaff.name);
+    setUserEmail(currentStaff.email || "");
+    setUserPhone(currentStaff.phone || "");
+  }, [currentStaff]);
+
+  useEffect(() => {
+    let active = true;
+    void supabase.auth.getUser().then(async ({ data }) => {
+      if (!data.user) return;
+      const { data: preferences } = await supabase
+        .from("user_notification_preferences")
+        .select("*")
+        .eq("auth_user_id", data.user.id)
+        .maybeSingle();
+      if (!active || !preferences) return;
+      setJobUpdatesEmail(preferences.job_updates_email);
+      setJobRemindersSms(preferences.job_reminders_sms);
+      setPaymentNotificationsEmail(preferences.payment_notifications_email);
+      setPaymentAlertsSms(preferences.payment_alerts_sms);
+      setCustomerFeedbackSms(preferences.customer_feedback_sms);
+      setSystemAlertsSms(preferences.system_alerts_sms);
+      setWeeklyReportsEmail(preferences.weekly_reports_email);
+    });
+    return () => { active = false; };
+  }, []);
+
   // Email Notification Settings
   const [jobUpdatesEmail, setJobUpdatesEmail] = useState(true);
   const [paymentNotificationsEmail, setPaymentNotificationsEmail] = useState(true);
   const [weeklyReportsEmail, setWeeklyReportsEmail] = useState(true);
-  const [marketingEmails, setMarketingEmails] = useState(false);
-
   // SMS & Push Notification Settings
-  const [smsNotifications, setSmsNotifications] = useState(true);
   const [jobRemindersSms, setJobRemindersSms] = useState(true);
   const [paymentAlertsSms, setPaymentAlertsSms] = useState(true);
   const [customerFeedbackSms, setCustomerFeedbackSms] = useState(true);
   const [systemAlertsSms, setSystemAlertsSms] = useState(true);
 
-  // Billing Settings - empty by default, will be populated when integrated with payment provider
-  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
-
-  // Team Settings - teamMembers kept for backwards compatibility but staff is primary
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
-  
-  
-  // Map display names to database values for filtering
-  const roleNameToDbValue: Record<string, string> = {
-    "admin": "admin",
-    "cleaner": "cleaner",
-    "cleaning manager team": "cleaning_manager",
-    "driver": "driver",
-    "office manager": "office_manager",
-    "virtual assistant": "virtual_assistant",
-  };
   const [teamSearchQuery, setTeamSearchQuery] = useState("");
   const [newMemberRole, setNewMemberRole] = useState("all");
-  const [viewPermissionsModalOpen, setViewPermissionsModalOpen] = useState(false);
-  const [createRoleModalOpen, setCreateRoleModalOpen] = useState(false);
-  const [editRoleModalOpen, setEditRoleModalOpen] = useState(false);
-  const [deleteRoleDialogOpen, setDeleteRoleDialogOpen] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [teamUserModalOpen, setTeamUserModalOpen] = useState(false);
   const [teamUserModalMode, setTeamUserModalMode] = useState<"create" | "edit">("create");
-  const [selectedTeamMember, setSelectedTeamMember] = useState<TeamMember | null>(null);
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
-  const [useDatabase, setUseDatabase] = useState(false);
 
   // Security Settings
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
@@ -211,8 +216,24 @@ export function Settings() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
 
-  const handleSaveProfile = () => {
-    toast.success("Profile saved successfully!");
+  const handleSaveProfile = async () => {
+    if (!fullName.trim()) {
+      toast.error("Full name is required");
+      return;
+    }
+    const { data, error } = await supabase.functions.invoke("manage-staff", {
+      body: { action: "update-profile", name: fullName.trim(), phone: userPhone.trim() || null },
+    });
+    if (error) {
+      toast.error("Could not save profile");
+      return;
+    }
+    await queryClient.invalidateQueries({ queryKey: ["staff"] });
+    if (data?.auth_metadata_synced === false) {
+      toast.warning("Profile saved, but login metadata synchronization needs attention");
+    } else {
+      toast.success("Profile saved successfully!");
+    }
   };
 
   const handleSaveCompany = () => {
@@ -255,54 +276,36 @@ export function Settings() {
     });
   };
 
-  const handleSaveNotifications = () => {
+  const handleSaveNotifications = async () => {
+    const { data: authData, error: authError } = await supabase.auth.getUser();
+    if (authError || !authData.user) {
+      toast.error("Authenticated account not found");
+      return;
+    }
+    const { error } = await supabase.from("user_notification_preferences").upsert({
+      auth_user_id: authData.user.id,
+      job_updates_email: jobUpdatesEmail,
+      job_reminders_sms: jobRemindersSms,
+      payment_notifications_email: paymentNotificationsEmail,
+      payment_alerts_sms: paymentAlertsSms,
+      customer_feedback_sms: customerFeedbackSms,
+      system_alerts_sms: systemAlertsSms,
+      weekly_reports_email: weeklyReportsEmail,
+    });
+    if (error) {
+      toast.error("Could not save notification preferences");
+      return;
+    }
     toast.success("Notification preferences saved!");
-  };
-
-  // Removed handleInviteTeamMember - now using Add Team Member button directly
-
-  const handleRemoveTeamMember = (id: string) => {
-    setTeamMembers(teamMembers.filter((m) => m.id !== id));
-    toast.success("Team member removed");
   };
 
   const handleOpenCreateUser = () => {
     setTeamUserModalMode("create");
-    setSelectedTeamMember(null);
     setSelectedStaff(null);
-    setUseDatabase(true);
     setTeamUserModalOpen(true);
   };
 
-  const handleOpenEditUser = (member: TeamMember) => {
-    setTeamUserModalMode("edit");
-    setSelectedTeamMember(member);
-    setSelectedStaff(null);
-    setUseDatabase(false);
-    setTeamUserModalOpen(true);
-  };
-
-  const handleOpenEditStaff = (staff: Staff) => {
-    setTeamUserModalMode("edit");
-    setSelectedTeamMember(null);
-    setSelectedStaff(staff);
-    setUseDatabase(true);
-    setTeamUserModalOpen(true);
-  };
-
-  const handleSaveTeamUser = (user: TeamMember) => {
-    if (teamUserModalMode === "create") {
-      setTeamMembers([...teamMembers, user]);
-    } else {
-      setTeamMembers(teamMembers.map((m) => m.id === user.id ? user : m));
-    }
-  };
-
-  const handleDeleteTeamUser = (userId: string) => {
-    setTeamMembers(teamMembers.filter((m) => m.id !== userId));
-  };
-
-  const handleChangePassword = () => {
+  const handleChangePassword = async () => {
     if (!currentPassword || !newPassword || !confirmPassword) {
       toast.error("Please fill in all password fields");
       return;
@@ -311,8 +314,24 @@ export function Settings() {
       toast.error("New passwords do not match");
       return;
     }
-    if (newPassword.length < parseInt(passwordMinLength)) {
-      toast.error(`Password must be at least ${passwordMinLength} characters`);
+    if (newPassword.length < 12) {
+      toast.error("Password must be at least 12 characters");
+      return;
+    }
+    const { data: authData } = await supabase.auth.getUser();
+    const email = authData.user?.email;
+    if (!email) {
+      toast.error("Authenticated account not found");
+      return;
+    }
+    const { error: reauthError } = await supabase.auth.signInWithPassword({ email, password: currentPassword });
+    if (reauthError) {
+      toast.error("Current password is incorrect");
+      return;
+    }
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) {
+      toast.error("Could not change password");
       return;
     }
     toast.success("Password changed successfully");
@@ -327,28 +346,21 @@ export function Settings() {
     setBusinessHours(updated);
   };
 
-  const handleRemovePaymentMethod = (id: string) => {
-    setPaymentMethods(paymentMethods.filter((m) => m.id !== id));
-    toast.success("Payment method removed");
-  };
-
-  const handleSetDefaultPaymentMethod = (id: string) => {
-    setPaymentMethods(paymentMethods.map((m) => ({ ...m, isDefault: m.id === id })));
-    toast.success("Default payment method updated");
-  };
-
-
   const tabs = [
     { id: "profile" as SettingsTab, label: t("settings.profile"), icon: User },
-    { id: "company" as SettingsTab, label: t("settings.company"), icon: Building2 },
     { id: "notifications" as SettingsTab, label: t("settings.notifications"), icon: Bell },
-    { id: "billing" as SettingsTab, label: t("settings.billing"), icon: CreditCard },
-    { id: "team" as SettingsTab, label: t("settings.team"), icon: Users },
     { id: "security" as SettingsTab, label: t("settings.security"), icon: Shield },
-    { id: "automations" as SettingsTab, label: "Automations", icon: Zap },
-    { id: "integrations" as SettingsTab, label: t("settings.integrations"), icon: Link2 },
-    { id: "templates" as SettingsTab, label: "Templates", icon: FileText },
-    { id: "audit" as SettingsTab, label: t("audit.title"), icon: ClipboardList },
+    ...(canManageTeam ? [
+      { id: "company" as SettingsTab, label: t("settings.company"), icon: Building2 },
+      { id: "team" as SettingsTab, label: t("settings.team"), icon: Users },
+    ] : []),
+    ...(canManageAutomations ? [
+      { id: "automations" as SettingsTab, label: "Automations", icon: Zap },
+    ] : []),
+    ...(canManageTeam ? [
+      { id: "integrations" as SettingsTab, label: t("settings.integrations"), icon: Link2 },
+      { id: "audit" as SettingsTab, label: t("audit.title"), icon: ClipboardList },
+    ] : []),
   ];
 
   const renderProfileSettings = () => (
@@ -366,10 +378,6 @@ export function Settings() {
           <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center text-2xl font-semibold text-foreground">
             {fullName.charAt(0)}
           </div>
-          <Button variant="outline" size="sm" className="gap-2">
-            <Upload className="w-4 h-4" />
-            {t("settings.changePhoto")}
-          </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -386,9 +394,11 @@ export function Settings() {
             <Input 
               type="email"
               value={userEmail}
-              onChange={(e) => setUserEmail(e.target.value)}
+              readOnly
+              aria-readonly="true"
               placeholder={t("settings.enterEmail")}
             />
+            <p className="text-xs text-muted-foreground">Login email changes are managed by an administrator.</p>
           </div>
         </div>
 
@@ -847,116 +857,6 @@ export function Settings() {
     </div>
   );
 
-  const renderBillingSettings = () => (
-    <div className="space-y-6">
-      {/* Pricing Plans */}
-      <PricingPlansCard />
-
-      {/* Payment Methods & Invoice History - Side by Side */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Payment Methods */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CreditCard className="w-5 h-5" />
-              {t("settings.paymentMethods")}
-            </CardTitle>
-            <CardDescription>{t("settings.managePaymentMethods")}</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {paymentMethods.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <CreditCard className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p className="mb-4">{t("settings.noPaymentMethods")}</p>
-                <div className="flex gap-2 justify-center flex-wrap">
-                  <Button variant="outline" size="sm" onClick={() => toast.info(t("settings.featureInDevelopment"))}>
-                    <CreditCard className="w-4 h-4 mr-2" />
-                    {t("settings.addCard")}
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => toast.info(t("settings.featureInDevelopment"))}>
-                    <Landmark className="w-4 h-4 mr-2" />
-                    {t("settings.addBankAccount")}
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <>
-                {paymentMethods.map((method) => (
-                  <div key={method.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-primary/10 rounded-lg">
-                        {method.type === "credit_card" ? (
-                          <CreditCard className="w-5 h-5 text-primary" />
-                        ) : (
-                          <Landmark className="w-5 h-5 text-primary" />
-                        )}
-                      </div>
-                      <div>
-                        <h4 className="font-medium">
-                          {method.type === "credit_card" ? t("settings.creditDebitCard") : t("settings.bankAccount")} {t("settings.ending")} {method.last4}
-                        </h4>
-                        {method.expiryDate && (
-                          <p className="text-sm text-muted-foreground">{t("settings.expiresOn")} {method.expiryDate}</p>
-                        )}
-                        {method.bankName && (
-                          <p className="text-sm text-muted-foreground">{method.bankName}</p>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {method.isDefault ? (
-                        <Badge variant="default">{t("settings.default")}</Badge>
-                      ) : (
-                        <Button variant="outline" size="sm" onClick={() => handleSetDefaultPaymentMethod(method.id)}>
-                          {t("settings.setAsDefault")}
-                        </Button>
-                      )}
-                      <Button variant="ghost" size="sm" onClick={() => toast.info(t("settings.featureInDevelopment"))}>
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleRemovePaymentMethod(method.id)}>
-                        <Trash2 className="w-4 h-4 text-destructive" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-
-                <div className="flex gap-2 flex-wrap">
-                  <Button variant="outline" size="sm" onClick={() => toast.info(t("settings.featureInDevelopment"))}>
-                    <CreditCard className="w-4 h-4 mr-2" />
-                    {t("settings.addCard")}
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => toast.info(t("settings.featureInDevelopment"))}>
-                    <Landmark className="w-4 h-4 mr-2" />
-                    {t("settings.addBankAccount")}
-                  </Button>
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Invoice & Payment History */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="w-5 h-5" />
-              {t("settings.invoicePaymentHistory")}
-            </CardTitle>
-            <CardDescription>{t("settings.viewBillingHistory")}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center py-8 text-muted-foreground">
-              <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p className="mb-2">{t("settings.noBillingHistory")}</p>
-              <p className="text-sm">{t("settings.billingHistoryDescription")}</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
-
   const renderTeamSettings = () => (
     <div className="space-y-6">
       <Card>
@@ -982,17 +882,19 @@ export function Settings() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t("common.all")}</SelectItem>
-                {roles.map((role) => (
-                  <SelectItem key={role.id} value={role.name.toLowerCase()}>
-                    {role.name}
+                {STAFF_ROLE_OPTIONS.map((role) => (
+                  <SelectItem key={role.value} value={role.value}>
+                    {role.label}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <Button onClick={handleOpenCreateUser} variant="hero">
-              <Plus className="w-4 h-4 mr-2" />
-              {t("settings.addTeamMember")}
-            </Button>
+            {canManageTeam && (
+              <Button onClick={handleOpenCreateUser} variant="hero">
+                <Plus className="w-4 h-4 mr-2" />
+                {t("settings.addTeamMember")}
+              </Button>
+            )}
           </div>
 
           <Separator />
@@ -1012,9 +914,7 @@ export function Settings() {
                   
                   const staffRole = staff.staff_roles?.role || (staff.is_driver ? "driver" : "cleaner");
                   
-                  // Convert display role name to database value for comparison
-                  const selectedRoleDbValue = roleNameToDbValue[newMemberRole.toLowerCase()] || newMemberRole.toLowerCase();
-                  const matchesRole = staffRole === selectedRoleDbValue;
+                  const matchesRole = staffRole === newMemberRole;
                   
                   return matchesSearch && matchesRole;
                 })
@@ -1074,26 +974,19 @@ export function Settings() {
                     <Badge variant={staff.is_active ? "default" : "outline"}>
                       {staff.is_active ? t("common.active") : t("common.inactive")}
                     </Badge>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => {
-                        setSelectedStaff(staff);
-                        setSelectedTeamMember(null);
-                        setTeamUserModalMode("edit");
-                        setUseDatabase(true);
-                        setTeamUserModalOpen(true);
-                      }}
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => deleteStaff.mutate(staff.id)}
-                    >
-                      <Trash2 className="w-4 h-4 text-destructive" />
-                    </Button>
+                    {canManageTeam && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedStaff(staff);
+                          setTeamUserModalMode("edit");
+                          setTeamUserModalOpen(true);
+                        }}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                    )}
                   </div>
                 </div>
               ))}
@@ -1113,70 +1006,14 @@ export function Settings() {
             <Shield className="w-5 h-5" />
             {t("settings.rolesPermissions")}
           </CardTitle>
-          <CardDescription>{t("settings.createEditRoles")}</CardDescription>
+          <CardDescription>
+            Access is enforced by the supported operational roles below.
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {isLoadingRoles ? (
-            <div className="text-center py-8 text-muted-foreground">
-              {t("settings.loadingRoles")}
-            </div>
-          ) : roles.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <Shield className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p className="mb-2">{t("settings.noRolesConfigured")}</p>
-              <p className="text-sm mb-4">{t("settings.createFirstRole")}</p>
-              <Button variant="outline" onClick={() => setCreateRoleModalOpen(true)}>
-                <Plus className="w-4 h-4 mr-2" />
-                {t("settings.createNewRole")}
-              </Button>
-            </div>
-          ) : (
-            <>
-              {roles.map((role) => (
-                <div key={role.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-medium">{role.name}</h4>
-                      {role.is_system && (
-                        <Badge variant="secondary" className="text-xs">System</Badge>
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {role.permissions.includes("*") ? t("settings.fullAccess") : `${role.permissions.length} ${t("settings.xPermissions")}`}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => {
-                      setSelectedRole(role);
-                      setViewPermissionsModalOpen(true);
-                    }}>
-                      {t("settings.viewPermissions")}
-                    </Button>
-                    {!role.is_system && (
-                      <>
-                        <Button variant="ghost" size="sm" onClick={() => {
-                          setSelectedRole(role);
-                          setEditRoleModalOpen(true);
-                        }}>
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" onClick={() => {
-                          setSelectedRole(role);
-                          setDeleteRoleDialogOpen(true);
-                        }}>
-                          <Trash2 className="w-4 h-4 text-destructive" />
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              ))}
-              <Button variant="outline" onClick={() => setCreateRoleModalOpen(true)}>
-                <Plus className="w-4 h-4 mr-2" />
-                {t("settings.createNewRole")}
-              </Button>
-            </>
-          )}
+        <CardContent className="flex flex-wrap gap-2">
+          {STAFF_ROLE_OPTIONS.map((role) => (
+            <Badge key={role.value} variant="secondary">{role.label}</Badge>
+          ))}
         </CardContent>
       </Card>
     </div>
@@ -1280,13 +1117,13 @@ export function Settings() {
                 </p>
               </div>
             </div>
-            <Switch checked={twoFactorEnabled} onCheckedChange={setTwoFactorEnabled} />
+            <Switch checked={twoFactorEnabled} disabled aria-label="Two-factor authentication is managed in Supabase" />
           </div>
 
           {twoFactorEnabled && (
             <div className="space-y-2 max-w-md">
               <Label>{t("settings.authMethod")}</Label>
-              <Select value={twoFactorMethod} onValueChange={setTwoFactorMethod}>
+              <Select value={twoFactorMethod} onValueChange={setTwoFactorMethod} disabled>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -1306,13 +1143,13 @@ export function Settings() {
             <AlertTriangle className="w-5 h-5" />
             {t("settings.securityPolicies")}
           </CardTitle>
-          <CardDescription>{t("settings.configureSecurityReqs")}</CardDescription>
+          <CardDescription>These account-wide policies are managed in Supabase Auth settings.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>{t("settings.sessionTimeoutMinutes")}</Label>
-              <Select value={sessionTimeout} onValueChange={setSessionTimeout}>
+              <Select value={sessionTimeout} onValueChange={setSessionTimeout} disabled>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -1326,7 +1163,7 @@ export function Settings() {
             </div>
             <div className="space-y-2">
               <Label>{t("settings.minPasswordLength")}</Label>
-              <Select value={passwordMinLength} onValueChange={setPasswordMinLength}>
+              <Select value={passwordMinLength} onValueChange={setPasswordMinLength} disabled>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -1345,7 +1182,7 @@ export function Settings() {
               <h4 className="font-medium">{t("settings.requireSpecialChars")}</h4>
               <p className="text-sm text-muted-foreground">{t("settings.passwordsMustInclude")}</p>
             </div>
-            <Switch checked={requireSpecialChars} onCheckedChange={setRequireSpecialChars} />
+            <Switch checked={requireSpecialChars} disabled />
           </div>
         </CardContent>
       </Card>
@@ -1361,8 +1198,6 @@ export function Settings() {
         return renderCompanySettings();
       case "notifications":
         return renderNotificationSettings();
-      case "billing":
-        return renderBillingSettings();
       case "team":
         return renderTeamSettings();
       case "security":
@@ -1371,8 +1206,6 @@ export function Settings() {
         return <AutomationsTab />;
       case "integrations":
         return <IntegrationsTab />;
-      case "templates":
-        return <TemplatesTab />;
       case "audit":
         return <AuditTab />;
       default:
@@ -1401,7 +1234,10 @@ export function Settings() {
                 return (
                   <button
                     key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
+                    onClick={() => {
+                      setActiveTab(tab.id);
+                      setSearchParams({ tab: tab.id }, { replace: true });
+                    }}
                     className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
                       isActive
                         ? "bg-foreground text-background"
@@ -1423,42 +1259,15 @@ export function Settings() {
         </main>
       </div>
 
-      {/* Modals */}
-      <ViewPermissionsModal
-        open={viewPermissionsModalOpen}
-        onOpenChange={setViewPermissionsModalOpen}
-        role={selectedRole}
-      />
-      <CreateRoleModal
-        open={createRoleModalOpen}
-        onOpenChange={setCreateRoleModalOpen}
-      />
-      <EditRoleModal
-        open={editRoleModalOpen}
-        onOpenChange={setEditRoleModalOpen}
-        role={selectedRole}
-      />
-      <DeleteRoleDialog
-        open={deleteRoleDialogOpen}
-        onOpenChange={setDeleteRoleDialogOpen}
-        role={selectedRole}
-      />
       <TeamUserModal
         open={teamUserModalOpen}
         onOpenChange={(open) => {
           setTeamUserModalOpen(open);
-          if (!open) {
-            setUseDatabase(false);
-            setSelectedStaff(null);
-          }
+          if (!open) setSelectedStaff(null);
         }}
         mode={teamUserModalMode}
-        user={selectedTeamMember}
-        roles={roles}
-        onSave={handleSaveTeamUser}
-        onDelete={handleDeleteTeamUser}
-        useDatabase={useDatabase}
         staff={selectedStaff}
+        canDelete={selectedStaff?.id !== currentStaff?.id}
       />
     </div>
   );

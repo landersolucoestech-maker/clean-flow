@@ -7,6 +7,8 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useJobs } from "@/hooks/useJobs";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useInvoices } from "@/hooks/useInvoices";
+import { useCurrentStaff } from "@/hooks/useStaff";
+import { useCompanySettings } from "@/hooks/useCompanySettings";
 import { DollarSign, Users, Calendar, TrendingUp } from "lucide-react";
 import { useMemo } from "react";
 
@@ -14,7 +16,11 @@ export function Dashboard() {
   const { t } = useLanguage();
   const { data: jobs = [] } = useJobs();
   const { data: customers = [] } = useCustomers();
-  const { data: invoices = [] } = useInvoices();
+  const { data: currentStaff } = useCurrentStaff();
+  const { data: companySettings } = useCompanySettings();
+  const currentRole = currentStaff?.staff_roles?.role;
+  const canViewFinancials = currentRole === "admin" || currentRole === "office_manager";
+  const { data: invoices = [] } = useInvoices(canViewFinancials);
 
   // Calculate real stats
   const stats = useMemo(() => {
@@ -93,9 +99,9 @@ export function Dashboard() {
   }, [jobs, customers, invoices]);
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat(companySettings?.locale || 'en-US', {
       style: 'currency',
-      currency: 'USD',
+      currency: companySettings?.currency || 'USD',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(value);
@@ -112,7 +118,7 @@ export function Dashboard() {
           {/* Welcome Section */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-foreground mb-2">
-              {t("dashboard.welcome")}, Admin!
+              {t("dashboard.welcome")}{currentStaff?.name ? `, ${currentStaff.name}` : ""}!
             </h1>
             <p className="text-muted-foreground">
               {t("dashboard.subtitle")}
@@ -120,14 +126,16 @@ export function Dashboard() {
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <StatsCard 
-              title={t("dashboard.monthlyRevenue")} 
-              value={formatCurrency(stats.monthlyRevenue)} 
-              change={`${Number(stats.revenueChange) >= 0 ? '+' : ''}${stats.revenueChange}% ${t("dashboard.fromLastMonth")}`} 
-              changeType={Number(stats.revenueChange) >= 0 ? "positive" : "negative"} 
-              icon={<DollarSign className="w-6 h-6 text-primary" />} 
-            />
+          <div className={`grid grid-cols-1 md:grid-cols-2 ${canViewFinancials ? "lg:grid-cols-4" : "lg:grid-cols-2"} gap-6 mb-8`}>
+            {canViewFinancials && (
+              <StatsCard
+                title={t("dashboard.monthlyRevenue")}
+                value={formatCurrency(stats.monthlyRevenue)}
+                change={`${Number(stats.revenueChange) >= 0 ? '+' : ''}${stats.revenueChange}% ${t("dashboard.fromLastMonth")}`}
+                changeType={Number(stats.revenueChange) >= 0 ? "positive" : "negative"}
+                icon={<DollarSign className="w-6 h-6 text-primary" />}
+              />
+            )}
             <StatsCard 
               title={t("dashboard.activeCustomers")} 
               value={String(stats.activeCustomers)} 
@@ -142,18 +150,20 @@ export function Dashboard() {
               changeType="neutral" 
               icon={<Calendar className="w-6 h-6 text-primary" />} 
             />
-            <StatsCard 
-              title={t("dashboard.growthRate")} 
-              value={`${stats.growthRate}%`} 
-              change={`${Number(stats.growthRate) >= 0 ? '+' : ''}${stats.growthRate}% ${t("dashboard.fromLastMonth")}`} 
-              changeType={Number(stats.growthRate) >= 0 ? "positive" : "negative"} 
-              icon={<TrendingUp className="w-6 h-6 text-primary" />} 
-            />
+            {canViewFinancials && (
+              <StatsCard
+                title={t("dashboard.growthRate")}
+                value={`${stats.growthRate}%`}
+                change={`${Number(stats.growthRate) >= 0 ? '+' : ''}${stats.growthRate}% ${t("dashboard.fromLastMonth")}`}
+                changeType={Number(stats.growthRate) >= 0 ? "positive" : "negative"}
+                icon={<TrendingUp className="w-6 h-6 text-primary" />}
+              />
+            )}
           </div>
 
           {/* Main Content Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <RecentActivity />
+            <RecentActivity includeInvoices={canViewFinancials} />
             <UpcomingJobs />
           </div>
         </main>

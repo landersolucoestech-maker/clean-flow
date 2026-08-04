@@ -1,6 +1,9 @@
 export interface OAuthStatePayload {
-  companyId: string;
+  provider: "ringcentral" | "quickbooks" | "google";
+  userId: string;
+  companyId?: string;
   redirectUri: string;
+  returnUrl?: string;
   expiresAt: number;
   nonce: string;
 }
@@ -37,20 +40,30 @@ export async function createOAuthState(payload: OAuthStatePayload, secret: strin
 }
 
 export async function verifyOAuthState(state: string, secret: string): Promise<OAuthStatePayload | null> {
-  const [encodedPayload, encodedSignature, extra] = state.split(".");
-  if (!encodedPayload || !encodedSignature || extra) return null;
-
-  const isValid = await crypto.subtle.verify(
-    "HMAC",
-    await importHmacKey(secret),
-    fromBase64Url(encodedSignature),
-    new TextEncoder().encode(encodedPayload),
-  );
-  if (!isValid) return null;
-
   try {
+    if (typeof state !== "string" || state.length > 8192) return null;
+    const [encodedPayload, encodedSignature, extra] = state.split(".");
+    if (!encodedPayload || !encodedSignature || extra) return null;
+
+    const isValid = await crypto.subtle.verify(
+      "HMAC",
+      await importHmacKey(secret),
+      fromBase64Url(encodedSignature),
+      new TextEncoder().encode(encodedPayload),
+    );
+    if (!isValid) return null;
+
     const payload = JSON.parse(new TextDecoder().decode(fromBase64Url(encodedPayload))) as OAuthStatePayload;
-    if (!payload.companyId || !payload.redirectUri || !payload.nonce || payload.expiresAt < Date.now()) return null;
+    const validProviders = ["ringcentral", "quickbooks", "google"];
+    if (
+      !validProviders.includes(payload.provider)
+      || !payload.userId
+      || !payload.redirectUri
+      || !payload.nonce
+      || !Number.isFinite(payload.expiresAt)
+      || payload.expiresAt < Date.now()
+      || payload.expiresAt > Date.now() + 15 * 60 * 1000
+    ) return null;
     return payload;
   } catch {
     return null;

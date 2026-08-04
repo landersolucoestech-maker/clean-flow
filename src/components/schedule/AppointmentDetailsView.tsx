@@ -195,7 +195,7 @@ export function AppointmentDetailsView({
 }) {
   const updateJobFields = useUpdateJobFields();
   const autoGenerateInvoice = useAutoGenerateInvoice();
-  const { tokens, isConnected: qbConnected } = useQuickBooks();
+  const { isConnected: qbConnected } = useQuickBooks();
   const { customerMapping } = useQuickBooksStore();
   const sendNotification = useSendNotificationSMS();
   const { data: companySettings } = useCompanySettings();
@@ -572,9 +572,9 @@ export function AppointmentDetailsView({
           const jobId = String(appointment.id);
           autoGenerateInvoice.mutate({
             jobId,
-            accessToken: qbConnected ? tokens?.accessToken : undefined,
-            realmId: qbConnected ? tokens?.realmId : undefined,
-            qbCustomerId: qbConnected ? customerMapping[jobId] : undefined,
+            qbCustomerId: qbConnected && appointment.customerId
+              ? customerMapping[appointment.customerId]
+              : undefined,
           });
         }
       },

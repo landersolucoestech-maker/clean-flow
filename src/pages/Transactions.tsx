@@ -29,7 +29,6 @@ import {
   TrendingDown,
   Receipt,
   Search,
-  Upload,
   Settings2,
   X,
 } from "lucide-react";
@@ -261,6 +260,38 @@ export function Transactions() {
     }
   };
 
+  const handleExport = () => {
+    const selected = selectedIds.length > 0
+      ? filteredTransactions.filter((transaction) => selectedIds.includes(transaction.id))
+      : filteredTransactions;
+    const safeCell = (value: unknown) => {
+      const text = String(value ?? "");
+      const protectedText = /^[=+\-@]/.test(text) ? `'${text}` : text;
+      return `"${protectedText.replace(/"/g, '""')}"`;
+    };
+    const rows = selected.map((transaction) => [
+      transaction.date,
+      transaction.name,
+      transaction.description,
+      transaction.category,
+      transaction.type,
+      transaction.status,
+      transaction.amount,
+      transaction.service_type,
+      transaction.notes,
+    ]);
+    const csv = [
+      ["Data", "Nome", "Descrição", "Categoria", "Tipo", "Status", "Valor", "Serviço", "Observações"],
+      ...rows,
+    ].map((row) => row.map(safeCell).join(";")).join("\n");
+    const url = URL.createObjectURL(new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8" }));
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `transacoes-${new Date().toISOString().slice(0, 10)}.csv`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
+
   if (isLoading) {
     return (
       <PageLayout>
@@ -279,20 +310,13 @@ export function Transactions() {
         description="Controle financeiro e fluxo de caixa"
         actions={
           <>
-            <Button variant="outline" size="sm">
-              <Upload className="w-4 h-4 mr-2" />
-              Importar OFX
-            </Button>
             <Button variant="outline" size="sm" onClick={() => navigate("/rules")}>
               <Settings2 className="w-4 h-4 mr-2" />
               Regras
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={handleExport} disabled={filteredTransactions.length === 0}>
               <Download className="w-4 h-4 mr-2" />
               Exportar
-            </Button>
-            <Button variant="outline" size="sm">
-              Integração Bancária
             </Button>
             <Button onClick={() => setShowNewTransactionModal(true)}>
               <Plus className="w-4 h-4 mr-2" />

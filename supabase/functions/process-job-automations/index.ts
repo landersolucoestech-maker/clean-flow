@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { authorizeStaffRequest } from "../_shared/authorize.ts";
+import { authorizeServiceRequest } from "../_shared/authorize.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -116,12 +116,7 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const authorizationError = await authorizeStaffRequest(
-      req,
-      supabase,
-      ["admin", "cleaner", "driver", "cleaning_manager", "office_manager", "virtual_assistant"],
-      { allowServiceRole: true },
-    );
+    const authorizationError = authorizeServiceRequest(req);
     if (authorizationError) return authorizationError;
 
     const { job_id, trigger_type, company_id }: ProcessAutomationRequest = await req.json();
@@ -265,9 +260,6 @@ Deno.serve(async (req) => {
       jobDate: formattedJobDate,
     });
 
-    console.log(`Sending automation message to: ${toPhone || toEmail}`);
-    console.log(`Message: ${message.substring(0, 100)}...`);
-
     // Send SMS via RingCentral if we have a phone
     if (toPhone) {
       const sendMessageUrl = `${supabaseUrl}/functions/v1/ringcentral-send-message`;
@@ -286,16 +278,15 @@ Deno.serve(async (req) => {
       });
 
       if (!sendResponse.ok) {
-        const errorText = await sendResponse.text();
-        console.error("Failed to send SMS:", errorText);
+        await sendResponse.body?.cancel();
+        console.error("Failed to send automation SMS:", sendResponse.status);
         return new Response(
-          JSON.stringify({ error: "Failed to send SMS", details: errorText }),
+          JSON.stringify({ error: "Failed to send SMS" }),
           { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
-      const sendResult = await sendResponse.json();
-      console.log("SMS sent successfully:", sendResult);
+      await sendResponse.body?.cancel();
 
       // Log the automation execution
       try {

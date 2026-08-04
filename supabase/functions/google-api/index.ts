@@ -1,4 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { authorizeStaffRequest } from "../_shared/authorize.ts";
+import { getGoogleConnection } from "../_shared/google.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,14 +14,21 @@ serve(async (req) => {
   }
 
   try {
-    const { action, accessToken, data } = await req.json();
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const adminClient = createClient(supabaseUrl, serviceRoleKey);
+    const authorizationError = await authorizeStaffRequest(
+      req,
+      adminClient,
+      ["admin", "cleaning_manager", "office_manager", "virtual_assistant"],
+    );
+    if (authorizationError) return authorizationError;
 
-    if (!accessToken) {
-      throw new Error("Access token is required");
-    }
+    const { action, data } = await req.json();
+    const connection = await getGoogleConnection(adminClient);
 
     const headers = {
-      Authorization: `Bearer ${accessToken}`,
+      Authorization: `Bearer ${connection.access_token}`,
       "Content-Type": "application/json",
     };
 

@@ -1,4 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { authorizeStaffRequest } from "../_shared/authorize.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -23,6 +25,15 @@ serve(async (req) => {
   }
 
   try {
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
+    const authError = await authorizeStaffRequest(req, supabase, [
+      "admin", "cleaner", "driver", "cleaning_manager", "office_manager", "virtual_assistant",
+    ]);
+    if (authError) return authError;
+
     const apiKey = Deno.env.get("GEOAPIFY_API_KEY");
     
     if (!apiKey) {
@@ -34,8 +45,6 @@ serve(async (req) => {
     }
 
     const body: MapRequest = await req.json();
-    console.log("Received request body:", JSON.stringify(body));
-    
     const { points, width = 580, height = 300 } = body;
 
     if (!points || points.length === 0) {
@@ -81,8 +90,6 @@ serve(async (req) => {
 
     const mapUrl = `https://maps.geoapify.com/v1/staticmap?style=osm-bright&width=${width}&height=${height}&center=lonlat:${centerLon},${centerLat}&zoom=${zoom}&marker=${markers}${geometryParam}&apiKey=${apiKey}`;
     
-    console.log("Generated map URL (without API key):", mapUrl.replace(apiKey, "***"));
-
     return new Response(
       JSON.stringify({ mapUrl }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }

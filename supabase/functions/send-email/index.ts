@@ -3,6 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { authorizeStaffRequest } from "../_shared/authorize.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+const EMAIL_FROM = Deno.env.get("EMAIL_FROM");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -14,13 +15,40 @@ interface EmailRequest {
   subject: string;
   html?: string;
   text?: string;
-  from?: string;
   replyTo?: string;
   template?: "invoice" | "reminder" | "welcome" | "review_request" | "estimate";
   data?: TemplateData;
 }
 
 type TemplateData = Record<string, string | number | boolean | null | undefined>;
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function sanitizeTemplateData(data: TemplateData): TemplateData {
+  return Object.fromEntries(Object.entries(data).map(([key, value]) => {
+    if (typeof value !== "string") return [key, value];
+    if (key === "reviewUrl") {
+      try {
+        const url = new URL(value);
+        return [key, ["http:", "https:"].includes(url.protocol) ? escapeHtml(url.toString()) : ""];
+      } catch {
+        return [key, ""];
+      }
+    }
+    return [key, escapeHtml(value.slice(0, 1000))];
+  }));
+}
+
+function isEmail(value: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) && value.length <= 254;
+}
 
 const templates = {
   invoice: (data: TemplateData) => ({
@@ -133,7 +161,7 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    if (!supabaseUrl || !serviceRoleKey || !RESEND_API_KEY) {
+    if (!supabaseUrl || !serviceRoleKey || !RESEND_API_KEY || !EMAIL_FROM) {
       throw new Error("Email service is not configured");
     }
 
@@ -147,11 +175,12 @@ const handler = async (req: Request): Promise<Response> => {
     if (authorizationError) return authorizationError;
 
     const body: EmailRequest = await req.json();
-    const { to, subject, html, text, from, replyTo, template, data } = body;
+    const { to, subject, html, text, replyTo, template, data } = body;
 
-    if (!to) {
+    const recipients = (Array.isArray(to) ? to : [to]).filter((value): value is string => typeof value === "string");
+    if (recipients.length === 0 || recipients.length > 50 || recipients.some((recipient) => !isEmail(recipient))) {
       return new Response(
-        JSON.stringify({ error: "Recipient email is required" }),
+        JSON.stringify({ error: "One to fifty valid recipient emails are required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -161,7 +190,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Use template if specified
     if (template && data && templates[template]) {
-      const templateContent = templates[template](data);
+      const templateContent = templates[template](sanitizeTemplateData(data));
       emailSubject = emailSubject || templateContent.subject;
       emailHtml = emailHtml || templateContent.html;
     }
@@ -170,6 +199,14 @@ const handler = async (req: Request): Promise<Response> => {
       return new Response(
         JSON.stringify({ error: "Subject and content (html or text) are required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    emailSubject = emailSubject.replace(/[\r\n]+/g, " ").trim().slice(0, 200);
+
+    if (replyTo && !isEmail(replyTo)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid reply-to email" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
@@ -181,8 +218,8 @@ const handler = async (req: Request): Promise<Response> => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: from || "Broom Connect <onboarding@resend.dev>",
-        to: Array.isArray(to) ? to : [to],
+        from: EMAIL_FROM,
+        to: recipients,
         subject: emailSubject,
         html: emailHtml,
         text: text,
@@ -196,8 +233,6 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const emailResponse = await resendResponse.json();
-
-    console.log("Email sent successfully:", emailResponse);
 
     return new Response(JSON.stringify(emailResponse), {
       status: 200,

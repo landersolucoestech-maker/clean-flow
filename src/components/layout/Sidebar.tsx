@@ -46,21 +46,21 @@ interface NavItem {
 
 const navigationItems: NavItem[] = [
   { icon: Home, labelKey: "sidebar.dashboard", href: "/" },
-  { icon: Calendar, labelKey: "sidebar.schedule", href: "/schedule", permission: "view_schedule" },
-  { icon: Users, labelKey: "sidebar.customers", href: "/customers", permission: "view_customers" },
+  { icon: Calendar, labelKey: "sidebar.schedule", href: "/schedule", permission: "schedule.view" },
+  { icon: Users, labelKey: "sidebar.customers", href: "/customers", permission: "customers.view" },
   { 
     icon: Calculator, 
     labelKey: "sidebar.accounting",
     submenu: [
-      { labelKey: "sidebar.transactions", href: "/transactions", icon: ArrowRightLeft, permission: "view_transactions" },
-      { labelKey: "sidebar.invoices", href: "/invoices", icon: DollarSign, permission: "view_invoices" },
-      { labelKey: "sidebar.leads", href: "/leads", icon: ClipboardList, permission: "view_leads" },
-      { labelKey: "sidebar.payroll", href: "/payroll", icon: Wallet, permission: "view_payroll" },
+      { labelKey: "sidebar.transactions", href: "/transactions", icon: ArrowRightLeft, permission: "transactions.view" },
+      { labelKey: "sidebar.invoices", href: "/invoices", icon: DollarSign, permission: "invoices.view" },
+      { labelKey: "sidebar.leads", href: "/leads", icon: ClipboardList, permission: "leads.view" },
+      { labelKey: "sidebar.payroll", href: "/payroll", icon: Wallet, permission: "payroll.view" },
     ]
   },
-  { icon: Phone, labelKey: "sidebar.communications", href: "/communications", permission: "view_communications" },
-  { icon: BarChart3, labelKey: "sidebar.reports", href: "/reports", permission: "view_reports" },
-  { icon: Settings, labelKey: "sidebar.settings", href: "/settings", permission: "view_system_settings" },
+  { icon: Phone, labelKey: "sidebar.communications", href: "/communications", permission: "communications.view" },
+  { icon: BarChart3, labelKey: "sidebar.reports", href: "/reports", permission: "reports.view" },
+  { icon: Settings, labelKey: "sidebar.settings", href: "/settings", permission: "settings.profile.view" },
   { icon: HelpCircle, labelKey: "sidebar.support", href: "/support" },
 ];
 

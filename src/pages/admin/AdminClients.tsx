@@ -13,26 +13,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { usePlatformAdmin } from "@/hooks/usePlatformAdmin";
-import { useLanguage } from "@/contexts/LanguageContext";
 import {
-  Plus,
   Search,
-  MoreHorizontal,
-  Eye,
-  Edit,
-  Ban,
   Download,
 } from "lucide-react";
 
 export function AdminClients() {
-  const { t } = useLanguage();
   const { companies, isLoadingCompanies } = usePlatformAdmin();
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -54,6 +41,32 @@ export function AdminClients() {
     );
   };
 
+  const handleExport = () => {
+    const safeCell = (value: string) => {
+      const protectedValue = /^[=+\-@]/.test(value) ? `'${value}` : value;
+      return `"${protectedValue.replace(/"/g, '""')}"`;
+    };
+    const rows = filteredClients.map((client) => [
+      client.trade_name || client.legal_name,
+      client.email || "",
+      client.phone || "",
+      client.country || "",
+      client.currency || "",
+      client.timezone || "",
+      client.created_at ? format(new Date(client.created_at), "yyyy-MM-dd") : "",
+    ]);
+    const csv = [
+      ["Empresa", "Email", "Telefone", "País", "Moeda", "Fuso horário", "Cadastro"],
+      ...rows,
+    ].map((row) => row.map(safeCell).join(";")).join("\n");
+    const url = URL.createObjectURL(new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8" }));
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `empresas-${new Date().toISOString().slice(0, 10)}.csv`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <AdminLayout>
       <div className="space-y-6">
@@ -61,16 +74,12 @@ export function AdminClients() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Gerenciamento de Clientes</h1>
-            <p className="text-gray-500 mt-1">Gerencie todos os usuários do sistema</p>
+            <p className="text-gray-500 mt-1">Consulte as empresas cadastradas no sistema</p>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="text-gray-700 border-gray-300">
+            <Button variant="outline" className="text-gray-700 border-gray-300" onClick={handleExport} disabled={filteredClients.length === 0}>
               <Download className="w-4 h-4 mr-2" />
               Exportar
-            </Button>
-            <Button className="bg-red-500 hover:bg-red-600 text-white">
-              <Plus className="w-4 h-4 mr-2" />
-              Novo Cliente
             </Button>
           </div>
         </div>
@@ -106,11 +115,10 @@ export function AdminClients() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-gray-50 hover:bg-gray-50">
-                    <TableHead className="text-gray-600 font-medium">Usuário</TableHead>
-                    <TableHead className="text-gray-600 font-medium">Plano</TableHead>
+                    <TableHead className="text-gray-600 font-medium">Empresa</TableHead>
+                    <TableHead className="text-gray-600 font-medium">Moeda</TableHead>
                     <TableHead className="text-gray-600 font-medium">Status</TableHead>
                     <TableHead className="text-gray-600 font-medium">Cadastro</TableHead>
-                    <TableHead className="text-gray-600 font-medium text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -132,29 +140,6 @@ export function AdminClients() {
                       </TableCell>
                       <TableCell className="text-gray-500">
                         {client.created_at ? format(new Date(client.created_at), "MM/dd/yyyy") : "-"}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-gray-600">
-                              <MoreHorizontal className="w-4 h-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="bg-white">
-                            <DropdownMenuItem className="text-gray-700">
-                              <Eye className="w-4 h-4 mr-2" />
-                              Visualizar
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-gray-700">
-                              <Edit className="w-4 h-4 mr-2" />
-                              Editar
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-red-600">
-                              <Ban className="w-4 h-4 mr-2" />
-                              Suspender
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   ))}

@@ -20,7 +20,6 @@ import {
   canOnlyTriggerStatus 
 } from "@/hooks/useJobStatusTracking";
 import type { JobStatusTracking } from "@/hooks/useJobStatusTracking";
-import { useJobAutomations, getAutomationTrigger } from "@/hooks/useJobAutomations";
 import {
   Dialog,
   DialogContent,
@@ -282,16 +281,11 @@ export const JobStatusTracker: React.FC<JobStatusTrackerProps> = ({
   staffId,
   userRole,
   jobAddress,
-  customerId,
-  customerPhone,
-  customerName,
-  jobDate,
 }) => {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [loadingStatus, setLoadingStatus] = useState<StatusType | null>(null);
   const { data: statusHistory, isLoading: historyLoading } = useJobStatusHistory(jobId);
   const trackStatus = useTrackJobStatus();
-  const triggerAutomation = useJobAutomations();
 
   const canOnlyTrigger = canOnlyTriggerStatus(userRole);
   const canEdit = canEditStatusManually(userRole);
@@ -310,19 +304,6 @@ export const JobStatusTracker: React.FC<JobStatusTrackerProps> = ({
       staffId,
       isManualEdit: false,
     }, {
-      onSuccess: () => {
-        // Trigger automation message after successful status update
-        const automationTrigger = getAutomationTrigger(statusType);
-        if (automationTrigger && customerId && customerPhone && customerName) {
-          triggerAutomation.mutate({
-            trigger: automationTrigger,
-            customerId,
-            customerPhone,
-            customerName,
-            jobDate,
-          });
-        }
-      },
       onSettled: () => setLoadingStatus(null),
     });
   };

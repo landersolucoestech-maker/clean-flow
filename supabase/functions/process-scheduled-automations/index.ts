@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { authorizeServiceRequest } from "../_shared/authorize.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -132,6 +133,9 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const authError = authorizeServiceRequest(req);
+    if (authError) return authError;
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -252,7 +256,7 @@ Deno.serve(async (req) => {
           }
 
           if (!toPhone) {
-            console.log(`No phone for customer ${customer.id}`);
+            console.log("Skipping reminder because customer has no phone");
             continue;
           }
 
@@ -279,7 +283,7 @@ Deno.serve(async (req) => {
             });
 
             if (sendResponse.ok) {
-              console.log(`Sent reminder for job ${job.id} to ${toPhone}`);
+              console.log(`Sent reminder for job ${job.id}`);
               results.sent++;
 
               // Log the automation
@@ -373,7 +377,7 @@ Deno.serve(async (req) => {
           }
 
           if (!toPhone) {
-            console.log(`No phone for customer ${customer.id}`);
+            console.log("Skipping payment reminder because customer has no phone");
             continue;
           }
 
@@ -401,7 +405,7 @@ Deno.serve(async (req) => {
             });
 
             if (sendResponse.ok) {
-              console.log(`Sent payment reminder for invoice ${invoice.id} to ${toPhone}`);
+              console.log(`Sent payment reminder for invoice ${invoice.id}`);
               results.sent++;
 
               // Log the automation

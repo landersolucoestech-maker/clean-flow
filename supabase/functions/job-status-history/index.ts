@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getAuthorizedStaffIdentity } from "../_shared/authorize.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -29,6 +30,10 @@ serve(async (req) => {
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const authorization = await getAuthorizedStaffIdentity(req, supabase, [
+      "admin", "cleaner", "driver", "cleaning_manager", "office_manager", "virtual_assistant",
+    ]);
+    if (authorization.error) return authorization.error;
 
     const body: JobStatusHistoryRequest = await req.json();
     const { jobId } = body;
@@ -38,6 +43,43 @@ serve(async (req) => {
         JSON.stringify({ error: "Invalid jobId" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
+    }
+
+    const { data: jobData, error: jobError } = await supabase
+      .from("jobs")
+      .select("address, staff_assigned")
+      .eq("id", jobId)
+      .maybeSingle();
+
+    if (jobError || !jobData) {
+      return new Response(
+        JSON.stringify({ error: "Job not found" }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    const managementRoles = ["admin", "cleaning_manager", "office_manager", "virtual_assistant"];
+    if (!managementRoles.includes(authorization.identity.role)) {
+      const { data: currentStaff } = await supabase
+        .from("staff")
+        .select("name, team")
+        .eq("id", authorization.identity.staffId)
+        .single();
+      const assigned = (jobData.staff_assigned ?? []) as string[];
+      const normalizedTeam = currentStaff?.team?.trim().toLowerCase();
+      const isAssigned = assigned.some((value) => {
+        const normalized = value.trim().toLowerCase();
+        return normalized === authorization.identity.staffId.toLowerCase()
+          || normalized === currentStaff?.name?.trim().toLowerCase()
+          || (normalizedTeam != null
+            && (normalized === normalizedTeam || normalized === `team ${normalizedTeam}`));
+      });
+      if (!isAssigned) {
+        return new Response(
+          JSON.stringify({ error: "You are not assigned to this job", code: "PERMISSION_DENIED" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
     }
 
     const { data: trackingData, error: trackingError } = await supabase
@@ -53,17 +95,7 @@ serve(async (req) => {
       );
     }
 
-    // Fetch job address (for map fallback)
-    let jobAddress: string | null = null;
-    const { data: jobData, error: jobError } = await supabase
-      .from("jobs")
-      .select("address")
-      .eq("id", jobId)
-      .maybeSingle();
-
-    if (!jobError) {
-      jobAddress = jobData?.address ?? null;
-    }
+    const jobAddress = jobData.address ?? null;
 
     const tracking = trackingData ?? [];
 

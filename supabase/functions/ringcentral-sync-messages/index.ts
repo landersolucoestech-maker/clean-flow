@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { authorizeStaffRequest } from "../_shared/authorize.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -86,6 +87,13 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const authError = await authorizeStaffRequest(
+      req,
+      supabase,
+      ["admin", "office_manager", "virtual_assistant"],
+      { allowServiceRole: true },
+    );
+    if (authError) return authError;
 
     const { company_id, days_back = 30 } = await req.json();
 
@@ -123,8 +131,6 @@ Deno.serve(async (req) => {
     messagesUrl.searchParams.set("dateFrom", dateFrom.toISOString());
     messagesUrl.searchParams.set("perPage", "250");
 
-    console.log("Fetching messages from RingCentral:", messagesUrl.toString());
-
     const messagesResponse = await fetch(messagesUrl.toString(), {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -132,8 +138,8 @@ Deno.serve(async (req) => {
     });
 
     if (!messagesResponse.ok) {
-      const errorText = await messagesResponse.text();
-      console.error("Failed to fetch messages:", errorText);
+      await messagesResponse.body?.cancel();
+      console.error("Failed to fetch messages from RingCentral:", messagesResponse.status);
       return new Response(
         JSON.stringify({ error: "Failed to fetch messages from RingCentral" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -142,8 +148,6 @@ Deno.serve(async (req) => {
 
     const messagesData = await messagesResponse.json();
     const rcMessages: RingCentralMessage[] = messagesData.records || [];
-
-    console.log(`Found ${rcMessages.length} messages from RingCentral`);
 
     // Get all customers with phone numbers
     const { data: customers } = await supabase
@@ -335,13 +339,14 @@ Deno.serve(async (req) => {
         try {
           const { error: msgError } = await supabase
             .from("messages")
-            .insert({
+            .upsert({
               conversation_id: conversationId,
               content: msg.content,
               sender_type: msg.sender_type,
               created_at: msg.created_at,
               read: msg.sender_type === "user",
-            });
+              ringcentral_message_id: msg.rc_message_id,
+            }, { onConflict: "ringcentral_message_id", ignoreDuplicates: true });
 
           if (msgError) {
             // Ignore duplicate key errors (23505)

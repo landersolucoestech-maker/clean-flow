@@ -64,7 +64,7 @@ export interface InvoiceFormData {
 }
 
 // Fetch all invoices with customer info
-export function useInvoices() {
+export function useInvoices(enabled = true) {
   return useQuery({
     queryKey: ["invoices"],
     queryFn: async () => {
@@ -79,6 +79,7 @@ export function useInvoices() {
       if (error) throw error;
       return data as Invoice[];
     },
+    enabled,
   });
 }
 
@@ -347,9 +348,9 @@ export function useSyncInvoicesWithQB() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ accessToken, realmId }: { accessToken: string; realmId: string }) => {
+    mutationFn: async () => {
       const { data, error } = await supabase.functions.invoke("quickbooks-sync-invoices", {
-        body: { action: "sync-all", accessToken, realmId },
+        body: { action: "sync-all" },
       });
 
       if (error) throw error;
@@ -382,8 +383,6 @@ export function useMarkInvoicePaid() {
       invoiceNumber,
       serviceType,
       companyName,
-      accessToken, 
-      realmId 
     }: { 
       invoiceId: string; 
       qbInvoiceId?: string | null;
@@ -394,12 +393,10 @@ export function useMarkInvoicePaid() {
       invoiceNumber?: string;
       serviceType?: string;
       companyName?: string;
-      accessToken?: string; 
-      realmId?: string;
     }) => {
       let invoiceData;
       
-      if (accessToken && realmId && qbInvoiceId) {
+      if (qbInvoiceId) {
         // Sync with QuickBooks
         const { data, error } = await supabase.functions.invoke("quickbooks-sync-invoices", {
           body: { 
@@ -408,8 +405,6 @@ export function useMarkInvoicePaid() {
             qbInvoiceId, 
             amount, 
             customerId,
-            accessToken, 
-            realmId 
           },
         });
         if (error) throw error;
@@ -593,17 +588,13 @@ export function useAutoGenerateInvoice() {
   return useMutation({
     mutationFn: async ({ 
       jobId, 
-      accessToken, 
-      realmId, 
       qbCustomerId 
     }: { 
       jobId: string; 
-      accessToken?: string; 
-      realmId?: string; 
       qbCustomerId?: string;
     }) => {
       const { data, error } = await supabase.functions.invoke("auto-generate-invoice", {
-        body: { jobId, accessToken, realmId, qbCustomerId },
+        body: { jobId, qbCustomerId },
       });
 
       if (error) throw error;

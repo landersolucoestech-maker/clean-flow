@@ -1,9 +1,8 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Button } from "@/components/ui/button";
 import { AnalyticsTab } from "@/components/reports/AnalyticsTab";
-import { ReportPreviewModal } from "@/components/reports/ReportPreviewModal";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,9 +45,6 @@ interface ReportData {
 
 export function Reports() {
   const { t } = useLanguage();
-  const [selectedReport, setSelectedReport] = useState<ReportData | null>(null);
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-
   // Fetch real data from database
   const { data: customers = [], isLoading: isLoadingCustomers } = useCustomers();
   const { data: jobs = [], isLoading: isLoadingJobs } = useJobs();
@@ -354,12 +350,6 @@ export function Reports() {
           {/* Analytics Content */}
           <AnalyticsTab />
 
-          {/* Report Preview Modal */}
-          <ReportPreviewModal
-            open={isPreviewOpen}
-            onOpenChange={setIsPreviewOpen}
-            report={selectedReport}
-          />
         </main>
       </div>
     </div>

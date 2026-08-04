@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { authorizeStaffRequest } from "../_shared/authorize.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -66,6 +67,21 @@ async function getValidToken(supabase: SupabaseClient, connection: {
 // Max file size for MMS (RingCentral limit is ~1.5MB, we use 1MB to be safe)
 const MAX_MMS_SIZE = 1 * 1024 * 1024; // 1MB
 
+function isAllowedAttachmentUrl(value: string, supabaseUrl: string): boolean {
+  try {
+    const candidate = new URL(value);
+    const storageOrigin = new URL(supabaseUrl).origin;
+    return candidate.protocol === "https:"
+      && candidate.origin === storageOrigin
+      && [
+        "/storage/v1/object/public/message-attachments/",
+        "/storage/v1/object/public/broadcast-attachments/",
+      ].some((prefix) => candidate.pathname.startsWith(prefix));
+  } catch {
+    return false;
+  }
+}
+
 async function getFileSize(url: string): Promise<number> {
   try {
     const response = await fetch(url, { method: "HEAD" });
@@ -110,6 +126,13 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const authError = await authorizeStaffRequest(
+      req,
+      supabase,
+      ["admin", "cleaning_manager", "office_manager", "virtual_assistant"],
+      { allowServiceRole: true },
+    );
+    if (authError) return authError;
 
     const { company_id, to_phone, message, attachment_url } = await req.json();
 
@@ -117,6 +140,12 @@ Deno.serve(async (req) => {
       return new Response(
         JSON.stringify({ error: "company_id and to_phone are required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    if (attachment_url && (typeof attachment_url !== "string" || !isAllowedAttachmentUrl(attachment_url, supabaseUrl))) {
+      return new Response(
+        JSON.stringify({ error: "Invalid attachment URL" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
@@ -161,12 +190,8 @@ Deno.serve(async (req) => {
     if (attachment_url) {
       // Check file size first
       const fileSize = await getFileSize(attachment_url);
-      console.log("Attachment size:", fileSize, "bytes, URL:", attachment_url);
-
       if (fileSize > MAX_MMS_SIZE || fileSize === 0) {
         // File too large for MMS - send as SMS with link
-        console.log("File too large for MMS, sending as SMS with link");
-        
         // Extract filename from URL for friendly display
         let fileName = "Document";
         try {
@@ -198,8 +223,6 @@ Deno.serve(async (req) => {
         messageType = "SMS_WITH_LINK";
       } else {
         // File small enough - send as MMS
-        console.log("Sending MMS with attachment");
-        
         const { base64, contentType } = await downloadFileAsBase64(attachment_url);
         
         const boundary = "----RingCentralBoundary" + Date.now();
@@ -232,8 +255,6 @@ Deno.serve(async (req) => {
       }
     } else {
       // Send regular SMS
-      console.log("Sending SMS to:", formattedPhone);
-      
       sendResponse = await fetch(`${RC_API_BASE}/account/~/extension/~/sms`, {
         method: "POST",
         headers: {
@@ -249,17 +270,15 @@ Deno.serve(async (req) => {
     }
 
     if (!sendResponse.ok) {
-      const errorText = await sendResponse.text();
-      console.error("Failed to send message:", errorText);
+      await sendResponse.body?.cancel();
+      console.error("Failed to send RingCentral message:", sendResponse.status);
       return new Response(
-        JSON.stringify({ error: "Failed to send message via RingCentral", details: errorText }),
+        JSON.stringify({ error: "Failed to send message via RingCentral" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     const result = await sendResponse.json();
-    console.log("Message sent successfully:", result.id, "type:", messageType);
-
     return new Response(
       JSON.stringify({
         success: true,

@@ -36,6 +36,8 @@ interface LeadFormData {
   message?: string;
   source?: string;
   referral_code?: string;
+  turnstile_token?: string;
+  website?: string; // Honeypot field; must stay empty.
 }
 
 // Centralized service type and frequency enums (must match frontend)
@@ -61,8 +63,8 @@ const FREQUENCY_OPTIONS = [
 ] as const;
 
 // Validate and sanitize input
-function sanitizeInput(value: string | undefined): string {
-  if (!value) return "";
+function sanitizeInput(value: unknown): string {
+  if (typeof value !== "string") return "";
   return value.trim().slice(0, 500);
 }
 
@@ -100,12 +102,85 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-    );
+    const declaredLength = Number(req.headers.get("content-length") || 0);
+    if (declaredLength > 32_768) {
+      return new Response(
+        JSON.stringify({ error: "Request body is too large" }),
+        { status: 413, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
-    const formData: LeadFormData = await req.json();
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    const turnstileSecret = Deno.env.get("TURNSTILE_SECRET_KEY");
+    const rateLimitSalt = Deno.env.get("LEAD_CAPTURE_RATE_LIMIT_SALT");
+    if (!supabaseUrl || !serviceRoleKey || !turnstileSecret || !rateLimitSalt) {
+      return new Response(
+        JSON.stringify({ error: "Lead capture is not configured" }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
+
+    const parsedBody: unknown = await req.json();
+    if (!parsedBody || typeof parsedBody !== "object" || Array.isArray(parsedBody)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid request body" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+    const formData = parsedBody as LeadFormData;
+    if (formData.website) {
+      return new Response(JSON.stringify({ success: true }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (!formData.turnstile_token) {
+      return new Response(
+        JSON.stringify({ error: "Bot verification is required", field: "turnstile_token" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    const forwardedFor = req.headers.get("x-forwarded-for")?.split(",").at(-1)?.trim();
+    const clientIp = req.headers.get("cf-connecting-ip") || req.headers.get("x-real-ip") || forwardedFor || "unknown";
+    const ipDigest = await crypto.subtle.digest(
+      "SHA-256",
+      new TextEncoder().encode(`${rateLimitSalt}:${clientIp}`),
+    );
+    const requestKeyHash = Array.from(new Uint8Array(ipDigest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+    const { data: rateAllowed, error: rateError } = await supabase.rpc("check_lead_capture_rate_limit", {
+      request_key_hash: requestKeyHash,
+      maximum_requests: 5,
+      window_seconds: 3600,
+    });
+    if (rateError) throw new Error("Failed to validate request rate");
+    if (!rateAllowed) {
+      return new Response(
+        JSON.stringify({ error: "Too many requests. Please try again later." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "3600" } },
+      );
+    }
+
+    const turnstileResponse = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        secret: turnstileSecret,
+        response: formData.turnstile_token,
+        remoteip: clientIp,
+      }),
+    });
+    const turnstileResult = await turnstileResponse.json();
+    if (!turnstileResponse.ok || turnstileResult.success !== true) {
+      return new Response(
+        JSON.stringify({ error: "Bot verification failed", field: "turnstile_token" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     // Validate required fields
     const name = sanitizeInput(formData.name);
@@ -141,142 +216,73 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Check for existing customer by phone or email
-    let customerId: string | null = null;
-    
-    if (phone) {
-      const { data: existingByPhone } = await supabase
-        .from("customers")
-        .select("id")
-        .or(`phone.eq.${phone},phone2.eq.${phone}`)
-        .limit(1)
-        .single();
-      
-      if (existingByPhone) {
-        customerId = existingByPhone.id;
-      }
+    if (!validateServiceType(formData.service_type) || !validateFrequency(formData.frequency)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid service selection", field: "service_type" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
-    if (!customerId && email) {
-      const { data: existingByEmail } = await supabase
-        .from("customers")
-        .select("id")
-        .eq("email", email)
-        .limit(1)
-        .single();
-      
-      if (existingByEmail) {
-        customerId = existingByEmail.id;
-      }
+    if (
+      formData.preferred_date
+      && !/^\d{4}-\d{2}-\d{2}$/.test(formData.preferred_date)
+    ) {
+      return new Response(
+        JSON.stringify({ error: "Invalid preferred date", field: "preferred_date" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
-    // Create customer if not exists
-    if (!customerId) {
-      const { data: newCustomer, error: customerError } = await supabase
-        .from("customers")
-        .insert({
-          name,
-          phone: phone || null,
-          email: email || null,
-          address: sanitizeInput(formData.address) || null,
-          city: sanitizeInput(formData.city) || null,
-          state: sanitizeInput(formData.state) || null,
-          zip_code: sanitizeInput(formData.zip_code) || null,
-          source: formData.source || "website_form",
-          status: "lead",
-        })
-        .select("id")
-        .single();
-
-      if (customerError) {
-        console.error("Error creating customer:", customerError);
-        throw new Error("Failed to create customer record");
-      }
-
-      customerId = newCustomer.id;
+    const invalidRoomCount = [formData.bedrooms, formData.bathrooms]
+      .some((value) => value != null && (!Number.isFinite(value) || value < 0 || value > 100));
+    const invalidSquareFeet = formData.square_feet != null
+      && (!Number.isFinite(formData.square_feet) || formData.square_feet < 0 || formData.square_feet > 1_000_000);
+    if (invalidRoomCount || invalidSquareFeet || (formData.has_pets != null && typeof formData.has_pets !== "boolean")) {
+      return new Response(
+        JSON.stringify({ error: "Invalid property measurements", field: "property" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
-    // Generate estimate number
-    const { data: lastEstimate } = await supabase
-      .from("leads")
-      .select("estimate_number")
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .single();
-
-    let nextNumber = 1001;
-    if (lastEstimate?.estimate_number) {
-      const match = lastEstimate.estimate_number.match(/EST-(\d+)/);
-      if (match) {
-        nextNumber = parseInt(match[1]) + 1;
-      }
-    }
-    const estimateNumber = `EST-${nextNumber}`;
-
-    // Build notes from message and additional info
     const notes = [
       formData.message ? `Message: ${sanitizeInput(formData.message)}` : null,
       formData.referral_code ? `Referral Code: ${sanitizeInput(formData.referral_code)}` : null,
     ].filter(Boolean).join("\n");
 
-    // Create lead/estimate
-    const { data: lead, error: leadError } = await supabase
-      .from("leads")
-      .insert({
-        customer_id: customerId,
-        title: `${formData.service_type || "Cleaning"} - ${name}`,
-        estimate_number: estimateNumber,
-        status: "new",
-        origin: formData.source || "website_form",
+    const { data: captureResult, error: captureError } = await supabase.rpc("capture_website_lead", {
+      form_data: {
+        name,
+        phone: phone || null,
+        email: email || null,
         address: sanitizeInput(formData.address) || null,
+        city: sanitizeInput(formData.city) || null,
+        state: sanitizeInput(formData.state) || null,
+        zip_code: sanitizeInput(formData.zip_code) || null,
         service_type: sanitizeInput(formData.service_type) || null,
         frequency: sanitizeInput(formData.frequency) || null,
+        preferred_date: sanitizeInput(formData.preferred_date) || null,
         preferred_time: sanitizeInput(formData.preferred_time) || null,
-        preferred_days: formData.preferred_date ? [formData.preferred_date] : null,
-        bedrooms: formData.bedrooms || null,
-        bathrooms: formData.bathrooms || null,
-        square_feet: formData.square_feet || null,
+        bedrooms: formData.bedrooms ?? null,
+        bathrooms: formData.bathrooms ?? null,
+        square_feet: formData.square_feet ?? null,
         property_type: sanitizeInput(formData.property_type) || null,
         has_pets: formData.has_pets ?? null,
         notes: notes || null,
-        phone: phone || null,
-        email: email || null,
-      })
-      .select()
-      .single();
-
-    if (leadError) {
-      console.error("Error creating lead:", leadError);
-      throw new Error("Failed to create lead record");
-    }
-
-    // Log the lead interaction
-    await supabase.from("lead_interactions").insert({
-      lead_id: lead.id,
-      interaction_type: "form_submission",
-      description: `Lead captured from ${formData.source || "website form"}`,
+      },
     });
-
-    console.log("Lead captured successfully:", {
-      lead_id: lead.id,
-      customer_id: customerId,
-      estimate_number: estimateNumber,
-    });
+    if (captureError || !captureResult) throw new Error("Failed to capture lead");
 
     return new Response(
       JSON.stringify({
         success: true,
         message: "Thank you! We'll be in touch soon.",
-        lead_id: lead.id,
-        estimate_number: estimateNumber,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: unknown) {
     console.error("Error in website-lead-capture:", error);
-    const message = error instanceof Error ? error.message : "An error occurred";
     return new Response(
-      JSON.stringify({ error: message }),
+      JSON.stringify({ error: "Unable to process the lead request" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

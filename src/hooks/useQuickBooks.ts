@@ -3,13 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getErrorMessage } from "@/lib/errors";
 
-interface QuickBooksTokens {
-  accessToken: string;
-  refreshToken: string;
-  realmId: string;
-  expiresAt: number;
-}
-
 interface QuickBooksCustomer {
   Id: string;
   DisplayName: string;
@@ -37,46 +30,73 @@ interface QuickBooksEmployee {
   PrimaryEmailAddr?: { Address: string };
 }
 
-const STORAGE_KEY = "quickbooks_tokens";
-
 export function useQuickBooks() {
-  const [tokens, setTokens] = useState<QuickBooksTokens | null>(null);
   const [isConnected, setIsConnected] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [companyName, setCompanyName] = useState<string | null>(null);
-  const refreshTokensRef = useRef<(refreshToken: string) => Promise<void>>();
-  const exchangeTokenRef = useRef<(code: string, realmId: string) => Promise<void>>();
+  const popupRef = useRef<Window | null>(null);
 
-  // Load tokens from localStorage on mount
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored) as QuickBooksTokens;
-      if (parsed.expiresAt > Date.now()) {
-        setTokens(parsed);
-        setIsConnected(true);
-        fetchCompanyInfo(parsed);
-      } else {
-        // Try to refresh token
-        void refreshTokensRef.current?.(parsed.refreshToken);
-      }
+  const checkConnection = useCallback(async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke("quickbooks-auth", {
+        body: { action: "status" },
+      });
+      if (error) throw error;
+      setIsConnected(data?.connected === true);
+      setCompanyName(data?.companyName || null);
+    } catch {
+      setIsConnected(false);
+      setCompanyName(null);
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
-  // Listen for OAuth callback
+  useEffect(() => {
+    void checkConnection();
+    const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT") {
+        setIsConnected(false);
+        setCompanyName(null);
+        setIsLoading(false);
+      } else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+        queueMicrotask(() => void checkConnection());
+      }
+    });
+    return () => authListener.subscription.unsubscribe();
+  }, [checkConnection]);
+
   useEffect(() => {
     const handleMessage = async (event: MessageEvent) => {
+      if (event.source !== popupRef.current || typeof event.data !== "object" || event.data == null) return;
+
       if (event.data.type === "quickbooks-callback") {
-        const { code, realmId } = event.data;
-        await exchangeTokenRef.current?.(code, realmId);
+        const { code, realmId, state } = event.data;
+        if (typeof code !== "string" || typeof realmId !== "string" || typeof state !== "string") return;
+
+        setIsLoading(true);
+        try {
+          const { error } = await supabase.functions.invoke("quickbooks-auth", {
+            body: { action: "exchange-token", code, realmId, state },
+          });
+          if (error) throw error;
+          await checkConnection();
+          toast.success("QuickBooks conectado com sucesso!");
+        } catch (error: unknown) {
+          toast.error(`Failed to exchange token: ${getErrorMessage(error, "Unknown error")}`);
+        } finally {
+          setIsLoading(false);
+          popupRef.current = null;
+        }
       } else if (event.data.type === "quickbooks-error") {
         toast.error(`QuickBooks: ${event.data.error}`);
+        popupRef.current = null;
       }
     };
 
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, []);
+  }, [checkConnection]);
 
   const connect = useCallback(async () => {
     setIsLoading(true);
@@ -93,7 +113,7 @@ export function useQuickBooks() {
       const left = window.screenX + (window.outerWidth - width) / 2;
       const top = window.screenY + (window.outerHeight - height) / 2;
       
-      window.open(
+      popupRef.current = window.open(
         data.authUrl,
         "QuickBooks Authorization",
         `width=${width},height=${height},left=${left},top=${top}`
@@ -105,109 +125,33 @@ export function useQuickBooks() {
     }
   }, []);
 
-  const exchangeToken = async (code: string, realmId: string) => {
+  const disconnect = useCallback(async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("quickbooks-auth", {
-        body: { action: "exchange-token", code, realmId },
+      const { error } = await supabase.functions.invoke("quickbooks-auth", {
+        body: { action: "disconnect" },
       });
-
       if (error) throw error;
-
-      const newTokens: QuickBooksTokens = {
-        accessToken: data.accessToken,
-        refreshToken: data.refreshToken,
-        realmId: data.realmId,
-        expiresAt: Date.now() + data.expiresIn * 1000,
-      };
-
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newTokens));
-      setTokens(newTokens);
-      setIsConnected(true);
-      await fetchCompanyInfo(newTokens);
-      toast.success("QuickBooks conectado com sucesso!");
+      setIsConnected(false);
+      setCompanyName(null);
+      toast.success("QuickBooks desconectado");
     } catch (error: unknown) {
-      toast.error(`Failed to exchange token: ${getErrorMessage(error, "Unknown error")}`);
+      toast.error(`Failed to disconnect: ${getErrorMessage(error, "Unknown error")}`);
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const refreshTokens = async (refreshToken: string) => {
-    try {
-      const { data, error } = await supabase.functions.invoke("quickbooks-auth", {
-        body: { action: "refresh-token", refreshToken },
-      });
-
-      if (error) throw error;
-
-      const storedTokens = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-      const newTokens: QuickBooksTokens = {
-        accessToken: data.accessToken,
-        refreshToken: data.refreshToken,
-        realmId: storedTokens.realmId,
-        expiresAt: Date.now() + data.expiresIn * 1000,
-      };
-
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newTokens));
-      setTokens(newTokens);
-      setIsConnected(true);
-    } catch (error) {
-      // Token refresh failed, need to reconnect
-      disconnect();
-    }
-  };
-
-  refreshTokensRef.current = refreshTokens;
-  exchangeTokenRef.current = exchangeToken;
-
-  const disconnect = useCallback(() => {
-    localStorage.removeItem(STORAGE_KEY);
-    setTokens(null);
-    setIsConnected(false);
-    setCompanyName(null);
-    toast.success("QuickBooks desconectado");
   }, []);
 
-  const fetchCompanyInfo = async (tokenData: QuickBooksTokens) => {
-    try {
-      const { data, error } = await supabase.functions.invoke("quickbooks-api", {
-        body: {
-          action: "get-company-info",
-          accessToken: tokenData.accessToken,
-          realmId: tokenData.realmId,
-        },
-      });
-
-      if (error) throw error;
-      setCompanyName(data.CompanyInfo?.CompanyName || null);
-    } catch (error) {
-      console.error("Failed to fetch company info:", error);
-    }
-  };
-
   const callApi = useCallback(async (action: string, data?: Record<string, unknown>) => {
-    if (!tokens) {
-      throw new Error("Not connected to QuickBooks");
-    }
-
-    // Check if token needs refresh
-    if (tokens.expiresAt < Date.now() + 60000) {
-      await refreshTokensRef.current?.(tokens.refreshToken);
-    }
+    if (!isConnected) throw new Error("Not connected to QuickBooks");
 
     const { data: result, error } = await supabase.functions.invoke("quickbooks-api", {
-      body: {
-        action,
-        accessToken: tokens.accessToken,
-        realmId: tokens.realmId,
-        data,
-      },
+      body: { action, data },
     });
 
     if (error) throw error;
     return result;
-  }, [tokens]);
+  }, [isConnected]);
 
   // ==================== CUSTOMERS ====================
   const getCustomers = useCallback(async (): Promise<QuickBooksCustomer[]> => {
@@ -323,17 +267,10 @@ export function useQuickBooks() {
     return result.Bill;
   }, [callApi]);
 
-  // Get tokens for API calls
-  const getTokens = useCallback(() => {
-    return tokens;
-  }, [tokens]);
-
   return {
     isConnected,
     isLoading,
     companyName,
-    tokens,
-    getTokens,
     connect,
     disconnect,
     // Customers

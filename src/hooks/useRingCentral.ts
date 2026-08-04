@@ -26,41 +26,20 @@ export function useRingCentral() {
     | null
   >(null);
 
-  // Get the first company (single-tenant for now)
-  const getCompanyId = useCallback(async () => {
-    const { data } = await supabase
-      .from("company_settings")
-      .select("id")
-      .limit(1)
-      .single();
-    return data?.id;
-  }, []);
-
   // Check connection status
   const checkConnection = useCallback(async () => {
     setIsLoading(true);
     try {
-      const companyId = await getCompanyId();
-      if (!companyId) {
-        setIsConnected(false);
-        setConnection(null);
-        return;
-      }
+      const { data, error } = await supabase.functions.invoke("ringcentral-auth", {
+        body: { action: "status" },
+      });
 
-      const { data, error } = await supabase
-        .from("ringcentral_connections")
-        .select("id, company_id, phone_number, extension_id, account_id, connected_at, token_expires_at")
-        .eq("company_id", companyId)
-        .maybeSingle();
-
-      if (error || !data) {
+      if (error || !data?.connected || !data.connection) {
         setIsConnected(false);
         setConnection(null);
       } else {
-        // Check if token is expired
-        const isExpired = new Date(data.token_expires_at) < new Date();
-        setIsConnected(!isExpired);
-        setConnection(data as RingCentralConnection);
+        setIsConnected(true);
+        setConnection(data.connection as RingCentralConnection);
       }
     } catch (err) {
       console.error("Failed to check RingCentral connection:", err);
@@ -69,7 +48,7 @@ export function useRingCentral() {
     } finally {
       setIsLoading(false);
     }
-  }, [getCompanyId]);
+  }, []);
 
   // Initial check
   useEffect(() => {
@@ -80,18 +59,12 @@ export function useRingCentral() {
   const connect = useCallback(async () => {
     setIsLoading(true);
     try {
-      const companyId = await getCompanyId();
-      if (!companyId) {
-        toast.error("Empresa não encontrada. Configure as informações da empresa primeiro.");
-        return;
-      }
-
       // Build redirect URI - use the callback page
       const redirectUri = `${window.location.origin}/integrations/ringcentral/callback`;
 
       const { data, error } = await supabase.functions.invoke("ringcentral-auth", {
         body: {
-          company_id: companyId,
+          action: "get-auth-url",
           redirect_uri: redirectUri,
         },
       });
@@ -118,6 +91,7 @@ export function useRingCentral() {
         "ringcentral-oauth",
         `width=${width},height=${height},left=${left},top=${top}`
       );
+      if (!popup) throw new Error("O navegador bloqueou a janela de autorização");
 
       // Listen for popup messages
       const handleMessage = async (event: MessageEvent) => {
@@ -150,19 +124,15 @@ export function useRingCentral() {
       toast.error("Falha ao iniciar conexão com RingCentral");
       setIsLoading(false);
     }
-  }, [getCompanyId, checkConnection]);
+  }, [checkConnection]);
 
   // Disconnect
   const disconnect = useCallback(async () => {
     setIsLoading(true);
     try {
-      const companyId = await getCompanyId();
-      if (!companyId) return;
-
-      const { error } = await supabase
-        .from("ringcentral_connections")
-        .delete()
-        .eq("company_id", companyId);
+      const { error } = await supabase.functions.invoke("ringcentral-auth", {
+        body: { action: "disconnect" },
+      });
 
       if (error) throw error;
 
@@ -175,7 +145,7 @@ export function useRingCentral() {
     } finally {
       setIsLoading(false);
     }
-  }, [getCompanyId]);
+  }, []);
 
   return {
     isConnected,

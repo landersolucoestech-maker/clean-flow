@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Shield, Mail, Lock, Loader2, ArrowLeft, KeyRound, Fingerprint } from "lucide-react";
+import { Shield, Mail, Lock, Loader2, ArrowLeft, KeyRound } from "lucide-react";
 import { getErrorMessage } from "@/lib/errors";
 
 export function AdminAuth() {
@@ -156,20 +156,11 @@ export function AdminAuth() {
                 </Button>
               </form>
 
-              {/* Security badges */}
               <div className="mt-8 pt-6 border-t border-slate-800">
-                <div className="flex items-center justify-center gap-6 text-slate-500">
+                <div className="flex items-center justify-center text-slate-500">
                   <div className="flex items-center gap-2 text-xs">
                     <Shield className="w-4 h-4" />
-                    <span>Encrypted</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs">
-                    <Fingerprint className="w-4 h-4" />
-                    <span>2FA Ready</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs">
-                    <Lock className="w-4 h-4" />
-                    <span>Secure</span>
+                    <span>Authentication provided by Supabase Auth</span>
                   </div>
                 </div>
               </div>
@@ -178,8 +169,6 @@ export function AdminAuth() {
 
           <p className="text-center text-sm text-slate-500 mt-6">
             Only authorized platform administrators can access this area.
-            <br />
-            All login attempts are monitored and logged.
           </p>
         </div>
       </div>

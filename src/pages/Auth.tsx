@@ -4,21 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Sparkles, Mail, Lock, User, Building2, Phone, ArrowRight, Loader2 } from "lucide-react";
+import { Sparkles, Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
 import { getErrorMessage } from "@/lib/errors";
 
 export function Auth() {
   const [isLoading, setIsLoading] = useState(false);
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
-  const [signupName, setSignupName] = useState("");
-  const [signupEmail, setSignupEmail] = useState("");
-  const [signupPassword, setSignupPassword] = useState("");
-  const [signupCompany, setSignupCompany] = useState("");
-  const [signupPhone, setSignupPhone] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -50,41 +44,6 @@ export function Auth() {
     }
   };
 
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    
-    try {
-      const { error } = await supabase.auth.signUp({
-        email: signupEmail,
-        password: signupPassword,
-        options: {
-          emailRedirectTo: window.location.origin,
-          data: {
-            full_name: signupName,
-            company_name: signupCompany,
-            phone: signupPhone,
-          },
-        },
-      });
-      
-      if (error) throw error;
-      
-      toast({
-        title: "Account created!",
-        description: "Please check your email to verify your account.",
-      });
-    } catch (error: unknown) {
-      toast({
-        title: "Error",
-        description: getErrorMessage(error, "Failed to create account"),
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleGoogleLogin = async () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -100,6 +59,29 @@ export function Auth() {
         description: getErrorMessage(error, "Failed to login with Google"),
         variant: "destructive",
       });
+    }
+  };
+
+  const handlePasswordReset = async () => {
+    if (!loginEmail) {
+      toast({ title: "Email required", description: "Enter your login email first.", variant: "destructive" });
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(loginEmail, {
+        redirectTo: `${window.location.origin}/set-password`,
+      });
+      if (error) throw error;
+      toast({ title: "Check your email", description: "If the account exists, a recovery link was sent." });
+    } catch (error: unknown) {
+      toast({
+        title: "Unable to request reset",
+        description: getErrorMessage(error, "Try again later."),
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -162,16 +144,10 @@ export function Auth() {
           <Card className="border-0 shadow-xl bg-card">
             <CardHeader className="text-center pb-2">
               <CardTitle className="text-2xl font-bold">Welcome</CardTitle>
-              <CardDescription>Sign in to your account or create a new one</CardDescription>
+              <CardDescription>Sign in with an owner account or a team invitation</CardDescription>
             </CardHeader>
             <CardContent>
-              <Tabs defaultValue="login" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 mb-6">
-                  <TabsTrigger value="login">Sign In</TabsTrigger>
-                  <TabsTrigger value="signup">Sign Up</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="login">
+              <div className="w-full">
                   <form onSubmit={handleLogin} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="login-email">Email</Label>
@@ -212,6 +188,15 @@ export function Auth() {
                         "Sign In"
                       )}
                     </Button>
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="h-auto w-full p-0 text-sm"
+                      onClick={handlePasswordReset}
+                      disabled={isLoading}
+                    >
+                      Forgot your password?
+                    </Button>
                   </form>
 
                   <div className="relative my-6">
@@ -249,104 +234,10 @@ export function Auth() {
                     </svg>
                     Continue with Google
                   </Button>
-                </TabsContent>
-
-                <TabsContent value="signup">
-                  <form onSubmit={handleSignup} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="signup-name">Full Name</Label>
-                        <div className="relative">
-                          <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                          <Input
-                            id="signup-name"
-                            placeholder="John Doe"
-                            value={signupName}
-                            onChange={(e) => setSignupName(e.target.value)}
-                            className="pl-10"
-                            required
-                          />
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="signup-phone">Phone</Label>
-                        <div className="relative">
-                          <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                          <Input
-                            id="signup-phone"
-                            type="tel"
-                            placeholder="+1 (555) 000-0000"
-                            value={signupPhone}
-                            onChange={(e) => setSignupPhone(e.target.value)}
-                            className="pl-10"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-company">Company Name</Label>
-                      <div className="relative">
-                        <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                          id="signup-company"
-                          placeholder="Your Cleaning Co."
-                          value={signupCompany}
-                          onChange={(e) => setSignupCompany(e.target.value)}
-                          className="pl-10"
-                          required
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-email">Email</Label>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                          id="signup-email"
-                          type="email"
-                          placeholder="you@company.com"
-                          value={signupEmail}
-                          onChange={(e) => setSignupEmail(e.target.value)}
-                          className="pl-10"
-                          required
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="signup-password">Password</Label>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input
-                          id="signup-password"
-                          type="password"
-                          placeholder="Min. 8 characters"
-                          value={signupPassword}
-                          onChange={(e) => setSignupPassword(e.target.value)}
-                          className="pl-10"
-                          minLength={8}
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <Button type="submit" className="w-full h-11" disabled={isLoading}>
-                      {isLoading ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        "Create Account"
-                      )}
-                    </Button>
-                    
-                    <p className="text-xs text-center text-muted-foreground">
-                      By signing up, you agree to our Terms of Service and Privacy Policy
-                    </p>
-                  </form>
-                </TabsContent>
-              </Tabs>
+                <p className="mt-6 text-center text-xs text-muted-foreground">
+                  New team members receive an invitation from an administrator.
+                </p>
+              </div>
             </CardContent>
           </Card>
 

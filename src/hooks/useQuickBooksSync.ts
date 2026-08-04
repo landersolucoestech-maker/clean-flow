@@ -15,7 +15,6 @@ interface SyncResult {
 export function useQuickBooksSync() {
   const { 
     isConnected, 
-    getTokens, 
     createInvoice: createQBInvoice, 
     createCustomer: createQBCustomer,
     sendInvoice: sendQBInvoice
@@ -61,16 +60,10 @@ export function useQuickBooksSync() {
       let qbCustomerId = customerMapping[customerId];
       
       if (!qbCustomerId) {
-        // Search or create customer in QuickBooks
-        const tokens = getTokens();
-        if (!tokens) throw new Error("No QuickBooks tokens available");
-
         // Try to find existing customer
         const { data: searchResult } = await supabase.functions.invoke("quickbooks-api", {
           body: {
             action: "search-customer",
-            accessToken: tokens.accessToken,
-            realmId: tokens.realmId,
             data: { displayName: customerName },
           },
         });
@@ -208,7 +201,7 @@ export function useQuickBooksSync() {
 
       return { success: false, error: errorMessage };
     }
-  }, [isConnected, getTokens, customerMapping, setCustomerMapping, setInvoiceMapping, 
+  }, [isConnected, customerMapping, setCustomerMapping, setInvoiceMapping,
       createQBCustomer, createQBInvoice, sendQBInvoice, addSyncLog, setLastSyncAt]);
 
   // Auto-sync invoice when job is completed

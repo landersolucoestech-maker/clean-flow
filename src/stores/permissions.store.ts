@@ -210,7 +210,7 @@ export const DEFAULT_ROLES: Omit<Role, "company_id">[] = [
       "jobs.view.all", "jobs.create", "jobs.edit", "jobs.prices.view", "jobs.toggle",
       "leads.view", "leads.create", "leads.edit", "leads.convert",
       "team.view",
-      "reports.view",
+      "communications.view", "communications.send",
       "settings.profile.view", "settings.profile.edit",
       "settings.company.view",
       "settings.team.view",
@@ -352,6 +352,11 @@ export const usePermissionsStore = create<PermissionsState>()(
         
         // Direct match
         if (currentRole.permissions.includes(permission)) return true;
+
+        if (permission.split(".").length === 2
+          && currentRole.permissions.some((granted) => granted.startsWith(`${permission}.`))) {
+          return true;
+        }
         
         // Check for module wildcard (e.g., "jobs.*")
         const [module] = permission.split(".");

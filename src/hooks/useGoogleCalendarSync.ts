@@ -3,7 +3,6 @@ import { useGoogle } from "@/hooks/useGoogle";
 import { toast } from "sonner";
 import { getErrorMessage } from "@/lib/errors";
 import { Job } from "@/hooks/useJobs";
-import { googleState } from "@/lib/googleState";
 
 interface CalendarEventData {
   jobId: string;
@@ -60,21 +59,13 @@ export function useGoogleCalendarSync() {
     updateEvent, 
     deleteEvent,
     listCalendars,
+    isConnected,
+    hasCalendarAccess,
   } = useGoogle();
 
-  // Check if can sync using the global state manager
   const canSync = useCallback(() => {
-    const isConnected = googleState.isConnected();
-    const hasCalendar = googleState.hasCalendarAccess();
-    
-    console.log("[CalendarSync] canSync check - isConnected:", isConnected, "hasCalendarAccess:", hasCalendar);
-    
-    if (isConnected && hasCalendar) {
-      return true;
-    }
-    
-    return false;
-  }, []);
+    return isConnected && hasCalendarAccess();
+  }, [hasCalendarAccess, isConnected]);
 
   // Get the selected calendar ID
   const getCalendarId = useCallback(() => {
@@ -187,7 +178,6 @@ export function useGoogleCalendarSync() {
   // Create calendar event for a job
   const syncJobToCalendar = useCallback(async (job: Job): Promise<string | null> => {
     if (!canSync()) {
-      console.log("Google Calendar sync not available");
       return null;
     }
 
@@ -306,7 +296,6 @@ export function useGoogleCalendarSync() {
     onProgress?: (current: number, total: number) => void
   ): Promise<{ synced: number; failed: number; errors: string[] }> => {
     if (!canSync()) {
-      console.log("Google Calendar sync not available");
       return { synced: 0, failed: 0, errors: ["Google Calendar não está conectado"] };
     }
 
@@ -320,7 +309,6 @@ export function useGoogleCalendarSync() {
       try {
         // Skip jobs without scheduled date
         if (!job.scheduled_date) {
-          console.log(`Skipping job ${job.id} - no scheduled date`);
           synced++; // Count as success since it's expected
           onProgress?.(i + 1, total);
           continue;
@@ -328,15 +316,12 @@ export function useGoogleCalendarSync() {
 
         // Skip jobs that already have calendar events
         if (hasCalendarEvent(job.id)) {
-          console.log(`Skipping job ${job.id} - already synced`);
           synced++;
           onProgress?.(i + 1, total);
           continue;
         }
 
         const eventData = jobToCalendarEvent(job);
-        console.log(`Syncing job ${job.id} to calendar...`, eventData);
-        
         const result = await createEvent(eventData);
 
         if (result?.id) {
@@ -344,7 +329,6 @@ export function useGoogleCalendarSync() {
           map[job.id] = result.id;
           setEventMap(map);
           synced++;
-          console.log(`Job ${job.id} synced successfully`);
         } else if (result?.error) {
           const errorMsg = `Job "${job.title}": ${result.error.message || result.error}`;
           console.error(`Failed to sync job ${job.id}:`, result.error);
@@ -385,13 +369,11 @@ export function useGoogleCalendarSync() {
     amount?: number;
   }): Promise<string | null> => {
     if (!canSync()) {
-      console.log("Google Calendar sync not available");
       return null;
     }
 
     const leadsCalendarId = getLeadsCalendarId();
     if (!leadsCalendarId) {
-      console.log("No leads calendar configured");
       return null;
     }
 
@@ -425,7 +407,6 @@ export function useGoogleCalendarSync() {
         calendarId: leadsCalendarId,
       };
 
-      console.log("[CalendarSync] Syncing lead to calendar:", eventData);
       const result = await createEvent(eventData);
 
       if (result?.id) {

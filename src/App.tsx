@@ -26,14 +26,16 @@ const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard").then(({
 const AdminClients = lazy(() => import("./pages/admin/AdminClients").then(({ AdminClients }) => ({ default: AdminClients })));
 const AdminAuth = lazy(() => import("./pages/admin/AdminAuth").then(({ AdminAuth }) => ({ default: AdminAuth })));
 const AdminLogs = lazy(() => import("./pages/admin/AdminLogs").then(({ AdminLogs }) => ({ default: AdminLogs })));
-const AdminSettings = lazy(() => import("./pages/admin/AdminSettings").then(({ AdminSettings }) => ({ default: AdminSettings })));
-const AdminSubscription = lazy(() => import("./pages/admin/AdminSubscription").then(({ AdminSubscription }) => ({ default: AdminSubscription })));
 const AdminSupport = lazy(() => import("./pages/admin/AdminSupport").then(({ AdminSupport }) => ({ default: AdminSupport })));
 const RingCentralCallback = lazy(() => import("./pages/RingCentralCallback"));
 const GoogleCallback = lazy(() => import("./pages/GoogleCallback"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const Setup = lazy(() => import("./pages/Setup").then(({ Setup }) => ({ default: Setup })));
+const SetPassword = lazy(() => import("./pages/SetPassword").then(({ SetPassword }) => ({ default: SetPassword })));
 
 const queryClient = new QueryClient();
+const OPERATIONAL_ROLES = ["admin", "office_manager", "cleaning_manager", "virtual_assistant"] as const;
+const FINANCE_ROLES = ["admin", "office_manager"] as const;
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -47,16 +49,18 @@ const App = () => (
               <Routes>
               <Route path="/" element={<AuthenticatedRoute><Index /></AuthenticatedRoute>} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/setup" element={<AuthenticatedRoute allowUnconfigured><Setup /></AuthenticatedRoute>} />
+              <Route path="/set-password" element={<AuthenticatedRoute><SetPassword /></AuthenticatedRoute>} />
               <Route path="/schedule" element={<AuthenticatedRoute><Schedule /></AuthenticatedRoute>} />
-              <Route path="/customers" element={<AuthenticatedRoute><Customers /></AuthenticatedRoute>} />
-              <Route path="/invoices" element={<AuthenticatedRoute><Billing /></AuthenticatedRoute>} />
-              <Route path="/transactions" element={<AuthenticatedRoute><Transactions /></AuthenticatedRoute>} />
-              <Route path="/rules" element={<AuthenticatedRoute><Rules /></AuthenticatedRoute>} />
-              <Route path="/communications" element={<AuthenticatedRoute><Communications /></AuthenticatedRoute>} />
-              <Route path="/reports" element={<AuthenticatedRoute><Reports /></AuthenticatedRoute>} />
+              <Route path="/customers" element={<AuthenticatedRoute allowedRoles={OPERATIONAL_ROLES}><Customers /></AuthenticatedRoute>} />
+              <Route path="/invoices" element={<AuthenticatedRoute allowedRoles={FINANCE_ROLES}><Billing /></AuthenticatedRoute>} />
+              <Route path="/transactions" element={<AuthenticatedRoute allowedRoles={FINANCE_ROLES}><Transactions /></AuthenticatedRoute>} />
+              <Route path="/rules" element={<AuthenticatedRoute allowedRoles={FINANCE_ROLES}><Rules /></AuthenticatedRoute>} />
+              <Route path="/communications" element={<AuthenticatedRoute allowedRoles={OPERATIONAL_ROLES}><Communications /></AuthenticatedRoute>} />
+              <Route path="/reports" element={<AuthenticatedRoute allowedRoles={FINANCE_ROLES}><Reports /></AuthenticatedRoute>} />
               <Route path="/settings" element={<AuthenticatedRoute><Settings /></AuthenticatedRoute>} />
-              <Route path="/integrations" element={<AuthenticatedRoute><Settings /></AuthenticatedRoute>} />
-              <Route path="/payroll" element={<AuthenticatedRoute><Payroll /></AuthenticatedRoute>} />
+              <Route path="/integrations" element={<AuthenticatedRoute allowedRoles={FINANCE_ROLES}><Settings /></AuthenticatedRoute>} />
+              <Route path="/payroll" element={<AuthenticatedRoute allowedRoles={FINANCE_ROLES}><Payroll /></AuthenticatedRoute>} />
               <Route path="/support" element={<AuthenticatedRoute><Support /></AuthenticatedRoute>} />
               
               {/* Admin Routes */}
@@ -64,12 +68,10 @@ const App = () => (
               <Route path="/admin/clients" element={<PlatformAdminRoute><AdminClients /></PlatformAdminRoute>} />
               <Route path="/admin/auth" element={<AdminAuth />} />
               <Route path="/admin/logs" element={<PlatformAdminRoute><AdminLogs /></PlatformAdminRoute>} />
-              <Route path="/admin/settings" element={<PlatformAdminRoute><AdminSettings /></PlatformAdminRoute>} />
-              <Route path="/admin/subscription" element={<PlatformAdminRoute><AdminSubscription /></PlatformAdminRoute>} />
               <Route path="/admin/support" element={<PlatformAdminRoute><AdminSupport /></PlatformAdminRoute>} />
               
-              <Route path="/leads" element={<AuthenticatedRoute><Leads /></AuthenticatedRoute>} />
-              <Route path="/sync-logs" element={<AuthenticatedRoute><SyncLogs /></AuthenticatedRoute>} />
+              <Route path="/leads" element={<AuthenticatedRoute allowedRoles={OPERATIONAL_ROLES}><Leads /></AuthenticatedRoute>} />
+              <Route path="/sync-logs" element={<AuthenticatedRoute allowedRoles={FINANCE_ROLES}><SyncLogs /></AuthenticatedRoute>} />
               <Route path="/integrations/ringcentral/callback" element={<RingCentralCallback />} />
               <Route path="/integrations/google/callback" element={<GoogleCallback />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

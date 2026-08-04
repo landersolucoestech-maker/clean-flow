@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { authorizeStaffRequest } from "../_shared/authorize.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -25,6 +26,18 @@ interface RingCentralConnection {
 const RC_CLIENT_ID = Deno.env.get("RINGCENTRAL_CLIENT_ID");
 const RC_CLIENT_SECRET = Deno.env.get("RINGCENTRAL_CLIENT_SECRET");
 const RC_FROM_NUMBER = Deno.env.get("RINGCENTRAL_FROM_NUMBER");
+
+function isAllowedAttachmentUrl(value: string, supabaseUrl: string): boolean {
+  try {
+    const candidate = new URL(value);
+    const storageOrigin = new URL(supabaseUrl).origin;
+    return candidate.protocol === "https:"
+      && candidate.origin === storageOrigin
+      && candidate.pathname.startsWith("/storage/v1/object/public/broadcast-attachments/");
+  } catch {
+    return false;
+  }
+}
 const RC_API_BASE = "https://platform.ringcentral.com/restapi/v1.0";
 const MAX_MMS_SIZE = 1 * 1024 * 1024; // 1MB - RingCentral limit is ~1.5MB
 
@@ -266,6 +279,12 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const authError = await authorizeStaffRequest(
+      req,
+      supabase,
+      ["admin", "office_manager", "virtual_assistant"],
+    );
+    if (authError) return authError;
 
     const { broadcast_id, company_id } = await req.json();
 
@@ -322,12 +341,12 @@ Deno.serve(async (req) => {
     const attachmentUrls: string[] = broadcast.attachment_urls || [];
     const hasAttachments = attachmentUrls.length > 0;
 
-    console.log("Broadcast details:", {
-      id: broadcast.id,
-      message: broadcast.message?.substring(0, 50),
-      attachments: attachmentUrls.length,
-      hasAttachments,
-    });
+    if (attachmentUrls.some((url) => !isAllowedAttachmentUrl(url, supabaseUrl))) {
+      return new Response(JSON.stringify({ error: "Broadcast contains an invalid attachment URL" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // Get recipients
     const { data: recipients, error: recipientsError } = await supabase
@@ -345,48 +364,10 @@ Deno.serve(async (req) => {
 
     // Check if RingCentral is connected via OAuth
     if (!rcConnection) {
-      console.log("RingCentral not connected - simulating broadcast");
-      
-      // Simulate sending for demo purposes
-      for (const recipient of recipients as BroadcastRecipient[]) {
-        if (recipient.phone) {
-          await supabase
-            .from("broadcast_recipients")
-            .update({
-              status: "sent",
-              sent_at: new Date().toISOString(),
-            })
-            .eq("id", recipient.id);
-          
-          sentCount++;
-
-          // Also create a message record for conversation history
-          const { data: conversation } = await supabase
-            .from("conversations")
-            .select("id")
-            .eq("customer_id", recipient.customer_id)
-            .single();
-
-          if (conversation) {
-            await supabase.from("messages").insert({
-              conversation_id: conversation.id,
-              content: broadcast.message,
-              sender_type: "user",
-              attachment_url: attachmentUrls[0] || null,
-            });
-          }
-        } else {
-          await supabase
-            .from("broadcast_recipients")
-            .update({
-              status: "failed",
-              error_message: "No phone number",
-            })
-            .eq("id", recipient.id);
-          
-          failedCount++;
-        }
-      }
+      return new Response(
+        JSON.stringify({ error: "RingCentral is not connected" }),
+        { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     } else {
       // RingCentral is connected - refresh token if needed and send real messages
       const accessToken = await refreshAccessToken(supabase, rcConnection);
@@ -408,8 +389,6 @@ Deno.serve(async (req) => {
         );
       }
       
-      console.log("Sending messages from:", fromNumber, "with attachments:", hasAttachments);
-
       // Send messages to each recipient
       for (const recipient of recipients as BroadcastRecipient[]) {
         if (!recipient.phone) {
@@ -445,7 +424,7 @@ Deno.serve(async (req) => {
               );
 
               if (!sendResult.success) {
-                console.error(`Failed to send MMS ${i + 1} to ${recipient.phone}:`, sendResult.error);
+                console.error("Failed to send broadcast MMS");
                 break;
               }
             }
@@ -492,7 +471,7 @@ Deno.serve(async (req) => {
             failedCount++;
           }
         } catch (err) {
-          console.error(`Error sending to ${recipient.phone}:`, err);
+          console.error("Error sending broadcast recipient:", err);
           
           await supabase
             .from("broadcast_recipients")

@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.0";
 import { Resend } from "https://esm.sh/resend@2.0.0";
+import { authorizeStaffRequest } from "../_shared/authorize.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -8,6 +9,20 @@ const corsHeaders = {
 };
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+const EMAIL_FROM = Deno.env.get("EMAIL_FROM");
+
+function escapeHtml(value: unknown): string {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function safeHeader(value: unknown): string {
+  return String(value ?? "").replace(/[\r\n]+/g, " ").slice(0, 200);
+}
 
 interface Invoice {
   id: string;
@@ -42,11 +57,11 @@ function getPaymentInfo(
   const method = paymentMethod.toLowerCase();
   
   if (method === "zelle" && zelleKey) {
-    return `<p><strong>💳 Pay via Zelle:</strong> ${zelleKey}</p>`;
+    return `<p><strong>💳 Pay via Zelle:</strong> ${escapeHtml(zelleKey)}</p>`;
   }
   
   if (method === "venmo" && venmoKey) {
-    return `<p><strong>💳 Pay via Venmo:</strong> ${venmoKey}</p>`;
+    return `<p><strong>💳 Pay via Venmo:</strong> ${escapeHtml(venmoKey)}</p>`;
   }
   
   return "";
@@ -58,9 +73,22 @@ serve(async (req: Request) => {
   }
 
   try {
+    if (!EMAIL_FROM || !Deno.env.get("RESEND_API_KEY")) {
+      return new Response(JSON.stringify({ error: "Email service is not configured" }), {
+        status: 503,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const authError = await authorizeStaffRequest(
+      req,
+      supabase,
+      ["admin", "office_manager"],
+      { allowServiceRole: true },
+    );
+    if (authError) return authError;
 
     // Parse body once and extract all needed fields
     const body = await req.json();
@@ -115,18 +143,18 @@ serve(async (req: Request) => {
           const paymentInfo = getPaymentInfo(customer.payment_method, zelleKey, venmoKey);
 
           await resend.emails.send({
-            from: "Invoices <invoices@resend.dev>",
+            from: EMAIL_FROM,
             to: [customer.email],
-            subject: `Reminder: Invoice ${invoice.invoice_number} is due soon`,
+            subject: safeHeader(`Reminder: Invoice ${invoice.invoice_number} is due soon`),
             html: `
               <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                 <h2 style="color: #1a1a2e;">Payment Reminder</h2>
-                <p>Dear ${customer.name},</p>
-                <p>This is a friendly reminder that invoice <strong>${invoice.invoice_number}</strong> for <strong>$${invoice.total?.toFixed(2)}</strong> is due on <strong>${invoice.due_date}</strong>.</p>
+                <p>Dear ${escapeHtml(customer.name)},</p>
+                <p>This is a friendly reminder that invoice <strong>${escapeHtml(invoice.invoice_number)}</strong> for <strong>$${invoice.total?.toFixed(2)}</strong> is due on <strong>${escapeHtml(invoice.due_date)}</strong>.</p>
                 ${paymentInfo}
                 <p>Please ensure timely payment to avoid any late fees.</p>
                 <p>Thank you for your business!</p>
-                <p>Best regards,<br>${companyName}</p>
+                <p>Best regards,<br>${escapeHtml(companyName)}</p>
               </div>
             `,
           });
@@ -161,19 +189,19 @@ serve(async (req: Request) => {
           const paymentInfo = getPaymentInfo(customer.payment_method, zelleKey, venmoKey);
 
           await resend.emails.send({
-            from: "Invoices <invoices@resend.dev>",
+            from: EMAIL_FROM,
             to: [customer.email],
-            subject: `OVERDUE: Invoice ${invoice.invoice_number} - ${daysOverdue} days past due`,
+            subject: safeHeader(`OVERDUE: Invoice ${invoice.invoice_number} - ${daysOverdue} days past due`),
             html: `
               <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                 <h2 style="color: #dc2626;">Payment Overdue</h2>
-                <p>Dear ${customer.name},</p>
-                <p>Invoice <strong>${invoice.invoice_number}</strong> for <strong>$${invoice.total?.toFixed(2)}</strong> was due on <strong>${invoice.due_date}</strong> and is now <strong>${daysOverdue} days overdue</strong>.</p>
+                <p>Dear ${escapeHtml(customer.name)},</p>
+                <p>Invoice <strong>${escapeHtml(invoice.invoice_number)}</strong> for <strong>$${invoice.total?.toFixed(2)}</strong> was due on <strong>${escapeHtml(invoice.due_date)}</strong> and is now <strong>${daysOverdue} days overdue</strong>.</p>
                 ${paymentInfo}
                 <p>Please make payment as soon as possible to avoid further action.</p>
                 <p>If you have already made payment, please disregard this notice.</p>
                 <p>Thank you.</p>
-                <p>Best regards,<br>${companyName}</p>
+                <p>Best regards,<br>${escapeHtml(companyName)}</p>
               </div>
             `,
           });
@@ -241,35 +269,35 @@ serve(async (req: Request) => {
       }
 
       const isOverdue = type === "overdue";
-      const subject = isOverdue 
+      const subject = safeHeader(isOverdue
         ? `OVERDUE: Invoice ${invoice.invoice_number}` 
-        : `Reminder: Invoice ${invoice.invoice_number} is due soon`;
+        : `Reminder: Invoice ${invoice.invoice_number} is due soon`);
 
       const paymentInfo = getPaymentInfo(customer.payment_method, zelleKey, venmoKey);
 
       await resend.emails.send({
-        from: "Invoices <invoices@resend.dev>",
+        from: EMAIL_FROM,
         to: [customer.email],
         subject,
         html: isOverdue
           ? `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
               <h2 style="color: #dc2626;">Payment Overdue</h2>
-              <p>Dear ${customer.name},</p>
-              <p>Invoice <strong>${invoice.invoice_number}</strong> for <strong>$${invoice.total?.toFixed(2)}</strong> is overdue.</p>
+              <p>Dear ${escapeHtml(customer.name)},</p>
+              <p>Invoice <strong>${escapeHtml(invoice.invoice_number)}</strong> for <strong>$${invoice.total?.toFixed(2)}</strong> is overdue.</p>
               ${paymentInfo}
               <p>Please make payment as soon as possible.</p>
-              <p>Best regards,<br>${companyName}</p>
+              <p>Best regards,<br>${escapeHtml(companyName)}</p>
             </div>
           `
           : `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
               <h2 style="color: #1a1a2e;">Payment Reminder</h2>
-              <p>Dear ${customer.name},</p>
-              <p>Invoice <strong>${invoice.invoice_number}</strong> for <strong>$${invoice.total?.toFixed(2)}</strong> is due on <strong>${invoice.due_date}</strong>.</p>
+              <p>Dear ${escapeHtml(customer.name)},</p>
+              <p>Invoice <strong>${escapeHtml(invoice.invoice_number)}</strong> for <strong>$${invoice.total?.toFixed(2)}</strong> is due on <strong>${escapeHtml(invoice.due_date)}</strong>.</p>
               ${paymentInfo}
               <p>Please ensure timely payment.</p>
-              <p>Best regards,<br>${companyName}</p>
+              <p>Best regards,<br>${escapeHtml(companyName)}</p>
             </div>
           `,
       });

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -29,7 +29,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { RefreshCw, Trash2, Upload, User, X } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   Staff,
@@ -39,38 +39,14 @@ import {
   useUpdateStaff,
 } from "@/hooks/useStaff";
 import type { Enums } from "@/integrations/supabase/types";
-import { useBillingStore } from "@/stores/billing.store";
 
 type AppRole = Enums<"app_role">;
-export interface TeamMember {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  status: "active" | "pending" | "inactive";
-  phone?: string;
-  username?: string;
-  profileImage?: string;
-}
-
-interface Role {
-  id: string;
-  name: string;
-  permissions: string[];
-}
-
 interface TeamUserModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   mode: "create" | "edit";
-  user: TeamMember | null;
-  roles: Role[];
-  onSave: (user: TeamMember) => void;
-  onDelete?: (userId: string) => void;
-
-  /** When true, this modal will persist to the staff table instead of local team members */
-  useDatabase?: boolean;
   staff?: Staff | null;
+  canDelete?: boolean;
 }
 
 const FUNCTION_ROLES = [
@@ -84,41 +60,22 @@ const FUNCTION_ROLES = [
 
 
 interface FormData {
-  id: string;
   fullName: string;
   email: string;
   phoneNumber: string;
-  username: string;
-  password: string;
   role: string;
   team: string;
-  profileImage: string;
-  profileImageFile: File | null;
   paymentMethod: string;
   zelleKey: string;
   quickbooksVendorId: string;
 }
 
-const generatePassword = (): string => {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%";
-  let password = "";
-  for (let i = 0; i < 12; i++) {
-    password += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return password;
-};
-
 const getInitialFormData = (): FormData => ({
-  id: Date.now().toString(),
   fullName: "",
   email: "",
   phoneNumber: "",
-  username: "",
-  password: generatePassword(),
-  role: "",
+  role: "cleaner",
   team: "",
-  profileImage: "",
-  profileImageFile: null,
   paymentMethod: "zelle",
   zelleKey: "",
   quickbooksVendorId: "",
@@ -129,29 +86,7 @@ function roleToIsDriver(role: AppRole | string): boolean {
 }
 
 function TeamSelector({ value, onChange }: { value: string; onChange: (value: string) => void }) {
-  const pricingPlans = useBillingStore((state) => state.pricingPlans);
-  const teamCounts = useBillingStore((state) => state.teamCounts);
-  
-  // Get team count based on current plan's teamCounts
-  const teamOptions = useMemo(() => {
-    // Find the current plan (isCurrent = true)
-    const currentPlan = pricingPlans.find((p) => p.isCurrent);
-    
-    if (!currentPlan) {
-      // Fallback to 6 teams if no current plan
-      return Array.from({ length: 6 }, (_, i) => String(i + 1));
-    }
-    
-    // Get the team count for the current plan from teamCounts store
-    const teamCount = teamCounts[currentPlan.id] || currentPlan.baseTeams;
-    
-    // If maxTeams is null (unlimited), cap at teamCount or 10
-    const count = currentPlan.maxTeams === null 
-      ? Math.max(teamCount, 10) 
-      : teamCount;
-    
-    return Array.from({ length: count }, (_, i) => String(i + 1));
-  }, [pricingPlans, teamCounts]);
+  const teamOptions = Array.from({ length: 10 }, (_, index) => String(index + 1));
 
   return (
     <div className="space-y-2">
@@ -177,15 +112,10 @@ export function TeamUserModal({
   open,
   onOpenChange,
   mode,
-  user,
-  roles,
-  onSave,
-  onDelete,
-  useDatabase = false,
   staff,
+  canDelete = true,
 }: TeamUserModalProps) {
   const [formData, setFormData] = useState<FormData>(getInitialFormData());
-  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const createStaff = useCreateStaff();
   const updateStaff = useUpdateStaff();
@@ -193,94 +123,27 @@ export function TeamUserModal({
 
 
   useEffect(() => {
-    if (useDatabase) {
-      if (mode === "edit" && staff) {
-        const roleFromDb = staff.staff_roles?.role;
-        const role: AppRole | string = roleFromDb || (staff.is_driver ? "driver" : "cleaner");
-
-        setFormData({
-          id: staff.id,
-          fullName: staff.name,
-          email: staff.email || "",
-          phoneNumber: staff.phone || "",
-          username: "",
-          password: "",
-          role,
-          team: staff.team || "",
-          profileImage: "",
-          profileImageFile: null,
-          paymentMethod: staff.payment_method || "zelle",
-          zelleKey: staff.zelle_key || "",
-          quickbooksVendorId: staff.quickbooks_vendor_id || "",
-        });
-        return;
-      }
-
-      if (mode === "create") {
-        // keep the same modal fields, but default role to Cleaner for staff
-        setFormData({ ...getInitialFormData(), role: "cleaner" });
-      }
+    if (!open) return;
+    if (mode === "edit" && staff) {
+      const roleFromDb = staff.staff_roles?.role;
+      const role: AppRole | string = roleFromDb || (staff.is_driver ? "driver" : "cleaner");
+      setFormData({
+        fullName: staff.name,
+        email: staff.email || "",
+        phoneNumber: staff.phone || "",
+        role,
+        team: staff.team || "",
+        paymentMethod: staff.payment_method || "zelle",
+        zelleKey: staff.zelle_key || "",
+        quickbooksVendorId: staff.quickbooks_vendor_id || "",
+      });
       return;
     }
-
-    // Local mode (original behavior)
-    if (mode === "edit" && user) {
-      setFormData({
-        id: user.id,
-        fullName: user.name,
-        email: user.email,
-        phoneNumber: user.phone || "",
-        username: user.username || "",
-        password: "",
-        role: user.role,
-        team: "",
-        profileImage: user.profileImage || "",
-        profileImageFile: null,
-        paymentMethod: "zelle",
-        zelleKey: "",
-        quickbooksVendorId: "",
-      });
-    } else if (mode === "create") {
-      setFormData(getInitialFormData());
-    }
-  }, [mode, user, staff, open, useDatabase]);
+    setFormData(getInitialFormData());
+  }, [mode, staff, open]);
 
   const handleChange = <K extends keyof FormData>(field: K, value: FormData[K]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleRegeneratePassword = () => {
-    handleChange("password", generatePassword());
-    toast.success("New password generated!");
-  };
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Image must be less than 5MB");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setFormData((prev) => ({
-        ...prev,
-        profileImage: reader.result as string,
-        profileImageFile: file,
-      }));
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleRemoveImage = () => {
-    setFormData((prev) => ({
-      ...prev,
-      profileImage: "",
-      profileImageFile: null,
-    }));
-    if (imageInputRef.current) imageInputRef.current.value = "";
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -290,6 +153,10 @@ export function TeamUserModal({
       toast.error("Please fill in all required fields");
       return;
     }
+    if (!formData.email.trim()) {
+      toast.error("Email is required to create or update the login");
+      return;
+    }
 
     // Validate Zelle key when payment method is Zelle
     if (formData.paymentMethod === "zelle" && !formData.zelleKey.trim()) {
@@ -297,75 +164,31 @@ export function TeamUserModal({
       return;
     }
 
-    if (useDatabase) {
-      const staffData: StaffFormData = {
-        name: formData.fullName.trim(),
-        email: formData.email?.trim() ? formData.email.trim() : undefined,
-        phone: formData.phoneNumber?.trim() ? formData.phoneNumber.trim() : undefined,
-        role: formData.role as AppRole,
-        is_driver: roleToIsDriver(formData.role),
-        team: formData.team || undefined,
-        payment_method: formData.paymentMethod,
-        zelle_key: formData.paymentMethod === "zelle" ? formData.zelleKey.trim() : undefined,
-        quickbooks_vendor_id: formData.paymentMethod === "quickbooks" ? formData.quickbooksVendorId.trim() : undefined,
-        // keep active as-is; not edited in this modal
-        is_active: staff?.is_active ?? true,
-      };
-
-      if (mode === "create") {
-        createStaff.mutate(staffData, {
-          onSuccess: () => onOpenChange(false),
-        });
-      } else if (mode === "edit" && staff) {
-        updateStaff.mutate(
-          { id: staff.id, ...staffData },
-          {
-            onSuccess: () => onOpenChange(false),
-          }
-        );
-      }
-      return;
-    }
-
-    // Local mode validations
-    if (!formData.email || !formData.role) {
-      toast.error("Please fill in all required fields");
-      return;
-    }
-
-    if (mode === "create" && !formData.username) {
-      toast.error("Username is required");
-      return;
-    }
-
-    const teamMember: TeamMember = {
-      id: formData.id,
-      name: formData.fullName,
-      email: formData.email,
-      role: formData.role,
-      status: "active",
-      phone: formData.phoneNumber,
-      username: formData.username,
-      profileImage: formData.profileImage,
+    const staffData: StaffFormData = {
+      name: formData.fullName.trim(),
+      email: formData.email.trim(),
+      phone: formData.phoneNumber.trim() || undefined,
+      role: formData.role as AppRole,
+      is_driver: roleToIsDriver(formData.role),
+      team: formData.team || undefined,
+      payment_method: formData.paymentMethod,
+      zelle_key: formData.paymentMethod === "zelle" ? formData.zelleKey.trim() : undefined,
+      quickbooks_vendor_id: formData.paymentMethod === "quickbooks" ? formData.quickbooksVendorId.trim() : undefined,
+      is_active: staff?.is_active ?? true,
     };
 
-    onSave(teamMember);
-    toast.success(mode === "create" ? "Team member created successfully!" : "Team member updated successfully!");
-    onOpenChange(false);
+    if (mode === "create") {
+      createStaff.mutate(staffData, { onSuccess: () => onOpenChange(false) });
+    } else if (staff) {
+      updateStaff.mutate({ id: staff.id, ...staffData }, { onSuccess: () => onOpenChange(false) });
+    }
   };
 
   const handleDelete = () => {
-    if (useDatabase && staff) {
+    if (staff) {
       deleteStaff.mutate(staff.id, {
         onSuccess: () => onOpenChange(false),
       });
-      return;
-    }
-
-    if (user && onDelete) {
-      onDelete(user.id);
-      toast.success("Team member deleted successfully!");
-      onOpenChange(false);
     }
   };
 
@@ -381,50 +204,6 @@ export function TeamUserModal({
 
         <ScrollArea className="flex-1 overflow-auto">
           <form id="team-user-form" onSubmit={handleSubmit} className="space-y-4 py-4 pr-4">
-          <div className="space-y-2">
-            <Label>Profile Image</Label>
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                {formData.profileImage ? (
-                  <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-border">
-                    <img src={formData.profileImage} alt="Profile" className="w-full h-full object-cover" />
-                    <button
-                      type="button"
-                      onClick={handleRemoveImage}
-                      className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full p-1 hover:bg-destructive/90"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center border-2 border-dashed border-border">
-                    <User className="w-8 h-8 text-muted-foreground" />
-                  </div>
-                )}
-              </div>
-              <div className="flex-1">
-                <input
-                  type="file"
-                  ref={imageInputRef}
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleImageChange}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => imageInputRef.current?.click()}
-                  className="gap-2"
-                >
-                  <Upload className="w-4 h-4" />
-                  Upload Image
-                </Button>
-                <p className="text-xs text-muted-foreground mt-1">JPG, PNG or GIF. Max 5MB.</p>
-              </div>
-            </div>
-          </div>
-
           <div className="space-y-2">
             <Label>Role *</Label>
             <Select value={formData.role} onValueChange={(value) => handleChange("role", value)}>
@@ -462,7 +241,7 @@ export function TeamUserModal({
               value={formData.email}
               onChange={(e) => handleChange("email", e.target.value)}
               placeholder="Enter email address"
-              required={!useDatabase}
+              required
             />
           </div>
 
@@ -475,41 +254,11 @@ export function TeamUserModal({
             />
           </div>
 
-          <div className="space-y-2">
-            <Label>Login (Username) *</Label>
-            <Input
-              value={formData.username}
-              onChange={(e) => handleChange("username", e.target.value)}
-              placeholder="Enter username"
-              required={mode === "create" && !useDatabase}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Password {mode === "create" ? "(Auto-generated)" : ""}</Label>
-            <div className="flex gap-2">
-              <Input 
-                type="text" 
-                value={formData.password} 
-                onChange={(e) => handleChange("password", e.target.value)}
-                placeholder={mode === "edit" ? "Leave blank to keep current" : ""}
-                className="font-mono" 
-                readOnly={mode === "create"}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={handleRegeneratePassword}
-                title="Generate new password"
-              >
-                <RefreshCw className="w-4 h-4" />
-              </Button>
-            </div>
-            {mode === "create" && (
-              <p className="text-xs text-muted-foreground">This password will be sent to the user. They must change it on first login.</p>
-            )}
-          </div>
+          {mode === "create" && (
+            <p className="text-sm text-muted-foreground">
+              An invitation email will let this team member set a private password.
+            </p>
+          )}
 
           {/* Payment Method Section */}
           <div className="space-y-2 pt-4 border-t">
@@ -559,7 +308,7 @@ export function TeamUserModal({
         </ScrollArea>
 
         <DialogFooter className="flex justify-between sm:justify-between flex-shrink-0 pt-4 border-t">
-          {mode === "edit" && (onDelete || useDatabase) && (
+          {mode === "edit" && staff && canDelete && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button type="button" variant="destructive" size="icon" disabled={isPending}>

@@ -34,27 +34,17 @@ import {
   Target,
   DollarSign,
   Building2,
-  User,
-  CreditCard,
-  Plug,
-  FileCode,
 } from "lucide-react";
 
 type AuditCategory = 
   | "customers" 
   | "jobs" 
-  | "staff" 
-  | "estimates" 
   | "invoices" 
   | "transactions"
   | "leads"
   | "payroll"
-  | "profile"
   | "company"
-  | "billing"
-  | "team"
-  | "integrations"
-  | "templates";
+  | "team";
 
 interface MissingField {
   key: string;
@@ -87,19 +77,6 @@ const REQUIRED_FIELDS: Record<AuditCategory, { key: string; label: string }[]> =
     { key: "staff_assigned", label: "Staff Assigned" },
     { key: "service_type", label: "Service Type" },
   ],
-  staff: [
-    { key: "email", label: "Email" },
-    { key: "phone", label: "Phone" },
-    { key: "team", label: "Team" },
-    { key: "payment_method", label: "Payment Method" },
-  ],
-  estimates: [
-    { key: "email", label: "Email" },
-    { key: "phone", label: "Phone" },
-    { key: "address", label: "Address" },
-    { key: "total", label: "Total" },
-    { key: "valid_until", label: "Valid Until" },
-  ],
   invoices: [
     { key: "due_date", label: "Due Date" },
     { key: "total", label: "Total" },
@@ -121,7 +98,6 @@ const REQUIRED_FIELDS: Record<AuditCategory, { key: string; label: string }[]> =
     { key: "client", label: "Client" },
     { key: "cleaning_type", label: "Cleaning Type" },
   ],
-  profile: [],
   company: [
     { key: "legal_name", label: "Legal Name" },
     { key: "trade_name", label: "Trade Name" },
@@ -133,15 +109,12 @@ const REQUIRED_FIELDS: Record<AuditCategory, { key: string; label: string }[]> =
     { key: "timezone", label: "Timezone" },
     { key: "logo_url", label: "Logo" },
   ],
-  billing: [],
   team: [
     { key: "email", label: "Email" },
     { key: "phone", label: "Phone" },
     { key: "team", label: "Team" },
     { key: "payment_method", label: "Payment Method" },
   ],
-  integrations: [],
-  templates: [],
 };
 
 export function AuditTab() {
@@ -257,7 +230,6 @@ export function AuditTab() {
   const auditData = useMemo(() => {
     const customersAudit = processRecords(customers, "customers", "name");
     const jobsAudit = processRecords(jobs, "jobs", "title");
-    const staffAudit = processRecords(staff, "staff", "name");
     const leadsAudit = processRecords(leads, "leads", "id");
     const invoicesAudit = processRecords(invoices, "invoices", "invoice_number");
     const transactionsAudit = processRecords(transactions, "transactions", "name");
@@ -268,17 +240,12 @@ export function AuditTab() {
     return {
       customers: customersAudit,
       jobs: jobsAudit,
-      staff: staffAudit,
       leads: leadsAudit,
       invoices: invoicesAudit,
       transactions: transactionsAudit,
       payroll: payrollAudit,
-      profile: [],
       company: companyAudit,
-      billing: [],
       team: teamAudit,
-      integrations: [],
-      templates: [],
     };
   }, [customers, jobs, staff, leads, invoices, transactions, payrollRecords, processCompanySettings, processRecords]);
 
@@ -303,17 +270,12 @@ export function AuditTab() {
     return {
       customers: auditData.customers.filter((r) => !r.isComplete).length,
       jobs: auditData.jobs.filter((r) => !r.isComplete).length,
-      staff: auditData.staff.filter((r) => !r.isComplete).length,
       leads: auditData.leads.filter((r) => !r.isComplete).length,
       invoices: auditData.invoices.filter((r) => !r.isComplete).length,
       transactions: auditData.transactions.filter((r) => !r.isComplete).length,
       payroll: auditData.payroll.filter((r) => !r.isComplete).length,
-      profile: 0,
       company: auditData.company.filter((r) => !r.isComplete).length,
-      billing: 0,
       team: auditData.team.filter((r) => !r.isComplete).length,
-      integrations: 0,
-      templates: 0,
     };
   }, [auditData]);
 
@@ -326,10 +288,6 @@ export function AuditTab() {
     { id: "payroll" as AuditCategory, label: "Payroll", icon: DollarSign, count: categoryCounts.payroll },
     { id: "team" as AuditCategory, label: "Team", icon: UserCheck, count: categoryCounts.team },
     { id: "company" as AuditCategory, label: "Company", icon: Building2, count: categoryCounts.company },
-    { id: "profile" as AuditCategory, label: "Profile", icon: User, count: categoryCounts.profile },
-    { id: "billing" as AuditCategory, label: "Billing", icon: CreditCard, count: categoryCounts.billing },
-    { id: "integrations" as AuditCategory, label: "Integrations", icon: Plug, count: categoryCounts.integrations },
-    { id: "templates" as AuditCategory, label: "Templates", icon: FileCode, count: categoryCounts.templates },
   ];
 
   const currentRecords = showOnlyIncomplete
@@ -361,12 +319,10 @@ export function AuditTab() {
       case "jobs":
         setEditingJobId(record.id);
         break;
-      case "staff":
       case "team":
         toast.info("Navegando para Team...");
         navigate("/settings?tab=team");
         break;
-      case "estimates":
       case "leads":
         toast.info("Navegando para Leads...");
         navigate("/leads");
@@ -385,22 +341,6 @@ export function AuditTab() {
         toast.info("Navegando para Company Settings...");
         navigate("/settings?tab=company");
         break;
-      case "profile":
-        toast.info("Navegando para Profile...");
-        navigate("/settings?tab=profile");
-        break;
-      case "billing":
-        toast.info("Navegando para Billing...");
-        navigate("/settings?tab=billing");
-        break;
-      case "integrations":
-        toast.info("Navegando para Integrations...");
-        navigate("/settings?tab=integrations");
-        break;
-      case "templates":
-        toast.info("Navegando para Templates...");
-        navigate("/settings?tab=templates");
-        break;
     }
   };
 
@@ -413,14 +353,6 @@ export function AuditTab() {
   // Get empty state message
   const getEmptyStateMessage = (category: AuditCategory) => {
     switch (category) {
-      case "profile":
-        return "Profile audit será disponibilizado quando a autenticação estiver implementada.";
-      case "billing":
-        return "Nenhuma configuração de billing incompleta encontrada.";
-      case "integrations":
-        return "Verifique suas integrações na página de Integrations.";
-      case "templates":
-        return "Verifique seus templates na aba de Templates.";
       default:
         return t("audit.allCompleteDesc");
     }
@@ -540,16 +472,6 @@ export function AuditTab() {
               <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
               <p className="text-lg font-medium text-foreground">{t("audit.allComplete")}</p>
               <p className="text-sm text-muted-foreground">{getEmptyStateMessage(selectedCategory)}</p>
-              {(selectedCategory === "integrations" || selectedCategory === "templates" || selectedCategory === "profile" || selectedCategory === "billing") && (
-                <Button
-                  variant="outline"
-                  className="mt-4"
-                  onClick={() => handleEditClick({ id: "", name: "", category: selectedCategory, missingFields: [], isComplete: true })}
-                >
-                  <ChevronRight className="w-4 h-4 mr-2" />
-                  Ver configurações
-                </Button>
-              )}
             </div>
           ) : (
             <>

@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { authorizeServiceRequest } from "../_shared/authorize.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -104,8 +105,18 @@ serve(async (req) => {
   }
 
   try {
+    const authError = authorizeServiceRequest(req);
+    if (authError) return authError;
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const siteUrl = Deno.env.get("SITE_URL");
+    if (!siteUrl) {
+      return new Response(JSON.stringify({ error: "SITE_URL is not configured" }), {
+        status: 503,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const { action } = await req.json();
@@ -363,8 +374,7 @@ serve(async (req) => {
         // Format currency using customer's language
         const formattedAmount = formatCurrency(invoice.total, messageLanguage);
 
-        // Generate invoice link (placeholder - would be actual link)
-        const invoiceLink = `https://broom-connect-cloud.lovable.app/billing?invoice=${invoice.id}`;
+        const invoiceLink = new URL(`/invoices?invoice=${encodeURIComponent(invoice.id)}`, siteUrl).toString();
 
         // Replace variables
         const message = config.message

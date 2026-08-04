@@ -1,4 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { authorizeStaffRequest } from "../_shared/authorize.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,6 +14,15 @@ serve(async (req) => {
   }
 
   try {
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
+    const authError = await authorizeStaffRequest(req, supabase, [
+      "admin", "cleaner", "driver", "cleaning_manager", "office_manager", "virtual_assistant",
+    ]);
+    if (authError) return authError;
+
     const apiKey = Deno.env.get("GEOAPIFY_API_KEY");
     
     if (!apiKey) {
@@ -34,8 +45,6 @@ serve(async (req) => {
     // Use Geoapify Autocomplete API
     const autocompleteUrl = `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(text)}&limit=${limit}&format=json&apiKey=${apiKey}`;
     
-    console.log("Fetching autocomplete for:", text);
-
     const response = await fetch(autocompleteUrl);
     
     if (!response.ok) {

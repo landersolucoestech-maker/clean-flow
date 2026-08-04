@@ -9,6 +9,7 @@ type StaffQueryRow = Omit<Staff, "staff_roles"> & { staff_roles: StaffRoleJoin }
 
 export interface Staff {
   id: string;
+  auth_user_id: string | null;
   name: string;
   email: string | null;
   phone: string | null;
@@ -68,16 +69,14 @@ export function useCurrentStaff() {
   return useQuery({
     queryKey: ["staff", "current"],
     queryFn: async () => {
-      const { data: authData, error: authError } = await supabase.auth.getUser();
-      if (authError) throw authError;
-
-      const email = authData.user?.email;
-      if (!email) return null;
+      const { data: staffId, error: identityError } = await supabase.rpc("current_staff_id");
+      if (identityError) throw identityError;
+      if (!staffId) return null;
 
       const { data, error } = await supabase
         .from("staff")
         .select("*, staff_roles(role)")
-        .ilike("email", email)
+        .eq("id", staffId)
         .eq("is_active", true)
         .maybeSingle();
 
@@ -151,38 +150,16 @@ export function useCreateStaff() {
   return useMutation({
     mutationFn: async (formData: StaffFormData) => {
       const role: AppRole = formData.role ?? (formData.is_driver ? "driver" : "cleaner");
-
-      const { data, error } = await supabase
-        .from("staff")
-        .insert({
-          name: formData.name,
-          email: formData.email || null,
-          phone: formData.phone || null,
-          is_driver: formData.is_driver ?? role === "driver",
-          is_active: formData.is_active ?? true,
-          team: formData.team || null,
-          payment_method: formData.payment_method || "zelle",
-          zelle_key: formData.zelle_key || null,
-          quickbooks_vendor_id: formData.quickbooks_vendor_id || null,
-        })
-        .select("*, staff_roles(role)")
-        .single();
-
-      if (error) throw error;
-
-      // Persist role to staff_roles (source of truth)
-      const { error: roleError } = await supabase
-        .from("staff_roles")
-        .upsert([{ staff_id: data.id, role }], { onConflict: "staff_id" });
-
-      if (roleError) throw roleError;
-
-      return normalizeStaff(data as StaffQueryRow);
+      const { data, error } = await supabase.functions.invoke("manage-staff", {
+        body: { action: "invite", ...formData, role },
+      });
+      if (error || !data?.staff) throw error || new Error("Staff invitation failed");
+      return normalizeStaff(data.staff as StaffQueryRow);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["staff"] });
       queryClient.invalidateQueries({ queryKey: ["staff", "cleaners-drivers"] });
-      toast.success("Staff member created successfully!");
+      toast.success("Staff member invited successfully!");
     },
     onError: (error) => {
       console.error("Error creating staff member:", error);
@@ -199,33 +176,11 @@ export function useUpdateStaff() {
     mutationFn: async ({ id, ...formData }: StaffFormData & { id: string }) => {
       const role: AppRole = formData.role ?? (formData.is_driver ? "driver" : "cleaner");
 
-      const { data, error } = await supabase
-        .from("staff")
-        .update({
-          name: formData.name,
-          email: formData.email || null,
-          phone: formData.phone || null,
-          is_driver: formData.is_driver ?? role === "driver",
-          is_active: formData.is_active ?? true,
-          team: formData.team || null,
-          payment_method: formData.payment_method || "zelle",
-          zelle_key: formData.zelle_key || null,
-          quickbooks_vendor_id: formData.quickbooks_vendor_id || null,
-        })
-        .eq("id", id)
-        .select("*, staff_roles(role)")
-        .single();
-
-      if (error) throw error;
-
-      // Persist role to staff_roles (source of truth)
-      const { error: roleError } = await supabase
-        .from("staff_roles")
-        .upsert([{ staff_id: id, role }], { onConflict: "staff_id" });
-
-      if (roleError) throw roleError;
-
-      return normalizeStaff(data as StaffQueryRow);
+      const { data, error } = await supabase.functions.invoke("manage-staff", {
+        body: { action: "update", id, ...formData, role },
+      });
+      if (error || !data?.staff) throw error || new Error("Staff update failed");
+      return normalizeStaff(data.staff as StaffQueryRow);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["staff"] });
@@ -245,7 +200,9 @@ export function useDeleteStaff() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("staff").delete().eq("id", id);
+      const { error } = await supabase.functions.invoke("manage-staff", {
+        body: { action: "delete", id },
+      });
       if (error) throw error;
     },
     onSuccess: () => {

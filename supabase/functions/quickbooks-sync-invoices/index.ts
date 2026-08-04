@@ -1,5 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.0";
+import { authorizeStaffRequest } from "../_shared/authorize.ts";
+import { getQuickBooksConnection, quickBooksHeaders } from "../_shared/quickbooks.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -51,23 +53,24 @@ serve(async (req: Request) => {
   }
 
   try {
-    const { action, accessToken, realmId } = await req.json();
+    const body = await req.json();
+    const { action } = body;
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const authorizationError = await authorizeStaffRequest(
+      req,
+      supabase,
+      ["admin", "office_manager"],
+    );
+    if (authorizationError) return authorizationError;
+
+    const connection = await getQuickBooksConnection(supabase);
+    const realmId = connection.realm_id;
+    const headers = quickBooksHeaders(connection.access_token);
 
     if (action === "sync-all") {
-      if (!accessToken || !realmId) {
-        throw new Error("Missing accessToken or realmId");
-      }
-
-      const headers = {
-        "Authorization": `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-      };
-
       // Fetch all invoices from QuickBooks
       const response = await fetch(
         `${QUICKBOOKS_BASE_URL}/${realmId}/query?query=SELECT * FROM Invoice ORDERBY MetaData.LastUpdatedTime DESC MAXRESULTS 500&minorversion=65`,
@@ -123,17 +126,11 @@ serve(async (req: Request) => {
     }
 
     if (action === "sync-single") {
-      const { invoiceId, qbInvoiceId } = await req.json();
+      const { invoiceId, qbInvoiceId } = body;
       
-      if (!accessToken || !realmId || !qbInvoiceId) {
+      if (!invoiceId || !qbInvoiceId) {
         throw new Error("Missing required parameters");
       }
-
-      const headers = {
-        "Authorization": `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-      };
 
       // Fetch specific invoice from QuickBooks
       const response = await fetch(
@@ -169,17 +166,11 @@ serve(async (req: Request) => {
     }
 
     if (action === "mark-paid") {
-      const { invoiceId, qbInvoiceId, amount, customerId } = await req.json();
+      const { invoiceId, qbInvoiceId, amount, customerId } = body;
       
-      if (!accessToken || !realmId || !qbInvoiceId || !customerId) {
+      if (!invoiceId || !qbInvoiceId || !customerId || typeof amount !== "number") {
         throw new Error("Missing required parameters");
       }
-
-      const headers = {
-        "Authorization": `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-      };
 
       // Create payment in QuickBooks
       const paymentData = {

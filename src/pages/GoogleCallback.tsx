@@ -3,27 +3,13 @@ import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, CheckCircle, XCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { googleState } from "@/lib/googleState";
-
-const CALLBACK_PATH = "/integrations/google/callback";
-
-function safeReturnPath(stateUrl: string | null) {
-  if (!stateUrl) return "/settings";
-  try {
-    const u = new URL(stateUrl);
-    if (u.origin !== window.location.origin) return "/settings";
-    return `${u.pathname}${u.search}${u.hash}` || "/settings";
-  } catch {
-    return "/settings";
-  }
-}
 
 export default function GoogleCallback() {
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [message, setMessage] = useState("Conectando ao Google...");
 
-  const returnPath = useMemo(() => safeReturnPath(searchParams.get("state")), [searchParams]);
+  const oauthState = useMemo(() => searchParams.get("state") || searchParams.get("oauth_state"), [searchParams]);
 
   useEffect(() => {
     const notifyOpener = (success: boolean, error: string | null, data?: unknown) => {
@@ -52,21 +38,19 @@ export default function GoogleCallback() {
         return;
       }
 
-      if (!code) {
+      if (!code || !oauthState) {
         setStatus("error");
-        setMessage("Parâmetros inválidos (code ausente)");
-        notifyOpener(false, "Parâmetros inválidos (code ausente)");
+        setMessage("Parâmetros OAuth inválidos");
+        notifyOpener(false, "Parâmetros OAuth inválidos");
         return;
       }
 
       try {
-        const oauthRedirectUri = `${window.location.origin}${CALLBACK_PATH}`;
-
         const { data, error: callbackError } = await supabase.functions.invoke("google-auth", {
           body: {
             action: "exchange-token",
             code,
-            oauthRedirectUri,
+            state: oauthState,
           },
         });
 
@@ -74,22 +58,10 @@ export default function GoogleCallback() {
           throw new Error(callbackError.message);
         }
 
-        const newTokens = {
-          accessToken: data.accessToken,
-          refreshToken: data.refreshToken,
-          expiresAt: Date.now() + data.expiresIn * 1000,
-          scope: data.scope,
-          userInfo: data.userInfo,
-        };
-
-        // Persist here as a fallback for cases where opener cannot access storage (iframe partitioning)
-        localStorage.setItem("google_tokens", JSON.stringify(newTokens));
-        googleState.setTokens(newTokens);
-
         setStatus("success");
         setMessage("Google conectado com sucesso!");
 
-        notifyOpener(true, null, data);
+        notifyOpener(true, null);
 
         // If this was opened as a popup, close it.
         if (window.opener) {
@@ -99,7 +71,8 @@ export default function GoogleCallback() {
 
         // Otherwise, navigate back
         setTimeout(() => {
-          window.location.assign(returnPath);
+          const returnUrl = typeof data?.returnUrl === "string" ? new URL(data.returnUrl) : null;
+          window.location.assign(returnUrl?.origin === window.location.origin ? returnUrl.toString() : "/settings");
         }, 400);
       } catch (err) {
         console.error("Google callback error:", err);
@@ -111,7 +84,7 @@ export default function GoogleCallback() {
     };
 
     handleCallback();
-  }, [searchParams, returnPath]);
+  }, [oauthState, searchParams]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">

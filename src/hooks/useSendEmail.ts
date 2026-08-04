@@ -9,7 +9,6 @@ interface SendEmailParams {
   subject?: string;
   html?: string;
   text?: string;
-  from?: string;
   replyTo?: string;
   template?: EmailTemplate;
   data?: Record<string, unknown>;

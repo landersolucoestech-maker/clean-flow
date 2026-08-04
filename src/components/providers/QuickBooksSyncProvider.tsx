@@ -31,11 +31,8 @@ export function QuickBooksSyncProvider({ children }: { children: React.ReactNode
 
       // Only auto-sync if enabled and connected
       if (!isConnected || !settings.autoSyncInvoices) {
-        console.log("Auto-sync disabled or not connected to QuickBooks");
         return;
       }
-
-      console.log("Job completed, triggering auto-sync for job:", jobId);
       
       // Small delay to ensure database is updated
       setTimeout(async () => {

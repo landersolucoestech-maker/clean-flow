@@ -288,8 +288,6 @@ export function useSendMessage() {
             if (response.error) {
               console.error("RingCentral send error:", response.error);
               // Don't throw - message is saved locally even if RC fails
-            } else {
-              console.log("Message sent via RingCentral:", response.data);
             }
           }
         } catch (rcError) {

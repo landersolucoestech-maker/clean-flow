@@ -114,7 +114,6 @@ export function useSendNotificationSMS() {
             console.error("RingCentral send error:", response.error);
           } else {
             smsSent = true;
-            console.log("SMS sent via RingCentral:", response.data);
           }
         }
       } catch (rcError) {

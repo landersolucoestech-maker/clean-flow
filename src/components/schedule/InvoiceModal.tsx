@@ -94,7 +94,7 @@ interface InvoiceModalProps {
 export function InvoiceModal({ open, onOpenChange, appointment, depositAmount, isDepositInvoice }: InvoiceModalProps) {
   const createInvoice = useCreateInvoice();
   const { data: nextInvoiceNumber } = useGenerateInvoiceNumber();
-  const { isConnected: qbConnected, tokens, createInvoice: createQBInvoice, sendInvoice: sendQBInvoice } = useQuickBooks();
+  const { isConnected: qbConnected, createInvoice: createQBInvoice, sendInvoice: sendQBInvoice } = useQuickBooks();
   const { customerMapping, addSyncLog } = useQuickBooksStore();
   const [isSending, setIsSending] = useState(false);
   
@@ -250,25 +250,17 @@ export function InvoiceModal({ open, onOpenChange, appointment, depositAmount, i
       let qbEmailStatus: string | null = null;
 
       // Create invoice in QuickBooks if connected
-      if (qbConnected && tokens) {
+      if (qbConnected) {
         try {
           // Get QB customer ID from mapping or search/create
           let qbCustomerId = customerMapping[customerId];
           
           // If no mapping exists, try to find or create customer in QuickBooks
           if (!qbCustomerId && appointment?.customer) {
-            const { getCustomers, createCustomer: createQBCustomer } = await import("@/hooks/useQuickBooks").then(m => {
-              // We need to use the hook functions - but since we're in async context,
-              // we'll call the edge function directly
-              return { getCustomers: null, createCustomer: null };
-            });
-
             // Call edge function to search/create customer
             const { data: customerSearchResult } = await supabase.functions.invoke("quickbooks-api", {
               body: {
                 action: "search-customer",
-                accessToken: tokens.accessToken,
-                realmId: tokens.realmId,
                 customerName: appointment.customer,
               },
             });
@@ -282,8 +274,6 @@ export function InvoiceModal({ open, onOpenChange, appointment, depositAmount, i
               const { data: newCustomerResult } = await supabase.functions.invoke("quickbooks-api", {
                 body: {
                   action: "create-customer",
-                  accessToken: tokens.accessToken,
-                  realmId: tokens.realmId,
                   name: appointment.customer,
                   email: customerEmail,
                 },

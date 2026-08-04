@@ -5,10 +5,8 @@ import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard,
   Users,
-  CreditCard,
   HeadphonesIcon,
   ScrollText,
-  Settings,
   Menu,
   ChevronDown,
 } from "lucide-react";
@@ -21,10 +19,8 @@ interface AdminSidebarProps {
 const adminNavItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
   { icon: Users, label: "Clientes", href: "/admin/clients" },
-  { icon: CreditCard, label: "Assinaturas", href: "/admin/subscription" },
   { icon: HeadphonesIcon, label: "Suporte", href: "/admin/support" },
   { icon: ScrollText, label: "Logs & Auditoria", href: "/admin/logs" },
-  { icon: Settings, label: "Configurações", href: "/admin/settings" },
 ];
 
 export function AdminSidebar({ className }: AdminSidebarProps) {
@@ -49,7 +45,7 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
               <span className="text-white font-bold text-sm">G</span>
             </div>
             <div>
-              <span className="text-base font-semibold text-gray-900">Gestão 360</span>
+              <span className="text-base font-semibold text-gray-900">Clean Flow</span>
               <p className="text-xs text-gray-500">Portal Admin</p>
             </div>
           </div>

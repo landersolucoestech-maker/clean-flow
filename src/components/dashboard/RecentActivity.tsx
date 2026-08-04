@@ -24,13 +24,13 @@ interface Activity {
 
 const ITEMS_PER_PAGE = 4;
 
-export function RecentActivity() {
+export function RecentActivity({ includeInvoices = true }: { includeInvoices?: boolean }) {
   const [currentPage, setCurrentPage] = useState(1);
   const { data: jobs = [], isLoading: isLoadingJobs } = useJobs();
-  const { data: invoices = [], isLoading: isLoadingInvoices } = useInvoices();
+  const { data: invoices = [], isLoading: isLoadingInvoices } = useInvoices(includeInvoices);
   const { t, language } = useLanguage();
 
-  const isLoading = isLoadingJobs || isLoadingInvoices;
+  const isLoading = isLoadingJobs || (includeInvoices && isLoadingInvoices);
   
   const locale = (() => {
     switch (language) {

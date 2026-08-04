@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { authorizeStaffRequest } from "../_shared/authorize.ts";
+import { getAuthorizedStaffIdentity } from "../_shared/authorize.ts";
 import { createOAuthState } from "../_shared/oauth-state.ts";
 
 const corsHeaders = {
@@ -32,24 +32,93 @@ Deno.serve(async (req) => {
     }
 
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
-    const authorizationError = await authorizeStaffRequest(
+    const authorization = await getAuthorizedStaffIdentity(
       req,
       adminClient,
       ["admin", "office_manager"],
     );
-    if (authorizationError) return authorizationError;
+    if (authorization.error) return authorization.error;
 
-    const { company_id, redirect_uri } = await req.json();
+    const body = await req.json();
+    const action = typeof body.action === "string" ? body.action : "get-auth-url";
 
-    if (!company_id || !redirect_uri) {
+    if (action === "status") {
+      const { data: connection, error } = await adminClient
+        .from("ringcentral_connections")
+        .select("id, company_id, phone_number, extension_id, account_id, connected_at, token_expires_at")
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return new Response(JSON.stringify({
+        connected: Boolean(connection),
+        connection: connection || null,
+      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    if (action === "disconnect") {
+      const { data: connection, error: findError } = await adminClient
+        .from("ringcentral_connections")
+        .select("id")
+        .limit(1)
+        .maybeSingle();
+      if (findError) throw findError;
+      if (connection) {
+        const { error } = await adminClient.from("ringcentral_connections").delete().eq("id", connection.id);
+        if (error) throw error;
+      }
+      return new Response(JSON.stringify({ connected: false, success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (action !== "get-auth-url") {
+      return new Response(JSON.stringify({ error: "Invalid action" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const redirect_uri = body.redirect_uri;
+
+    if (typeof redirect_uri !== "string") {
       return new Response(
-        JSON.stringify({ error: "company_id and redirect_uri are required" }),
+        JSON.stringify({ error: "redirect_uri is required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
+    try {
+      const requestOrigin = new URL(req.headers.get("Origin") || "").origin;
+      const redirect = new URL(redirect_uri);
+      if (
+        redirect.origin !== requestOrigin
+        || redirect.pathname !== "/integrations/ringcentral/callback"
+        || redirect.search
+        || redirect.hash
+      ) throw new Error("Invalid redirect");
+    } catch {
+      return new Response(JSON.stringify({ error: "Invalid redirect_uri" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { data: company, error: companyError } = await adminClient
+      .from("company_settings")
+      .select("id")
+      .limit(1)
+      .single();
+    if (companyError || !company) {
+      return new Response(JSON.stringify({ error: "Company settings not found" }), {
+        status: 404,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const state = await createOAuthState({
-      companyId: company_id,
+      provider: "ringcentral",
+      userId: authorization.identity.userId,
+      companyId: company.id,
       redirectUri: redirect_uri,
       expiresAt: Date.now() + 10 * 60 * 1000,
       nonce: crypto.randomUUID(),

@@ -1,12 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { authorizeStaffRequest } from "../_shared/authorize.ts";
+import { getGoogleConnection } from "../_shared/google.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
-
-const GOOGLE_CLIENT_ID = Deno.env.get("GOOGLE_CLIENT_ID")!;
-const GOOGLE_CLIENT_SECRET = Deno.env.get("GOOGLE_CLIENT_SECRET")!;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -14,28 +14,19 @@ serve(async (req) => {
   }
 
   try {
-    const { action, accessToken, refreshToken, startDate, endDate, pageToken, pageSize } = await req.json();
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const adminClient = createClient(supabaseUrl, serviceRoleKey);
+    const authorizationError = await authorizeStaffRequest(
+      req,
+      adminClient,
+      ["admin", "office_manager"],
+    );
+    if (authorizationError) return authorizationError;
 
-    // Helper to refresh token if needed
-    const refreshAccessToken = async (rToken: string): Promise<string> => {
-      const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          client_id: GOOGLE_CLIENT_ID,
-          client_secret: GOOGLE_CLIENT_SECRET,
-          refresh_token: rToken,
-          grant_type: "refresh_token",
-        }),
-      });
-      const tokenData = await tokenResponse.json();
-      if (tokenData.error) {
-        throw new Error(tokenData.error_description || tokenData.error);
-      }
-      return tokenData.access_token;
-    };
-
-    let token = accessToken;
+    const { action, startDate, endDate, pageToken, pageSize } = await req.json();
+    const connection = await getGoogleConnection(adminClient);
+    const token = connection.access_token;
 
     // List Local Services accounts
     if (action === "list-accounts") {
@@ -45,20 +36,6 @@ serve(async (req) => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-
-      if (response.status === 401 && refreshToken) {
-        token = await refreshAccessToken(refreshToken);
-        const retryResponse = await fetch(
-          "https://localservices.googleapis.com/v1/accountReports",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        const data = await retryResponse.json();
-        return new Response(JSON.stringify({ ...data, newAccessToken: token }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
 
       const data = await response.json();
       return new Response(JSON.stringify(data), {
@@ -83,17 +60,6 @@ serve(async (req) => {
       const response = await fetch(url, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
-      if (response.status === 401 && refreshToken) {
-        token = await refreshAccessToken(refreshToken);
-        const retryResponse = await fetch(url, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await retryResponse.json();
-        return new Response(JSON.stringify({ ...data, newAccessToken: token }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
 
       const data = await response.json();
       return new Response(JSON.stringify(data), {
@@ -120,17 +86,6 @@ serve(async (req) => {
       const response = await fetch(url, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
-      if (response.status === 401 && refreshToken) {
-        token = await refreshAccessToken(refreshToken);
-        const retryResponse = await fetch(url, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await retryResponse.json();
-        return new Response(JSON.stringify({ ...data, newAccessToken: token }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
 
       const data = await response.json();
       return new Response(JSON.stringify(data), {

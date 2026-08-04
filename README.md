@@ -1,73 +1,50 @@
-# Welcome to your Lovable project
+# Clean Flow
 
-## Project info
+Plataforma operacional para empresas de limpeza: clientes, leads, agenda, execução de serviços, comunicações, faturamento, folha, relatórios e integrações.
 
-**URL**: https://lovable.dev/projects/6825084b-41a2-4df1-bcef-53282c184943
+## Estado do projeto
 
-## How can I edit this code?
+O desenvolvimento ativo acontece na branch `DEV`. A branch `main` é preservada para promoção controlada.
 
-There are several ways of editing your application.
+O frontend e as funções estão preparados para Supabase, mas este repositório não está vinculado a nenhum projeto remoto. Crie o projeto Supabase antes de aplicar migrações ou publicar Edge Functions.
 
-**Use Lovable**
+## Requisitos
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/6825084b-41a2-4df1-bcef-53282c184943) and start prompting.
+- Node.js 22 ou superior
+- npm
+- Supabase CLI somente quando chegar a hora de configurar o backend
 
-Changes made via Lovable will be committed automatically to this repo.
+## Desenvolvimento local
 
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
+cp .env.example .env
+npm ci
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Preencha em `.env` apenas as três variáveis públicas do projeto Supabase. Nunca coloque a service-role key ou segredos de provedores em variáveis `VITE_*`.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Validação
 
-**Use GitHub Codespaces**
+```bash
+npm run check
+npm audit
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+`npm run check` executa lint, TypeScript, testes e build de produção. O mesmo fluxo roda no GitHub Actions para `DEV` e pull requests direcionados a `DEV` ou `main`.
 
-## What technologies are used for this project?
+## Backend e publicação
 
-This project is built with:
+Consulte [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) antes de criar ou vincular um projeto Supabase. O checklist cobre a ordem das migrações, configuração do primeiro administrador, secrets, OAuth, webhook, Turnstile, storage e smoke tests.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Segurança
 
-## How can I deploy this project?
+Consulte [SECURITY.md](SECURITY.md). Tokens OAuth ficam exclusivamente em tabelas inacessíveis ao navegador; as Edge Functions validam identidade e função novamente no servidor.
 
-Simply open [Lovable](https://lovable.dev/projects/6825084b-41a2-4df1-bcef-53282c184943) and click on Share -> Publish.
+## Stack
 
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+- React 18, TypeScript e Vite
+- TanStack Query e Zustand
+- shadcn/ui e Tailwind CSS
+- Supabase Auth, Postgres, Storage e Edge Functions
+- QuickBooks, Google, RingCentral, Resend, Geoapify e Cloudflare Turnstile

@@ -1,1 +1,15 @@
-project_id = "egkwzkxbmglklvgmczbz"
+project_id = "clean-flow-local"
+
+# These endpoints are intentionally public at the Supabase gateway and perform
+# their own provider signature/state or bot-verification checks.
+[functions.quickbooks-callback]
+verify_jwt = false
+
+[functions.google-callback]
+verify_jwt = false
+
+[functions.ringcentral-webhook]
+verify_jwt = false
+
+[functions.website-lead-capture]
+verify_jwt = false

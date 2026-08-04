@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { authorizeStaffRequest } from "../_shared/authorize.ts";
+import { getAuthorizedStaffIdentity } from "../_shared/authorize.ts";
 import { verifyOAuthState } from "../_shared/oauth-state.ts";
 
 const corsHeaders = {
@@ -28,12 +28,12 @@ Deno.serve(async (req) => {
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    const authorizationError = await authorizeStaffRequest(
+    const authorization = await getAuthorizedStaffIdentity(
       req,
       supabase,
       ["admin", "office_manager"],
     );
-    if (authorizationError) return authorizationError;
+    if (authorization.error) return authorization.error;
 
     const { code, state, redirect_uri } = await req.json();
 
@@ -45,7 +45,13 @@ Deno.serve(async (req) => {
     }
 
     const stateData = await verifyOAuthState(state, RC_CLIENT_SECRET);
-    if (!stateData || stateData.redirectUri !== redirect_uri) {
+    if (
+      !stateData
+      || stateData.provider !== "ringcentral"
+      || stateData.userId !== authorization.identity.userId
+      || stateData.redirectUri !== redirect_uri
+      || !stateData.companyId
+    ) {
       return new Response(
         JSON.stringify({ error: "Invalid or expired state parameter" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }

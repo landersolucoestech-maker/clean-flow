@@ -1,5 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.0";
+import { authorizeStaffRequest } from "../_shared/authorize.ts";
+import { getQuickBooksConnection, quickBooksHeaders } from "../_shared/quickbooks.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -23,11 +25,17 @@ serve(async (req: Request) => {
   }
 
   try {
-    const { jobId, accessToken, realmId, qbCustomerId } = await req.json();
+    const { jobId, qbCustomerId } = await req.json();
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const authorizationError = await authorizeStaffRequest(
+      req,
+      supabase,
+      ["admin", "office_manager"],
+    );
+    if (authorizationError) return authorizationError;
 
     // Fetch job with customer info
     const { data: job, error: jobError } = await supabase
@@ -100,19 +108,18 @@ serve(async (req: Request) => {
     let qbDocNumber: string | null = null;
     let actualQbCustomerId = qbCustomerId;
 
-    if (accessToken && realmId) {
-      const headers = {
-        "Authorization": `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-      };
+    const quickBooksConnection = await getQuickBooksConnection(supabase).catch(() => null);
+    if (quickBooksConnection) {
+      const realmId = quickBooksConnection.realm_id;
+      const headers = quickBooksHeaders(quickBooksConnection.access_token);
 
       // Auto-map customer to QuickBooks if not provided
       if (!actualQbCustomerId && job.customer) {
         // Search for existing customer in QuickBooks by name
-        const searchQuery = encodeURIComponent(`DisplayName = '${job.customer.name}'`);
+        const escapedCustomerName = String(job.customer.name).replace(/'/g, "''");
+        const searchQuery = encodeURIComponent(`SELECT * FROM Customer WHERE DisplayName = '${escapedCustomerName}'`);
         const searchResponse = await fetch(
-          `${QUICKBOOKS_BASE_URL}/${realmId}/query?query=SELECT * FROM Customer WHERE ${searchQuery}&minorversion=65`,
+          `${QUICKBOOKS_BASE_URL}/${realmId}/query?query=${searchQuery}&minorversion=65`,
           { method: "GET", headers }
         );
 

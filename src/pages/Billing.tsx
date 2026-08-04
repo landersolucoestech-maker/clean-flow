@@ -101,7 +101,7 @@ export function Billing() {
   const { data: stats } = useInvoiceStats();
   const { data: customers = [] } = useCustomers();
   const { data: companySettings } = useCompanySettings();
-  const { isConnected: qbConnected, tokens } = useQuickBooks();
+  const { isConnected: qbConnected } = useQuickBooks();
   const { syncInvoiceToQuickBooks } = useQuickBooksSync();
   const syncInvoices = useSyncInvoicesWithQB();
   const markPaid = useMarkInvoicePaid();
@@ -174,14 +174,11 @@ export function Billing() {
   };
 
   const handleSyncWithQB = async () => {
-    if (!qbConnected || !tokens) {
+    if (!qbConnected) {
       toast.error("Conecte ao QuickBooks primeiro");
       return;
     }
-    await syncInvoices.mutateAsync({
-      accessToken: tokens.accessToken,
-      realmId: tokens.realmId,
-    });
+    await syncInvoices.mutateAsync();
   };
 
   const handleMarkPaid = async (invoice: Invoice) => {
@@ -198,8 +195,6 @@ export function Billing() {
       customerPhone: customerPhone,
       invoiceNumber: invoice.invoice_number,
       companyName: companySettings?.trade_name || companySettings?.legal_name,
-      accessToken: tokens?.accessToken,
-      realmId: tokens?.realmId,
     });
 
     // If this is a deposit invoice linked to a lead, auto-open job creation

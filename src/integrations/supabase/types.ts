@@ -1056,6 +1056,27 @@ export type Database = {
           },
         ]
       }
+      lead_capture_rate_limits: {
+        Row: {
+          key_hash: string
+          request_count: number
+          updated_at: string
+          window_started_at: string
+        }
+        Insert: {
+          key_hash: string
+          request_count?: number
+          updated_at?: string
+          window_started_at?: string
+        }
+        Update: {
+          key_hash?: string
+          request_count?: number
+          updated_at?: string
+          window_started_at?: string
+        }
+        Relationships: []
+      }
       leads: {
         Row: {
           add_on_services: string[] | null
@@ -1220,6 +1241,7 @@ export type Database = {
           created_at: string
           id: string
           read: boolean
+          ringcentral_message_id: string | null
           sender_type: string
         }
         Insert: {
@@ -1229,6 +1251,7 @@ export type Database = {
           created_at?: string
           id?: string
           read?: boolean
+          ringcentral_message_id?: string | null
           sender_type?: string
         }
         Update: {
@@ -1238,6 +1261,7 @@ export type Database = {
           created_at?: string
           id?: string
           read?: boolean
+          ringcentral_message_id?: string | null
           sender_type?: string
         }
         Relationships: [
@@ -1371,6 +1395,100 @@ export type Database = {
             columns: ["staff_id"]
             isOneToOne: true
             referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      google_connections: {
+        Row: {
+          access_token: string
+          company_id: string
+          connected_at: string
+          email: string | null
+          google_user_id: string | null
+          id: string
+          name: string | null
+          picture_url: string | null
+          refresh_token: string
+          scopes: string[]
+          token_expires_at: string
+          updated_at: string
+        }
+        Insert: {
+          access_token: string
+          company_id: string
+          connected_at?: string
+          email?: string | null
+          google_user_id?: string | null
+          id?: string
+          name?: string | null
+          picture_url?: string | null
+          refresh_token: string
+          scopes?: string[]
+          token_expires_at: string
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string
+          company_id?: string
+          connected_at?: string
+          email?: string | null
+          google_user_id?: string | null
+          id?: string
+          name?: string | null
+          picture_url?: string | null
+          refresh_token?: string
+          scopes?: string[]
+          token_expires_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "google_connections_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "company_settings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quickbooks_connections: {
+        Row: {
+          access_token: string
+          company_id: string
+          connected_at: string
+          id: string
+          realm_id: string
+          refresh_token: string
+          token_expires_at: string
+          updated_at: string
+        }
+        Insert: {
+          access_token: string
+          company_id: string
+          connected_at?: string
+          id?: string
+          realm_id: string
+          refresh_token: string
+          token_expires_at: string
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string
+          company_id?: string
+          connected_at?: string
+          id?: string
+          realm_id?: string
+          refresh_token?: string
+          token_expires_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quickbooks_connections_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "company_settings"
             referencedColumns: ["id"]
           },
         ]
@@ -1570,6 +1688,7 @@ export type Database = {
       }
       staff: {
         Row: {
+          auth_user_id: string | null
           created_at: string
           email: string | null
           id: string
@@ -1584,6 +1703,7 @@ export type Database = {
           zelle_key: string | null
         }
         Insert: {
+          auth_user_id?: string | null
           created_at?: string
           email?: string | null
           id?: string
@@ -1598,6 +1718,7 @@ export type Database = {
           zelle_key?: string | null
         }
         Update: {
+          auth_user_id?: string | null
           created_at?: string
           email?: string | null
           id?: string
@@ -1817,14 +1938,73 @@ export type Database = {
         }
         Relationships: []
       }
+      user_notification_preferences: {
+        Row: {
+          auth_user_id: string
+          created_at: string
+          customer_feedback_sms: boolean
+          job_reminders_sms: boolean
+          job_updates_email: boolean
+          payment_alerts_sms: boolean
+          payment_notifications_email: boolean
+          system_alerts_sms: boolean
+          updated_at: string
+          weekly_reports_email: boolean
+        }
+        Insert: {
+          auth_user_id: string
+          created_at?: string
+          customer_feedback_sms?: boolean
+          job_reminders_sms?: boolean
+          job_updates_email?: boolean
+          payment_alerts_sms?: boolean
+          payment_notifications_email?: boolean
+          system_alerts_sms?: boolean
+          updated_at?: string
+          weekly_reports_email?: boolean
+        }
+        Update: {
+          auth_user_id?: string
+          created_at?: string
+          customer_feedback_sms?: boolean
+          job_reminders_sms?: boolean
+          job_updates_email?: boolean
+          payment_alerts_sms?: boolean
+          payment_notifications_email?: boolean
+          system_alerts_sms?: boolean
+          updated_at?: string
+          weekly_reports_email?: boolean
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      bootstrap_first_admin: {
+        Args: { company_name: string; staff_name?: string | null }
+        Returns: Json
+      }
+      capture_website_lead: { Args: { form_data: Json }; Returns: Json }
       can_edit_job_status: { Args: { staff_id: string }; Returns: boolean }
       can_trigger_job_status: { Args: { staff_id: string }; Returns: boolean }
+      current_staff_id: { Args: never; Returns: string }
+      current_staff_role: { Args: never; Returns: Database["public"]["Enums"]["app_role"] }
+      is_current_staff_active: { Args: never; Returns: boolean }
+      is_finance_staff: { Args: never; Returns: boolean }
+      is_job_assigned: { Args: { assignments: string[] }; Returns: boolean }
+      is_management_staff: { Args: never; Returns: boolean }
       is_platform_admin: { Args: { _user_id: string }; Returns: boolean }
+      next_lead_estimate_number: { Args: never; Returns: string }
+      check_lead_capture_rate_limit: {
+        Args: {
+          maximum_requests?: number
+          request_key_hash: string
+          window_seconds?: number
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role:

@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { authorizeServiceRequest } from "../_shared/authorize.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -33,6 +34,9 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const authError = authorizeServiceRequest(req);
+    if (authError) return authError;
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -215,7 +219,7 @@ Deno.serve(async (req) => {
 
           if (!response.error) {
             smsSent = true;
-            console.log(`SMS sent for job ${job.id} to ${customer.name}`);
+            console.log(`SMS sent for job ${job.id}`);
           } else {
             console.error(`RingCentral error for job ${job.id}:`, response.error);
           }
@@ -239,7 +243,7 @@ Deno.serve(async (req) => {
         }
 
         successCount++;
-        console.log(`✓ Review request sent for job ${job.id} (${customer.name})`);
+        console.log(`Review request sent for job ${job.id}`);
 
       } catch (jobError) {
         console.error(`Error processing job ${job.id}:`, jobError);

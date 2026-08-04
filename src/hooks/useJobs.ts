@@ -650,8 +650,6 @@ export function useImportJobs() {
     mutationFn: async (rows: ImportedJobRow[]) => {
       const results = { success: 0, failed: 0, errors: [] as string[] };
 
-      console.log(`Starting import of ${rows.length} rows`);
-
       // First, fetch all customers to map names to IDs
       const { data: customers, error: customersError } = await supabase
         .from("customers")
@@ -670,14 +668,11 @@ export function useImportJobs() {
         customerMap.set(c.norm, c.id); // normalized
       });
 
-      console.log(`Loaded ${customerIndex.length} customers for matching`);
-
       for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
         try {
           const customerName = row["Customer Name"]?.toString().trim();
           if (!customerName) {
-            console.warn(`Row ${i + 1}: Skipping - no Customer Name`);
             results.errors.push(`Row ${i + 1}: No Customer Name`);
             results.failed++;
             continue;
@@ -696,7 +691,6 @@ export function useImportJobs() {
             );
             if (matches.length === 1) {
               customerId = matches[0].id;
-              console.log(`Row ${i + 1}: Customer "${customerName}" matched by substring to "${matches[0].name}"`);
             }
           }
 
@@ -705,12 +699,10 @@ export function useImportJobs() {
             const best = findBestCustomerMatch(customerNameNorm, customerIndex);
             if (best) {
               customerId = best.id;
-              console.log(`Row ${i + 1}: Customer "${customerName}" matched by fuzzy to "${best.name}"`);
             }
           }
 
           if (!customerId) {
-            console.error(`Row ${i + 1}: Customer not found: "${customerName}"`);
             results.errors.push(`Row ${i + 1}: Customer not found: "${customerName}"`);
             results.failed++;
             continue;
@@ -802,22 +794,15 @@ export function useImportJobs() {
           });
 
           if (jobError) {
-            console.error("Error inserting job:", jobError);
             results.failed++;
             continue;
           }
 
           results.success++;
         } catch (error) {
-          console.error(`Row ${i + 1}: Error processing:`, error);
           results.errors.push(`Row ${i + 1}: Processing error`);
           results.failed++;
         }
-      }
-
-      console.log(`Import complete: ${results.success} success, ${results.failed} failed`);
-      if (results.errors.length > 0) {
-        console.log("Import errors:", results.errors);
       }
 
       return results;
@@ -827,7 +812,7 @@ export function useImportJobs() {
       if (results.failed === 0) {
         toast.success(`${results.success} jobs imported successfully!`);
       } else {
-        toast.warning(`Imported ${results.success} jobs. ${results.failed} failed. Check console for details.`);
+        toast.warning(`Imported ${results.success} jobs. ${results.failed} rows failed validation.`);
       }
     },
     onError: (error) => {
