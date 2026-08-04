@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 export type TicketStatus = "open" | "in_progress" | "waiting_customer" | "resolved" | "closed";
 export type TicketPriority = "low" | "medium" | "high" | "urgent";
 export type TicketCategory = "billing" | "technical" | "feature_request" | "general" | "account" | "integration";
+export type TicketUpdate = Partial<Pick<SupportTicket, "status" | "assigned_to" | "resolved_at" | "closed_at" | "updated_at">>;
 
 export interface SupportTicket {
   id: string;
@@ -29,7 +30,7 @@ export interface TicketMessage {
   user_id: string | null;
   is_staff_reply: boolean;
   message: string;
-  attachments: any[];
+  attachments: unknown[];
   created_at: string;
 }
 
@@ -189,7 +190,7 @@ export function useSupportTickets() {
   // Update ticket status
   const updateStatusMutation = useMutation({
     mutationFn: async ({ ticketId, status }: { ticketId: string; status: TicketStatus }) => {
-      const updates: any = { status };
+      const updates: TicketUpdate = { status };
       
       if (status === "resolved") {
         updates.resolved_at = new Date().toISOString();
