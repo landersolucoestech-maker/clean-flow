@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.112.0";
 import { authorizeStaffRequest } from "../_shared/authorize.ts";
 import { getGoogleConnection } from "../_shared/google.ts";
 
