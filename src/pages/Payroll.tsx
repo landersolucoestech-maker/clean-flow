@@ -389,13 +389,14 @@ export function Payroll() {
 
     try {
       // Fetch fresh records directly from database to ensure we have latest data
-      let { data: freshRecords, error: fetchError } = await supabase
+      const { data: initialRecords, error: fetchError } = await supabase
         .from("payroll_records")
         .select("*")
         .eq("period_start", periodStartISO)
         .eq("period_end", periodEndISO);
 
       if (fetchError) throw fetchError;
+      let freshRecords = initialRecords;
 
       // If there are no records yet, auto-generate them from finished jobs for this period
       if (!freshRecords || freshRecords.length === 0) {
