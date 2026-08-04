@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuickBooks } from "./useQuickBooks";
 import { useQuickBooksStore } from "@/stores/quickbooks.store";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/errors";
 
 interface SyncResult {
   success: boolean;
@@ -185,8 +186,8 @@ export function useQuickBooksSync() {
         qbDocNumber: qbInvoice.DocNumber 
       };
 
-    } catch (error: any) {
-      const errorMessage = error.message || "Unknown error";
+    } catch (error: unknown) {
+      const errorMessage = getErrorMessage(error, "Unknown error");
       
       addSyncLog({
         type: "invoice",
@@ -315,19 +316,19 @@ export function useQuickBooksSync() {
 
       return result;
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Auto-sync failed:", error);
       
       addSyncLog({
         type: "invoice",
         action: "sync",
         status: "error",
-        message: `Auto-sync failed for job ${jobId}: ${error.message}`,
+        message: `Auto-sync failed for job ${jobId}: ${getErrorMessage(error, "Unknown error")}`,
         localId: jobId,
       });
 
       toast.error("Auto-sync to QuickBooks Failed", {
-        description: error.message,
+        description: getErrorMessage(error, "Unknown error"),
         duration: 8000,
         action: {
           label: "View Logs",
@@ -423,17 +424,17 @@ export function useQuickBooksSync() {
       toast.warning("Retry not supported for this operation type");
       return false;
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       addSyncLog({
         type,
         action: "sync",
         status: "error",
-        message: `Retry failed: ${error.message}`,
+        message: `Retry failed: ${getErrorMessage(error, "Unknown error")}`,
         localId,
       });
 
       toast.error("Retry Failed", {
-        description: error.message,
+        description: getErrorMessage(error, "Unknown error"),
         duration: 5000,
       });
 
