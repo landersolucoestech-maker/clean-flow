@@ -10,7 +10,17 @@ const RC_TOKEN_URL = "https://platform.ringcentral.com/restapi/oauth/token";
 const RC_CLIENT_ID = Deno.env.get("RINGCENTRAL_CLIENT_ID");
 const RC_CLIENT_SECRET = Deno.env.get("RINGCENTRAL_CLIENT_SECRET");
 
-async function refreshToken(supabase: any, connection: {
+type SupabaseClient = ReturnType<typeof createClient>;
+interface InvoiceCustomer {
+  id?: string;
+  name: string | null;
+  phone: string | null;
+  phone2: string | null;
+  payment_method: string | null;
+  preferred_language: string | null;
+}
+
+async function refreshToken(supabase: SupabaseClient, connection: {
   company_id: string;
   refresh_token: string;
 }) {
@@ -46,7 +56,7 @@ async function refreshToken(supabase: any, connection: {
   return tokenData.access_token;
 }
 
-async function getValidToken(supabase: any, connection: {
+async function getValidToken(supabase: SupabaseClient, connection: {
   company_id: string;
   access_token: string;
   refresh_token: string;
@@ -151,7 +161,7 @@ Deno.serve(async (req) => {
         throw new Error("Invoice not found");
       }
 
-      const customer = invoice.customer as any;
+      const customer = invoice.customer as InvoiceCustomer | null;
       const phone = customer?.phone || customer?.phone2;
       
       if (!phone) {
@@ -228,7 +238,7 @@ Deno.serve(async (req) => {
       const errors: string[] = [];
 
       for (const invoice of (invoices || [])) {
-        const customer = invoice.customer as any;
+        const customer = invoice.customer as InvoiceCustomer | null;
         const phone = customer?.phone || customer?.phone2;
         
         if (!phone) continue;
