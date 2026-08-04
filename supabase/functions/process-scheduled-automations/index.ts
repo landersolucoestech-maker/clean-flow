@@ -5,6 +5,13 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+interface AutomationCustomer {
+  id: string;
+  name: string | null;
+  phone: string | null;
+  phone_2: string | null;
+}
+
 // Replace template variables in message
 function replaceVariables(
   message: string,
@@ -213,7 +220,7 @@ Deno.serve(async (req) => {
         }
 
         for (const job of jobs || []) {
-          const customer = job.customers as any;
+          const customer = job.customers as AutomationCustomer | null;
           if (!customer) continue;
 
           // Check if we already sent this automation for this job today
@@ -334,7 +341,7 @@ Deno.serve(async (req) => {
         }
 
         for (const invoice of invoices || []) {
-          const customer = invoice.customers as any;
+          const customer = invoice.customers as AutomationCustomer | null;
           if (!customer) continue;
 
           // Check if we already sent this automation for this invoice today
