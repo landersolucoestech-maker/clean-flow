@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/layout/Header";
@@ -163,7 +163,7 @@ export function Leads() {
   const createJobMutation = useCreateJob();
 
   // Track previous invoice payment status to detect when deposit gets paid
-  const [prevInvoiceStatus, setPrevInvoiceStatus] = useState<Map<string, { deposit: string; final: string }>>(new Map());
+  const prevInvoiceStatus = useRef<Map<string, { deposit: string; final: string }>>(new Map());
   const [pendingJobForLead, setPendingJobForLead] = useState<Estimate | null>(null);
 
   // Fetch invoices to determine payment status for each lead (using invoice_type)
@@ -360,17 +360,17 @@ export function Leads() {
 
   // Effect to detect when a deposit invoice gets marked as paid - auto open job creation modal
   useEffect(() => {
-    if (prevInvoiceStatus.size === 0 && leadInvoiceStatus.size > 0) {
+    if (prevInvoiceStatus.current.size === 0 && leadInvoiceStatus.size > 0) {
       // First load - just save state
-      setPrevInvoiceStatus(new Map(
+      prevInvoiceStatus.current = new Map(
         Array.from(leadInvoiceStatus.entries()).map(([k, v]) => [k, { deposit: v.deposit, final: v.final }])
-      ));
+      );
       return;
     }
 
     // Check for any deposit that changed from non-paid to paid
     leadInvoiceStatus.forEach((status, leadId) => {
-      const prev = prevInvoiceStatus.get(leadId);
+      const prev = prevInvoiceStatus.current.get(leadId);
       const wasDepositPaid = prev?.deposit === "paid";
       const isDepositPaid = status.deposit === "paid";
 
@@ -391,9 +391,9 @@ export function Leads() {
     });
 
     // Update previous status
-    setPrevInvoiceStatus(new Map(
+    prevInvoiceStatus.current = new Map(
       Array.from(leadInvoiceStatus.entries()).map(([k, v]) => [k, { deposit: v.deposit, final: v.final }])
-    ));
+    );
   }, [leadInvoiceStatus, estimates, jobsByLeadId]);
 
   // Open appointment modal when pending job is set
