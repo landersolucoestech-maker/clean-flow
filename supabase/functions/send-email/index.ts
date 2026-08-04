@@ -15,11 +15,13 @@ interface EmailRequest {
   from?: string;
   replyTo?: string;
   template?: "invoice" | "reminder" | "welcome" | "review_request" | "estimate";
-  data?: Record<string, any>;
+  data?: TemplateData;
 }
 
+type TemplateData = Record<string, string | number | boolean | null | undefined>;
+
 const templates = {
-  invoice: (data: Record<string, any>) => ({
+  invoice: (data: TemplateData) => ({
     subject: `Invoice #${data.invoiceNumber} from ${data.companyName}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -51,7 +53,7 @@ const templates = {
       </div>
     `,
   }),
-  reminder: (data: Record<string, any>) => ({
+  reminder: (data: TemplateData) => ({
     subject: `Reminder: Invoice #${data.invoiceNumber} is ${data.status}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -65,7 +67,7 @@ const templates = {
       </div>
     `,
   }),
-  welcome: (data: Record<string, any>) => ({
+  welcome: (data: TemplateData) => ({
     subject: `Welcome to ${data.companyName}!`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -78,7 +80,7 @@ const templates = {
       </div>
     `,
   }),
-  review_request: (data: Record<string, any>) => ({
+  review_request: (data: TemplateData) => ({
     subject: `How was your experience with ${data.companyName}?`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -92,7 +94,7 @@ const templates = {
       </div>
     `,
   }),
-  estimate: (data: Record<string, any>) => ({
+  estimate: (data: TemplateData) => ({
     subject: `Your Estimate from ${data.companyName}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -184,10 +186,11 @@ const handler = async (req: Request): Promise<Response> => {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error sending email:", error);
+    const message = error instanceof Error ? error.message : "Unknown email delivery error";
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: message }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
