@@ -1,6 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import type { SupportTicket, TicketUpdate } from "@/hooks/useSupportTickets";
+
+type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
+export type AdminTicket = SupportTicket & {
+  company_settings: { trade_name: string | null; legal_name: string } | null;
+};
 
 export interface PlatformAdmin {
   id: string;
@@ -18,7 +24,7 @@ export interface PlatformLog {
   action: string;
   entity_type: string;
   entity_id: string | null;
-  details: Record<string, any>;
+  details: Record<string, JsonValue>;
   ip_address: string | null;
   created_at: string;
 }
@@ -119,7 +125,7 @@ export function usePlatformAdmin() {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data;
+      return data as AdminTicket[];
     },
   });
 
@@ -129,7 +135,7 @@ export function usePlatformAdmin() {
       action: string;
       entity_type: string;
       entity_id?: string;
-      details?: Record<string, any>;
+      details?: Record<string, JsonValue>;
     }) => {
       const { error } = await supabase.from("platform_logs").insert([{
         action: logData.action,
@@ -173,7 +179,7 @@ export function usePlatformAdmin() {
 
   // Update ticket (admin reply, status change)
   const updateTicketMutation = useMutation({
-    mutationFn: async ({ ticketId, updates }: { ticketId: string; updates: any }) => {
+    mutationFn: async ({ ticketId, updates }: { ticketId: string; updates: TicketUpdate }) => {
       const { error } = await supabase
         .from("support_tickets")
         .update(updates)
