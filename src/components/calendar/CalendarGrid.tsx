@@ -223,7 +223,7 @@ export function CalendarGrid({
       color: cleanerColors[index % cleanerColors.length],
       jobs: jobCountMap.get(teamNum) || 0,
     }));
-  }, [appointments, weekDateStrings]);
+  }, [appointments, weekDateStrings, TEAM_OPTIONS]);
 
   const navigateWeek = (direction: "prev" | "next") => {
     setCurrentWeek(prev => {
