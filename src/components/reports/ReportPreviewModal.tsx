@@ -39,7 +39,23 @@ export function ReportPreviewModal({
   };
 
   const handleDownload = () => {
-    console.log("Downloading report:", report.name);
+    const rows = [
+      ["Relatório", report.name],
+      ["Descrição", report.description],
+      ["Tipo", report.type],
+      ["Total de registros", String(report.records)],
+      ["Gerado em", new Date().toLocaleString("pt-BR")],
+    ];
+    const csv = rows
+      .map((row) => row.map((value) => `"${value.replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+    const blob = new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `${report.name.toLowerCase().replace(/[^a-z0-9]+/gi, "-")}.csv`;
+    anchor.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
