@@ -33,6 +33,7 @@ import { SyncLogs } from "./pages/SyncLogs";
 import RingCentralCallback from "./pages/RingCentralCallback";
 import GoogleCallback from "./pages/GoogleCallback";
 import NotFound from "./pages/NotFound";
+import { AuthenticatedRoute, PlatformAdminRoute } from "@/components/auth/RouteGuards";
 
 const queryClient = new QueryClient();
 
@@ -45,31 +46,31 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Index />} />
+              <Route path="/" element={<AuthenticatedRoute><Index /></AuthenticatedRoute>} />
               <Route path="/auth" element={<Auth />} />
-              <Route path="/schedule" element={<Schedule />} />
-              <Route path="/customers" element={<Customers />} />
-              <Route path="/invoices" element={<Billing />} />
-              <Route path="/transactions" element={<Transactions />} />
-              <Route path="/rules" element={<Rules />} />
-              <Route path="/communications" element={<Communications />} />
-              <Route path="/reports" element={<Reports />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/integrations" element={<Settings />} />
-              <Route path="/payroll" element={<Payroll />} />
-              <Route path="/support" element={<Support />} />
+              <Route path="/schedule" element={<AuthenticatedRoute><Schedule /></AuthenticatedRoute>} />
+              <Route path="/customers" element={<AuthenticatedRoute><Customers /></AuthenticatedRoute>} />
+              <Route path="/invoices" element={<AuthenticatedRoute><Billing /></AuthenticatedRoute>} />
+              <Route path="/transactions" element={<AuthenticatedRoute><Transactions /></AuthenticatedRoute>} />
+              <Route path="/rules" element={<AuthenticatedRoute><Rules /></AuthenticatedRoute>} />
+              <Route path="/communications" element={<AuthenticatedRoute><Communications /></AuthenticatedRoute>} />
+              <Route path="/reports" element={<AuthenticatedRoute><Reports /></AuthenticatedRoute>} />
+              <Route path="/settings" element={<AuthenticatedRoute><Settings /></AuthenticatedRoute>} />
+              <Route path="/integrations" element={<AuthenticatedRoute><Settings /></AuthenticatedRoute>} />
+              <Route path="/payroll" element={<AuthenticatedRoute><Payroll /></AuthenticatedRoute>} />
+              <Route path="/support" element={<AuthenticatedRoute><Support /></AuthenticatedRoute>} />
               
               {/* Admin Routes */}
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/admin/clients" element={<AdminClients />} />
+              <Route path="/admin" element={<PlatformAdminRoute><AdminDashboard /></PlatformAdminRoute>} />
+              <Route path="/admin/clients" element={<PlatformAdminRoute><AdminClients /></PlatformAdminRoute>} />
               <Route path="/admin/auth" element={<AdminAuth />} />
-              <Route path="/admin/logs" element={<AdminLogs />} />
-              <Route path="/admin/settings" element={<AdminSettings />} />
-              <Route path="/admin/subscription" element={<AdminSubscription />} />
-              <Route path="/admin/support" element={<AdminSupport />} />
+              <Route path="/admin/logs" element={<PlatformAdminRoute><AdminLogs /></PlatformAdminRoute>} />
+              <Route path="/admin/settings" element={<PlatformAdminRoute><AdminSettings /></PlatformAdminRoute>} />
+              <Route path="/admin/subscription" element={<PlatformAdminRoute><AdminSubscription /></PlatformAdminRoute>} />
+              <Route path="/admin/support" element={<PlatformAdminRoute><AdminSupport /></PlatformAdminRoute>} />
               
-              <Route path="/leads" element={<Leads />} />
-              <Route path="/sync-logs" element={<SyncLogs />} />
+              <Route path="/leads" element={<AuthenticatedRoute><Leads /></AuthenticatedRoute>} />
+              <Route path="/sync-logs" element={<AuthenticatedRoute><SyncLogs /></AuthenticatedRoute>} />
               <Route path="/integrations/ringcentral/callback" element={<RingCentralCallback />} />
               <Route path="/integrations/google/callback" element={<GoogleCallback />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
