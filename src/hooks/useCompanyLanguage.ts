@@ -35,7 +35,7 @@ export function useCompanyLanguage() {
         setLanguage(dbLang);
       }
     }
-  }, [companySettings?.preferred_language]);
+  }, [companySettings?.preferred_language, language, setLanguage]);
 
   // Mutation to update company language
   const updateCompanyLanguage = useMutation({
