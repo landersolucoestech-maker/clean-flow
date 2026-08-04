@@ -1,6 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import type { Tables } from "@/integrations/supabase/types";
+
+type CustomerRow = Tables<"customers">;
+type CustomerAddressRow = Tables<"customer_addresses">;
+type JobCustomerReference = Pick<Tables<"jobs">, "id" | "customer_id">;
 
 export interface CustomerAddress {
   id?: string;
@@ -85,7 +90,7 @@ const normalizeFrequency = (value: unknown): string | null => {
   if (normalized) return normalized;
 
   // Check if it's already a valid new enum value
-  if (FREQUENCY_OPTIONS.includes(v as any)) return v;
+  if (FREQUENCY_OPTIONS.some((option) => option === v)) return v;
 
   // Legacy value mapping for backwards compatibility
   const legacyMap: Record<string, string> = {
@@ -172,7 +177,7 @@ export function useCustomers() {
       // Fetch ALL rows (no hard cap). We page manually to bypass the default 1000-row limit.
       const pageSize = 1000;
 
-      const allCustomers: any[] = [];
+      const allCustomers: CustomerRow[] = [];
       for (let from = 0; ; from += pageSize) {
         const to = from + pageSize - 1;
         const { data, error } = await supabase
@@ -190,7 +195,7 @@ export function useCustomers() {
         if (data.length < pageSize) break;
       }
 
-      const allAddresses: any[] = [];
+      const allAddresses: CustomerAddressRow[] = [];
       for (let from = 0; ; from += pageSize) {
         const to = from + pageSize - 1;
         const { data, error } = await supabase
@@ -208,7 +213,7 @@ export function useCustomers() {
       }
 
       // Fetch all jobs to calculate real job counts per customer
-      const allJobs: any[] = [];
+      const allJobs: JobCustomerReference[] = [];
       for (let from = 0; ; from += pageSize) {
         const to = from + pageSize - 1;
         const { data, error } = await supabase
@@ -232,7 +237,7 @@ export function useCustomers() {
         }
       }
 
-      const normalizedAddresses = (allAddresses ?? []).map((addr: any) => ({
+      const normalizedAddresses = allAddresses.map((addr) => ({
         ...addr,
         frequency: normalizeFrequency(addr.frequency) ?? addr.frequency,
         preferred_day: normalizePreferredDay(addr.preferred_day) ?? addr.preferred_day,
@@ -570,7 +575,7 @@ export function useImportCustomers() {
           };
 
           const rawSource = cellString(row["Source"]);
-          const rawReferralName = cellString((row as any)["Referral Name"]);
+          const rawReferralName = cellString(row["Referral Name"]);
 
           let sourceValue: string | null = null;
           if (rawSource) {
