@@ -19,7 +19,7 @@ interface FilterModalProps {
   onApplyFilters: (filters: FilterState) => void;
 }
 
-interface FilterState {
+export interface FilterState {
   staff: string[];
   services: string[];
   statuses: string[];
