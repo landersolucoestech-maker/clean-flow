@@ -151,7 +151,7 @@ export function InvoicePreviewModal({
     });
 
     // Totals
-    const finalY = (doc as any).lastAutoTable.finalY + 10;
+    const finalY = (doc as typeof doc & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10;
     doc.setFontSize(10);
     doc.text(`Subtotal: $${subtotal.toFixed(2)}`, pageWidth - 14, finalY, { align: "right" });
     doc.text(`Tax (${invoiceData.taxRate}%): $${tax.toFixed(2)}`, pageWidth - 14, finalY + 6, { align: "right" });
