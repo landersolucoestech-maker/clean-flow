@@ -19,7 +19,7 @@ serve(async (req) => {
   if (code) {
     // Redirect back to the app with the code
     // The state contains the original return URL with google_auth=true
-    let returnUrl = state || `${defaultReturnUrl}/settings?google_auth=true`;
+    const returnUrl = state || `${defaultReturnUrl}/settings?google_auth=true`;
     
     // Add the code to the return URL
     const separator = returnUrl.includes("?") ? "&" : "?";
