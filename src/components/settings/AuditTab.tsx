@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -169,16 +169,16 @@ export function AuditTab() {
   const { data: companySettings } = useCompanySettings();
 
   // Helper function to check if a field is missing
-  const isFieldMissing = (value: unknown): boolean => {
+  const isFieldMissing = useCallback((value: unknown): boolean => {
     if (value === null || value === undefined) return true;
     if (typeof value === "string" && value.trim() === "") return true;
     if (Array.isArray(value) && value.length === 0) return true;
     if (typeof value === "number" && value === 0) return true;
     return false;
-  };
+  }, []);
 
   // Process records for each category
-  const processRecords = <T extends { id: string }>(
+  const processRecords = useCallback(<T extends { id: string },>(
     data: T[],
     category: AuditCategory,
     nameField: keyof T
@@ -220,10 +220,10 @@ export function AuditTab() {
         isComplete: missingFields.length === 0,
       };
     });
-  };
+  }, [isFieldMissing]);
 
   // Process company settings as a single record
-  const processCompanySettings = (): AuditRecord[] => {
+  const processCompanySettings = useCallback((): AuditRecord[] => {
     if (!companySettings) {
       return [{
         id: "company-settings",
@@ -251,7 +251,7 @@ export function AuditTab() {
       missingFields,
       isComplete: missingFields.length === 0,
     }];
-  };
+  }, [companySettings, isFieldMissing]);
 
   // Get audit data for each category
   const auditData = useMemo(() => {
@@ -280,7 +280,7 @@ export function AuditTab() {
       integrations: [],
       templates: [],
     };
-  }, [customers, jobs, staff, leads, invoices, transactions, payrollRecords, companySettings]);
+  }, [customers, jobs, staff, leads, invoices, transactions, payrollRecords, processCompanySettings, processRecords]);
 
   // Calculate statistics
   const stats = useMemo(() => {
