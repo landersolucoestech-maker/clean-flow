@@ -81,7 +81,7 @@ export function Transactions() {
       hasSynced.current = true;
       syncInvoices.mutate();
     }
-  }, [isLoading]);
+  }, [isLoading, syncInvoices]);
 
   const APP_TIMEZONE = "America/New_York";
 
