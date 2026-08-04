@@ -61,7 +61,7 @@ export function BonusModal({ open, onOpenChange, employees, onAddBonus, defaultS
       if (defaultStartDate) setStartDate(defaultStartDate);
       if (defaultEndDate) setEndDate(defaultEndDate);
     }
-  }, [open, defaultStartDate, defaultEndDate]);
+  }, [open, defaultStartDate, defaultEndDate, selectedEmployee]);
 
   // Update dates when employee is selected based on their period
   useEffect(() => {
