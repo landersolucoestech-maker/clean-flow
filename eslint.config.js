@@ -28,5 +28,11 @@ export default tseslint.config(
       // visible while allowing the verification pipeline to run.
       "@typescript-eslint/no-explicit-any": "warn",
     },
-  }
+  },
+  {
+    files: ["src/components/ui/**/*.{ts,tsx}", "src/contexts/LanguageContext.tsx"],
+    rules: {
+      "react-refresh/only-export-components": "off",
+    },
+  },
 );
