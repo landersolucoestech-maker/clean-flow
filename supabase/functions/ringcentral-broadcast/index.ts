@@ -30,7 +30,7 @@ const MAX_MMS_SIZE = 1 * 1024 * 1024; // 1MB - RingCentral limit is ~1.5MB
 
 // Refresh access token if expired
 async function refreshAccessToken(
-  supabase: any,
+  supabase: ReturnType<typeof createClient>,
   connection: RingCentralConnection
 ): Promise<string | null> {
   const isExpired = new Date(connection.token_expires_at) < new Date();
