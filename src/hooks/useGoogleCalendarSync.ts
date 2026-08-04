@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { useGoogle } from "@/hooks/useGoogle";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/errors";
 import { Job } from "@/hooks/useJobs";
 import { googleState } from "@/lib/googleState";
 
@@ -204,9 +205,9 @@ export function useGoogleCalendarSync() {
         return result.id;
       }
       return null;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to sync job to calendar:", error);
-      toast.error(`Falha ao sincronizar com Calendar: ${error.message}`);
+      toast.error(`Falha ao sincronizar com Calendar: ${getErrorMessage(error, "Erro desconhecido")}`);
       return null;
     }
   }, [canSync, createEvent, jobToCalendarEvent]);
@@ -239,17 +240,18 @@ export function useGoogleCalendarSync() {
 
       toast.success("Evento do Calendar atualizado!");
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to update calendar event:", error);
       // If event doesn't exist anymore, create a new one
-      if (error.message?.includes("404") || error.message?.includes("Not Found")) {
+      const message = getErrorMessage(error, "");
+      if (message.includes("404") || message.includes("Not Found")) {
         const map = getEventMap();
         delete map[job.id];
         setEventMap(map);
         await syncJobToCalendar(job);
         return true;
       }
-      toast.error(`Falha ao atualizar evento: ${error.message}`);
+      toast.error(`Falha ao atualizar evento: ${getErrorMessage(error, "Erro desconhecido")}`);
       return false;
     }
   }, [canSync, updateEvent, jobToCalendarEvent, syncJobToCalendar]);
@@ -272,10 +274,11 @@ export function useGoogleCalendarSync() {
 
       toast.success("Evento removido do Calendar");
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to delete calendar event:", error);
       // If already deleted, just remove mapping
-      if (error.message?.includes("404") || error.message?.includes("Not Found")) {
+      const message = getErrorMessage(error, "");
+      if (message.includes("404") || message.includes("Not Found")) {
         const map = getEventMap();
         delete map[jobId];
         setEventMap(map);
@@ -352,8 +355,8 @@ export function useGoogleCalendarSync() {
           console.warn(`Job ${job.id} - unclear result:`, result);
           synced++;
         }
-      } catch (error: any) {
-        const errorMsg = `Job "${job.title}": ${error.message || "Erro desconhecido"}`;
+      } catch (error: unknown) {
+        const errorMsg = `Job "${job.title}": ${getErrorMessage(error, "Erro desconhecido")}`;
         console.error(`Failed to sync job ${job.id}:`, error);
         errors.push(errorMsg);
         failed++;
@@ -434,9 +437,9 @@ export function useGoogleCalendarSync() {
         return result.id;
       }
       return null;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to sync lead to calendar:", error);
-      toast.error(`Falha ao sincronizar lead: ${error.message}`);
+      toast.error(`Falha ao sincronizar lead: ${getErrorMessage(error, "Erro desconhecido")}`);
       return null;
     }
   }, [canSync, createEvent]);
