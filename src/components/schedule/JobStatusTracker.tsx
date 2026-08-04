@@ -19,6 +19,7 @@ import {
   canEditStatusManually,
   canOnlyTriggerStatus 
 } from "@/hooks/useJobStatusTracking";
+import type { JobStatusTracking } from "@/hooks/useJobStatusTracking";
 import { useJobAutomations, getAutomationTrigger } from "@/hooks/useJobAutomations";
 import {
   Dialog,
@@ -121,7 +122,7 @@ const StatusButton: React.FC<StatusButtonProps> = ({
 
 // GPS Map Component showing trajectory
 interface GPSMapViewProps {
-  statusHistory: any[];
+  statusHistory: JobStatusTracking[];
   isLoading: boolean;
   jobAddress?: string | null;
 }
