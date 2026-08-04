@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/errors";
 
 interface QuickBooksTokens {
   accessToken: string;
@@ -97,8 +98,8 @@ export function useQuickBooks() {
         "QuickBooks Authorization",
         `width=${width},height=${height},left=${left},top=${top}`
       );
-    } catch (error: any) {
-      toast.error(`Failed to connect: ${error.message}`);
+    } catch (error: unknown) {
+      toast.error(`Failed to connect: ${getErrorMessage(error, "Unknown error")}`);
     } finally {
       setIsLoading(false);
     }
@@ -125,8 +126,8 @@ export function useQuickBooks() {
       setIsConnected(true);
       await fetchCompanyInfo(newTokens);
       toast.success("QuickBooks conectado com sucesso!");
-    } catch (error: any) {
-      toast.error(`Failed to exchange token: ${error.message}`);
+    } catch (error: unknown) {
+      toast.error(`Failed to exchange token: ${getErrorMessage(error, "Unknown error")}`);
     } finally {
       setIsLoading(false);
     }
@@ -185,7 +186,7 @@ export function useQuickBooks() {
     }
   };
 
-  const callApi = useCallback(async (action: string, data?: any) => {
+  const callApi = useCallback(async (action: string, data?: Record<string, unknown>) => {
     if (!tokens) {
       throw new Error("Not connected to QuickBooks");
     }
