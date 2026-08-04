@@ -89,7 +89,7 @@ interface PrefilledData {
   estimateId?: string;
 }
 
-interface EditJobData {
+export interface EditJobData {
   id: string;
   customer: string;
   service: string;
