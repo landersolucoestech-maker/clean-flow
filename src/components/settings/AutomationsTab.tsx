@@ -18,6 +18,7 @@ import {
   useCreateAutomation,
   useDeleteAutomation,
   CreateAutomationData,
+  AutomationConfig,
 } from "@/hooks/useAutomationConfigs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
@@ -55,7 +56,7 @@ export function AutomationsTab() {
   const deleteAutomation = useDeleteAutomation();
   
   const [editingAutomation, setEditingAutomation] = useState<string | null>(null);
-  const [editedValues, setEditedValues] = useState<Record<string, any>>({});
+  const [editedValues, setEditedValues] = useState<Record<string, Partial<AutomationConfig>>>({});
   const [showAddModal, setShowAddModal] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [newAutomation, setNewAutomation] = useState<CreateAutomationData>({
@@ -71,7 +72,7 @@ export function AutomationsTab() {
     toggleAutomation.mutate({ id, enabled: !currentEnabled });
   };
 
-  const handleEditField = (id: string, field: string, value: any) => {
+  const handleEditField = <Key extends keyof AutomationConfig>(id: string, field: Key, value: AutomationConfig[Key]) => {
     setEditedValues(prev => ({
       ...prev,
       [id]: {
@@ -150,14 +151,15 @@ export function AutomationsTab() {
 
   const hasUnsavedChanges = Object.keys(editedValues).length > 0;
 
-  const getFieldValue = (automation: any, field: string) => {
-    if (editedValues[automation.id]?.[field] !== undefined) {
-      return editedValues[automation.id][field];
+  const getFieldValue = <Key extends keyof AutomationConfig>(automation: AutomationConfig, field: Key): AutomationConfig[Key] => {
+    const editedValue = editedValues[automation.id]?.[field];
+    if (editedValue !== undefined) {
+      return editedValue as AutomationConfig[Key];
     }
     return automation[field];
   };
 
-  const getTriggerDescription = (automation: any) => {
+  const getTriggerDescription = (automation: AutomationConfig) => {
     const trigger = TRIGGER_OPTIONS.find(t => t.value === automation.trigger_type);
     let desc = `When ${trigger?.label || automation.trigger_type}`;
     
