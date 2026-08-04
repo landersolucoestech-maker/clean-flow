@@ -200,7 +200,7 @@ serve(async (req) => {
         .single();
 
       if (!jobFetchError && jobData) {
-        const jobAddress = jobData.address || (jobData.customers as any)?.address;
+        const jobAddress = jobData.address || (jobData.customers as { address?: string } | null)?.address;
         
         if (jobAddress) {
           const jobCoords = await geocodeAddress(jobAddress, geoapifyApiKey);
@@ -239,7 +239,7 @@ serve(async (req) => {
                     .eq("id", jobId)
                     .single();
                   
-                  const customerName = (jobInfo?.customers as any)?.name || "Unknown";
+                  const customerName = (jobInfo?.customers as { name?: string } | null)?.name || "Unknown";
                   const statusLabel = statusType === "on_our_way" ? "A Caminho" : 
                                       statusType === "cleaning_now" ? "Limpando" : "Concluído";
                   
@@ -382,7 +382,7 @@ serve(async (req) => {
         } else if (jobDetails && jobDetails.staff_assigned && jobDetails.staff_assigned.length > 0) {
           const staffAssigned = jobDetails.staff_assigned as string[];
           const jobDate = jobDetails.scheduled_date || serverTimestamp.split('T')[0];
-          const customerName = (jobDetails.customers as any)?.name || 'Unknown Customer';
+          const customerName = (jobDetails.customers as { name?: string } | null)?.name || 'Unknown Customer';
 
           // Check for existing payroll records for this job to avoid duplicates
           const { data: existingPayroll, error: existingError } = await supabase
@@ -554,7 +554,7 @@ serve(async (req) => {
                   .eq("status", "paid");
 
                 let paidAmount = 0;
-                paidInvoices?.forEach((inv: any) => {
+                paidInvoices?.forEach((inv) => {
                   paidAmount += inv.total || inv.amount_paid || 0;
                 });
 
@@ -605,7 +605,7 @@ serve(async (req) => {
                     console.log(`Created balance invoice ${newInvoiceNumber} for remaining amount: $${remainingBalance}`);
                     
                     // Create pending transaction for this invoice
-                    const customerName = (jobForInvoice.customers as any)?.name || "Customer";
+                    const customerName = (jobForInvoice.customers as { name?: string } | null)?.name || "Customer";
                     await supabase.from("transactions").insert({
                       name: `Invoice - ${customerName} (${newInvoiceNumber})`,
                       description: `Invoice ${newInvoiceNumber} - Valor restante`,
