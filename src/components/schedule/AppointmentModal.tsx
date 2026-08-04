@@ -410,7 +410,6 @@ export function AppointmentModal({
   const isViewMode = mode === "view";
 
   const handleSubmit = () => {
-    console.log("Submitting:", formData);
     const amount = parseFloat(formData.amount.replace(/[^0-9.]/g, '')) || 0;
     // Teams are stored as array of team numbers (unique)
     const staffMembers = Array.from(new Set(formData.teams.map((t) => t.trim()).filter(Boolean)));
