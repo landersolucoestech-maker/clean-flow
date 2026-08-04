@@ -1,4 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { authorizeStaffRequest } from "../_shared/authorize.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
@@ -129,6 +131,21 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!supabaseUrl || !serviceRoleKey || !RESEND_API_KEY) {
+      throw new Error("Email service is not configured");
+    }
+
+    const adminClient = createClient(supabaseUrl, serviceRoleKey);
+    const authorizationError = await authorizeStaffRequest(
+      req,
+      adminClient,
+      ["admin", "cleaning_manager", "office_manager", "virtual_assistant"],
+      { allowServiceRole: true },
+    );
+    if (authorizationError) return authorizationError;
+
     const body: EmailRequest = await req.json();
     const { to, subject, html, text, from, replyTo, template, data } = body;
 
