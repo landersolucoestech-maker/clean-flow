@@ -31,6 +31,11 @@ type StaffAuthorizationResult =
   | { identity: AuthorizedStaffIdentity; error: null }
   | { identity: null; error: Response };
 
+type StaffIdentityRow = {
+  id: string;
+  staff_roles: { role: StaffRole } | Array<{ role: StaffRole }> | null;
+};
+
 export async function getAuthorizedStaffIdentity(
   req: Request,
   adminClient: SupabaseClient,
@@ -81,8 +86,9 @@ export async function getAuthorizedStaffIdentity(
     };
   }
 
-  const roleJoin = staffMatches[0].staff_roles;
-  const role = (Array.isArray(roleJoin) ? roleJoin[0]?.role : roleJoin?.role) as StaffRole | undefined;
+  const staffIdentity = staffMatches[0] as StaffIdentityRow;
+  const roleJoin = staffIdentity.staff_roles;
+  const role = Array.isArray(roleJoin) ? roleJoin[0]?.role : roleJoin?.role;
   if (!role || !allowedRoles.includes(role)) {
     return {
       identity: null,
@@ -91,7 +97,7 @@ export async function getAuthorizedStaffIdentity(
   }
 
   return {
-    identity: { userId: user.id, email: user.email, staffId: staffMatches[0].id, role },
+    identity: { userId: user.id, email: user.email, staffId: staffIdentity.id, role },
     error: null,
   };
 }
