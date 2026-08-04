@@ -157,12 +157,12 @@ export function CustomerModal({
           ? customer.additional_info.match(/Reason: (.+)/)?.[1] || ""
           : "",
         // Billing Contact fields
-        billingContactName: (customer as any).billing_contact_name || "",
-        billingContactRelationship: (customer as any).billing_contact_relationship || "",
-        billingContactEmail: (customer as any).billing_contact_email || "",
-        billingContactPhone: (customer as any).billing_contact_phone || "",
-        billingContactPhone2: (customer as any).billing_contact_phone2 || "",
-        billingContactNotes: (customer as any).billing_contact_notes || "",
+        billingContactName: customer.billing_contact_name || "",
+        billingContactRelationship: customer.billing_contact_relationship || "",
+        billingContactEmail: customer.billing_contact_email || "",
+        billingContactPhone: customer.billing_contact_phone || "",
+        billingContactPhone2: customer.billing_contact_phone2 || "",
+        billingContactNotes: customer.billing_contact_notes || "",
       });
       
       // If source starts with "referral:", extract the name and set source to "referral"
@@ -171,7 +171,7 @@ export function CustomerModal({
       }
       
       if (customer.addresses && customer.addresses.length > 0) {
-        setAddresses(customer.addresses.map((addr: any, index: number) => ({
+        setAddresses(customer.addresses.map((addr, index) => ({
           id: addr.id || String(index + 1),
           name: addr.name || "Home",
           street: addr.street || "",
