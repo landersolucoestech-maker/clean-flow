@@ -12,7 +12,7 @@ interface SendEmailParams {
   from?: string;
   replyTo?: string;
   template?: EmailTemplate;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
 }
 
 interface EmailResponse {
