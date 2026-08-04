@@ -10,6 +10,7 @@ export interface Invoice {
   customer_id: string;
   job_id: string | null;
   lead_id: string | null;
+  invoice_type?: InvoiceType | null;
   status: string;
   subtotal: number | null;
   tax_rate: number | null;
