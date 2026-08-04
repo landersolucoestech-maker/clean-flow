@@ -11,7 +11,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Download, Plus, Trash2, Settings2, Loader2, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "@/hooks/use-toast";
-import XLSX from "xlsx-js-style";
 import { useJobs, Job } from "@/hooks/useJobs";
 import { useStaff, Staff } from "@/hooks/useStaff";
 import { usePayrollRules, PayrollRule, useSavePayrollRules } from "@/hooks/usePayrollRules";
@@ -456,7 +455,8 @@ export function CalculatePayrollModal({
 
   const totalPayroll = employeeData.reduce((sum, c) => sum + c.finalValue, 0);
 
-  const handleDownloadExcel = () => {
+  const handleDownloadExcel = async () => {
+    const { default: XLSX } = await import("xlsx-js-style");
     const workbook = XLSX.utils.book_new();
 
     const border = {
