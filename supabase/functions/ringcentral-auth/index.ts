@@ -1,4 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { authorizeStaffRequest } from "../_shared/authorize.ts";
+import { createOAuthState } from "../_shared/oauth-state.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -7,6 +9,7 @@ const corsHeaders = {
 
 // RingCentral OAuth configuration
 const RC_CLIENT_ID = Deno.env.get("RINGCENTRAL_CLIENT_ID");
+const RC_CLIENT_SECRET = Deno.env.get("RINGCENTRAL_CLIENT_SECRET");
 const RC_AUTHORIZE_URL = "https://platform.ringcentral.com/restapi/oauth/authorize";
 
 // Space-delimited scopes per OAuth spec
@@ -19,20 +22,24 @@ Deno.serve(async (req) => {
   }
 
   try {
-    if (!RC_CLIENT_ID) {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!RC_CLIENT_ID || !RC_CLIENT_SECRET || !supabaseUrl || !serviceRoleKey) {
       return new Response(
-        JSON.stringify({ error: "RingCentral Client ID not configured" }),
+        JSON.stringify({ error: "RingCentral integration is not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const { company_id, redirect_uri } = await req.json();
+    const adminClient = createClient(supabaseUrl, serviceRoleKey);
+    const authorizationError = await authorizeStaffRequest(
+      req,
+      adminClient,
+      ["admin", "office_manager"],
+    );
+    if (authorizationError) return authorizationError;
 
-    console.log("ringcentral-auth request", {
-      company_id,
-      redirect_uri,
-      client_id: RC_CLIENT_ID,
-    });
+    const { company_id, redirect_uri } = await req.json();
 
     if (!company_id || !redirect_uri) {
       return new Response(
@@ -41,8 +48,12 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Create state parameter with company_id for security
-    const state = btoa(JSON.stringify({ company_id, timestamp: Date.now() }));
+    const state = await createOAuthState({
+      companyId: company_id,
+      redirectUri: redirect_uri,
+      expiresAt: Date.now() + 10 * 60 * 1000,
+      nonce: crypto.randomUUID(),
+    }, RC_CLIENT_SECRET);
 
     // Build OAuth authorization URL
     // IMPORTANT: RingCentral may not treat `+` as a space in query params.
@@ -56,8 +67,6 @@ Deno.serve(async (req) => {
     ]
       .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
       .join("&")}`;
-
-    console.log("ringcentral-auth response", { auth_url: authUrl });
 
     return new Response(
       JSON.stringify({
