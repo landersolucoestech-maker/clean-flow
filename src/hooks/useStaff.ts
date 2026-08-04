@@ -4,6 +4,8 @@ import type { Enums } from "@/integrations/supabase/types";
 import { toast } from "sonner";
 
 type AppRole = Enums<"app_role">;
+type StaffRoleJoin = { role: AppRole } | Array<{ role: AppRole }> | null;
+type StaffQueryRow = Omit<Staff, "staff_roles"> & { staff_roles: StaffRoleJoin };
 
 export interface Staff {
   id: string;
@@ -34,6 +36,13 @@ export interface StaffFormData {
   quickbooks_vendor_id?: string;
 }
 
+const normalizeStaff = (staff: StaffQueryRow): Staff => ({
+  ...staff,
+  staff_roles: Array.isArray(staff.staff_roles)
+    ? (staff.staff_roles[0] ?? null)
+    : staff.staff_roles,
+});
+
 // Fetch all staff members
 export function useStaff() {
   return useQuery({
@@ -46,11 +55,7 @@ export function useStaff() {
 
       if (error) throw error;
 
-      const normalized = (data || []).map((s: any) => ({
-        ...s,
-        // PostgREST may return 1:1 joins as an array; normalize to object
-        staff_roles: Array.isArray(s.staff_roles) ? (s.staff_roles[0] ?? null) : (s.staff_roles ?? null),
-      }));
+      const normalized = (data as StaffQueryRow[] | null)?.map(normalizeStaff) ?? [];
 
       return normalized as Staff[];
     },
@@ -71,15 +76,12 @@ export function useCleanersAndDrivers() {
 
       if (error) throw error;
 
-      const normalized = (data || []).map((s: any) => ({
-        ...s,
-        staff_roles: Array.isArray(s.staff_roles) ? (s.staff_roles[0] ?? null) : (s.staff_roles ?? null),
-      }));
+      const normalized = (data as StaffQueryRow[] | null)?.map(normalizeStaff) ?? [];
 
       const allowedRoles = new Set<AppRole>(["cleaner", "driver"]);
 
       return normalized
-        .map((s: any) => {
+        .map((s) => {
           const roleFromDb = s.staff_roles?.role as AppRole | undefined;
           const role: AppRole | undefined = roleFromDb ?? (s.is_driver ? "driver" : undefined);
 
@@ -90,7 +92,7 @@ export function useCleanersAndDrivers() {
             is_driver: role === "driver",
           };
         })
-        .filter((s: any) => allowedRoles.has(s.role)) as (Staff & { role: AppRole })[];
+        .filter((s) => allowedRoles.has(s.role));
     },
   });
 }
@@ -149,14 +151,7 @@ export function useCreateStaff() {
 
       if (roleError) throw roleError;
 
-      const normalized: any = {
-        ...data,
-        staff_roles: Array.isArray((data as any).staff_roles)
-          ? ((data as any).staff_roles[0] ?? null)
-          : ((data as any).staff_roles ?? null),
-      };
-
-      return normalized;
+      return normalizeStaff(data as StaffQueryRow);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["staff"] });
@@ -204,14 +199,7 @@ export function useUpdateStaff() {
 
       if (roleError) throw roleError;
 
-      const normalized: any = {
-        ...data,
-        staff_roles: Array.isArray((data as any).staff_roles)
-          ? ((data as any).staff_roles[0] ?? null)
-          : ((data as any).staff_roles ?? null),
-      };
-
-      return normalized;
+      return normalizeStaff(data as StaffQueryRow);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["staff"] });
