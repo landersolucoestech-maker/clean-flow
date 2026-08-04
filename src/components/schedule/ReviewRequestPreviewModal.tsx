@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -39,7 +39,7 @@ export function ReviewRequestPreviewModal({
   const [includeNextdoor, setIncludeNextdoor] = useState(true);
 
   // Generate message based on selected review links
-  const generateMessage = (google: boolean, nextdoor: boolean) => {
+  const generateMessage = useCallback((google: boolean, nextdoor: boolean) => {
     const reviewLinks: string[] = [];
     if (google && googleReviewUrl) {
       reviewLinks.push(`🌟Google Review: ${googleReviewUrl}`);
@@ -52,7 +52,7 @@ export function ReviewRequestPreviewModal({
       : "It really helps our small business. Thank you!";
 
     return `Hi ${customerName}! Thank you for choosing ${companyName}. We'd love to hear your feedback! Could you take a moment to leave us a review?\n\n${reviewLinksText}\n\n- ${companyName}`;
-  };
+  }, [companyName, customerName, googleReviewUrl, nextdoorReviewUrl]);
 
   // Reset state when modal opens
   useEffect(() => {
@@ -63,14 +63,14 @@ export function ReviewRequestPreviewModal({
       setIncludeNextdoor(hasNextdoor);
       setMessage(generateMessage(hasGoogle, hasNextdoor));
     }
-  }, [open, customerName, companyName, googleReviewUrl, nextdoorReviewUrl]);
+  }, [open, googleReviewUrl, nextdoorReviewUrl, generateMessage]);
 
   // Update message when checkboxes change
   useEffect(() => {
     if (open) {
       setMessage(generateMessage(includeGoogle, includeNextdoor));
     }
-  }, [includeGoogle, includeNextdoor]);
+  }, [includeGoogle, includeNextdoor, open, generateMessage]);
 
   const handleSend = () => {
     if (message.trim()) {
