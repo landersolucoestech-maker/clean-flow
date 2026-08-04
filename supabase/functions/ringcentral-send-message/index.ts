@@ -1,4 +1,4 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.112.0";
+import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.112.0";
 import { authorizeStaffRequest } from "../_shared/authorize.ts";
 
 const corsHeaders = {
@@ -10,7 +10,12 @@ const RC_API_BASE = "https://platform.ringcentral.com/restapi/v1.0";
 const RC_TOKEN_URL = "https://platform.ringcentral.com/restapi/oauth/token";
 const RC_CLIENT_ID = Deno.env.get("RINGCENTRAL_CLIENT_ID");
 const RC_CLIENT_SECRET = Deno.env.get("RINGCENTRAL_CLIENT_SECRET");
-type SupabaseClient = ReturnType<typeof createClient>;
+
+interface RingCentralTokenResponse {
+  access_token: string;
+  refresh_token: string;
+  expires_in: number;
+}
 
 async function refreshToken(supabase: SupabaseClient, connection: {
   company_id: string;
@@ -32,7 +37,7 @@ async function refreshToken(supabase: SupabaseClient, connection: {
     throw new Error("Failed to refresh token");
   }
 
-  const tokenData = await response.json();
+  const tokenData = await response.json() as RingCentralTokenResponse;
   const tokenExpiresAt = new Date(Date.now() + tokenData.expires_in * 1000);
 
   await supabase

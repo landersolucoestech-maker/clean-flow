@@ -1,4 +1,4 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.112.0";
+import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.112.0";
 import { authorizeStaffRequest } from "../_shared/authorize.ts";
 
 const corsHeaders = {
@@ -23,6 +23,12 @@ interface RingCentralConnection {
   phone_number: string | null;
 }
 
+interface RingCentralTokenResponse {
+  access_token: string;
+  refresh_token: string;
+  expires_in: number;
+}
+
 const RC_CLIENT_ID = Deno.env.get("RINGCENTRAL_CLIENT_ID");
 const RC_CLIENT_SECRET = Deno.env.get("RINGCENTRAL_CLIENT_SECRET");
 const RC_FROM_NUMBER = Deno.env.get("RINGCENTRAL_FROM_NUMBER");
@@ -43,7 +49,7 @@ const MAX_MMS_SIZE = 1 * 1024 * 1024; // 1MB - RingCentral limit is ~1.5MB
 
 // Refresh access token if expired
 async function refreshAccessToken(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient,
   connection: RingCentralConnection
 ): Promise<string | null> {
   const isExpired = new Date(connection.token_expires_at) < new Date();
@@ -78,7 +84,7 @@ async function refreshAccessToken(
       return null;
     }
 
-    const { access_token, refresh_token, expires_in } = await tokenResponse.json();
+    const { access_token, refresh_token, expires_in } = await tokenResponse.json() as RingCentralTokenResponse;
     const tokenExpiresAt = new Date(Date.now() + expires_in * 1000);
 
     // Update tokens in database
