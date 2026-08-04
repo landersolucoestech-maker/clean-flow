@@ -49,7 +49,7 @@ serve(async (req) => {
     const data = await response.json();
     
     // Parse results into structured format
-    const results = (data.results || []).map((result: any) => ({
+    const results = (data.results || []).map((result: Record<string, string | undefined>) => ({
       formatted: result.formatted || "",
       street: result.street || "",
       housenumber: result.housenumber || "",
