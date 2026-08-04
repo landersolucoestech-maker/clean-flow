@@ -34,6 +34,7 @@ import { useJobs } from "@/hooks/useJobs";
 import { useCompanySettings } from "@/hooks/useCompanySettings";
 import { formatCurrency } from "@/lib/currency";
 import { supabase } from "@/integrations/supabase/client";
+import { getErrorMessage } from "@/lib/errors";
 
 const PayrollPDFPreviewModal = lazy(() =>
   import("@/components/payroll/PayrollPDFPreviewModal").then(({ PayrollPDFPreviewModal }) => ({
@@ -742,11 +743,11 @@ export function Payroll() {
       });
 
       return localRecords;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error generating payroll from jobs:", error);
       toast({
         title: "Erro ao gerar payroll",
-        description: error.message || "Tente novamente.",
+        description: getErrorMessage(error, "Tente novamente."),
         variant: "destructive",
       });
       return [];
@@ -1109,7 +1110,7 @@ export function Payroll() {
     });
     
     // Get final Y position after main table
-    let finalY = (doc as any).lastAutoTable.finalY + 5;
+    let finalY = (doc as typeof doc & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 5;
     
     // Build bonus details from payroll rules
     const bonusDetails: { label: string; value: number }[] = [];
@@ -1172,7 +1173,7 @@ export function Payroll() {
           },
         });
         
-        finalY = (doc as any).lastAutoTable.finalY + 5;
+        finalY = (doc as typeof doc & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 5;
       }
     }
     
@@ -1338,11 +1339,11 @@ export function Payroll() {
       });
       
       setPreviewModalOpen(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error sending SMS:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to send SMS.",
+        description: getErrorMessage(error, "Failed to send SMS."),
         variant: "destructive",
       });
     } finally {
@@ -1403,11 +1404,11 @@ export function Payroll() {
         title: "SMS Sent",
         description: `Payroll PDF sent to ${record.employeeName} at ${staffMember.phone}.`,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error sending SMS:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to send SMS.",
+        description: getErrorMessage(error, "Failed to send SMS."),
         variant: "destructive",
       });
     } finally {
@@ -1515,11 +1516,11 @@ export function Payroll() {
           variant: "destructive",
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Bulk SMS error:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to send bulk SMS.",
+        description: getErrorMessage(error, "Failed to send bulk SMS."),
         variant: "destructive",
       });
     } finally {
