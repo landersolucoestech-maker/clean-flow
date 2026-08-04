@@ -297,7 +297,7 @@ export function EditInvoiceModal({ open, onOpenChange, invoice, mode = "edit" }:
       }
 
       onOpenChange(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error saving invoice:", error);
       toast.error("Erro ao salvar invoice");
       setIsSyncing(false);
