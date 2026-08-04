@@ -1,4 +1,4 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.112.0";
+import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.112.0";
 import { authorizeStaffRequest } from "../_shared/authorize.ts";
 
 const corsHeaders = {
@@ -11,7 +11,6 @@ const RC_TOKEN_URL = "https://platform.ringcentral.com/restapi/oauth/token";
 const RC_CLIENT_ID = Deno.env.get("RINGCENTRAL_CLIENT_ID");
 const RC_CLIENT_SECRET = Deno.env.get("RINGCENTRAL_CLIENT_SECRET");
 
-type SupabaseClient = ReturnType<typeof createClient>;
 interface InvoiceCustomer {
   id?: string;
   name: string | null;
@@ -19,6 +18,18 @@ interface InvoiceCustomer {
   phone2: string | null;
   payment_method: string | null;
   preferred_language: string | null;
+}
+
+interface RingCentralTokenResponse {
+  access_token: string;
+  refresh_token: string;
+  expires_in: number;
+}
+
+function getInvoiceCustomer(
+  customer: InvoiceCustomer | InvoiceCustomer[] | null | undefined,
+): InvoiceCustomer | null {
+  return Array.isArray(customer) ? customer[0] ?? null : customer ?? null;
 }
 
 async function refreshToken(supabase: SupabaseClient, connection: {
@@ -41,7 +52,7 @@ async function refreshToken(supabase: SupabaseClient, connection: {
     throw new Error("Failed to refresh token");
   }
 
-  const tokenData = await response.json();
+  const tokenData = await response.json() as RingCentralTokenResponse;
   const tokenExpiresAt = new Date(Date.now() + tokenData.expires_in * 1000);
 
   await supabase
@@ -100,8 +111,14 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!supabaseUrl || !supabaseServiceKey || !RC_CLIENT_ID || !RC_CLIENT_SECRET) {
+      return new Response(JSON.stringify({ error: "SMS reminder service is not configured" }), {
+        status: 503,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const authError = await authorizeStaffRequest(
       req,
@@ -160,7 +177,7 @@ Deno.serve(async (req) => {
         .from("invoices")
         .select(`
           id, invoice_number, total, due_date, status,
-          customer:customers(name, phone, phone2, payment_method, preferred_language)
+          customer:customers(id, name, phone, phone2, payment_method, preferred_language)
         `)
         .eq("id", invoice_id)
         .single();
@@ -169,7 +186,7 @@ Deno.serve(async (req) => {
         throw new Error("Invoice not found");
       }
 
-      const customer = invoice.customer as InvoiceCustomer | null;
+      const customer = getInvoiceCustomer(invoice.customer);
       const phone = customer?.phone || customer?.phone2;
       
       if (!phone) {
@@ -246,7 +263,7 @@ Deno.serve(async (req) => {
       const errors: string[] = [];
 
       for (const invoice of (invoices || [])) {
-        const customer = invoice.customer as InvoiceCustomer | null;
+        const customer = getInvoiceCustomer(invoice.customer);
         const phone = customer?.phone || customer?.phone2;
         
         if (!phone) continue;
