@@ -77,6 +77,24 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    const authorization = req.headers.get("Authorization");
+    const accessToken = authorization?.match(/^Bearer\s+(.+)$/i)?.[1];
+    if (!accessToken) {
+      return new Response(
+        JSON.stringify({ error: "Authentication required", code: "UNAUTHENTICATED" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    const { data: authData, error: authError } = await supabase.auth.getUser(accessToken);
+    const authenticatedEmail = authData.user?.email;
+    if (authError || !authenticatedEmail) {
+      return new Response(
+        JSON.stringify({ error: "Invalid authentication token", code: "UNAUTHENTICATED" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     const body: TrackStatusRequest = await req.json();
     const { 
       jobId, 
@@ -98,40 +116,89 @@ serve(async (req) => {
       );
     }
 
-    // Staff id is optional until authentication is fully wired.
-    // If provided, it must be a UUID.
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    const staffIdUuid = staffId && uuidRegex.test(staffId) ? staffId : null;
+    const { data: staffMatches, error: staffError } = await supabase
+      .from("staff")
+      .select("id, name, email, team, is_active, staff_roles(role)")
+      .ilike("email", authenticatedEmail)
+      .eq("is_active", true)
+      .limit(2);
 
-    // If this is a manual edit, require a valid staff UUID (audit + permissions)
-    if (isManualEdit && !staffIdUuid) {
+    if (staffError || staffMatches?.length !== 1) {
       return new Response(
-        JSON.stringify({ 
-          error: "Permission denied: Manual edits require a valid staff user",
-          code: "PERMISSION_DENIED"
+        JSON.stringify({
+          error: "The authenticated account is not linked to exactly one active staff member",
+          code: "STAFF_IDENTITY_REQUIRED",
         }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
-    // Check if staff exists and get their role (only when we have a valid UUID)
-    let role = "cleaner";
-    if (staffIdUuid) {
-      const { data: staffRole, error: roleError } = await supabase
-        .from("staff_roles")
-        .select("role")
-        .eq("staff_id", staffIdUuid)
-        .single();
-
-      if (roleError && roleError.code !== "PGRST116") {
-        console.error("Error fetching staff role:", roleError);
-      }
-
-      role = staffRole?.role || "cleaner";
+    const authenticatedStaff = staffMatches[0];
+    if (staffId && staffId !== authenticatedStaff.id) {
+      return new Response(
+        JSON.stringify({ error: "Staff identity mismatch", code: "PERMISSION_DENIED" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
+    const joinedRole = Array.isArray(authenticatedStaff.staff_roles)
+      ? authenticatedStaff.staff_roles[0]?.role
+      : authenticatedStaff.staff_roles?.role;
+    const role = joinedRole || "cleaner";
+    const staffIdUuid = authenticatedStaff.id;
     const canEdit = ["admin", "virtual_assistant", "office_manager", "cleaning_manager"].includes(role);
-    const canTrigger = true; // All active staff can trigger (server does not block when staffId is not wired)
+    const canTrigger = canEdit || ["driver", "cleaner"].includes(role);
+
+    if (!canTrigger) {
+      return new Response(
+        JSON.stringify({ error: "Your role cannot update job status", code: "PERMISSION_DENIED" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    const { data: authorizedJob, error: authorizedJobError } = await supabase
+      .from("jobs")
+      .select("id, status, staff_assigned, on_our_way_time, time_started, time_finished")
+      .eq("id", jobId)
+      .single();
+
+    if (authorizedJobError || !authorizedJob) {
+      return new Response(
+        JSON.stringify({ error: "Job not found", code: "NOT_FOUND" }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    if (!canEdit) {
+      const assignedStaff = (authorizedJob.staff_assigned || []) as string[];
+      const normalizedTeam = authenticatedStaff.team?.toLowerCase();
+      const isAssigned = assignedStaff.some((identifier) => {
+        const normalized = identifier.trim().toLowerCase();
+        return normalized === authenticatedStaff.id.toLowerCase()
+          || normalized === authenticatedStaff.name.toLowerCase()
+          || (normalizedTeam != null
+            && (normalized === normalizedTeam || normalized === `team ${normalizedTeam}`));
+      });
+
+      if (!isAssigned) {
+        return new Response(
+          JSON.stringify({ error: "You are not assigned to this job", code: "PERMISSION_DENIED" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+
+      const allowedCurrentStatus: Record<TrackStatusRequest["statusType"], string[]> = {
+        on_our_way: ["scheduled"],
+        cleaning_now: ["on-the-way"],
+        cleaning_done: ["in-progress"],
+      };
+      if (!allowedCurrentStatus[statusType].includes(authorizedJob.status)) {
+        return new Response(
+          JSON.stringify({ error: "Invalid status transition", code: "INVALID_TRANSITION" }),
+          { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+    }
 
     // If this is a manual edit, check permissions
     if (isManualEdit && !canEdit) {
