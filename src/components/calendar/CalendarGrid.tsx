@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight, Pencil } from "lucide-react";
 
 import { Checkbox } from "@/components/ui/checkbox";
 
-interface Appointment {
+export interface Appointment {
   id: string | number;
   time: string;
   customer: string;
@@ -16,6 +16,18 @@ interface Appointment {
   date?: string;
   team?: string;
   staffAssigned?: string[];
+  onOurWayTime?: string;
+  timeStarted?: string;
+  timeFinished?: string;
+  customerId?: string;
+  customerPhone?: string;
+  description?: string;
+  title?: string;
+  amount?: string | number | null;
+  notes?: string;
+  additionalNotes?: string;
+  feedback?: string;
+  paymentMethod?: string;
 }
 
 interface StaffMember {
@@ -251,10 +263,9 @@ export function CalendarGrid({
   };
   const getStatusIcon = (status: string, appointment?: Appointment) => {
     // If we have timeline times, prefer them over raw status (avoids mismatches)
-    const anyAppointment = appointment as any;
-    const onOurWay = typeof anyAppointment?.onOurWayTime === "string" ? anyAppointment.onOurWayTime.trim() : "";
-    const started = typeof anyAppointment?.timeStarted === "string" ? anyAppointment.timeStarted.trim() : "";
-    const finished = typeof anyAppointment?.timeFinished === "string" ? anyAppointment.timeFinished.trim() : "";
+    const onOurWay = appointment?.onOurWayTime?.trim() ?? "";
+    const started = appointment?.timeStarted?.trim() ?? "";
+    const finished = appointment?.timeFinished?.trim() ?? "";
 
     if (finished) return "✓";
     if (started) return "🏠";
