@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { googleState } from "@/lib/googleState";
+import { getErrorMessage } from "@/lib/errors";
 
 interface GoogleTokens {
   accessToken: string;
@@ -67,7 +68,7 @@ export function useGoogle() {
       };
 
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newTokens));
-      googleState.setTokens(newTokens as any); // Sync to global state
+      googleState.setTokens(newTokens as GoogleTokens); // Sync to global state
       setTokens(newTokens);
       setIsConnected(true);
       return newTokens as GoogleTokens & { userInfo?: GoogleUserInfo };
@@ -104,14 +105,14 @@ export function useGoogle() {
       };
 
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newTokens));
-      googleState.setTokens(newTokens as any); // Sync to global state
+      googleState.setTokens(newTokens as GoogleTokens & { userInfo?: GoogleUserInfo }); // Sync to global state
       localStorage.removeItem(PENDING_AUTH_KEY);
       setTokens(newTokens);
       setUserInfo(data.userInfo);
       setIsConnected(true);
       toast.success("Google conectado com sucesso!");
-    } catch (error: any) {
-      toast.error(`Falha ao trocar token: ${error.message}`);
+    } catch (error: unknown) {
+      toast.error(`Falha ao trocar token: ${getErrorMessage(error, "Erro desconhecido")}`);
     } finally {
       setIsLoading(false);
     }
@@ -127,7 +128,7 @@ export function useGoogle() {
       try {
         const parsed = JSON.parse(stored) as GoogleTokens & { userInfo?: GoogleUserInfo };
         console.log("[Google] Loaded tokens from storage, scope:", parsed.scope);
-        googleState.setTokens(parsed as any); // Sync to global state
+        googleState.setTokens(parsed); // Sync to global state
         if (parsed.expiresAt > Date.now()) {
           setTokens(parsed);
           setIsConnected(true);
@@ -195,7 +196,7 @@ export function useGoogle() {
       };
 
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newTokens));
-      googleState.setTokens(newTokens as any);
+      googleState.setTokens(newTokens as GoogleTokens & { userInfo?: GoogleUserInfo });
       setTokens(newTokens);
       setUserInfo(data.userInfo);
       setIsConnected(true);
@@ -266,15 +267,15 @@ export function useGoogle() {
         }
         toast.message("Abra a nova aba para concluir o login do Google.");
       }
-    } catch (error: any) {
-      toast.error(`Falha ao conectar: ${error.message}`);
+    } catch (error: unknown) {
+      toast.error(`Falha ao conectar: ${getErrorMessage(error, "Erro desconhecido")}`);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
   const callApi = useCallback(
-    async (action: string, data?: any) => {
+    async (action: string, data?: Record<string, unknown>) => {
       if (!tokens) {
         throw new Error("Não conectado ao Google");
       }
