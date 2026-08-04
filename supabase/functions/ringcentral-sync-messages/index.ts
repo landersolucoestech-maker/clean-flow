@@ -9,6 +9,7 @@ const RC_API_BASE = "https://platform.ringcentral.com/restapi/v1.0";
 const RC_TOKEN_URL = "https://platform.ringcentral.com/restapi/oauth/token";
 const RC_CLIENT_ID = Deno.env.get("RINGCENTRAL_CLIENT_ID");
 const RC_CLIENT_SECRET = Deno.env.get("RINGCENTRAL_CLIENT_SECRET");
+type SupabaseClient = ReturnType<typeof createClient>;
 
 interface RingCentralMessage {
   id: string;
@@ -23,7 +24,7 @@ interface RingCentralMessage {
   messageStatus: string;
 }
 
-async function refreshToken(supabase: any, connection: {
+async function refreshToken(supabase: SupabaseClient, connection: {
   company_id: string;
   refresh_token: string;
 }) {
@@ -59,7 +60,7 @@ async function refreshToken(supabase: any, connection: {
   return tokenData.access_token;
 }
 
-async function getValidToken(supabase: any, connection: {
+async function getValidToken(supabase: SupabaseClient, connection: {
   company_id: string;
   access_token: string;
   refresh_token: string;
