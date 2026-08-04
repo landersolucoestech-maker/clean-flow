@@ -247,7 +247,7 @@ Deno.serve(async (req) => {
 
       if (convData.customerId) {
         // Check if customer conversation exists
-        let { data: existingConv } = await supabase
+        const { data: existingConv } = await supabase
           .from("conversations")
           .select("id")
           .eq("customer_id", convData.customerId)
@@ -287,7 +287,7 @@ Deno.serve(async (req) => {
         }
       } else if (convData.staffId) {
         // Check if staff conversation exists
-        let { data: existingConv } = await supabase
+        const { data: existingConv } = await supabase
           .from("conversations")
           .select("id")
           .eq("staff_id", convData.staffId)
