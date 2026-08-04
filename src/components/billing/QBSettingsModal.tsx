@@ -38,6 +38,7 @@ import {
 import { toast } from "sonner";
 import { useQuickBooks } from "@/hooks/useQuickBooks";
 import { useQuickBooksStore } from "@/stores/quickbooks.store";
+import { getErrorMessage } from "@/lib/errors";
 import { format } from "date-fns";
 
 interface QBSettingsModalProps {
@@ -108,14 +109,15 @@ export function QBSettingsModal({ open, onOpenChange }: QBSettingsModalProps) {
 
       setLastSyncAt(new Date());
       toast.success("Sincronização concluída com sucesso!");
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = getErrorMessage(error, "Erro na sincronização");
       addSyncLog({
         type: "customer",
         action: "sync",
         status: "error",
-        message: error.message || "Erro na sincronização",
+        message,
       });
-      toast.error("Erro na sincronização: " + error.message);
+      toast.error("Erro na sincronização: " + message);
     } finally {
       setIsSyncing(false);
     }
