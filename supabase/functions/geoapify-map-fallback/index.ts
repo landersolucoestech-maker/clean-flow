@@ -15,15 +15,6 @@ interface MapByAddressRequest {
 
 async function geocodeAddress(address: string, apiKey: string): Promise<{ lat: number; lon: number } | null> {
   try {
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    );
-    const authError = await authorizeStaffRequest(req, supabase, [
-      "admin", "cleaner", "driver", "cleaning_manager", "office_manager", "virtual_assistant",
-    ]);
-    if (authError) return authError;
-
     const url = `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(address)}&apiKey=${apiKey}`;
     const res = await fetch(url);
     const data = await res.json();
@@ -44,13 +35,21 @@ serve(async (req) => {
   }
 
   try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     const apiKey = Deno.env.get("GEOAPIFY_API_KEY");
-    if (!apiKey) {
+    if (!supabaseUrl || !serviceRoleKey || !apiKey) {
       return new Response(
-        JSON.stringify({ error: "Geoapify API key not configured" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        JSON.stringify({ error: "Map service is not configured" }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
+
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
+    const authError = await authorizeStaffRequest(req, supabase, [
+      "admin", "cleaner", "driver", "cleaning_manager", "office_manager", "virtual_assistant",
+    ]);
+    if (authError) return authError;
 
     const body: MapByAddressRequest = await req.json();
     const { address, width = 580, height = 300 } = body;
@@ -62,6 +61,9 @@ serve(async (req) => {
       );
     }
 
+    const safeWidth = Number.isFinite(width) ? Math.min(1920, Math.max(100, Math.round(width))) : 580;
+    const safeHeight = Number.isFinite(height) ? Math.min(1080, Math.max(100, Math.round(height))) : 300;
+
     const coords = await geocodeAddress(address, apiKey);
     if (!coords) {
       return new Response(
@@ -71,7 +73,7 @@ serve(async (req) => {
     }
 
     const marker = `lonlat:${coords.lon},${coords.lat};color:%233b82f6;size:medium`;
-    const mapUrl = `https://maps.geoapify.com/v1/staticmap?style=osm-bright&width=${width}&height=${height}&center=lonlat:${coords.lon},${coords.lat}&zoom=15&marker=${marker}&apiKey=${apiKey}`;
+    const mapUrl = `https://maps.geoapify.com/v1/staticmap?style=osm-bright&width=${safeWidth}&height=${safeHeight}&center=lonlat:${coords.lon},${coords.lat}&zoom=15&marker=${marker}&apiKey=${apiKey}`;
 
     return new Response(
       JSON.stringify({ mapUrl, center: coords }),
@@ -80,7 +82,7 @@ serve(async (req) => {
   } catch (error) {
     console.error("Error in geoapify-map-fallback:", error);
     return new Response(
-      JSON.stringify({ error: "Internal server error", details: String(error) }),
+      JSON.stringify({ error: "Internal server error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
