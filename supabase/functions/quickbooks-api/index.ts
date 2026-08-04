@@ -119,7 +119,7 @@ serve(async (req: Request) => {
     if (action === "create-invoice") {
       const invoiceData = {
         CustomerRef: { value: data.customerId },
-        Line: data.lineItems.map((item: any) => ({
+        Line: data.lineItems.map((item: { amount: number; itemId?: string; quantity?: number; unitPrice?: number; description?: string }) => ({
           Amount: item.amount,
           DetailType: "SalesItemLineDetail",
           SalesItemLineDetail: {
