@@ -11,6 +11,15 @@ interface ProcessAutomationRequest {
   company_id?: string;
 }
 
+interface AutomationCustomer {
+  id: string;
+  name: string | null;
+  phone: string | null;
+  phone2: string | null;
+  email: string | null;
+  preferred_language: string | null;
+}
+
 type SupportedLanguage = "en" | "pt" | "es";
 
 const LOCALES: Record<SupportedLanguage, string> = {
@@ -180,7 +189,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    const customer = job.customers as any;
+    const customer = job.customers as AutomationCustomer | null;
     if (!customer) {
       console.error("No customer found for job");
       return new Response(
