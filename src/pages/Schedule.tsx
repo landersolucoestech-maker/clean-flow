@@ -4,6 +4,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CalendarGrid } from "@/components/calendar/CalendarGrid";
+import type { Appointment as CalendarAppointment } from "@/components/calendar/CalendarGrid";
 import { AppointmentModal } from "@/components/schedule/AppointmentModal";
 import { FilterModal } from "@/components/schedule/FilterModal";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -119,7 +120,7 @@ export function Schedule() {
   const [appointmentModal, setAppointmentModal] = useState<{
     open: boolean;
     mode: "create" | "view" | "edit";
-    appointment: typeof appointments[0] | null;
+    appointment: CalendarAppointment | null;
     editJobData: {
       id: string;
       customer: string;
@@ -155,7 +156,7 @@ export function Schedule() {
     });
   };
 
-  const handleViewAppointment = (appointment: any) => {
+  const handleViewAppointment = (appointment: CalendarAppointment) => {
     setAppointmentModal({
       open: true,
       mode: "view",
@@ -164,7 +165,7 @@ export function Schedule() {
     });
   };
 
-  const handleEditJob = (appointment: any) => {
+  const handleEditJob = (appointment: CalendarAppointment) => {
     const jobId = String(appointment.id);
     const dbJob = jobsFromDb.find((j) => j.id === jobId);
 
