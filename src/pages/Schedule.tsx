@@ -7,8 +7,9 @@ import { CalendarGrid } from "@/components/calendar/CalendarGrid";
 import type { Appointment as CalendarAppointment } from "@/components/calendar/CalendarGrid";
 import { AppointmentModal } from "@/components/schedule/AppointmentModal";
 import { FilterModal } from "@/components/schedule/FilterModal";
+import type { FilterState } from "@/components/schedule/FilterModal";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Plus, Upload, Download, Loader2, Trash2, CheckSquare, X } from "lucide-react";
+import { Plus, Upload, Download, Loader2, Trash2, CheckSquare, X, Filter } from "lucide-react";
 import { toast } from "sonner";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useCleanersAndDrivers } from "@/hooks/useStaff";
@@ -20,7 +21,7 @@ import {
   useDeleteJob,
   ImportedJobRow,
 } from "@/hooks/useJobs";
-import * as XLSX from "xlsx";
+import { readSpreadsheetFile } from "@/lib/spreadsheet";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -143,6 +144,11 @@ export function Schedule() {
   });
 
   const [filterModal, setFilterModal] = useState(false);
+  const [activeFilters, setActiveFilters] = useState<FilterState>({
+    staff: [],
+    services: [],
+    statuses: [],
+  });
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -284,17 +290,29 @@ export function Schedule() {
     }
     setSelectionMode(!selectionMode);
   };
-  const handleApplyFilters = (filters: {
-    staff: string[];
-    services: string[];
-    statuses: string[];
-  }) => {
+  const handleApplyFilters = (filters: FilterState) => {
+    setActiveFilters(filters);
     toast.success(t("payroll.filterApplied"));
-    console.log("Applied filters:", filters);
   };
 
+  const filteredAppointments = useMemo(() => {
+    return appointments.filter((appointment) => {
+      const matchesStaff = activeFilters.staff.length === 0
+        || activeFilters.staff.some((staff) => appointment.staffAssigned?.includes(staff));
+      const matchesService = activeFilters.services.length === 0
+        || activeFilters.services.includes(appointment.service);
+      const matchesStatus = activeFilters.statuses.length === 0
+        || activeFilters.statuses.includes(appointment.status);
+      return matchesStaff && matchesService && matchesStatus;
+    });
+  }, [activeFilters, appointments]);
+
+  const activeFilterCount = activeFilters.staff.length
+    + activeFilters.services.length
+    + activeFilters.statuses.length;
+
   // Export jobs to Excel with all requested columns
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     if (jobsFromDb.length === 0) {
       toast.error("No jobs to export.");
       return;
@@ -319,6 +337,7 @@ export function Schedule() {
       "Invoice Status": job.invoice_status || "Not Generated"
     }));
 
+    const XLSX = await import("xlsx-js-style");
     const worksheet = XLSX.utils.json_to_sheet(exportData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Jobs");
@@ -347,18 +366,12 @@ export function Schedule() {
   };
 
   // Import jobs from Excel
-  const handleImportExcel = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImportExcel = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const data = new Uint8Array(e.target?.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: "array" });
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json<ImportedJobRow>(worksheet);
+    try {
+        const jsonData = await readSpreadsheetFile(file) as ImportedJobRow[];
 
         if (jsonData.length === 0) {
           toast.error("No data found in the file.");
@@ -375,13 +388,10 @@ export function Schedule() {
         }
 
         importJobs.mutate(jsonData);
-      } catch (error) {
-        console.error("Import error:", error);
-        toast.error("Error importing file. Please check the format.");
-      }
-    };
-
-    reader.readAsArrayBuffer(file);
+    } catch (error) {
+      console.error("Import error:", error);
+      toast.error(error instanceof Error ? error.message : "Error importing file. Please check the format.");
+    }
 
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -407,7 +417,7 @@ export function Schedule() {
                 type="file"
                 ref={fileInputRef}
                 onChange={handleImportExcel}
-                accept=".xlsx,.xls,.csv"
+                accept=".xlsx,.csv"
                 className="hidden"
               />
 
@@ -435,6 +445,12 @@ export function Schedule() {
                 </>
               ) : (
                 <>
+
+                  <Button variant="outline" onClick={() => setFilterModal(true)}>
+                    <Filter className="w-4 h-4 mr-2" />
+                    {t("common.filter") || "Filter"}
+                    {activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
+                  </Button>
 
                   <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={importJobs.isPending}>
                     {importJobs.isPending ? (
@@ -468,7 +484,7 @@ export function Schedule() {
           <Card className="flex-1 overflow-hidden">
             <CardContent className="p-0 h-full">
               <CalendarGrid
-                appointments={appointments}
+                appointments={filteredAppointments}
                 staffMembers={staffMembers}
                 onAppointmentClick={selectionMode ? undefined : handleViewAppointment}
                 onEditClick={selectionMode ? undefined : handleEditJob}
