@@ -72,7 +72,7 @@ function validateEmail(email: string): boolean {
 }
 
 function validatePhone(phone: string): boolean {
-  const phoneRegex = /^[\d\s\-\+\(\)]{7,20}$/;
+  const phoneRegex = /^[\d\s+()-]{7,20}$/;
   return phoneRegex.test(phone);
 }
 
