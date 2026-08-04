@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -61,11 +61,11 @@ export function UpcomingJobs() {
   const [currentPage, setCurrentPage] = useState(1);
 
   // Get day name translation
-  const getDayName = (date: Date) => {
+  const getDayName = useCallback((date: Date) => {
     const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     const dayKey = dayNames[date.getDay()];
     return t(`days.${dayKey}`);
-  };
+  }, [t]);
 
   // Build customer lookup map
   const customersByName = useMemo(() => {
@@ -139,7 +139,7 @@ export function UpcomingJobs() {
           rawJob: job,
         };
       });
-  }, [jobs, t, language]);
+  }, [jobs, t, getDayName]);
 
   // Fetch GPS alerts for all upcoming jobs
   const jobIds = useMemo(() => upcomingJobs.map(j => j.id), [upcomingJobs]);
