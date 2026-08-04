@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Shield, Mail, Lock, Loader2, ArrowLeft, KeyRound, Fingerprint } from "lucide-react";
+import { getErrorMessage } from "@/lib/errors";
 
 export function AdminAuth() {
   const [isLoading, setIsLoading] = useState(false);
@@ -45,10 +46,10 @@ export function AdminAuth() {
         description: "You have successfully logged in to the admin panel.",
       });
       navigate("/admin");
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Access Denied",
-        description: error.message || "Failed to login",
+        description: getErrorMessage(error, "Failed to login"),
         variant: "destructive",
       });
     } finally {
