@@ -136,7 +136,8 @@ export function EditJobModal({ open, onOpenChange, job, onSave, onDelete }: Edit
 
   const convertTo24Hour = (time12h: string): string => {
     const [time, modifier] = time12h.split(" ");
-    let [hours, minutes] = time.split(":");
+    let [hours] = time.split(":");
+    const minutes = time.split(":")[1];
     
     if (hours === "12") {
       hours = modifier === "AM" ? "00" : "12";
