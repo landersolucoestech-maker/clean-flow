@@ -35,7 +35,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { usePlatformAdmin } from "@/hooks/usePlatformAdmin";
-import { useSupportTickets, TicketStatus, SupportTicket } from "@/hooks/useSupportTickets";
+import { useSupportTickets, TicketStatus, TicketUpdate } from "@/hooks/useSupportTickets";
+import type { AdminTicket } from "@/hooks/usePlatformAdmin";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
   Search,
@@ -59,7 +60,7 @@ export function AdminSupport() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
-  const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
+  const [selectedTicket, setSelectedTicket] = useState<AdminTicket | null>(null);
   const [replyMessage, setReplyMessage] = useState("");
 
   const { data: messages = [] } = useTicketMessages(selectedTicket?.id || null);
@@ -84,7 +85,7 @@ export function AdminSupport() {
   };
 
   const handleStatusChange = (ticketId: string, status: TicketStatus) => {
-    const updates: any = { status };
+    const updates: TicketUpdate = { status };
     if (status === "resolved") updates.resolved_at = new Date().toISOString();
     if (status === "closed") updates.closed_at = new Date().toISOString();
     
