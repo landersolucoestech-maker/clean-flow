@@ -35,7 +35,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { usePlatformAdmin } from "@/hooks/usePlatformAdmin";
-import { useSupportTickets, TicketStatus } from "@/hooks/useSupportTickets";
+import { useSupportTickets, TicketStatus, SupportTicket } from "@/hooks/useSupportTickets";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
   Search,
@@ -51,15 +51,6 @@ import {
 
 type StatusFilter = "all" | TicketStatus;
 
-// Mock data for demo
-const mockTickets = [
-  { id: "1", ticket_number: "TK-001", subject: "Problema com login", user: "João Silva", org: "Produtora ABC", status: "open", priority: "high", category: "Autenticação", created_at: "2024-01-15T14:30:00" },
-  { id: "2", ticket_number: "TK-002", subject: "Erro ao exportar relatório", user: "Maria Santos", org: "Gravadora XYZ", status: "in_progress", priority: "medium", category: "Relatórios", created_at: "2024-01-15T10:15:00" },
-  { id: "3", ticket_number: "TK-003", subject: "Dúvida sobre plano Pro", user: "Carlos Oliveira", org: "Studio Music", status: "resolved", priority: "low", category: "Comercial", created_at: "2024-01-14T16:45:00" },
-  { id: "4", ticket_number: "TK-004", subject: "Integração com Spotify", user: "Ana Costa", org: "Label Digital", status: "open", priority: "high", category: "Integrações", created_at: "2024-01-14T09:20:00" },
-  { id: "5", ticket_number: "TK-005", subject: "Falha no upload de arquivo", user: "Pedro Lima", org: "Indie Records", status: "in_progress", priority: "medium", category: "Upload", created_at: "2024-01-13T11:00:00" },
-];
-
 export function AdminSupport() {
   const { t } = useLanguage();
   const { allTickets, isLoadingTickets, updateTicket, addStaffReply } = usePlatformAdmin();
@@ -68,18 +59,16 @@ export function AdminSupport() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
-  const [selectedTicket, setSelectedTicket] = useState<any>(null);
+  const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
   const [replyMessage, setReplyMessage] = useState("");
 
   const { data: messages = [] } = useTicketMessages(selectedTicket?.id || null);
 
-  const displayTickets = allTickets.length > 0 ? allTickets : mockTickets;
-
-  const filteredTickets = displayTickets.filter((ticket: any) => {
+  const filteredTickets = allTickets.filter((ticket) => {
     const matchesSearch =
       ticket.subject?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       ticket.ticket_number?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      ticket.user?.toLowerCase().includes(searchQuery.toLowerCase());
+      ticket.company_settings?.trade_name?.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesStatus = statusFilter === "all" || ticket.status === statusFilter;
     const matchesPriority = priorityFilter === "all" || ticket.priority === priorityFilter;
@@ -134,10 +123,10 @@ export function AdminSupport() {
   };
 
   // Stats
-  const openTickets = displayTickets.filter((t: any) => t.status === "open").length;
-  const inProgressTickets = displayTickets.filter((t: any) => t.status === "in_progress").length;
-  const resolvedTickets = displayTickets.filter((t: any) => t.status === "resolved").length;
-  const totalTickets = displayTickets.length;
+  const openTickets = allTickets.filter((ticket) => ticket.status === "open").length;
+  const inProgressTickets = allTickets.filter((ticket) => ticket.status === "in_progress").length;
+  const resolvedTickets = allTickets.filter((ticket) => ticket.status === "resolved").length;
+  const totalTickets = allTickets.length;
 
   return (
     <AdminLayout>
@@ -282,7 +271,7 @@ export function AdminSupport() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredTickets.map((ticket: any) => (
+                  {filteredTickets.map((ticket) => (
                     <TableRow 
                       key={ticket.id} 
                       className="hover:bg-gray-50 cursor-pointer"
@@ -295,10 +284,10 @@ export function AdminSupport() {
                         {ticket.subject}
                       </TableCell>
                       <TableCell className="text-gray-700">
-                        {ticket.user || ticket.company_settings?.trade_name || "-"}
+                        {ticket.company_settings?.trade_name || "-"}
                       </TableCell>
                       <TableCell className="text-gray-500">
-                        {ticket.org || ticket.company_settings?.legal_name || "-"}
+                        {ticket.company_settings?.legal_name || "-"}
                       </TableCell>
                       <TableCell>
                         {getStatusBadge(ticket.status)}
