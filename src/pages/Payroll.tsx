@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { lazy, Suspense, useState, useMemo, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
@@ -24,11 +24,7 @@ import { useNavigate } from "react-router-dom";
 import { format, isWithinInterval, parse } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
-import XLSX from "xlsx-js-style";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
 import { CalculatePayrollModal, PayrollCalculation } from "@/components/payroll/CalculatePayrollModal";
-import { PayrollPDFPreviewModal } from "@/components/payroll/PayrollPDFPreviewModal";
 import { PayrollRulesModal } from "@/components/payroll/PayrollRulesModal";
 import { usePayrollRecords, useCreatePayrollRecords, useUpdatePayrollStatus, useDeletePayrollRecords, PayrollRecord as DBPayrollRecord } from "@/hooks/usePayrollRecords";
 import { usePayrollRules } from "@/hooks/usePayrollRules";
@@ -38,6 +34,12 @@ import { useJobs } from "@/hooks/useJobs";
 import { useCompanySettings } from "@/hooks/useCompanySettings";
 import { formatCurrency } from "@/lib/currency";
 import { supabase } from "@/integrations/supabase/client";
+
+const PayrollPDFPreviewModal = lazy(() =>
+  import("@/components/payroll/PayrollPDFPreviewModal").then(({ PayrollPDFPreviewModal }) => ({
+    default: PayrollPDFPreviewModal,
+  })),
+);
 interface PayrollRecord {
   id: string;
   period: string;
@@ -752,7 +754,8 @@ export function Payroll() {
       setIsGeneratingFromJobs(false);
     }
   };
-  const handleDownloadExcel = () => {
+  const handleDownloadExcel = async () => {
+    const { default: XLSX } = await import("xlsx-js-style");
     // Get period for header
     const periodHeader = startDate && endDate 
       ? `${format(startDate, "dd/MM/yyyy")} - ${format(endDate, "dd/MM/yyyy")}`
@@ -977,6 +980,10 @@ export function Payroll() {
   
   // Generate PDF for a single employee (same style as Excel)
   const generateEmployeePDF = async (employeeName: string): Promise<Blob> => {
+    const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([
+      import("jspdf"),
+      import("jspdf-autotable"),
+    ]);
     const doc = new jsPDF();
     
     // Get all records for this employee - use payrollData as source (not filteredData which may be empty)
@@ -1923,17 +1930,21 @@ export function Payroll() {
           )}
 
           {/* PDF Preview Modal */}
-          <PayrollPDFPreviewModal
-            open={previewModalOpen}
-            onOpenChange={setPreviewModalOpen}
-            employeeName={previewRecord?.employeeName || ""}
-            employeePhone={staffList.find(s => s.name === previewRecord?.employeeName)?.phone || undefined}
-            pdfBlob={previewPdfBlob}
-            isGenerating={isGeneratingPreview}
-            onDownload={handleDownloadFromPreview}
-            onSendSMS={handleSendFromPreview}
-            isSending={isSendingSMS === previewRecord?.id}
-          />
+          {previewModalOpen && (
+            <Suspense fallback={null}>
+              <PayrollPDFPreviewModal
+                open={previewModalOpen}
+                onOpenChange={setPreviewModalOpen}
+                employeeName={previewRecord?.employeeName || ""}
+                employeePhone={staffList.find(s => s.name === previewRecord?.employeeName)?.phone || undefined}
+                pdfBlob={previewPdfBlob}
+                isGenerating={isGeneratingPreview}
+                onDownload={handleDownloadFromPreview}
+                onSendSMS={handleSendFromPreview}
+                isSending={isSendingSMS === previewRecord?.id}
+              />
+            </Suspense>
+          )}
 
           {/* Payroll Rules Modal */}
           <PayrollRulesModal
