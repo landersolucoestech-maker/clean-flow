@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -5,35 +6,32 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { QuickBooksSyncProvider } from "@/components/providers/QuickBooksSyncProvider";
-import Index from "./pages/Index";
-import { Auth } from "./pages/Auth";
-import { Customers } from "./pages/Customers";
-import { Schedule } from "./pages/Schedule";
-import { Billing } from "./pages/Billing";
-import { Transactions } from "./pages/Transactions";
-import { Leads } from "./pages/Leads";
-import { Communications } from "./pages/Communications";
-import { Rules } from "./pages/Rules";
-import { Reports } from "./pages/Reports";
-import { Settings } from "./pages/Settings";
-import { Support } from "./pages/Support";
-import {
-  AdminDashboard,
-  AdminClients,
-  AdminAuth,
-  AdminLogs,
-  AdminSettings,
-  AdminSubscription,
-  AdminSupport,
-} from "./pages/admin";
-
-import { Payroll } from "./pages/Payroll";
-
-import { SyncLogs } from "./pages/SyncLogs";
-import RingCentralCallback from "./pages/RingCentralCallback";
-import GoogleCallback from "./pages/GoogleCallback";
-import NotFound from "./pages/NotFound";
 import { AuthenticatedRoute, PlatformAdminRoute } from "@/components/auth/RouteGuards";
+
+const Index = lazy(() => import("./pages/Index"));
+const Auth = lazy(() => import("./pages/Auth").then(({ Auth }) => ({ default: Auth })));
+const Customers = lazy(() => import("./pages/Customers").then(({ Customers }) => ({ default: Customers })));
+const Schedule = lazy(() => import("./pages/Schedule").then(({ Schedule }) => ({ default: Schedule })));
+const Billing = lazy(() => import("./pages/Billing").then(({ Billing }) => ({ default: Billing })));
+const Transactions = lazy(() => import("./pages/Transactions").then(({ Transactions }) => ({ default: Transactions })));
+const Leads = lazy(() => import("./pages/Leads").then(({ Leads }) => ({ default: Leads })));
+const Communications = lazy(() => import("./pages/Communications").then(({ Communications }) => ({ default: Communications })));
+const Rules = lazy(() => import("./pages/Rules").then(({ Rules }) => ({ default: Rules })));
+const Reports = lazy(() => import("./pages/Reports").then(({ Reports }) => ({ default: Reports })));
+const Settings = lazy(() => import("./pages/Settings").then(({ Settings }) => ({ default: Settings })));
+const Support = lazy(() => import("./pages/Support").then(({ Support }) => ({ default: Support })));
+const Payroll = lazy(() => import("./pages/Payroll").then(({ Payroll }) => ({ default: Payroll })));
+const SyncLogs = lazy(() => import("./pages/SyncLogs").then(({ SyncLogs }) => ({ default: SyncLogs })));
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard").then(({ AdminDashboard }) => ({ default: AdminDashboard })));
+const AdminClients = lazy(() => import("./pages/admin/AdminClients").then(({ AdminClients }) => ({ default: AdminClients })));
+const AdminAuth = lazy(() => import("./pages/admin/AdminAuth").then(({ AdminAuth }) => ({ default: AdminAuth })));
+const AdminLogs = lazy(() => import("./pages/admin/AdminLogs").then(({ AdminLogs }) => ({ default: AdminLogs })));
+const AdminSettings = lazy(() => import("./pages/admin/AdminSettings").then(({ AdminSettings }) => ({ default: AdminSettings })));
+const AdminSubscription = lazy(() => import("./pages/admin/AdminSubscription").then(({ AdminSubscription }) => ({ default: AdminSubscription })));
+const AdminSupport = lazy(() => import("./pages/admin/AdminSupport").then(({ AdminSupport }) => ({ default: AdminSupport })));
+const RingCentralCallback = lazy(() => import("./pages/RingCentralCallback"));
+const GoogleCallback = lazy(() => import("./pages/GoogleCallback"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
 
@@ -45,7 +43,8 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <Routes>
+            <Suspense fallback={<div className="flex min-h-screen items-center justify-center text-muted-foreground">Carregando...</div>}>
+              <Routes>
               <Route path="/" element={<AuthenticatedRoute><Index /></AuthenticatedRoute>} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/schedule" element={<AuthenticatedRoute><Schedule /></AuthenticatedRoute>} />
@@ -75,7 +74,8 @@ const App = () => (
               <Route path="/integrations/google/callback" element={<GoogleCallback />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
-            </Routes>
+              </Routes>
+            </Suspense>
           </BrowserRouter>
         </TooltipProvider>
       </QuickBooksSyncProvider>
