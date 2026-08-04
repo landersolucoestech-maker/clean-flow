@@ -32,13 +32,13 @@ export function RecentActivity() {
 
   const isLoading = isLoadingJobs || isLoadingInvoices;
   
-  const getLocale = () => {
+  const locale = (() => {
     switch (language) {
       case 'pt': return ptBR;
       case 'es': return es;
       default: return enUS;
     }
-  };
+  })();
 
   const getDateFormat = () => {
     switch (language) {
@@ -65,7 +65,7 @@ export function RecentActivity() {
           descriptionKey: 'activity.cleaningCompleted',
           customerName,
           createdBy,
-          time: formatDistanceToNow(updatedAt, { addSuffix: true, locale: getLocale() }),
+          time: formatDistanceToNow(updatedAt, { addSuffix: true, locale }),
           statusKey: 'activity.completed',
           icon: CheckCircle,
           color: 'text-success',
@@ -78,7 +78,7 @@ export function RecentActivity() {
           descriptionKey: 'activity.appointmentCancelled',
           customerName,
           createdBy,
-          time: formatDistanceToNow(updatedAt, { addSuffix: true, locale: getLocale() }),
+          time: formatDistanceToNow(updatedAt, { addSuffix: true, locale }),
           statusKey: 'activity.cancelled',
           icon: XCircle,
           color: 'text-destructive',
@@ -92,7 +92,7 @@ export function RecentActivity() {
           descriptionKey: 'activity.newAppointmentScheduled',
           customerName,
           createdBy,
-          time: formatDistanceToNow(createdAt, { addSuffix: true, locale: getLocale() }),
+          time: formatDistanceToNow(createdAt, { addSuffix: true, locale }),
           statusKey: 'activity.scheduled',
           icon: Calendar,
           color: 'text-primary',
@@ -114,7 +114,7 @@ export function RecentActivity() {
           descriptionKey: 'activity.paymentReceived',
           customerName,
           createdBy,
-          time: formatDistanceToNow(updatedAt, { addSuffix: true, locale: getLocale() }),
+          time: formatDistanceToNow(updatedAt, { addSuffix: true, locale }),
           statusKey: 'activity.paid',
           icon: DollarSign,
           color: 'text-success',
@@ -127,7 +127,7 @@ export function RecentActivity() {
           descriptionKey: 'activity.invoicePending',
           customerName,
           createdBy,
-          time: formatDistanceToNow(updatedAt, { addSuffix: true, locale: getLocale() }),
+          time: formatDistanceToNow(updatedAt, { addSuffix: true, locale }),
           statusKey: 'activity.pending',
           icon: Clock,
           color: 'text-warning',
@@ -138,7 +138,7 @@ export function RecentActivity() {
 
     // Sort by timestamp descending (most recent first)
     return allActivities.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-  }, [jobs, invoices, language]);
+  }, [jobs, invoices, locale]);
 
   const totalPages = Math.max(1, Math.ceil(activities.length / ITEMS_PER_PAGE));
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -179,7 +179,7 @@ export function RecentActivity() {
                 </p>
                 <div className="flex items-center gap-2 mt-1 flex-wrap">
                   <p className="text-xs text-muted-foreground">
-                    {format(activity.timestamp, getDateFormat(), { locale: getLocale() })}
+                    {format(activity.timestamp, getDateFormat(), { locale })}
                   </p>
                   <span className="text-xs text-muted-foreground/60">•</span>
                   <p className="text-xs text-muted-foreground/60">
