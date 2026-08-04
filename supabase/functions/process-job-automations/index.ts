@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { authorizeStaffRequest } from "../_shared/authorize.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -114,6 +115,14 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    const authorizationError = await authorizeStaffRequest(
+      req,
+      supabase,
+      ["admin", "cleaner", "driver", "cleaning_manager", "office_manager", "virtual_assistant"],
+      { allowServiceRole: true },
+    );
+    if (authorizationError) return authorizationError;
 
     const { job_id, trigger_type, company_id }: ProcessAutomationRequest = await req.json();
 
@@ -318,15 +327,51 @@ Deno.serve(async (req) => {
       );
     }
 
-    // TODO: Handle email sending if needed
     if (toEmail) {
-      console.log(`Email automation not yet implemented. Would send to: ${toEmail}`);
+      const sendEmailUrl = `${supabaseUrl}/functions/v1/send-email`;
+      const emailResponse = await fetch(sendEmailUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${supabaseServiceKey}`,
+        },
+        body: JSON.stringify({
+          to: toEmail,
+          subject: `${companyName}: service update`,
+          text: message,
+        }),
+      });
+
+      if (!emailResponse.ok) {
+        const details = await emailResponse.text();
+        console.error("Failed to send automation email:", details);
+        return new Response(
+          JSON.stringify({ error: "Failed to send email", details }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+
+      const { error: logError } = await supabase.from("automation_logs").insert({
+        automation_id: automation.id,
+        job_id,
+        customer_id: customer.id,
+        trigger_type,
+        message_sent: message,
+        sent_to: toEmail,
+        sent_via: "email",
+        status: "sent",
+        sent_at: new Date().toISOString(),
+      });
+      if (logError) console.warn("Could not log email automation:", logError);
+
       return new Response(
         JSON.stringify({
           success: true,
           automation_id: automation.id,
-          message_sent: false,
-          reason: "Email sending not yet implemented",
+          message_sent: true,
+          sent_to: toEmail,
+          sent_via: "email",
+          language: messageLanguage,
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
