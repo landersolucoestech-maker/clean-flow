@@ -93,7 +93,7 @@ function generateRecurringDates(startDate: string, frequencyDays: number): strin
   const oneMonthLater = new Date(startDate);
   oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
   
-  let currentDate = new Date(start);
+  const currentDate = new Date(start);
   currentDate.setDate(currentDate.getDate() + frequencyDays);
   
   while (currentDate <= oneMonthLater) {
@@ -574,7 +574,7 @@ function normalizeCustomerName(name: string): string {
     .replace(/[\u0300-\u036f]/g, "") // remove diacritics
     .toLowerCase()
     .replace(/&/g, " and ")
-    .replace(/[\/|]+/g, " ")
+    .replace(/[/|]+/g, " ")
     .replace(/[^a-z0-9 ]+/g, " ")
     .replace(/\s+/g, " ")
     .trim();
