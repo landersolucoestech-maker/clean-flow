@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -106,12 +106,12 @@ export function InvoiceModal({ open, onOpenChange, appointment, depositAmount, i
     : 0;
 
   // Parse appointment date using EST timezone utilities
-  const parseAppointmentDate = (): Date => {
+  const parseAppointmentDate = useCallback((): Date => {
     if (appointment?.date) {
       return parseDateString(appointment.date);
     }
     return getCurrentDateInEST();
-  };
+  }, [appointment?.date]);
 
   // Prefer service type for invoice line item description (avoid using job notes)
   const itemDescription = appointment?.service || appointment?.description || "Cleaning Service";
@@ -191,7 +191,7 @@ export function InvoiceModal({ open, onOpenChange, appointment, depositAmount, i
       // Calculate due date based on payment terms
       setDueDate(addDays(issueDate, PAYMENT_TERMS_DAYS[paymentTerms]));
     }
-  }, [open, appointment, depositAmount, isDepositInvoice]);
+  }, [open, appointment, depositAmount, isDepositInvoice, parseAppointmentDate, paymentTerms]);
 
   // Update due date when invoice date or payment terms change
   useEffect(() => {
