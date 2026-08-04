@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Sparkles, Mail, Lock, User, Building2, Phone, ArrowRight, Loader2 } from "lucide-react";
+import { getErrorMessage } from "@/lib/errors";
 
 export function Auth() {
   const [isLoading, setIsLoading] = useState(false);
@@ -38,10 +39,10 @@ export function Auth() {
         description: "You have successfully logged in.",
       });
       navigate("/");
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: error.message || "Failed to login",
+        description: getErrorMessage(error, "Failed to login"),
         variant: "destructive",
       });
     } finally {
@@ -73,10 +74,10 @@ export function Auth() {
         title: "Account created!",
         description: "Please check your email to verify your account.",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: error.message || "Failed to create account",
+        description: getErrorMessage(error, "Failed to create account"),
         variant: "destructive",
       });
     } finally {
@@ -93,10 +94,10 @@ export function Auth() {
         },
       });
       if (error) throw error;
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: error.message || "Failed to login with Google",
+        description: getErrorMessage(error, "Failed to login with Google"),
         variant: "destructive",
       });
     }
