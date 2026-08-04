@@ -49,7 +49,7 @@ export function useRingCentral() {
 
       const { data, error } = await supabase
         .from("ringcentral_connections")
-        .select("*")
+        .select("id, company_id, phone_number, extension_id, account_id, connected_at, token_expires_at")
         .eq("company_id", companyId)
         .maybeSingle();
 
@@ -107,12 +107,6 @@ export function useRingCentral() {
         authUrl: data.auth_url,
       });
 
-      console.log("RingCentral OAuth debug", {
-        clientId: data.client_id,
-        redirectUri: data.redirect_uri ?? redirectUri,
-        scope: data.scope,
-      });
-
       // Open OAuth popup
       const width = 600;
       const height = 700;
@@ -127,6 +121,7 @@ export function useRingCentral() {
 
       // Listen for popup messages
       const handleMessage = async (event: MessageEvent) => {
+        if (event.origin !== window.location.origin || event.source !== popup) return;
         if (event.data?.type === "ringcentral-callback") {
           window.removeEventListener("message", handleMessage);
           
