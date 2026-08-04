@@ -203,8 +203,8 @@ export function Billing() {
     });
 
     // If this is a deposit invoice linked to a lead, auto-open job creation
-    const invoiceType = (invoice as any).invoice_type as string | undefined;
-    const leadId = (invoice as any).lead_id as string | undefined;
+    const invoiceType = invoice.invoice_type;
+    const leadId = invoice.lead_id;
 
     const notesLower = (invoice.notes || "").toLowerCase();
     const isDepositInvoice = invoiceType === "deposit" ||
