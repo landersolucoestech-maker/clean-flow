@@ -26,7 +26,7 @@ export default function GoogleCallback() {
   const returnPath = useMemo(() => safeReturnPath(searchParams.get("state")), [searchParams]);
 
   useEffect(() => {
-    const notifyOpener = (success: boolean, error: string | null, data?: any) => {
+    const notifyOpener = (success: boolean, error: string | null, data?: unknown) => {
       if (window.opener) {
         window.opener.postMessage(
           {
@@ -84,7 +84,7 @@ export default function GoogleCallback() {
 
         // Persist here as a fallback for cases where opener cannot access storage (iframe partitioning)
         localStorage.setItem("google_tokens", JSON.stringify(newTokens));
-        googleState.setTokens(newTokens as any);
+        googleState.setTokens(newTokens);
 
         setStatus("success");
         setMessage("Google conectado com sucesso!");
