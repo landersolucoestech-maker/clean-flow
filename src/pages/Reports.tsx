@@ -23,7 +23,6 @@ import {
   Loader2,
 } from "lucide-react";
 import { LucideIcon } from "lucide-react";
-import * as XLSX from "xlsx";
 import { toast } from "sonner";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useJobs } from "@/hooks/useJobs";
@@ -62,7 +61,7 @@ export function Reports() {
   const isLoading = isLoadingCustomers || isLoadingJobs || isLoadingInvoices || 
                     isLoadingLeads || isLoadingTransactions || isLoadingPayroll || isLoadingStaff;
 
-  const handleExportReport = (report: ReportData) => {
+  const handleExportReport = async (report: ReportData) => {
     let data: Record<string, unknown>[] = [];
     let fileName = "";
 
@@ -181,6 +180,8 @@ export function Reports() {
       toast.error(t("reports.reportNotFound"));
         return;
     }
+
+    const XLSX = await import("xlsx-js-style");
 
     // Create workbook and worksheet
     const ws = XLSX.utils.json_to_sheet(data);
