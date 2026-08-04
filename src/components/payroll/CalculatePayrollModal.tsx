@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -136,7 +136,7 @@ export function CalculatePayrollModal({
   const isUuid = (value: string) =>
     /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
 
-  const findStaffFromAssignedValue = (assignedValue: string): Staff[] => {
+  const findStaffFromAssignedValue = useCallback((assignedValue: string): Staff[] => {
     if (!assignedValue) return [];
 
     const raw = assignedValue.trim();
@@ -183,7 +183,7 @@ export function CalculatePayrollModal({
     }
 
     return best && best.score >= 15 ? [best.staff] : [];
-  };
+  }, [staffList]);
 
   // Calculate employee data from jobs (completed or all based on toggle)
   useEffect(() => {
@@ -343,7 +343,7 @@ export function CalculatePayrollModal({
     });
 
     setEmployeeData(data);
-  }, [open, jobs, staffList, payrollRules, existingRecords, isLoading, periodStartISO, periodEndISO, includeNonCompleted]);
+  }, [open, jobs, staffList, payrollRules, existingRecords, isLoading, periodStartISO, periodEndISO, includeNonCompleted, findStaffFromAssignedValue]);
 
   const recalculateTotals = (data: EmployeePayrollData[]): EmployeePayrollData[] => {
     return data.map((emp) => {
