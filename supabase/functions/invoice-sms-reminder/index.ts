@@ -161,7 +161,7 @@ Deno.serve(async (req) => {
       const paymentInfo = getPaymentInfoSMS(customer.payment_method, zelleKey, venmoKey);
       const isOverdue = invoice.status === "overdue" || new Date(invoice.due_date) < new Date();
 
-      let message = isOverdue
+      const message = isOverdue
         ? `Hi ${customer.name}, invoice ${invoice.invoice_number} for $${invoice.total?.toFixed(2)} is overdue. ${paymentInfo}Please pay ASAP. - ${companyName}`
         : `Hi ${customer.name}, reminder: invoice ${invoice.invoice_number} for $${invoice.total?.toFixed(2)} is due on ${invoice.due_date}. ${paymentInfo}- ${companyName}`;
 
