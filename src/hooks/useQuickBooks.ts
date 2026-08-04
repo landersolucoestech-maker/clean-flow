@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -43,6 +43,8 @@ export function useQuickBooks() {
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [companyName, setCompanyName] = useState<string | null>(null);
+  const refreshTokensRef = useRef<(refreshToken: string) => Promise<void>>();
+  const exchangeTokenRef = useRef<(code: string, realmId: string) => Promise<void>>();
 
   // Load tokens from localStorage on mount
   useEffect(() => {
@@ -55,7 +57,7 @@ export function useQuickBooks() {
         fetchCompanyInfo(parsed);
       } else {
         // Try to refresh token
-        refreshTokens(parsed.refreshToken);
+        void refreshTokensRef.current?.(parsed.refreshToken);
       }
     }
   }, []);
@@ -65,7 +67,7 @@ export function useQuickBooks() {
     const handleMessage = async (event: MessageEvent) => {
       if (event.data.type === "quickbooks-callback") {
         const { code, realmId } = event.data;
-        await exchangeToken(code, realmId);
+        await exchangeTokenRef.current?.(code, realmId);
       } else if (event.data.type === "quickbooks-error") {
         toast.error(`QuickBooks: ${event.data.error}`);
       }
@@ -155,6 +157,9 @@ export function useQuickBooks() {
     }
   };
 
+  refreshTokensRef.current = refreshTokens;
+  exchangeTokenRef.current = exchangeToken;
+
   const disconnect = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY);
     setTokens(null);
@@ -187,7 +192,7 @@ export function useQuickBooks() {
 
     // Check if token needs refresh
     if (tokens.expiresAt < Date.now() + 60000) {
-      await refreshTokens(tokens.refreshToken);
+      await refreshTokensRef.current?.(tokens.refreshToken);
     }
 
     const { data: result, error } = await supabase.functions.invoke("quickbooks-api", {
