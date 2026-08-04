@@ -9,6 +9,8 @@ import { useJobs, useUpdateJob, useDeleteJob } from "@/hooks/useJobs";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useJobGpsAlerts } from "@/hooks/useJobGpsAlerts";
 import { AppointmentModal } from "@/components/schedule/AppointmentModal";
+import type { EditJobData } from "@/components/schedule/AppointmentModal";
+import type { Appointment as CalendarAppointment } from "@/components/calendar/CalendarGrid";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { format } from "date-fns";
 
@@ -54,10 +56,10 @@ export function UpcomingJobs() {
   const deleteJob = useDeleteJob();
   const { t, language } = useLanguage();
   
-  const [selectedAppointment, setSelectedAppointment] = useState<any | null>(null);
+  const [selectedAppointment, setSelectedAppointment] = useState<CalendarAppointment | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"view" | "edit">("view");
-  const [editJobData, setEditJobData] = useState<any | null>(null);
+  const [editJobData, setEditJobData] = useState<EditJobData | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
 
   // Get day name translation
@@ -149,14 +151,14 @@ export function UpcomingJobs() {
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const paginatedJobs = upcomingJobs.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
-  const handleViewDetails = (job: any) => {
+  const handleViewDetails = (job: CalendarAppointment) => {
     setSelectedAppointment(job);
     setModalMode("view");
     setEditJobData(null);
     setModalOpen(true);
   };
 
-  const handleRequestEdit = (appointment: any) => {
+  const handleRequestEdit = (appointment: CalendarAppointment) => {
     // Find the raw job data
     const rawJob = upcomingJobs.find(j => j.id === appointment.id)?.rawJob;
     if (!rawJob) return;
@@ -179,10 +181,7 @@ export function UpcomingJobs() {
       service: rawJob.service_type || rawJob.title || "",
       date: rawJob.scheduled_date || new Date().toISOString().split("T")[0],
       time: formatTime(rawJob.scheduled_time),
-      staff1: staffArray[0] || "",
-      staff2: staffArray[1] || "",
-      staff3: staffArray[2] || "",
-      staff4: staffArray[3] || "",
+      team: staffArray.join(", "),
       status: rawJob.status || "scheduled",
       duration: rawJob.duration_text || (rawJob.duration_minutes != null ? `${rawJob.duration_minutes} min` : ""),
       amount: rawJob.amount != null ? String(rawJob.amount) : "",
