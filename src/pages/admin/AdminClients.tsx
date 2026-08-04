@@ -31,23 +31,14 @@ import {
   Download,
 } from "lucide-react";
 
-// Mock data for demo
-const mockClients = [
-  { id: "1", name: "João Silva", email: "joao@empresa.com", plan: "Pro", status: "Ativo", createdAt: "2024-01-15" },
-  { id: "2", name: "Maria Santos", email: "maria@studio.com", plan: "Enterprise", status: "Ativo", createdAt: "2024-01-10" },
-  { id: "3", name: "Carlos Oliveira", email: "carlos@label.com", plan: "Start", status: "Pendente", createdAt: "2024-01-05" },
-];
-
 export function AdminClients() {
   const { t } = useLanguage();
   const { companies, isLoadingCompanies } = usePlatformAdmin();
   const [searchQuery, setSearchQuery] = useState("");
 
-  const displayClients = companies.length > 0 ? companies : mockClients;
-
-  const filteredClients = displayClients.filter((client: any) => {
+  const filteredClients = companies.filter((client) => {
     const searchLower = searchQuery.toLowerCase();
-    const name = client.name || client.legal_name || client.trade_name || "";
+    const name = client.trade_name || client.legal_name || "";
     const email = client.email || "";
     return (
       name.toLowerCase().includes(searchLower) ||
@@ -55,17 +46,10 @@ export function AdminClients() {
     );
   });
 
-  const getStatusBadge = (status: string) => {
-    if (status === "Ativo" || status === "active") {
-      return (
-        <Badge className="bg-green-100 text-green-700 hover:bg-green-100 font-medium">
-          Ativo
-        </Badge>
-      );
-    }
+  const getStatusBadge = () => {
     return (
-      <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-100 font-medium">
-        Pendente
+      <Badge className="bg-green-100 text-green-700 hover:bg-green-100 font-medium">
+        Cadastrado
       </Badge>
     );
   };
@@ -130,24 +114,24 @@ export function AdminClients() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredClients.map((client: any) => (
+                  {filteredClients.map((client) => (
                     <TableRow key={client.id} className="hover:bg-gray-50">
                       <TableCell>
                         <div>
                           <p className="font-medium text-gray-900">
-                            {client.name || client.trade_name || client.legal_name}
+                            {client.trade_name || client.legal_name}
                           </p>
                           <p className="text-sm text-gray-500">{client.email || "-"}</p>
                         </div>
                       </TableCell>
                       <TableCell className="text-gray-700">
-                        {client.plan || client.currency || "Pro"}
+                        {client.currency || "-"}
                       </TableCell>
                       <TableCell>
-                        {getStatusBadge(client.status || "Ativo")}
+                        {getStatusBadge()}
                       </TableCell>
                       <TableCell className="text-gray-500">
-                        {format(new Date(client.createdAt || client.created_at), "MM/dd/yyyy")}
+                        {client.created_at ? format(new Date(client.created_at), "MM/dd/yyyy") : "-"}
                       </TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
