@@ -14,8 +14,8 @@ import { CustomerDetailsModal } from "@/components/customers/CustomerDetailsModa
 import { useCustomers, useDeleteCustomer, useBulkDeleteCustomers, useImportCustomers, Customer, ImportedCustomerRow } from "@/hooks/useCustomers";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import * as XLSX from "xlsx";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { readSpreadsheetFile } from "@/lib/spreadsheet";
 
 export function Customers() {
   const { t } = useLanguage();
@@ -51,7 +51,7 @@ export function Customers() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     // Map source values to readable labels
     const sourceLabels: Record<string, string> = {
       "website": "Website",
@@ -155,6 +155,7 @@ export function Customers() {
       return baseData;
     });
 
+    const XLSX = await import("xlsx-js-style");
     const worksheet = XLSX.utils.json_to_sheet(exportData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Customers");
@@ -193,18 +194,12 @@ export function Customers() {
     toast.success("Customer list exported successfully!");
   };
 
-  const handleImportExcel = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImportExcel = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const data = new Uint8Array(e.target?.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: "array" });
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json<ImportedCustomerRow>(worksheet);
+    try {
+        const jsonData = await readSpreadsheetFile(file) as ImportedCustomerRow[];
         
         if (jsonData.length === 0) {
           toast.error("No data found in the file.");
@@ -223,12 +218,10 @@ export function Customers() {
 
         // Import customers to database
         importCustomers.mutate(jsonData);
-      } catch (error) {
-        console.error("Import error:", error);
-        toast.error("Error importing file. Please check the format.");
-      }
-    };
-    reader.readAsArrayBuffer(file);
+    } catch (error) {
+      console.error("Import error:", error);
+      toast.error(error instanceof Error ? error.message : "Error importing file. Please check the format.");
+    }
     
     // Reset input
     if (fileInputRef.current) {
@@ -359,7 +352,7 @@ export function Customers() {
                 type="file"
                 ref={fileInputRef}
                 onChange={handleImportExcel}
-                accept=".xlsx,.xls,.csv"
+                accept=".xlsx,.csv"
                 className="hidden"
               />
               <Button 
