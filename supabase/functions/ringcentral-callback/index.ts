@@ -1,4 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { authorizeStaffRequest } from "../_shared/authorize.ts";
+import { verifyOAuthState } from "../_shared/oauth-state.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -25,6 +27,14 @@ Deno.serve(async (req) => {
       );
     }
 
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const authorizationError = await authorizeStaffRequest(
+      req,
+      supabase,
+      ["admin", "office_manager"],
+    );
+    if (authorizationError) return authorizationError;
+
     const { code, state, redirect_uri } = await req.json();
 
     if (!code || !state || !redirect_uri) {
@@ -34,25 +44,15 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Decode state to get company_id
-    let stateData;
-    try {
-      stateData = JSON.parse(atob(state));
-    } catch {
+    const stateData = await verifyOAuthState(state, RC_CLIENT_SECRET);
+    if (!stateData || stateData.redirectUri !== redirect_uri) {
       return new Response(
-        JSON.stringify({ error: "Invalid state parameter" }),
+        JSON.stringify({ error: "Invalid or expired state parameter" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const { company_id } = stateData;
-
-    if (!company_id) {
-      return new Response(
-        JSON.stringify({ error: "Invalid state: missing company_id" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    const company_id = stateData.companyId;
 
     // Exchange code for tokens
     const tokenResponse = await fetch(RC_TOKEN_URL, {
@@ -127,8 +127,6 @@ Deno.serve(async (req) => {
     }
 
     // Store tokens in database
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
     const { error: upsertError } = await supabase
       .from("ringcentral_connections")
       .upsert({
