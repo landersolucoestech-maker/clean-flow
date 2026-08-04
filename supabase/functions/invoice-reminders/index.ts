@@ -24,26 +24,17 @@ function safeHeader(value: unknown): string {
   return String(value ?? "").replace(/[\r\n]+/g, " ").slice(0, 200);
 }
 
-interface Invoice {
-  id: string;
-  invoice_number: string;
-  total: number;
-  due_date: string;
-  status: string;
-  customer_id: string;
-  customer?: {
-    name: string;
-    email: string;
-    payment_method: string | null;
-    preferred_language: string | null;
-  };
+interface InvoiceCustomer {
+  name: string;
+  email: string;
+  payment_method: string | null;
+  preferred_language?: string | null;
 }
 
-interface CompanySettings {
-  zelle_payment_key: string | null;
-  venmo_payment_key: string | null;
-  trade_name: string;
-  preferred_language: string | null;
+function getInvoiceCustomer(
+  customer: InvoiceCustomer | InvoiceCustomer[] | null | undefined,
+): InvoiceCustomer | null {
+  return Array.isArray(customer) ? customer[0] ?? null : customer ?? null;
 }
 
 // Get payment info based on customer preference
@@ -136,7 +127,7 @@ serve(async (req: Request) => {
 
       // Send upcoming reminders
       for (const invoice of (upcomingInvoices || [])) {
-        const customer = invoice.customer as { name: string; email: string; payment_method: string | null } | null;
+        const customer = getInvoiceCustomer(invoice.customer);
         if (!customer?.email) continue;
 
         try {
@@ -180,7 +171,7 @@ serve(async (req: Request) => {
 
       // Send overdue reminders
       for (const invoice of (overdueInvoices || [])) {
-        const customer = invoice.customer as { name: string; email: string; payment_method: string | null } | null;
+        const customer = getInvoiceCustomer(invoice.customer);
         if (!customer?.email) continue;
 
         try {
@@ -263,7 +254,7 @@ serve(async (req: Request) => {
         throw new Error("Invoice not found");
       }
 
-      const customer = invoice.customer as { name: string; email: string; payment_method: string | null } | null;
+      const customer = getInvoiceCustomer(invoice.customer);
       if (!customer?.email) {
         throw new Error("Customer email not found");
       }
