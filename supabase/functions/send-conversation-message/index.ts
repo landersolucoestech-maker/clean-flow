@@ -6,11 +6,19 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+type CustomerContact = { phone: string | null; phone2: string | null };
+type StaffContact = { phone: string | null };
+
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
+}
+
+function firstRelated<T>(value: T | T[] | null | undefined): T | null {
+  if (Array.isArray(value)) return value[0] ?? null;
+  return value ?? null;
 }
 
 function isAllowedAttachmentUrl(value: string, supabaseUrl: string): boolean {
@@ -61,8 +69,8 @@ Deno.serve(async (req) => {
       .maybeSingle();
     if (conversationError || !conversation) return json({ error: "Conversation not found" }, 404);
 
-    const customer = conversation.customer as { phone: string | null; phone2: string | null } | null;
-    const staff = conversation.staff as { phone: string | null } | null;
+    const customer = firstRelated(conversation.customer as CustomerContact | CustomerContact[] | null);
+    const staff = firstRelated(conversation.staff as StaffContact | StaffContact[] | null);
     const phone = customer?.phone || customer?.phone2 || staff?.phone || null;
     if (!phone) return json({ error: "Recipient has no phone number" }, 409);
 
