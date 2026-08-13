@@ -1,8 +1,15 @@
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { useGoogle } from "@/hooks/useGoogle";
 import { toast } from "sonner";
 import { getErrorMessage } from "@/lib/errors";
-import { Job } from "@/hooks/useJobs";
+import type { Job } from "@/hooks/useJobs";
+import {
+  loadCalendarState,
+  removeCalendarMapping,
+  saveCalendarMapping,
+  saveCalendarPreferences,
+  type CalendarEntityType,
+} from "../services/googleCalendarState.service";
 
 interface CalendarEventData {
   jobId: string;
@@ -14,120 +21,107 @@ interface CalendarEventData {
   attendees?: string[];
 }
 
-const CALENDAR_EVENT_MAP_KEY = "google_calendar_events";
-const SELECTED_CALENDAR_KEY = "google_selected_calendar";
-const LEADS_CALENDAR_KEY = "google_leads_calendar";
+type CachedMapping = { eventId: string; calendarId: string };
 
-// Store mapping between job IDs and Google Calendar event IDs
-function getEventMap(): Record<string, string> {
-  const stored = localStorage.getItem(CALENDAR_EVENT_MAP_KEY);
-  return stored ? JSON.parse(stored) : {};
-}
+let selectedCalendarId = "primary";
+let leadsCalendarId = "";
+const eventMap = new Map<string, CachedMapping>();
+let stateLoadPromise: Promise<void> | null = null;
 
-function setEventMap(map: Record<string, string>) {
-  localStorage.setItem(CALENDAR_EVENT_MAP_KEY, JSON.stringify(map));
-}
+const mappingKey = (entityType: CalendarEntityType, entityId: string) => `${entityType}:${entityId}`;
 
-// Get/set selected calendar ID for jobs
-export function getSelectedCalendarId(): string {
-  return localStorage.getItem(SELECTED_CALENDAR_KEY) || "primary";
-}
-
-export function setSelectedCalendarId(calendarId: string) {
-  localStorage.setItem(SELECTED_CALENDAR_KEY, calendarId);
-}
-
-// Get/set selected calendar ID for leads
-export function getLeadsCalendarId(): string {
-  const stored = localStorage.getItem(LEADS_CALENDAR_KEY) || "";
-  // "none" is a UI sentinel meaning disabled
-  return stored === "none" ? "" : stored;
-}
-
-export function setLeadsCalendarId(calendarId: string) {
-  // "none" (or empty) disables leads calendar sync
-  if (!calendarId || calendarId === "none") {
-    localStorage.removeItem(LEADS_CALENDAR_KEY);
-    return;
+async function ensureCalendarStateLoaded(force = false): Promise<void> {
+  if (force) stateLoadPromise = null;
+  if (!stateLoadPromise) {
+    stateLoadPromise = loadCalendarState().then(({ preferences, mappings }) => {
+      selectedCalendarId = preferences.selectedCalendarId || "primary";
+      leadsCalendarId = preferences.leadsCalendarId || "";
+      eventMap.clear();
+      for (const mapping of mappings) {
+        eventMap.set(mappingKey(mapping.entityType, mapping.entityId), {
+          eventId: mapping.eventId,
+          calendarId: mapping.calendarId,
+        });
+      }
+    }).catch((error) => {
+      stateLoadPromise = null;
+      throw error;
+    });
   }
-  localStorage.setItem(LEADS_CALENDAR_KEY, calendarId);
+  return stateLoadPromise;
+}
+
+export async function loadGoogleCalendarPreferences(): Promise<{ selectedCalendarId: string; leadsCalendarId: string }> {
+  await ensureCalendarStateLoaded(true);
+  return { selectedCalendarId, leadsCalendarId };
+}
+
+export function getSelectedCalendarId(): string {
+  return selectedCalendarId;
+}
+
+export async function setSelectedCalendarId(calendarId: string): Promise<void> {
+  selectedCalendarId = calendarId || "primary";
+  await saveCalendarPreferences({ selectedCalendarId, leadsCalendarId });
+}
+
+export function getLeadsCalendarId(): string {
+  return leadsCalendarId;
+}
+
+export async function setLeadsCalendarId(calendarId: string): Promise<void> {
+  leadsCalendarId = !calendarId || calendarId === "none" ? "" : calendarId;
+  await saveCalendarPreferences({ selectedCalendarId, leadsCalendarId });
+}
+
+async function persistMapping(entityType: CalendarEntityType, entityId: string, calendarId: string, eventId: string) {
+  await saveCalendarMapping({ entityType, entityId, calendarId, eventId });
+  eventMap.set(mappingKey(entityType, entityId), { eventId, calendarId });
+}
+
+async function clearMapping(entityType: CalendarEntityType, entityId: string) {
+  await removeCalendarMapping(entityType, entityId);
+  eventMap.delete(mappingKey(entityType, entityId));
 }
 
 export function useGoogleCalendarSync() {
-  const { 
-    createEvent, 
-    updateEvent, 
-    deleteEvent,
-    listCalendars,
-    isConnected,
-    hasCalendarAccess,
-  } = useGoogle();
+  const { createEvent, updateEvent, deleteEvent, listCalendars, isConnected, hasCalendarAccess } = useGoogle();
 
-  const canSync = useCallback(() => {
-    return isConnected && hasCalendarAccess();
-  }, [hasCalendarAccess, isConnected]);
+  useEffect(() => {
+    if (!isConnected) return;
+    void ensureCalendarStateLoaded(true).catch((error) => {
+      console.error("Failed to load Google Calendar state:", error);
+    });
+  }, [isConnected]);
 
-  // Get the selected calendar ID
-  const getCalendarId = useCallback(() => {
-    return getSelectedCalendarId();
-  }, []);
+  const canSync = useCallback(() => isConnected && hasCalendarAccess(), [hasCalendarAccess, isConnected]);
+  const getCalendarId = useCallback(() => getSelectedCalendarId(), []);
 
-  // Fetch available calendars
   const fetchCalendars = useCallback(async () => {
     if (!canSync()) return [];
     try {
-      const calendars = await listCalendars();
-      return calendars || [];
+      return (await listCalendars()) || [];
     } catch (error) {
       console.error("Failed to fetch calendars:", error);
       return [];
     }
   }, [canSync, listCalendars]);
 
-  // Helper to normalize time format to HH:MM
   const normalizeTime = (time: string | null | undefined): string => {
     if (!time) return "09:00";
-    
     const trimmed = time.trim();
-    
-    // Already in HH:MM or HH:MM:SS format
     if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(trimmed)) {
-      const parts = trimmed.split(':');
-      const hours = parts[0].padStart(2, '0');
-      const minutes = parts[1];
-      return `${hours}:${minutes}`;
+      const parts = trimmed.split(":");
+      return `${parts[0].padStart(2, "0")}:${parts[1]}`;
     }
-    
-    // Just hours (e.g., "8" or "14")
-    if (/^\d{1,2}$/.test(trimmed)) {
-      const hours = trimmed.padStart(2, '0');
-      return `${hours}:00`;
-    }
-    
-    // Try to extract time from various formats
+    if (/^\d{1,2}$/.test(trimmed)) return `${trimmed.padStart(2, "0")}:00`;
     const match = trimmed.match(/(\d{1,2})[:\s]?(\d{2})?/);
-    if (match) {
-      const hours = (match[1] || '09').padStart(2, '0');
-      const minutes = match[2] || '00';
-      return `${hours}:${minutes}`;
-    }
-    
-    return "09:00"; // Default fallback
+    return match ? `${(match[1] || "09").padStart(2, "0")}:${match[2] || "00"}` : "09:00";
   };
 
-  // Convert job data to calendar event format
-  const jobToCalendarEvent = useCallback((job: Job | CalendarEventData): {
-    summary: string;
-    description: string;
-    location: string;
-    startDateTime: string;
-    endDateTime: string;
-    calendarId: string;
-  } => {
+  const jobToCalendarEvent = useCallback((job: Job | CalendarEventData) => {
     const calendarId = getSelectedCalendarId();
-    
-    // Handle CalendarEventData format
-    if ('jobId' in job) {
+    if ("jobId" in job) {
       return {
         summary: job.title,
         description: job.description || "",
@@ -138,24 +132,17 @@ export function useGoogleCalendarSync() {
       };
     }
 
-    // Handle Job format
-    const startDate = job.scheduled_date || new Date().toISOString().split('T')[0];
+    const startDate = job.scheduled_date || new Date().toISOString().split("T")[0];
     const startTime = normalizeTime(job.scheduled_time);
-    const durationMinutes = job.duration_minutes || 120; // Default 2 hours
-
-    // Build the date string more safely
+    const durationMinutes = job.duration_minutes || 120;
     const dateTimeString = `${startDate}T${startTime}:00`;
     let startDateTime = new Date(dateTimeString);
-    
-    // If invalid date, use today at 9am as fallback
-    if (isNaN(startDateTime.getTime())) {
+    if (Number.isNaN(startDateTime.getTime())) {
       console.warn(`Invalid date/time for job ${job.id}: ${dateTimeString}, using fallback`);
       startDateTime = new Date();
       startDateTime.setHours(9, 0, 0, 0);
     }
-    
     const endDateTime = new Date(startDateTime.getTime() + durationMinutes * 60 * 1000);
-
     const customerName = job.customer?.name || "Cliente";
     const serviceType = job.service_type || job.title;
 
@@ -175,26 +162,16 @@ export function useGoogleCalendarSync() {
     };
   }, []);
 
-  // Create calendar event for a job
   const syncJobToCalendar = useCallback(async (job: Job): Promise<string | null> => {
-    if (!canSync()) {
-      return null;
-    }
-
+    if (!canSync()) return null;
     try {
+      await ensureCalendarStateLoaded();
       const eventData = jobToCalendarEvent(job);
       const result = await createEvent(eventData);
-
-      if (result?.id) {
-        // Store mapping
-        const map = getEventMap();
-        map[job.id] = result.id;
-        setEventMap(map);
-
-        toast.success("Job sincronizado com Google Calendar!");
-        return result.id;
-      }
-      return null;
+      if (!result?.id) return null;
+      await persistMapping("job", job.id, eventData.calendarId, result.id);
+      toast.success("Job sincronizado com Google Calendar!");
+      return result.id;
     } catch (error: unknown) {
       console.error("Failed to sync job to calendar:", error);
       toast.error(`Falha ao sincronizar com Calendar: ${getErrorMessage(error, "Erro desconhecido")}`);
@@ -202,161 +179,100 @@ export function useGoogleCalendarSync() {
     }
   }, [canSync, createEvent, jobToCalendarEvent]);
 
-  // Update calendar event for a job
   const updateJobInCalendar = useCallback(async (job: Job): Promise<boolean> => {
     if (!canSync()) return false;
-
     try {
-      const map = getEventMap();
-      const eventId = map[job.id];
-      const calendarId = getSelectedCalendarId();
-
-      if (!eventId) {
-        // No existing event, create one
-        await syncJobToCalendar(job);
-        return true;
-      }
+      await ensureCalendarStateLoaded();
+      const mapping = eventMap.get(mappingKey("job", job.id));
+      if (!mapping) return (await syncJobToCalendar(job)) !== null;
 
       const eventData = jobToCalendarEvent(job);
       await updateEvent({
-        eventId,
+        eventId: mapping.eventId,
         summary: eventData.summary,
         description: eventData.description,
         location: eventData.location,
         startDateTime: eventData.startDateTime,
         endDateTime: eventData.endDateTime,
-        calendarId,
+        calendarId: mapping.calendarId,
       });
-
+      await persistMapping("job", job.id, mapping.calendarId, mapping.eventId);
       toast.success("Evento do Calendar atualizado!");
       return true;
     } catch (error: unknown) {
-      console.error("Failed to update calendar event:", error);
-      // If event doesn't exist anymore, create a new one
       const message = getErrorMessage(error, "");
+      console.error("Failed to update calendar event:", error);
       if (message.includes("404") || message.includes("Not Found")) {
-        const map = getEventMap();
-        delete map[job.id];
-        setEventMap(map);
-        await syncJobToCalendar(job);
-        return true;
+        await clearMapping("job", job.id);
+        return (await syncJobToCalendar(job)) !== null;
       }
       toast.error(`Falha ao atualizar evento: ${getErrorMessage(error, "Erro desconhecido")}`);
       return false;
     }
   }, [canSync, updateEvent, jobToCalendarEvent, syncJobToCalendar]);
 
-  // Delete calendar event for a job
   const deleteJobFromCalendar = useCallback(async (jobId: string): Promise<boolean> => {
     if (!canSync()) return false;
-
     try {
-      const map = getEventMap();
-      const eventId = map[jobId];
-      const calendarId = getSelectedCalendarId();
-
-      if (!eventId) return true; // No event to delete
-
-      await deleteEvent(eventId, calendarId);
-
-      delete map[jobId];
-      setEventMap(map);
-
+      await ensureCalendarStateLoaded();
+      const mapping = eventMap.get(mappingKey("job", jobId));
+      if (!mapping) return true;
+      await deleteEvent(mapping.eventId, mapping.calendarId);
+      await clearMapping("job", jobId);
       toast.success("Evento removido do Calendar");
       return true;
     } catch (error: unknown) {
-      console.error("Failed to delete calendar event:", error);
-      // If already deleted, just remove mapping
       const message = getErrorMessage(error, "");
+      console.error("Failed to delete calendar event:", error);
       if (message.includes("404") || message.includes("Not Found")) {
-        const map = getEventMap();
-        delete map[jobId];
-        setEventMap(map);
+        await clearMapping("job", jobId);
         return true;
       }
       return false;
     }
   }, [canSync, deleteEvent]);
 
-  // Check if a job has a synced calendar event
-  const hasCalendarEvent = useCallback((jobId: string): boolean => {
-    const map = getEventMap();
-    return !!map[jobId];
-  }, []);
+  const hasCalendarEvent = useCallback((jobId: string): boolean => eventMap.has(mappingKey("job", jobId)), []);
+  const getCalendarEventId = useCallback((jobId: string): string | null => eventMap.get(mappingKey("job", jobId))?.eventId || null, []);
 
-  // Get calendar event ID for a job
-  const getCalendarEventId = useCallback((jobId: string): string | null => {
-    const map = getEventMap();
-    return map[jobId] || null;
-  }, []);
-
-  // Bulk sync multiple jobs to calendar
   const syncMultipleJobsToCalendar = useCallback(async (
     jobs: Job[],
-    onProgress?: (current: number, total: number) => void
+    onProgress?: (current: number, total: number) => void,
   ): Promise<{ synced: number; failed: number; errors: string[] }> => {
-    if (!canSync()) {
-      return { synced: 0, failed: 0, errors: ["Google Calendar não está conectado"] };
-    }
-
+    if (!canSync()) return { synced: 0, failed: 0, errors: ["Google Calendar não está conectado"] };
+    await ensureCalendarStateLoaded();
     let synced = 0;
     let failed = 0;
     const errors: string[] = [];
-    const total = jobs.length;
 
     for (let i = 0; i < jobs.length; i++) {
       const job = jobs[i];
       try {
-        // Skip jobs without scheduled date
-        if (!job.scheduled_date) {
-          synced++; // Count as success since it's expected
-          onProgress?.(i + 1, total);
-          continue;
-        }
-
-        // Skip jobs that already have calendar events
-        if (hasCalendarEvent(job.id)) {
+        if (!job.scheduled_date || eventMap.has(mappingKey("job", job.id))) {
           synced++;
-          onProgress?.(i + 1, total);
-          continue;
-        }
-
-        const eventData = jobToCalendarEvent(job);
-        const result = await createEvent(eventData);
-
-        if (result?.id) {
-          const map = getEventMap();
-          map[job.id] = result.id;
-          setEventMap(map);
-          synced++;
-        } else if (result?.error) {
-          const errorMsg = `Job "${job.title}": ${result.error.message || result.error}`;
-          console.error(`Failed to sync job ${job.id}:`, result.error);
-          errors.push(errorMsg);
-          failed++;
         } else {
-          // No ID returned but no explicit error - might have succeeded
-          console.warn(`Job ${job.id} - unclear result:`, result);
-          synced++;
+          const eventData = jobToCalendarEvent(job);
+          const result = await createEvent(eventData);
+          if (result?.id) {
+            await persistMapping("job", job.id, eventData.calendarId, result.id);
+            synced++;
+          } else if (result?.error) {
+            errors.push(`Job "${job.title}": ${result.error.message || result.error}`);
+            failed++;
+          } else {
+            synced++;
+          }
         }
       } catch (error: unknown) {
-        const errorMsg = `Job "${job.title}": ${getErrorMessage(error, "Erro desconhecido")}`;
-        console.error(`Failed to sync job ${job.id}:`, error);
-        errors.push(errorMsg);
+        errors.push(`Job "${job.title}": ${getErrorMessage(error, "Erro desconhecido")}`);
         failed++;
       }
-      onProgress?.(i + 1, total);
-      
-      // Small delay to avoid rate limiting
-      if (i < jobs.length - 1) {
-        await new Promise(resolve => setTimeout(resolve, 200));
-      }
+      onProgress?.(i + 1, jobs.length);
+      if (i < jobs.length - 1) await new Promise((resolve) => setTimeout(resolve, 200));
     }
-
     return { synced, failed, errors };
-  }, [canSync, createEvent, jobToCalendarEvent, hasCalendarEvent]);
+  }, [canSync, createEvent, jobToCalendarEvent]);
 
-  // Sync a lead appointment to the leads calendar
   const syncLeadToCalendar = useCallback(async (leadData: {
     id: string;
     customerName: string;
@@ -368,32 +284,20 @@ export function useGoogleCalendarSync() {
     notes?: string;
     amount?: number;
   }): Promise<string | null> => {
-    if (!canSync()) {
-      return null;
-    }
-
-    const leadsCalendarId = getLeadsCalendarId();
-    if (!leadsCalendarId) {
-      return null;
-    }
-
+    if (!canSync()) return null;
     try {
+      await ensureCalendarStateLoaded();
+      if (!leadsCalendarId) return null;
       const startTime = normalizeTime(leadData.time);
-      const startDate = leadData.date;
-      const durationMinutes = leadData.durationMinutes || 60;
-
-      const dateTimeString = `${startDate}T${startTime}:00`;
+      const dateTimeString = `${leadData.date}T${startTime}:00`;
       let startDateTime = new Date(dateTimeString);
-      
-      if (isNaN(startDateTime.getTime())) {
-        console.warn(`Invalid date/time for lead: ${dateTimeString}, using fallback`);
+      if (Number.isNaN(startDateTime.getTime())) {
         startDateTime = new Date();
         startDateTime.setHours(9, 0, 0, 0);
       }
-      
-      const endDateTime = new Date(startDateTime.getTime() + durationMinutes * 60 * 1000);
-
-      const eventData = {
+      const endDateTime = new Date(startDateTime.getTime() + (leadData.durationMinutes || 60) * 60 * 1000);
+      const calendarId = leadsCalendarId;
+      const result = await createEvent({
         summary: `📋 Lead: ${leadData.customerName} - ${leadData.service}`,
         description: [
           `Cliente: ${leadData.customerName}`,
@@ -404,20 +308,12 @@ export function useGoogleCalendarSync() {
         location: leadData.address || "",
         startDateTime: startDateTime.toISOString(),
         endDateTime: endDateTime.toISOString(),
-        calendarId: leadsCalendarId,
-      };
-
-      const result = await createEvent(eventData);
-
-      if (result?.id) {
-        const map = getEventMap();
-        map[`lead_${leadData.id}`] = result.id;
-        setEventMap(map);
-
-        toast.success("Lead sincronizado com Google Calendar!");
-        return result.id;
-      }
-      return null;
+        calendarId,
+      });
+      if (!result?.id) return null;
+      await persistMapping("lead", leadData.id, calendarId, result.id);
+      toast.success("Lead sincronizado com Google Calendar!");
+      return result.id;
     } catch (error: unknown) {
       console.error("Failed to sync lead to calendar:", error);
       toast.error(`Falha ao sincronizar lead: ${getErrorMessage(error, "Erro desconhecido")}`);
@@ -425,10 +321,7 @@ export function useGoogleCalendarSync() {
     }
   }, [canSync, createEvent]);
 
-  // Check if leads calendar is configured
-  const hasLeadsCalendar = useCallback(() => {
-    return !!getLeadsCalendarId();
-  }, []);
+  const hasLeadsCalendar = useCallback(() => !!getLeadsCalendarId(), []);
 
   return {
     canSync,
@@ -441,7 +334,6 @@ export function useGoogleCalendarSync() {
     getCalendarId,
     setCalendarId: setSelectedCalendarId,
     syncMultipleJobsToCalendar,
-    // Leads
     syncLeadToCalendar,
     hasLeadsCalendar,
     getLeadsCalendarId,
