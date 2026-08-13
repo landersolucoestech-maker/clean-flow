@@ -6,20 +6,16 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-interface ProcessAutomationRequest {
-  job_id: string;
-  trigger_type: "on_our_way" | "started" | "finished";
-  company_id?: string;
-}
+type TriggerType = "on_our_way" | "started" | "finished";
 
-interface AutomationCustomer {
+type AutomationCustomer = {
   id: string;
   name: string | null;
   phone: string | null;
   phone2: string | null;
   email: string | null;
   preferred_language: string | null;
-}
+};
 
 type SupportedLanguage = "en" | "pt" | "es";
 
@@ -29,354 +25,179 @@ const LOCALES: Record<SupportedLanguage, string> = {
   es: "es-ES",
 };
 
-// Format date based on language
-function formatJobDate(dateStr: string, language: SupportedLanguage): string {
+function json(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
+function resolveLanguage(customerLanguage: string | null, companyLanguage: string | null): SupportedLanguage {
+  const supported: SupportedLanguage[] = ["en", "pt", "es"];
+  if (customerLanguage && supported.includes(customerLanguage as SupportedLanguage)) return customerLanguage as SupportedLanguage;
+  if (companyLanguage && supported.includes(companyLanguage as SupportedLanguage)) return companyLanguage as SupportedLanguage;
+  return "en";
+}
+
+function formatJobDate(date: string, language: SupportedLanguage): string {
   try {
-    const date = new Date(dateStr);
-    const locale = LOCALES[language] || LOCALES.en;
-    
-    return date.toLocaleDateString(locale, {
+    return new Date(`${date}T12:00:00Z`).toLocaleDateString(LOCALES[language], {
       weekday: "long",
       month: "long",
       day: "numeric",
       year: "numeric",
+      timeZone: "America/New_York",
     });
   } catch {
-    return dateStr;
+    return date;
   }
 }
 
-// Replace template variables in message
-function replaceVariables(
-  message: string,
-  data: {
-    clientName?: string;
-    companyName?: string;
-    jobDate?: string;
-    invoiceNumber?: string;
-    invoiceLink?: string;
-    estimateLink?: string;
-    contractLink?: string;
-    receiptLink?: string;
-  }
-): string {
-  let result = message;
-  
-  if (data.clientName) {
-    result = result.replace(/\{ClientName\}/gi, data.clientName);
-  }
-  if (data.companyName) {
-    result = result.replace(/\{CompanyName\}/gi, data.companyName);
-  }
-  if (data.jobDate) {
-    result = result.replace(/\{JobDate\}/gi, data.jobDate);
-  }
-  if (data.invoiceNumber) {
-    result = result.replace(/\{InvoiceNumber\}/gi, data.invoiceNumber);
-  }
-  if (data.invoiceLink) {
-    result = result.replace(/\{InvoiceLink\}/gi, data.invoiceLink);
-  }
-  if (data.estimateLink) {
-    result = result.replace(/\{EstimateLink\}/gi, data.estimateLink);
-  }
-  if (data.contractLink) {
-    result = result.replace(/\{ContractLink\}/gi, data.contractLink);
-  }
-  if (data.receiptLink) {
-    result = result.replace(/\{ReceiptLink\}/gi, data.receiptLink);
-  }
-  
-  return result;
+function renderMessage(message: string, values: Record<string, string>): string {
+  return Object.entries(values).reduce(
+    (result, [key, value]) => result.replace(new RegExp(`\\{${key}\\}`, "gi"), value),
+    message,
+  );
 }
 
-// Resolve language: customer > company > 'en'
-function resolveLanguage(
-  customerLang: string | null | undefined,
-  companyLang: string | null | undefined
-): SupportedLanguage {
-  const valid: SupportedLanguage[] = ["en", "pt", "es"];
-  
-  if (customerLang && valid.includes(customerLang as SupportedLanguage)) {
-    return customerLang as SupportedLanguage;
-  }
-  if (companyLang && valid.includes(companyLang as SupportedLanguage)) {
-    return companyLang as SupportedLanguage;
-  }
-  return "en";
+function customerFrom(value: AutomationCustomer | AutomationCustomer[] | null): AutomationCustomer | null {
+  return Array.isArray(value) ? value[0] ?? null : value;
 }
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const authError = authorizeServiceRequest(req);
+    if (authError) return authError;
 
-    const authorizationError = authorizeServiceRequest(req);
-    if (authorizationError) return authorizationError;
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!supabaseUrl || !serviceRoleKey) return json({ error: "Backend not configured" }, 503);
 
-    const { job_id, trigger_type, company_id }: ProcessAutomationRequest = await req.json();
-
-    if (!job_id || !trigger_type) {
-      return new Response(
-        JSON.stringify({ error: "job_id and trigger_type are required" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    const body = await req.json();
+    const jobId = typeof body.job_id === "string" ? body.job_id : "";
+    const triggerType = body.trigger_type as TriggerType | undefined;
+    const requestedCompanyId = typeof body.company_id === "string" ? body.company_id : null;
+    if (!jobId || !triggerType || !["on_our_way", "started", "finished"].includes(triggerType)) {
+      return json({ error: "Valid job_id and trigger_type are required" }, 400);
     }
 
-    console.log(`Processing automation for job ${job_id}, trigger: ${trigger_type}`);
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
+    const { data: job, error: jobError } = await supabase
+      .from("jobs")
+      .select("id, company_id, scheduled_date, customer:customers(id, name, phone, phone2, email, preferred_language, company_id)")
+      .eq("id", jobId)
+      .maybeSingle();
 
-    // Get automation config for this trigger
+    if (jobError || !job?.company_id) return json({ error: "Job not found" }, 404);
+    const companyId = job.company_id as string;
+    if (requestedCompanyId && requestedCompanyId !== companyId) {
+      return json({ error: "Cross-company automation is not allowed" }, 403);
+    }
+
+    const customer = customerFrom(job.customer as AutomationCustomer | AutomationCustomer[] | null);
+    if (!customer) return json({ error: "No customer associated with job" }, 400);
+
     const { data: automation, error: automationError } = await supabase
       .from("automation_configs")
       .select("*")
-      .eq("trigger_type", trigger_type)
+      .eq("company_id", companyId)
+      .eq("trigger_type", triggerType)
       .eq("enabled", true)
       .maybeSingle();
+    if (automationError) return json({ error: "Failed to fetch automation config" }, 500);
+    if (!automation) return json({ success: true, message: "No automation configured for this trigger" });
 
-    if (automationError) {
-      console.error("Error fetching automation config:", automationError);
-      return new Response(
-        JSON.stringify({ error: "Failed to fetch automation config" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    if (!automation) {
-      console.log(`No enabled automation found for trigger: ${trigger_type}`);
-      return new Response(
-        JSON.stringify({ success: true, message: "No automation configured for this trigger" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // Check delay - if delay_value > 0, this should be scheduled, not sent immediately
-    const delayValue = automation.delay_value || 0;
+    const delayValue = Number(automation.delay_value || 0);
     if (delayValue > 0) {
-      console.log(`Automation has delay of ${delayValue} ${automation.delay_type || 'hours'}, skipping immediate send`);
-      return new Response(
-        JSON.stringify({ 
-          success: true, 
-          message: "Automation has delay configured, will be processed by scheduler",
-          delay: { value: delayValue, type: automation.delay_type }
-        }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return json({
+        success: true,
+        message: "Automation has delay configured and will be processed by the scheduler",
+        delay: { value: delayValue, type: automation.delay_type },
+      });
     }
 
-    // Get job details with customer info including preferred_language
-    const { data: job, error: jobError } = await supabase
-      .from("jobs")
-      .select(`
-        *,
-        customers (
-          id,
-          name,
-          phone,
-          phone2,
-          email,
-          preferred_language
-        )
-      `)
-      .eq("id", job_id)
-      .single();
-
-    if (jobError || !job) {
-      console.error("Error fetching job:", jobError);
-      return new Response(
-        JSON.stringify({ error: "Job not found" }),
-        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    const customer = job.customers as AutomationCustomer | null;
-    if (!customer) {
-      console.error("No customer found for job");
-      return new Response(
-        JSON.stringify({ error: "No customer associated with job" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // Get company settings for company name and language
-    const resolvedCompanyId = company_id || job.company_id;
-    let companyName = "Our Team";
-    let companyLanguage: string | null = null;
-    
-    const { data: companySettings } = await supabase
+    const { data: settings } = await supabase
       .from("company_settings")
       .select("trade_name, legal_name, preferred_language")
-      .limit(1)
-      .single();
-    
-    if (companySettings) {
-      companyName = companySettings.trade_name || companySettings.legal_name || "Our Team";
-      companyLanguage = companySettings.preferred_language;
-    }
+      .eq("id", companyId)
+      .maybeSingle();
+    const companyName = settings?.trade_name || settings?.legal_name || "Our Team";
+    const language = resolveLanguage(customer.preferred_language, settings?.preferred_language || null);
 
-    // Resolve language for this message
-    const messageLanguage = resolveLanguage(customer.preferred_language, companyLanguage);
-    console.log(`Using language: ${messageLanguage} (customer: ${customer.preferred_language}, company: ${companyLanguage})`);
-
-    // Determine which phone/email to send to based on message_to
     let toPhone: string | null = null;
     let toEmail: string | null = null;
+    if (automation.message_to === "text_phone_2") toPhone = customer.phone2;
+    else if (automation.message_to === "email") toEmail = customer.email;
+    else toPhone = customer.phone;
+    if (!toPhone && !toEmail) return json({ error: "No contact information available for customer" }, 400);
 
-    switch (automation.message_to) {
-      case "text_phone_1":
-        toPhone = customer.phone;
-        break;
-      case "text_phone_2":
-        toPhone = customer.phone2;
-        break;
-      case "email":
-        toEmail = customer.email;
-        break;
-      default:
-        toPhone = customer.phone;
+    const sentTo = toPhone || toEmail || "";
+    const sentVia = toPhone ? "sms" : "email";
+    const { data: existing } = await supabase
+      .from("automation_logs")
+      .select("id")
+      .eq("company_id", companyId)
+      .eq("automation_id", automation.id)
+      .eq("job_id", jobId)
+      .eq("trigger_type", triggerType)
+      .eq("sent_to", sentTo)
+      .eq("sent_via", sentVia)
+      .eq("status", "sent")
+      .limit(1);
+    if (existing?.length) {
+      return json({ success: true, idempotent: true, automation_id: automation.id, message_sent: false });
     }
 
-    if (!toPhone && !toEmail) {
-      console.error("No contact info available for customer");
-      return new Response(
-        JSON.stringify({ error: "No contact information available for customer" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // Format job date using resolved language
-    const formattedJobDate = job.scheduled_date 
-      ? formatJobDate(job.scheduled_date, messageLanguage)
-      : "";
-
-    // Replace variables in message
-    const message = replaceVariables(automation.message, {
-      clientName: customer.name || "Customer",
-      companyName,
-      jobDate: formattedJobDate,
+    const message = renderMessage(automation.message || "", {
+      ClientName: customer.name || "Customer",
+      CompanyName: companyName,
+      JobDate: job.scheduled_date ? formatJobDate(job.scheduled_date, language) : "",
     });
 
-    // Send SMS via RingCentral if we have a phone
     if (toPhone) {
-      const sendMessageUrl = `${supabaseUrl}/functions/v1/ringcentral-send-message`;
-      
-      const sendResponse = await fetch(sendMessageUrl, {
+      const response = await fetch(`${supabaseUrl}/functions/v1/ringcentral-send-message`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${supabaseServiceKey}`,
-        },
-        body: JSON.stringify({
-          company_id: resolvedCompanyId,
-          to_phone: toPhone,
-          message,
-        }),
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${serviceRoleKey}` },
+        body: JSON.stringify({ company_id: companyId, to_phone: toPhone, message }),
       });
-
-      if (!sendResponse.ok) {
-        await sendResponse.body?.cancel();
-        console.error("Failed to send automation SMS:", sendResponse.status);
-        return new Response(
-          JSON.stringify({ error: "Failed to send SMS" }),
-          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-
-      await sendResponse.body?.cancel();
-
-      // Log the automation execution
-      try {
-        await supabase.from("automation_logs").insert({
-          automation_id: automation.id,
-          job_id,
-          customer_id: customer.id,
-          trigger_type,
-          message_sent: message,
-          sent_to: toPhone,
-          sent_via: "sms",
-          status: "sent",
-          sent_at: new Date().toISOString(),
-        });
-      } catch (logErr) {
-        console.warn("Could not log automation:", logErr);
-      }
-
-      return new Response(
-        JSON.stringify({
-          success: true,
-          automation_id: automation.id,
-          message_sent: true,
-          sent_to: toPhone,
-          sent_via: "sms",
-          language: messageLanguage,
-        }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      await response.body?.cancel();
+      if (!response.ok) return json({ error: "Failed to send SMS" }, 502);
+    } else if (toEmail) {
+      const response = await fetch(`${supabaseUrl}/functions/v1/send-email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${serviceRoleKey}` },
+        body: JSON.stringify({ to: toEmail, subject: `${companyName}: service update`, text: message }),
+      });
+      await response.body?.cancel();
+      if (!response.ok) return json({ error: "Failed to send email" }, 502);
     }
 
-    if (toEmail) {
-      const sendEmailUrl = `${supabaseUrl}/functions/v1/send-email`;
-      const emailResponse = await fetch(sendEmailUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${supabaseServiceKey}`,
-        },
-        body: JSON.stringify({
-          to: toEmail,
-          subject: `${companyName}: service update`,
-          text: message,
-        }),
-      });
+    const { error: logError } = await supabase.from("automation_logs").insert({
+      company_id: companyId,
+      automation_id: automation.id,
+      job_id: jobId,
+      customer_id: customer.id,
+      trigger_type: triggerType,
+      message_sent: message,
+      sent_to: sentTo,
+      sent_via: sentVia,
+      status: "sent",
+      sent_at: new Date().toISOString(),
+    });
+    if (logError) console.warn("Automation sent but log persistence failed", logError);
 
-      if (!emailResponse.ok) {
-        const details = await emailResponse.text();
-        console.error("Failed to send automation email:", details);
-        return new Response(
-          JSON.stringify({ error: "Failed to send email", details }),
-          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-        );
-      }
-
-      const { error: logError } = await supabase.from("automation_logs").insert({
-        automation_id: automation.id,
-        job_id,
-        customer_id: customer.id,
-        trigger_type,
-        message_sent: message,
-        sent_to: toEmail,
-        sent_via: "email",
-        status: "sent",
-        sent_at: new Date().toISOString(),
-      });
-      if (logError) console.warn("Could not log email automation:", logError);
-
-      return new Response(
-        JSON.stringify({
-          success: true,
-          automation_id: automation.id,
-          message_sent: true,
-          sent_to: toEmail,
-          sent_via: "email",
-          language: messageLanguage,
-        }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    return new Response(
-      JSON.stringify({ success: true }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return json({
+      success: true,
+      automation_id: automation.id,
+      message_sent: true,
+      sent_to: sentTo,
+      sent_via: sentVia,
+      language,
+    });
   } catch (error) {
     console.error("Error processing automation:", error);
-    return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return json({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
   }
 });
