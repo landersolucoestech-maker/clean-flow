@@ -59,7 +59,7 @@ DECLARE
   only_company uuid;
   has_unscoped_data boolean;
 BEGIN
-  SELECT count(*), min(id) INTO company_count, only_company FROM public.company_settings;
+  SELECT count(*), min(id::text)::uuid INTO company_count, only_company FROM public.company_settings;
 
   IF company_count = 1 THEN
     UPDATE public.staff SET company_id = only_company WHERE company_id IS NULL;
