@@ -46,31 +46,24 @@ export interface CreateMessageData {
   message: string;
 }
 
+type RpcResult<T> = { data: T | null; error: unknown };
+
+async function callRpc<T>(name: string, args: Record<string, unknown>): Promise<T> {
+  const result = await supabase.rpc(name as never, args as never) as unknown as RpcResult<T>;
+  if (result.error || !result.data) throw result.error || new Error(`${name} returned no data`);
+  return result.data;
+}
+
 export function useSupportTickets() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Get company ID (single-tenant fallback for now)
-  const getCompanyId = async () => {
-    const { data } = await supabase
-      .from("company_settings")
-      .select("id")
-      .limit(1)
-      .single();
-    return data?.id;
-  };
-
-  // Fetch all tickets for the company
   const ticketsQuery = useQuery({
     queryKey: ["support-tickets"],
     queryFn: async () => {
-      const companyId = await getCompanyId();
-      if (!companyId) return [];
-
       const { data, error } = await supabase
         .from("support_tickets")
         .select("*")
-        .eq("company_id", companyId)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -78,7 +71,6 @@ export function useSupportTickets() {
     },
   });
 
-  // Fetch messages for a specific ticket
   const useTicketMessages = (ticketId: string | null) => {
     return useQuery({
       queryKey: ["ticket-messages", ticketId],
@@ -98,38 +90,13 @@ export function useSupportTickets() {
     });
   };
 
-  // Create a new ticket
   const createTicketMutation = useMutation({
-    mutationFn: async (data: CreateTicketData) => {
-      const companyId = await getCompanyId();
-      if (!companyId) throw new Error("Company not found");
-
-      const { data: ticket, error } = await supabase
-        .from("support_tickets")
-        .insert([{
-          company_id: companyId,
-          user_id: companyId, // Using company_id as user_id until auth is implemented
-          ticket_number: "TEMP", // Will be overwritten by database trigger
-          subject: data.subject,
-          description: data.description,
-          priority: data.priority,
-          category: data.category,
-        }])
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // Create initial message
-      await supabase.from("support_ticket_messages").insert([{
-        ticket_id: ticket.id,
-        user_id: companyId,
-        is_staff_reply: false,
-        message: data.description,
-      }]);
-
-      return ticket;
-    },
+    mutationFn: async (data: CreateTicketData) => callRpc<SupportTicket>("create_support_ticket_atomic", {
+      ticket_subject: data.subject,
+      ticket_description: data.description,
+      ticket_priority: data.priority,
+      ticket_category: data.category,
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["support-tickets"] });
       toast({
@@ -147,32 +114,11 @@ export function useSupportTickets() {
     },
   });
 
-  // Add message to ticket
   const addMessageMutation = useMutation({
-    mutationFn: async (data: CreateMessageData) => {
-      const companyId = await getCompanyId();
-
-      const { data: message, error } = await supabase
-        .from("support_ticket_messages")
-        .insert([{
-          ticket_id: data.ticket_id,
-          user_id: companyId,
-          is_staff_reply: false,
-          message: data.message,
-        }])
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // Update ticket timestamp
-      await supabase
-        .from("support_tickets")
-        .update({ updated_at: new Date().toISOString() })
-        .eq("id", data.ticket_id);
-
-      return message;
-    },
+    mutationFn: async (data: CreateMessageData) => callRpc<TicketMessage>("add_support_ticket_message_atomic", {
+      target_ticket_id: data.ticket_id,
+      message_body: data.message,
+    }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["ticket-messages", variables.ticket_id] });
       queryClient.invalidateQueries({ queryKey: ["support-tickets"] });
@@ -187,11 +133,10 @@ export function useSupportTickets() {
     },
   });
 
-  // Update ticket status
   const updateStatusMutation = useMutation({
     mutationFn: async ({ ticketId, status }: { ticketId: string; status: TicketStatus }) => {
       const updates: TicketUpdate = { status };
-      
+
       if (status === "resolved") {
         updates.resolved_at = new Date().toISOString();
       } else if (status === "closed") {
