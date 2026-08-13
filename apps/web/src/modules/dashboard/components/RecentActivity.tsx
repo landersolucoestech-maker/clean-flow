@@ -146,9 +146,9 @@ export function RecentActivity({ includeInvoices = true }: { includeInvoices?: b
 
   if (isLoading) {
     return (
-      <Card className="transition-all duration-200 hover:shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold">{t("activity.recentActivity")}</CardTitle>
+      <Card className="border-border/80 shadow-sm transition-shadow hover:shadow-md">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base font-semibold tracking-tight">{t("activity.recentActivity")}</CardTitle>
         </CardHeader>
         <CardContent className="flex items-center justify-center py-12">
           <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
@@ -158,19 +158,19 @@ export function RecentActivity({ includeInvoices = true }: { includeInvoices?: b
   }
 
   return (
-    <Card className="transition-all duration-200 hover:shadow-lg">
-      <CardHeader>
-        <CardTitle className="text-lg font-semibold">{t("activity.recentActivity")}</CardTitle>
+    <Card className="border-border/80 shadow-sm transition-shadow hover:shadow-md">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base font-semibold tracking-tight">{t("activity.recentActivity")}</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3">
         {paginatedActivities.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <p>{t("activity.noRecentActivity")}</p>
           </div>
         ) : (
           paginatedActivities.map((activity) => (
-            <div key={activity.id} className="flex items-start space-x-3">
-              <div className={`p-2 rounded-lg bg-surface-muted ${activity.color}`}>
+            <div key={activity.id} className="flex items-start gap-3 rounded-xl border border-transparent p-2.5 transition-colors hover:border-border hover:bg-accent/40">
+              <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-light ${activity.color}`}>
                 <activity.icon className="w-4 h-4" />
               </div>
               <div className="flex-1 min-w-0">
@@ -203,7 +203,7 @@ export function RecentActivity({ includeInvoices = true }: { includeInvoices?: b
                     ? "destructive"
                     : "secondary"
                 }
-                className="text-xs"
+                className="text-[11px]"
               >
                 {t(activity.statusKey)}
               </Badge>
@@ -213,7 +213,7 @@ export function RecentActivity({ includeInvoices = true }: { includeInvoices?: b
         
         {/* Pagination at bottom */}
         {activities.length > ITEMS_PER_PAGE && (
-          <div className="flex items-center justify-center gap-1 pt-4 border-t border-border">
+          <div className="flex items-center justify-center gap-1 border-t border-border/80 pt-4">
             <Button
               variant="ghost"
               size="icon"

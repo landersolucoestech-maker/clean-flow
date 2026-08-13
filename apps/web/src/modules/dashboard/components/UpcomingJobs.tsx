@@ -241,9 +241,9 @@ export function UpcomingJobs() {
 
   if (isLoading) {
     return (
-      <Card className="transition-all duration-200 hover:shadow-lg">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-lg font-semibold">{t("upcomingJobs.title")}</CardTitle>
+      <Card className="border-border/80 shadow-sm transition-shadow hover:shadow-md">
+        <CardHeader className="flex flex-row items-center justify-between gap-3 pb-3">
+          <CardTitle className="text-base font-semibold tracking-tight">{t("upcomingJobs.title")}</CardTitle>
         </CardHeader>
         <CardContent className="flex items-center justify-center py-12">
           <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
@@ -254,14 +254,14 @@ export function UpcomingJobs() {
 
   return (
     <>
-      <Card className="transition-all duration-200 hover:shadow-lg">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-lg font-semibold">{t("upcomingJobs.title")}</CardTitle>
+      <Card className="border-border/80 shadow-sm transition-shadow hover:shadow-md">
+        <CardHeader className="flex flex-row items-center justify-between gap-3 pb-3">
+          <CardTitle className="text-base font-semibold tracking-tight">{t("upcomingJobs.title")}</CardTitle>
           <Button variant="outline" size="sm" onClick={handleViewAll}>
             {t("common.viewAll")}
           </Button>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3">
           {paginatedJobs.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <p>{t("upcomingJobs.noJobs")}</p>
@@ -270,7 +270,7 @@ export function UpcomingJobs() {
             paginatedJobs.map((job) => (
               <div
                 key={job.id}
-                className="flex items-center justify-between p-4 bg-surface-muted rounded-lg hover:bg-accent transition-colors"
+                className="flex items-center justify-between gap-4 rounded-xl border border-border/70 bg-card p-4 shadow-sm transition-colors hover:bg-accent/40"
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-2">
@@ -280,7 +280,7 @@ export function UpcomingJobs() {
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <div className="flex items-center gap-1 px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded text-xs">
+                              <div className="flex items-center gap-1 rounded-full bg-warning/15 px-2 py-0.5 text-xs font-medium text-warning-foreground">
                                 <AlertTriangle className="w-3 h-3" />
                                 <span>{gpsAlertsMap.get(job.id)?.distance_from_job}m</span>
                               </div>
@@ -294,13 +294,13 @@ export function UpcomingJobs() {
                     </div>
                     <Badge
                       variant={job.priority === "high" ? "destructive" : "secondary"}
-                      className="text-xs ml-2 flex-shrink-0"
+                      className="ml-2 flex-shrink-0 text-[11px]"
                     >
                       {job.type}
                     </Badge>
                   </div>
                   
-                  <div className="space-y-1 text-sm text-muted-foreground">
+                  <div className="space-y-1.5 text-sm text-muted-foreground">
                     <div className="flex items-center space-x-2">
                       <MapPin className="w-3 h-3 flex-shrink-0" />
                       <span className="truncate">{job.address || t("upcomingJobs.noAddress")}</span>
@@ -330,7 +330,7 @@ export function UpcomingJobs() {
           
           {/* Pagination at bottom */}
           {upcomingJobs.length > ITEMS_PER_PAGE && (
-            <div className="flex items-center justify-center gap-1 pt-4 border-t border-border">
+            <div className="flex items-center justify-center gap-1 border-t border-border/80 pt-4">
               <Button
                 variant="ghost"
                 size="icon"
