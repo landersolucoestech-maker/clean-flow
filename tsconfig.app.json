@@ -18,6 +18,7 @@
     "noFallthroughCasesInSwitch": false,
     "baseUrl": ".",
     "paths": {
+      "@/components/shared": ["./apps/web/src/shared/components/index.ts"],
       "@/components/admin/*": ["./apps/web/src/modules/admin/components/*"],
       "@/components/billing/*": ["./apps/web/src/modules/billing/components/*"],
       "@/components/calendar/*": ["./apps/web/src/modules/schedule/calendar/*"],
