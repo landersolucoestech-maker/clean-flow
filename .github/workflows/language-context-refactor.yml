@@ -1,91 +1,13 @@
-name: Language context refactor
+name: Language context refactor archive
 
 on:
-  push:
-    branches: [DEV]
-    paths:
-      - .github/workflows/language-context-refactor.yml
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  refactor:
+  archived:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: DEV
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - name: Split language context and hook
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-
-          root = Path('apps/web/src')
-          provider = root / 'app/providers/LanguageContext.tsx'
-          text = provider.read_text(encoding='utf-8')
-
-          old_import = 'import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";\n\n'
-          new_import = 'import React, { useState, useEffect, ReactNode } from "react";\nimport { LanguageContext, type Language } from "./language-context";\n\nexport type { Language } from "./language-context";\n\n'
-          if old_import not in text:
-              raise SystemExit('Expected React import not found')
-          text = text.replace(old_import, new_import, 1)
-
-          type_block = '''export type Language = "en" | "pt" | "es";\n\ninterface LanguageContextType {\n  language: Language;\n  setLanguage: (lang: Language) => void;\n  t: (key: string) => string;\n}\n\n'''
-          if type_block not in text:
-              raise SystemExit('Expected language type block not found')
-          text = text.replace(type_block, '', 1)
-
-          context_line = 'const LanguageContext = createContext<LanguageContextType | undefined>(undefined);\n\n'
-          if context_line not in text:
-              raise SystemExit('Expected context declaration not found')
-          text = text.replace(context_line, '', 1)
-
-          hook_block = '''\nexport function useLanguage() {\n  const context = useContext(LanguageContext);\n  if (context === undefined) {\n    throw new Error("useLanguage must be used within a LanguageProvider");\n  }\n  return context;\n}'''
-          if hook_block not in text:
-              raise SystemExit('Expected useLanguage block not found')
-          text = text.replace(hook_block, '')
-          provider.write_text(text, encoding='utf-8')
-
-          context_file = provider.parent / 'language-context.ts'
-          context_file.write_text('''import { createContext } from "react";\n\nexport type Language = "en" | "pt" | "es";\n\nexport interface LanguageContextType {\n  language: Language;\n  setLanguage: (lang: Language) => void;\n  t: (key: string) => string;\n}\n\nexport const LanguageContext = createContext<LanguageContextType | undefined>(undefined);\n''', encoding='utf-8')
-
-          hook_file = provider.parent / 'useLanguage.ts'
-          hook_file.write_text('''import { useContext } from "react";\nimport { LanguageContext } from "./language-context";\n\nexport type { Language } from "./language-context";\n\nexport function useLanguage() {\n  const context = useContext(LanguageContext);\n  if (context === undefined) {\n    throw new Error("useLanguage must be used within a LanguageProvider");\n  }\n  return context;\n}\n''', encoding='utf-8')
-
-          changed = 0
-          for path in root.rglob('*'):
-              if path.suffix not in {'.ts', '.tsx'} or path in {provider, hook_file, context_file}:
-                  continue
-              source = path.read_text(encoding='utf-8')
-              lines = source.splitlines(keepends=True)
-              updated = []
-              touched = False
-              for line in lines:
-                  if '@/contexts/LanguageContext' in line and 'useLanguage' in line:
-                      line = line.replace('@/contexts/LanguageContext', '@/contexts/useLanguage')
-                      touched = True
-                  updated.append(line)
-              if touched:
-                  path.write_text(''.join(updated), encoding='utf-8')
-                  changed += 1
-          print(f'Updated {changed} language hook consumers')
-          PY
-      - run: npm ci
-      - name: Verify lint
-        run: npm run lint
-      - name: Verify typecheck
-        run: npm run typecheck
-      - name: Commit verified refactor
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/web/src
-          git diff --cached --quiet && exit 0
-          git commit -m "refactor: separate language provider and hook"
-          git push origin HEAD:DEV
+      - run: echo "Language context refactor completed; this workflow is archived and read-only."
