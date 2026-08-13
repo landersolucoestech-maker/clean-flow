@@ -40,6 +40,7 @@ Deno.serve(async (req) => {
     const authorization = await getAuthorizedStaffIdentity(req, adminClient, roles);
     if (authorization.error) return authorization.error;
 
+    const identity = authorization.identity;
     const body = await req.json();
     const action = body.action;
 
@@ -50,18 +51,19 @@ Deno.serve(async (req) => {
       const { data: staff, error } = await adminClient
         .from("staff")
         .update({ name, phone })
-        .eq("id", authorization.identity.staffId)
+        .eq("id", identity.staffId)
+        .eq("company_id", identity.companyId)
         .select("*")
         .single();
       if (error || !staff) return response({ error: "Unable to update profile" }, 400);
-      const { error: authError } = await adminClient.auth.admin.updateUserById(authorization.identity.userId, {
+      const { error: authError } = await adminClient.auth.admin.updateUserById(identity.userId, {
         user_metadata: { full_name: name, phone },
       });
       if (authError) console.error("Profile saved but Auth metadata synchronization failed");
       return response({ staff, auth_metadata_synced: !authError });
     }
 
-    if (!["admin", "office_manager"].includes(authorization.identity.role)) {
+    if (!["admin", "office_manager"].includes(identity.role)) {
       return response({ error: "Your role cannot manage staff accounts" }, 403);
     }
 
@@ -76,20 +78,22 @@ Deno.serve(async (req) => {
       const { data: existing } = await adminClient
         .from("staff")
         .select("id")
+        .eq("company_id", identity.companyId)
         .ilike("email", email)
         .maybeSingle();
-      if (existing) return response({ error: "A staff member already uses this email" }, 409);
+      if (existing) return response({ error: "A staff member already uses this email in this company" }, 409);
 
       const redirectTo = new URL("/set-password", siteUrl).toString();
       const { data: invitation, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(email, {
         redirectTo,
-        data: { full_name: name },
+        data: { full_name: name, company_id: identity.companyId },
       });
       if (inviteError || !invitation.user) return response({ error: "Unable to invite this email" }, 400);
 
       const { data: staff, error: staffError } = await adminClient
         .from("staff")
         .insert({
+          company_id: identity.companyId,
           name,
           email,
           auth_user_id: invitation.user.id,
@@ -110,7 +114,7 @@ Deno.serve(async (req) => {
 
       const { error: roleError } = await adminClient.from("staff_roles").insert({ staff_id: staff.id, role });
       if (roleError) {
-        await adminClient.from("staff").delete().eq("id", staff.id);
+        await adminClient.from("staff").delete().eq("id", staff.id).eq("company_id", identity.companyId);
         await adminClient.auth.admin.deleteUser(invitation.user.id);
         return response({ error: "Unable to assign staff role" }, 400);
       }
@@ -131,13 +135,14 @@ Deno.serve(async (req) => {
         .from("staff")
         .select("*, staff_roles(role)")
         .eq("id", id)
+        .eq("company_id", identity.companyId)
         .single();
       if (currentError || !current) return response({ error: "Staff member not found" }, 404);
 
       if (current.auth_user_id) {
         const { error } = await adminClient.auth.admin.updateUserById(current.auth_user_id, {
           email,
-          user_metadata: { full_name: name },
+          user_metadata: { full_name: name, company_id: identity.companyId },
         });
         if (error) return response({ error: "Unable to update the staff login" }, 400);
       }
@@ -156,6 +161,7 @@ Deno.serve(async (req) => {
           quickbooks_vendor_id: optionalText(body.quickbooks_vendor_id, 255),
         })
         .eq("id", id)
+        .eq("company_id", identity.companyId)
         .select("*")
         .single();
       if (staffError || !staff) return response({ error: "Unable to update staff record" }, 400);
@@ -171,16 +177,21 @@ Deno.serve(async (req) => {
     if (action === "delete") {
       const id = optionalText(body.id, 36);
       if (!id) return response({ error: "Staff id is required" }, 400);
-      if (id === authorization.identity.staffId) return response({ error: "You cannot delete your own account" }, 409);
+      if (id === identity.staffId) return response({ error: "You cannot delete your own account" }, 409);
 
       const { data: staff, error: findError } = await adminClient
         .from("staff")
         .select("auth_user_id")
         .eq("id", id)
+        .eq("company_id", identity.companyId)
         .single();
       if (findError || !staff) return response({ error: "Staff member not found" }, 404);
 
-      const { error: deleteError } = await adminClient.from("staff").delete().eq("id", id);
+      const { error: deleteError } = await adminClient
+        .from("staff")
+        .delete()
+        .eq("id", id)
+        .eq("company_id", identity.companyId);
       if (deleteError) return response({ error: "Unable to delete staff record" }, 400);
 
       if (staff.auth_user_id) {
