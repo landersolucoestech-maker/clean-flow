@@ -95,5 +95,5 @@ REVOKE ALL ON FUNCTION public.finish_automation_delivery(uuid, uuid, text, text,
   FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.claim_automation_delivery(uuid, uuid, text, uuid, uuid, uuid, text)
   TO service_role;
-GRANT EXECUTE ON FUNCTION public.finish_automation_delivery(uuid, uuid, text, text, text, text, text, text)
+GRANT EXECUTE ON FUNCTION public.finish_automation_delivery(uuid, uuid, text, text, text, text, text)
   TO service_role;
