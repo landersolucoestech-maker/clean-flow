@@ -9,7 +9,7 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: [
-      { find: "@/components/shared", replacement: webSrc("shared/components/index.ts") },
+      { find: "@/components/shared", replacement: webSrc("shared/components") },
       { find: "@/components/admin", replacement: webSrc("modules/admin/components") },
       { find: "@/components/billing", replacement: webSrc("modules/billing/components") },
       { find: "@/components/calendar", replacement: webSrc("modules/schedule/calendar") },
