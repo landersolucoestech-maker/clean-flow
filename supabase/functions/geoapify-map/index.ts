@@ -50,7 +50,9 @@ serve(async (req) => {
     if (authError) return authError;
 
     const body = await req.json();
-    const points = Array.isArray(body.points) ? body.points.filter(validPoint).slice(0, 50) : [];
+    const points: MapPoint[] = Array.isArray(body.points)
+      ? (body.points as unknown[]).filter(validPoint).slice(0, 50)
+      : [];
     if (points.length === 0) return json({ error: "At least one valid map point is required" }, 400);
 
     const width = clamp(body.width, 320, 1600, 900);
