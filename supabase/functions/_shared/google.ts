@@ -13,13 +13,22 @@ export interface GoogleConnection {
   token_expires_at: string;
 }
 
-export async function getGoogleConnection(adminClient: SupabaseClient): Promise<GoogleConnection> {
-  const { data, error } = await adminClient
+export async function getGoogleConnection(
+  adminClient: SupabaseClient,
+  companyId?: string,
+): Promise<GoogleConnection> {
+  let query = adminClient
     .from("google_connections")
-    .select("id, company_id, google_user_id, email, name, picture_url, scopes, access_token, refresh_token, token_expires_at")
-    .limit(1)
-    .maybeSingle();
-  if (error || !data) throw new Error("Google is not connected");
+    .select("id, company_id, google_user_id, email, name, picture_url, scopes, access_token, refresh_token, token_expires_at");
+
+  if (companyId) query = query.eq("company_id", companyId);
+
+  const { data, error } = await query.maybeSingle();
+  if (error || !data) {
+    throw new Error(companyId
+      ? "Google is not connected for this company"
+      : "Google connection is ambiguous or not configured");
+  }
 
   const connection = data as GoogleConnection;
   if (new Date(connection.token_expires_at).getTime() > Date.now() + 60_000) return connection;
@@ -41,7 +50,7 @@ export async function getGoogleConnection(adminClient: SupabaseClient): Promise<
   const tokens = await response.json();
   if (!response.ok) throw new Error(tokens.error_description || "Failed to refresh Google token");
 
-  const refreshed = {
+  const refreshed: GoogleConnection = {
     ...connection,
     access_token: tokens.access_token,
     refresh_token: tokens.refresh_token || connection.refresh_token,
@@ -54,7 +63,8 @@ export async function getGoogleConnection(adminClient: SupabaseClient): Promise<
       refresh_token: refreshed.refresh_token,
       token_expires_at: refreshed.token_expires_at,
     })
-    .eq("id", connection.id);
+    .eq("id", connection.id)
+    .eq("company_id", connection.company_id);
   if (updateError) throw new Error("Failed to persist refreshed Google token");
   return refreshed;
 }
