@@ -11,15 +11,24 @@ export interface QuickBooksConnection {
 
 export async function getQuickBooksConnection(
   adminClient: SupabaseClient,
-  companyId: string,
+  companyId?: string,
 ): Promise<QuickBooksConnection> {
-  const { data, error } = await adminClient
+  let query = adminClient
     .from("quickbooks_connections")
-    .select("id, company_id, realm_id, access_token, refresh_token, token_expires_at")
-    .eq("company_id", companyId)
-    .maybeSingle();
+    .select("id, company_id, realm_id, access_token, refresh_token, token_expires_at");
 
-  if (error || !data) throw new Error("QuickBooks is not connected for this company");
+  if (companyId) query = query.eq("company_id", companyId);
+
+  // Without an explicit company, maybeSingle intentionally fails when multiple
+  // connections exist instead of silently selecting another tenant's token.
+  const { data, error } = await query.maybeSingle();
+
+  if (error || !data) {
+    throw new Error(companyId
+      ? "QuickBooks is not connected for this company"
+      : "QuickBooks connection is ambiguous or not configured");
+  }
+
   const connection = data as QuickBooksConnection;
   if (new Date(connection.token_expires_at).getTime() > Date.now() + 60_000) {
     return connection;
@@ -58,7 +67,7 @@ export async function getQuickBooksConnection(
       token_expires_at: refreshed.token_expires_at,
     })
     .eq("id", connection.id)
-    .eq("company_id", companyId);
+    .eq("company_id", connection.company_id);
   if (updateError) throw new Error("Failed to persist refreshed QuickBooks token");
 
   return refreshed;
