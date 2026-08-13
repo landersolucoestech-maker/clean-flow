@@ -42,9 +42,12 @@ function json(body: unknown, status = 200): Response {
   });
 }
 
-function hasCoordinates(latitude: unknown, longitude: unknown): latitude is number {
-  return typeof latitude === "number" && Number.isFinite(latitude)
-    && typeof longitude === "number" && Number.isFinite(longitude);
+function coordinates(latitude: unknown, longitude: unknown): { lat: number; lon: number } | null {
+  if (
+    typeof latitude !== "number" || !Number.isFinite(latitude)
+    || typeof longitude !== "number" || !Number.isFinite(longitude)
+  ) return null;
+  return { lat: latitude, lon: longitude };
 }
 
 function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -61,9 +64,9 @@ async function geocodeAddress(address: string, apiKey: string): Promise<{ lat: n
     const response = await fetch(`https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(address)}&apiKey=${apiKey}`);
     if (!response.ok) return null;
     const payload = await response.json();
-    const coordinates = payload.features?.[0]?.geometry?.coordinates;
-    return Array.isArray(coordinates) && coordinates.length >= 2
-      ? { lon: Number(coordinates[0]), lat: Number(coordinates[1]) }
+    const found = payload.features?.[0]?.geometry?.coordinates;
+    return Array.isArray(found) && found.length >= 2
+      ? { lon: Number(found[0]), lat: Number(found[1]) }
       : null;
   } catch {
     return null;
@@ -368,6 +371,7 @@ serve(async (req) => {
     }
 
     const clock = newYorkClock();
+    const gps = coordinates(latitude, longitude);
     let addressResolved: string | null = null;
     let distanceWarning: { distance: number; threshold: number; message: string } | null = null;
 
@@ -378,14 +382,14 @@ serve(async (req) => {
       .maybeSingle();
     const threshold = Number(settings?.gps_distance_threshold || 500);
 
-    if (hasCoordinates(latitude, longitude) && geoapifyApiKey) {
-      addressResolved = await reverseGeocode(latitude, longitude, geoapifyApiKey);
+    if (gps && geoapifyApiKey) {
+      addressResolved = await reverseGeocode(gps.lat, gps.lon, geoapifyApiKey);
       const customerData = Array.isArray(job.customer) ? job.customer[0] : job.customer;
       const jobAddress = job.address || customerData?.address || null;
       if (jobAddress) {
         const expected = await geocodeAddress(jobAddress, geoapifyApiKey);
         if (expected) {
-          const distance = Math.round(calculateDistance(latitude, longitude, expected.lat, expected.lon));
+          const distance = Math.round(calculateDistance(gps.lat, gps.lon, expected.lat, expected.lon));
           if (distance > threshold) {
             distanceWarning = {
               distance,
@@ -419,8 +423,8 @@ serve(async (req) => {
       status_type: statusType,
       triggered_by: staff.id,
       triggered_at: clock.timestamp,
-      latitude: hasCoordinates(latitude, longitude) ? latitude : null,
-      longitude: hasCoordinates(latitude, longitude) ? longitude : null,
+      latitude: gps?.lat ?? null,
+      longitude: gps?.lon ?? null,
       accuracy_meters: typeof accuracy === "number" && Number.isFinite(accuracy) ? accuracy : null,
       address_resolved: addressResolved,
       device_info: deviceInfo,
