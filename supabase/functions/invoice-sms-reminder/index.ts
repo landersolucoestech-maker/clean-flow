@@ -1,15 +1,10 @@
-import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.112.0";
-import { authorizeStaffRequest } from "../_shared/authorize.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.112.0";
+import { authorizeServiceRequest, getAuthorizedStaffIdentity } from "../_shared/authorize.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
-
-const RC_API_BASE = "https://platform.ringcentral.com/restapi/v1.0";
-const RC_TOKEN_URL = "https://platform.ringcentral.com/restapi/oauth/token";
-const RC_CLIENT_ID = Deno.env.get("RINGCENTRAL_CLIENT_ID");
-const RC_CLIENT_SECRET = Deno.env.get("RINGCENTRAL_CLIENT_SECRET");
 
 interface InvoiceCustomer {
   id?: string;
@@ -17,324 +12,197 @@ interface InvoiceCustomer {
   phone: string | null;
   phone2: string | null;
   payment_method: string | null;
-  preferred_language: string | null;
 }
 
-interface RingCentralTokenResponse {
-  access_token: string;
-  refresh_token: string;
-  expires_in: number;
+function json(body: Record<string, unknown>, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
 }
 
-function getInvoiceCustomer(
-  customer: InvoiceCustomer | InvoiceCustomer[] | null | undefined,
-): InvoiceCustomer | null {
+function getInvoiceCustomer(customer: InvoiceCustomer | InvoiceCustomer[] | null | undefined): InvoiceCustomer | null {
   return Array.isArray(customer) ? customer[0] ?? null : customer ?? null;
 }
 
-async function refreshToken(supabase: SupabaseClient, connection: {
-  company_id: string;
-  refresh_token: string;
-}) {
-  const response = await fetch(RC_TOKEN_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      Authorization: `Basic ${btoa(`${RC_CLIENT_ID}:${RC_CLIENT_SECRET}`)}`,
-    },
-    body: new URLSearchParams({
-      grant_type: "refresh_token",
-      refresh_token: connection.refresh_token,
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to refresh token");
-  }
-
-  const tokenData = await response.json() as RingCentralTokenResponse;
-  const tokenExpiresAt = new Date(Date.now() + tokenData.expires_in * 1000);
-
-  await supabase
-    .from("ringcentral_connections")
-    .update({
-      access_token: tokenData.access_token,
-      refresh_token: tokenData.refresh_token,
-      token_expires_at: tokenExpiresAt.toISOString(),
-      updated_at: new Date().toISOString(),
-    })
-    .eq("company_id", connection.company_id);
-
-  return tokenData.access_token;
-}
-
-async function getValidToken(supabase: SupabaseClient, connection: {
-  company_id: string;
-  access_token: string;
-  refresh_token: string;
-  token_expires_at: string;
-}) {
-  const expiresAt = new Date(connection.token_expires_at);
-  const now = new Date();
-  
-  if (expiresAt.getTime() - now.getTime() < 5 * 60 * 1000) {
-    return await refreshToken(supabase, connection);
-  }
-  
-  return connection.access_token;
-}
-
-// Get payment info for SMS
-function getPaymentInfoSMS(
-  paymentMethod: string | null,
-  zelleKey: string | null,
-  venmoKey: string | null
-): string {
-  if (!paymentMethod) return "";
-  
-  const method = paymentMethod.toLowerCase();
-  
-  if (method === "zelle" && zelleKey) {
-    return `Pay via Zelle: ${zelleKey}`;
-  }
-  
-  if (method === "venmo" && venmoKey) {
-    return `Pay via Venmo: ${venmoKey}`;
-  }
-  
+function getPaymentInfo(paymentMethod: string | null, zelleKey: string | null, venmoKey: string | null): string {
+  const method = paymentMethod?.toLowerCase();
+  if (method === "zelle" && zelleKey) return `Pay via Zelle: ${zelleKey}. `;
+  if (method === "venmo" && venmoKey) return `Pay via Venmo: ${venmoKey}. `;
   return "";
 }
 
+function formatPhone(phone: string): string {
+  const digits = phone.replace(/\D/g, "");
+  return digits.length === 10 ? `+1${digits}` : `+${digits}`;
+}
+
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    if (!supabaseUrl || !supabaseServiceKey || !RC_CLIENT_ID || !RC_CLIENT_SECRET) {
-      return new Response(JSON.stringify({ error: "SMS reminder service is not configured" }), {
-        status: 503,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    const authError = await authorizeStaffRequest(
-      req,
-      supabase,
-      ["admin", "office_manager"],
-      { allowServiceRole: true },
-    );
-    if (authError) return authError;
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!supabaseUrl || !serviceRoleKey) return json({ error: "SMS reminder service is not configured" }, 503);
 
-    const { action, invoice_id } = await req.json();
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
+    const body = await req.json();
+    const { action, invoice_id, company_id: requestedCompanyId } = body;
+    const accessToken = req.headers.get("Authorization")?.match(/^Bearer\s+(.+)$/i)?.[1];
+    const isServiceRequest = accessToken === serviceRoleKey;
 
-    // Get company settings
-    const { data: companySettings } = await supabase
-      .from("company_settings")
-      .select("id, zelle_payment_key, venmo_payment_key, trade_name, preferred_language")
-      .maybeSingle();
-
-    if (!companySettings) {
-      return new Response(
-        JSON.stringify({ error: "Company settings not found" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    let staffCompanyId: string | null = null;
+    if (isServiceRequest) {
+      const error = authorizeServiceRequest(req);
+      if (error) return error;
+    } else {
+      const authorization = await getAuthorizedStaffIdentity(req, supabase, ["admin", "office_manager"]);
+      if (authorization.error) return authorization.error;
+      staffCompanyId = authorization.identity.companyId;
+      if (requestedCompanyId && requestedCompanyId !== staffCompanyId) return json({ error: "Company scope mismatch" }, 403);
     }
 
-    const zelleKey = companySettings.zelle_payment_key;
-    const venmoKey = companySettings.venmo_payment_key;
-    const companyName = companySettings.trade_name || "Our Company";
-
-    // Get RingCentral connection
-    const { data: connection, error: connError } = await supabase
-      .from("ringcentral_connections")
-      .select("*")
-      .eq("company_id", companySettings.id)
-      .single();
-
-    if (connError || !connection) {
-      return new Response(
-        JSON.stringify({ error: "RingCentral not connected" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    const accessToken = await getValidToken(supabase, connection);
-    const fromNumber = connection.phone_number || Deno.env.get("RINGCENTRAL_FROM_NUMBER");
-
-    if (!fromNumber) {
-      return new Response(
-        JSON.stringify({ error: "No from phone number configured" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // Send reminder for single invoice
-    if (action === "send-single" && invoice_id) {
-      const { data: invoice } = await supabase
-        .from("invoices")
-        .select(`
-          id, invoice_number, total, due_date, status,
-          customer:customers(id, name, phone, phone2, payment_method, preferred_language)
-        `)
-        .eq("id", invoice_id)
-        .single();
-
-      if (!invoice) {
-        throw new Error("Invoice not found");
-      }
-
+    const sendInvoice = async (companyId: string, invoice: {
+      id: string;
+      invoice_number: string;
+      total: number | null;
+      due_date: string;
+      status: string;
+      customer: InvoiceCustomer | InvoiceCustomer[] | null;
+    }, settings: { zelle_payment_key: string | null; venmo_payment_key: string | null; trade_name: string | null; legal_name: string | null }) => {
       const customer = getInvoiceCustomer(invoice.customer);
       const phone = customer?.phone || customer?.phone2;
-      
-      if (!phone) {
-        throw new Error("Customer has no phone number");
-      }
+      if (!customer || !phone) return false;
 
-      const paymentInfo = getPaymentInfoSMS(customer.payment_method, zelleKey, venmoKey);
-      const isOverdue = invoice.status === "overdue" || new Date(invoice.due_date) < new Date();
+      const formattedPhone = formatPhone(phone);
+      const isOverdue = invoice.status === "overdue" || new Date(`${invoice.due_date}T12:00:00`) < new Date();
+      const companyName = settings.trade_name || settings.legal_name || "Our Company";
+      const paymentInfo = getPaymentInfo(customer.payment_method, settings.zelle_payment_key, settings.venmo_payment_key);
+      const triggerType = isOverdue ? "invoice_overdue_sms" : "invoice_reminder_sms";
+
+      const { data: existing, error: existingError } = await supabase
+        .from("automation_logs")
+        .select("id")
+        .eq("company_id", companyId)
+        .eq("invoice_id", invoice.id)
+        .eq("trigger_type", triggerType)
+        .eq("sent_to", formattedPhone)
+        .eq("sent_via", "sms")
+        .eq("status", "sent")
+        .limit(1)
+        .maybeSingle();
+      if (existingError) throw existingError;
+      if (existing) return true;
 
       const message = isOverdue
-        ? `Hi ${customer.name}, invoice ${invoice.invoice_number} for $${invoice.total?.toFixed(2)} is overdue. ${paymentInfo}Please pay ASAP. - ${companyName}`
-        : `Hi ${customer.name}, reminder: invoice ${invoice.invoice_number} for $${invoice.total?.toFixed(2)} is due on ${invoice.due_date}. ${paymentInfo}- ${companyName}`;
+        ? `Hi ${customer.name || "Customer"}, invoice ${invoice.invoice_number} for $${Number(invoice.total || 0).toFixed(2)} is overdue. ${paymentInfo}Please pay ASAP. - ${companyName}`
+        : `Hi ${customer.name || "Customer"}, reminder: invoice ${invoice.invoice_number} for $${Number(invoice.total || 0).toFixed(2)} is due on ${invoice.due_date}. ${paymentInfo}- ${companyName}`;
 
-      // Normalize phone
-      let formattedPhone = phone.replace(/\D/g, "");
-      if (formattedPhone.length === 10) {
-        formattedPhone = "+1" + formattedPhone;
-      } else if (!formattedPhone.startsWith("+")) {
-        formattedPhone = "+" + formattedPhone;
-      }
-
-      const sendResponse = await fetch(`${RC_API_BASE}/account/~/extension/~/sms`, {
+      const response = await fetch(`${supabaseUrl}/functions/v1/ringcentral-send-message`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from: { phoneNumber: fromNumber },
-          to: [{ phoneNumber: formattedPhone }],
-          text: message,
-        }),
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${serviceRoleKey}` },
+        body: JSON.stringify({ company_id: companyId, to_phone: formattedPhone, message }),
       });
-
-      if (!sendResponse.ok) {
-        const errorText = await sendResponse.text();
-        console.error("Failed to send SMS:", errorText);
-        throw new Error("Failed to send SMS");
+      if (!response.ok) {
+        await response.body?.cancel();
+        throw new Error(`RingCentral delivery failed (${response.status})`);
       }
+      await response.body?.cancel();
 
-      // Log the automation
-      await supabase.from("automation_logs").insert({
-        trigger_type: isOverdue ? "invoice_overdue_sms" : "invoice_reminder_sms",
+      const { error: logError } = await supabase.from("automation_logs").insert({
+        company_id: companyId,
+        trigger_type: triggerType,
         invoice_id: invoice.id,
         customer_id: customer.id,
         message_sent: message,
         sent_to: formattedPhone,
         sent_via: "sms",
         status: "sent",
+        sent_at: new Date().toISOString(),
       });
+      if (logError) console.warn("SMS reminder sent but logging failed", logError);
+      return true;
+    };
 
-      return new Response(
-        JSON.stringify({ success: true, message: "SMS sent successfully" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    const loadSettings = async (companyId: string) => {
+      const { data, error } = await supabase
+        .from("company_settings")
+        .select("zelle_payment_key, venmo_payment_key, trade_name, legal_name")
+        .eq("id", companyId)
+        .single();
+      if (error || !data) throw error || new Error("Company settings not found");
+      return data;
+    };
+
+    if (action === "send-single") {
+      if (typeof invoice_id !== "string" || !invoice_id) return json({ error: "invoice_id is required" }, 400);
+
+      let companyId = staffCompanyId || (typeof requestedCompanyId === "string" ? requestedCompanyId : null);
+      if (!companyId && isServiceRequest) {
+        const { data: owner, error } = await supabase.from("invoices").select("company_id").eq("id", invoice_id).single();
+        if (error || !owner?.company_id) return json({ error: "Invoice not found" }, 404);
+        companyId = owner.company_id;
+      }
+      if (!companyId) return json({ error: "Company context is required" }, 400);
+
+      const [settings, invoiceResult] = await Promise.all([
+        loadSettings(companyId),
+        supabase.from("invoices")
+          .select("id, invoice_number, total, due_date, status, customer:customers(id, name, phone, phone2, payment_method)")
+          .eq("id", invoice_id)
+          .eq("company_id", companyId)
+          .single(),
+      ]);
+      if (invoiceResult.error || !invoiceResult.data) return json({ error: "Invoice not found" }, 404);
+      const sent = await sendInvoice(companyId, invoiceResult.data, settings);
+      if (!sent) return json({ error: "Customer has no phone number" }, 400);
+      return json({ success: true, message: "SMS sent successfully" });
     }
 
-    // Batch send reminders for all upcoming/overdue invoices
     if (action === "send-batch") {
-      const now = new Date();
-      const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
+      let companyIds: string[] = [];
+      if (staffCompanyId) companyIds = [staffCompanyId];
+      else if (typeof requestedCompanyId === "string" && requestedCompanyId) companyIds = [requestedCompanyId];
+      else {
+        const { data, error } = await supabase.from("company_settings").select("id");
+        if (error) throw error;
+        companyIds = (data || []).map((company) => company.id);
+      }
 
-      // Fetch invoices needing reminders
-      const { data: invoices } = await supabase
-        .from("invoices")
-        .select(`
-          id, invoice_number, total, due_date, status, reminder_sent_at,
-          customer:customers(id, name, phone, phone2, payment_method, preferred_language)
-        `)
-        .in("status", ["sent", "viewed", "overdue"])
-        .lte("due_date", threeDaysFromNow.toISOString().split("T")[0]);
-
+      const threeDaysFromNow = new Date(Date.now() + 3 * 86_400_000).toISOString().split("T")[0];
       let sentCount = 0;
       const errors: string[] = [];
 
-      for (const invoice of (invoices || [])) {
-        const customer = getInvoiceCustomer(invoice.customer);
-        const phone = customer?.phone || customer?.phone2;
-        
-        if (!phone) continue;
-
+      for (const companyId of companyIds) {
         try {
-          const paymentInfo = getPaymentInfoSMS(customer.payment_method, zelleKey, venmoKey);
-          const isOverdue = new Date(invoice.due_date) < now;
+          const [settings, invoicesResult] = await Promise.all([
+            loadSettings(companyId),
+            supabase.from("invoices")
+              .select("id, invoice_number, total, due_date, status, customer:customers(id, name, phone, phone2, payment_method)")
+              .eq("company_id", companyId)
+              .in("status", ["sent", "viewed", "overdue"])
+              .lte("due_date", threeDaysFromNow),
+          ]);
+          if (invoicesResult.error) throw invoicesResult.error;
 
-          const message = isOverdue
-            ? `Hi ${customer.name}, invoice ${invoice.invoice_number} for $${invoice.total?.toFixed(2)} is overdue. ${paymentInfo}Please pay ASAP. - ${companyName}`
-            : `Hi ${customer.name}, reminder: invoice ${invoice.invoice_number} for $${invoice.total?.toFixed(2)} is due soon. ${paymentInfo}- ${companyName}`;
-
-          let formattedPhone = phone.replace(/\D/g, "");
-          if (formattedPhone.length === 10) {
-            formattedPhone = "+1" + formattedPhone;
-          } else if (!formattedPhone.startsWith("+")) {
-            formattedPhone = "+" + formattedPhone;
+          for (const invoice of invoicesResult.data || []) {
+            try {
+              if (await sendInvoice(companyId, invoice, settings)) sentCount++;
+            } catch (error) {
+              errors.push(`${companyId}/${invoice.invoice_number}: ${error instanceof Error ? error.message : String(error)}`);
+            }
           }
-
-          const sendResponse = await fetch(`${RC_API_BASE}/account/~/extension/~/sms`, {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              from: { phoneNumber: fromNumber },
-              to: [{ phoneNumber: formattedPhone }],
-              text: message,
-            }),
-          });
-
-          if (sendResponse.ok) {
-            await supabase.from("automation_logs").insert({
-              trigger_type: isOverdue ? "invoice_overdue_sms" : "invoice_reminder_sms",
-              invoice_id: invoice.id,
-              customer_id: customer.id,
-              message_sent: message,
-              sent_to: formattedPhone,
-              sent_via: "sms",
-              status: "sent",
-            });
-            sentCount++;
-          } else {
-            errors.push(`Failed for ${invoice.invoice_number}`);
-          }
-        } catch (err) {
-          errors.push(`Error for ${invoice.invoice_number}: ${err}`);
+        } catch (error) {
+          errors.push(`${companyId}: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
 
-      return new Response(
-        JSON.stringify({ 
-          success: true, 
-          sentCount,
-          errors: errors.length > 0 ? errors : undefined
-        }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return json({ success: true, sentCount, errors: errors.length ? errors : undefined });
     }
 
-    return new Response(
-      JSON.stringify({ error: "Invalid action" }),
-      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
-
+    return json({ error: "Invalid action" }, 400);
   } catch (error) {
     console.error("Invoice SMS Reminder Error:", error);
-    return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return json({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
   }
 });
