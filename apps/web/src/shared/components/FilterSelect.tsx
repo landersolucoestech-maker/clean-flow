@@ -28,12 +28,12 @@ export function FilterSelect({
 }: FilterSelectProps) {
   return (
     <Select value={value} onValueChange={onValueChange}>
-      <SelectTrigger className={className}>
+      <SelectTrigger className={`rounded-xl border-input bg-card shadow-sm ${className}`}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
-      <SelectContent className="bg-background border border-border">
+      <SelectContent className="rounded-xl border border-border bg-popover shadow-lg">
         {options.map((option) => (
-          <SelectItem key={option.value} value={option.value}>
+          <SelectItem key={option.value} value={option.value} className="rounded-lg">
             {option.label}
           </SelectItem>
         ))}
