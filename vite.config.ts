@@ -15,7 +15,7 @@ export default defineConfig({
       { find: "@/components/calendar", replacement: webSrc("modules/schedule/calendar") },
       { find: "@/components/communications", replacement: webSrc("modules/communications/components") },
       { find: "@/components/customers", replacement: webSrc("modules/customers/components") },
-      { find: "@/components/dashboard", replacement: webSrc("app/components") },
+      { find: "@/components/dashboard", replacement: webSrc("modules/dashboard/components") },
       { find: "@/components/jobs", replacement: webSrc("modules/jobs/components") },
       { find: "@/components/layout", replacement: webSrc("shared/layout") },
       { find: "@/components/leads", replacement: webSrc("modules/leads/components") },
