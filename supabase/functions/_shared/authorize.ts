@@ -24,6 +24,7 @@ export interface AuthorizedStaffIdentity {
   userId: string;
   email: string;
   staffId: string;
+  companyId: string;
   role: StaffRole;
 }
 
@@ -33,6 +34,7 @@ type StaffAuthorizationResult =
 
 type StaffIdentityRow = {
   id: string;
+  company_id: string | null;
   staff_roles: { role: StaffRole } | Array<{ role: StaffRole }> | null;
 };
 
@@ -53,7 +55,7 @@ export async function getAuthorizedStaffIdentity(
     return { identity: null, error: authorizationResponse(401, "Invalid authentication token", "UNAUTHENTICATED") };
   }
 
-  const staffSelection = "id, staff_roles(role)";
+  const staffSelection = "id, company_id, staff_roles(role)";
   const { data: identityMatches, error: identityError } = await adminClient
     .from("staff")
     .select(staffSelection)
@@ -87,6 +89,13 @@ export async function getAuthorizedStaffIdentity(
   }
 
   const staffIdentity = staffMatches[0] as StaffIdentityRow;
+  if (!staffIdentity.company_id) {
+    return {
+      identity: null,
+      error: authorizationResponse(403, "The staff account is not linked to a company", "TENANT_REQUIRED"),
+    };
+  }
+
   const roleJoin = staffIdentity.staff_roles;
   const role = Array.isArray(roleJoin) ? roleJoin[0]?.role : roleJoin?.role;
   if (!role || !allowedRoles.includes(role)) {
@@ -97,7 +106,13 @@ export async function getAuthorizedStaffIdentity(
   }
 
   return {
-    identity: { userId: user.id, email: user.email, staffId: staffIdentity.id, role },
+    identity: {
+      userId: user.id,
+      email: user.email,
+      staffId: staffIdentity.id,
+      companyId: staffIdentity.company_id,
+      role,
+    },
     error: null,
   };
 }
