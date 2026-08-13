@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.112.0";
-import { authorizeStaffRequest } from "../_shared/authorize.ts";
+import { getAuthorizedStaffIdentity } from "../_shared/authorize.ts";
 import { getQuickBooksConnection, quickBooksHeaders } from "../_shared/quickbooks.ts";
 
 const corsHeaders = {
@@ -10,7 +10,7 @@ const corsHeaders = {
 
 const QUICKBOOKS_BASE_URL = "https://quickbooks.api.intuit.com/v3/company";
 
-interface QuickBooksInvoice {
+type QuickBooksInvoice = {
   Id: string;
   DocNumber: string;
   CustomerRef: { value: string; name: string };
@@ -19,214 +19,168 @@ interface QuickBooksInvoice {
   DueDate: string;
   TxnDate: string;
   EmailStatus: string;
-  // QB status: NotSent, NeedToSend, EmailSent
+};
+
+function json(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
 }
 
-function mapQBStatusToLocal(qbInvoice: QuickBooksInvoice): string {
-  const now = new Date();
-  const dueDate = new Date(qbInvoice.DueDate);
-  
-  // If balance is 0, it's paid
-  if (qbInvoice.Balance === 0) {
-    return "paid";
-  }
-  
-  // If past due date, it's overdue
-  if (dueDate < now) {
-    return "overdue";
-  }
-  
-  // Based on email status
-  switch (qbInvoice.EmailStatus) {
-    case "EmailSent":
-      return "sent";
-    case "Viewed":
-      return "viewed";
-    default:
-      return "sent";
-  }
+function mapQBStatusToLocal(invoice: QuickBooksInvoice): string {
+  if (invoice.Balance === 0) return "paid";
+  if (invoice.DueDate && new Date(invoice.DueDate) < new Date()) return "overdue";
+  if (invoice.EmailStatus === "Viewed") return "viewed";
+  return "sent";
 }
 
 serve(async (req: Request) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!supabaseUrl || !serviceRoleKey) return json({ error: "Backend not configured" }, 503);
+
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
+    const authorization = await getAuthorizedStaffIdentity(req, supabase, ["admin", "office_manager"]);
+    if (authorization.error) return authorization.error;
+    const companyId = authorization.identity.companyId;
+
     const body = await req.json();
-    const { action } = body;
-
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    const authorizationError = await authorizeStaffRequest(
-      req,
-      supabase,
-      ["admin", "office_manager"],
-    );
-    if (authorizationError) return authorizationError;
-
-    const connection = await getQuickBooksConnection(supabase);
+    const action = body.action;
+    const connection = await getQuickBooksConnection(supabase, companyId);
     const realmId = connection.realm_id;
     const headers = quickBooksHeaders(connection.access_token);
 
     if (action === "sync-all") {
-      // Fetch all invoices from QuickBooks
       const response = await fetch(
         `${QUICKBOOKS_BASE_URL}/${realmId}/query?query=SELECT * FROM Invoice ORDERBY MetaData.LastUpdatedTime DESC MAXRESULTS 500&minorversion=65`,
-        { headers }
+        { headers },
       );
-
-      if (!response.ok) {
-        throw new Error(`QuickBooks API error: ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`QuickBooks API error: ${response.status}`);
 
       const result = await response.json();
-      const qbInvoices = result.QueryResponse?.Invoice || [];
-
-      let synced = 0;
+      const qbInvoices = (result.QueryResponse?.Invoice || []) as QuickBooksInvoice[];
       let updated = 0;
 
       for (const qbInvoice of qbInvoices) {
-        const status = mapQBStatusToLocal(qbInvoice);
-        
-        // Check if we have this invoice locally
         const { data: existingInvoice } = await supabase
           .from("invoices")
           .select("id")
+          .eq("company_id", companyId)
           .eq("qb_invoice_id", qbInvoice.Id)
-          .single();
+          .maybeSingle();
+        if (!existingInvoice) continue;
 
-        if (existingInvoice) {
-          // Update existing invoice
-          await supabase
-            .from("invoices")
-            .update({
-              status,
-              qb_doc_number: qbInvoice.DocNumber,
-              qb_email_status: qbInvoice.EmailStatus,
-              qb_balance: qbInvoice.Balance,
-              qb_synced_at: new Date().toISOString(),
-            })
-            .eq("id", existingInvoice.id);
-          updated++;
-        }
-        synced++;
+        const { error } = await supabase
+          .from("invoices")
+          .update({
+            status: mapQBStatusToLocal(qbInvoice),
+            qb_doc_number: qbInvoice.DocNumber,
+            qb_email_status: qbInvoice.EmailStatus,
+            qb_balance: qbInvoice.Balance,
+            qb_synced_at: new Date().toISOString(),
+          })
+          .eq("id", existingInvoice.id)
+          .eq("company_id", companyId);
+        if (error) throw error;
+        updated++;
       }
 
-      return new Response(
-        JSON.stringify({ 
-          success: true, 
-          synced, 
-          updated,
-          message: `Synced ${synced} invoices, updated ${updated}` 
-        }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return json({ success: true, synced: qbInvoices.length, updated });
     }
 
     if (action === "sync-single") {
-      const { invoiceId, qbInvoiceId } = body;
-      
-      if (!invoiceId || !qbInvoiceId) {
-        throw new Error("Missing required parameters");
+      const invoiceId = typeof body.invoiceId === "string" ? body.invoiceId : "";
+      const qbInvoiceId = typeof body.qbInvoiceId === "string" ? body.qbInvoiceId : "";
+      if (!invoiceId || !qbInvoiceId) return json({ error: "invoiceId and qbInvoiceId are required" }, 400);
+
+      const { data: localInvoice, error: localError } = await supabase
+        .from("invoices")
+        .select("id, qb_invoice_id")
+        .eq("id", invoiceId)
+        .eq("company_id", companyId)
+        .maybeSingle();
+      if (localError || !localInvoice) return json({ error: "Invoice not found" }, 404);
+      if (localInvoice.qb_invoice_id && localInvoice.qb_invoice_id !== qbInvoiceId) {
+        return json({ error: "QuickBooks invoice identity mismatch" }, 409);
       }
 
-      // Fetch specific invoice from QuickBooks
-      const response = await fetch(
-        `${QUICKBOOKS_BASE_URL}/${realmId}/invoice/${qbInvoiceId}?minorversion=65`,
-        { headers }
-      );
-
-      if (!response.ok) {
-        throw new Error(`QuickBooks API error: ${response.status}`);
-      }
-
-      const result = await response.json();
-      const qbInvoice = result.Invoice;
-
+      const response = await fetch(`${QUICKBOOKS_BASE_URL}/${realmId}/invoice/${qbInvoiceId}?minorversion=65`, { headers });
+      if (!response.ok) throw new Error(`QuickBooks API error: ${response.status}`);
+      const qbInvoice = (await response.json()).Invoice as QuickBooksInvoice;
       const status = mapQBStatusToLocal(qbInvoice);
 
-      // Update local invoice
-      await supabase
+      const { error } = await supabase
         .from("invoices")
         .update({
           status,
+          qb_invoice_id: qbInvoice.Id,
           qb_doc_number: qbInvoice.DocNumber,
           qb_email_status: qbInvoice.EmailStatus,
           qb_balance: qbInvoice.Balance,
           qb_synced_at: new Date().toISOString(),
         })
-        .eq("id", invoiceId);
-
-      return new Response(
-        JSON.stringify({ success: true, status }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+        .eq("id", invoiceId)
+        .eq("company_id", companyId);
+      if (error) throw error;
+      return json({ success: true, status });
     }
 
     if (action === "mark-paid") {
-      const { invoiceId, qbInvoiceId, amount, customerId } = body;
-      
-      if (!invoiceId || !qbInvoiceId || !customerId || typeof amount !== "number") {
-        throw new Error("Missing required parameters");
+      const invoiceId = typeof body.invoiceId === "string" ? body.invoiceId : "";
+      const qbInvoiceId = typeof body.qbInvoiceId === "string" ? body.qbInvoiceId : "";
+      const qbCustomerId = typeof body.customerId === "string" ? body.customerId : "";
+      const amount = Number(body.amount);
+      if (!invoiceId || !qbInvoiceId || !qbCustomerId || !Number.isFinite(amount) || amount <= 0) {
+        return json({ error: "Valid invoiceId, qbInvoiceId, customerId and amount are required" }, 400);
       }
 
-      // Create payment in QuickBooks
-      const paymentData = {
-        CustomerRef: { value: customerId },
-        TotalAmt: amount,
-        Line: [{
-          Amount: amount,
-          LinkedTxn: [{
-            TxnId: qbInvoiceId,
-            TxnType: "Invoice"
-          }]
-        }],
-      };
-
-      const response = await fetch(
-        `${QUICKBOOKS_BASE_URL}/${realmId}/payment?minorversion=65`,
-        {
-          method: "POST",
-          headers,
-          body: JSON.stringify(paymentData),
-        }
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`QuickBooks payment error: ${errorText}`);
+      const { data: localInvoice, error: localError } = await supabase
+        .from("invoices")
+        .select("id, qb_invoice_id, total, amount_paid")
+        .eq("id", invoiceId)
+        .eq("company_id", companyId)
+        .maybeSingle();
+      if (localError || !localInvoice) return json({ error: "Invoice not found" }, 404);
+      if (localInvoice.qb_invoice_id && localInvoice.qb_invoice_id !== qbInvoiceId) {
+        return json({ error: "QuickBooks invoice identity mismatch" }, 409);
       }
 
-      // Update local invoice
-      await supabase
+      const response = await fetch(`${QUICKBOOKS_BASE_URL}/${realmId}/payment?minorversion=65`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          CustomerRef: { value: qbCustomerId },
+          TotalAmt: amount,
+          Line: [{ Amount: amount, LinkedTxn: [{ TxnId: qbInvoiceId, TxnType: "Invoice" }] }],
+        }),
+      });
+      if (!response.ok) throw new Error(`QuickBooks payment error (${response.status})`);
+
+      const total = Number(localInvoice.total || 0);
+      const newPaidAmount = Number(localInvoice.amount_paid || 0) + amount;
+      const status = newPaidAmount >= total ? "paid" : "partial";
+      const { error } = await supabase
         .from("invoices")
         .update({
-          status: "paid",
-          amount_paid: amount,
-          qb_balance: 0,
+          status,
+          amount_paid: newPaidAmount,
+          qb_balance: Math.max(0, total - newPaidAmount),
           qb_synced_at: new Date().toISOString(),
         })
-        .eq("id", invoiceId);
+        .eq("id", invoiceId)
+        .eq("company_id", companyId);
+      if (error) throw error;
 
-      return new Response(
-        JSON.stringify({ success: true, message: "Payment recorded" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return json({ success: true, message: "Payment recorded", status, amount_paid: newPaidAmount });
     }
 
-    return new Response(
-      JSON.stringify({ error: "Invalid action" }),
-      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
-
+    return json({ error: "Invalid action" }, 400);
   } catch (error: unknown) {
-    console.error("Sync Error:", error);
-    const message = error instanceof Error ? error.message : "Unknown error";
-    return new Response(
-      JSON.stringify({ error: message }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    console.error("QuickBooks sync error:", error);
+    return json({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
   }
 });
