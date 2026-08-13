@@ -24,7 +24,7 @@
       "@/components/calendar/*": ["./apps/web/src/modules/schedule/calendar/*"],
       "@/components/communications/*": ["./apps/web/src/modules/communications/components/*"],
       "@/components/customers/*": ["./apps/web/src/modules/customers/components/*"],
-      "@/components/dashboard/*": ["./apps/web/src/app/components/*"],
+      "@/components/dashboard/*": ["./apps/web/src/modules/dashboard/components/*"],
       "@/components/jobs/*": ["./apps/web/src/modules/jobs/components/*"],
       "@/components/layout/*": ["./apps/web/src/shared/layout/*"],
       "@/components/leads/*": ["./apps/web/src/modules/leads/components/*"],
