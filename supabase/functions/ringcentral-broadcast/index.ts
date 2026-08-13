@@ -1,37 +1,49 @@
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.112.0";
-import { authorizeStaffRequest } from "../_shared/authorize.ts";
+import { getAuthorizedStaffIdentity } from "../_shared/authorize.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+const RC_API_BASE = "https://platform.ringcentral.com/restapi/v1.0";
+const RC_TOKEN_URL = "https://platform.ringcentral.com/restapi/oauth/token";
+const RC_CLIENT_ID = Deno.env.get("RINGCENTRAL_CLIENT_ID");
+const RC_CLIENT_SECRET = Deno.env.get("RINGCENTRAL_CLIENT_SECRET");
+const RC_FROM_NUMBER = Deno.env.get("RINGCENTRAL_FROM_NUMBER");
+const MAX_MMS_SIZE = 1 * 1024 * 1024;
 
-interface BroadcastRecipient {
+type Recipient = {
   id: string;
   broadcast_id: string;
   customer_id: string;
   phone: string | null;
   status: string;
-}
+};
 
-interface RingCentralConnection {
+type Connection = {
   id: string;
   company_id: string;
   access_token: string;
   refresh_token: string;
   token_expires_at: string;
   phone_number: string | null;
+};
+
+type SendResult = { success: boolean; messageId?: string; error?: string };
+
+function json(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
 }
 
-interface RingCentralTokenResponse {
-  access_token: string;
-  refresh_token: string;
-  expires_in: number;
+function formatPhoneNumber(phone: string): string {
+  const cleaned = phone.replace(/\D/g, "");
+  if (cleaned.startsWith("1") && cleaned.length === 11) return `+${cleaned}`;
+  if (cleaned.length === 10) return `+1${cleaned}`;
+  return `+${cleaned}`;
 }
-
-const RC_CLIENT_ID = Deno.env.get("RINGCENTRAL_CLIENT_ID");
-const RC_CLIENT_SECRET = Deno.env.get("RINGCENTRAL_CLIENT_SECRET");
-const RC_FROM_NUMBER = Deno.env.get("RINGCENTRAL_FROM_NUMBER");
 
 function isAllowedAttachmentUrl(value: string, supabaseUrl: string): boolean {
   try {
@@ -44,499 +56,231 @@ function isAllowedAttachmentUrl(value: string, supabaseUrl: string): boolean {
     return false;
   }
 }
-const RC_API_BASE = "https://platform.ringcentral.com/restapi/v1.0";
-const MAX_MMS_SIZE = 1 * 1024 * 1024; // 1MB - RingCentral limit is ~1.5MB
 
-// Refresh access token if expired
-async function refreshAccessToken(
-  supabase: SupabaseClient,
-  connection: RingCentralConnection
-): Promise<string | null> {
-  const isExpired = new Date(connection.token_expires_at) < new Date();
-  
-  if (!isExpired) {
-    return connection.access_token;
+async function refreshAccessToken(supabase: SupabaseClient, connection: Connection): Promise<string> {
+  if (new Date(connection.token_expires_at).getTime() > Date.now() + 60_000) return connection.access_token;
+  if (!RC_CLIENT_ID || !RC_CLIENT_SECRET) throw new Error("RingCentral credentials are not configured");
+
+  const response = await fetch(RC_TOKEN_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Authorization: `Basic ${btoa(`${RC_CLIENT_ID}:${RC_CLIENT_SECRET}`)}`,
+    },
+    body: new URLSearchParams({ grant_type: "refresh_token", refresh_token: connection.refresh_token }),
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || typeof payload.access_token !== "string") {
+    throw new Error("Failed to refresh RingCentral token");
   }
 
-  if (!RC_CLIENT_ID || !RC_CLIENT_SECRET) {
-    console.error("RingCentral client credentials not configured");
-    return null;
-  }
-
-  try {
-    const tokenResponse = await fetch(
-      "https://platform.ringcentral.com/restapi/oauth/token",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Authorization: `Basic ${btoa(`${RC_CLIENT_ID}:${RC_CLIENT_SECRET}`)}`,
-        },
-        body: new URLSearchParams({
-          grant_type: "refresh_token",
-          refresh_token: connection.refresh_token,
-        }),
-      }
-    );
-
-    if (!tokenResponse.ok) {
-      console.error("Failed to refresh token:", await tokenResponse.text());
-      return null;
-    }
-
-    const { access_token, refresh_token, expires_in } = await tokenResponse.json() as RingCentralTokenResponse;
-    const tokenExpiresAt = new Date(Date.now() + expires_in * 1000);
-
-    // Update tokens in database
-    await supabase
-      .from("ringcentral_connections")
-      .update({
-        access_token,
-        refresh_token,
-        token_expires_at: tokenExpiresAt.toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", connection.id);
-
-    return access_token;
-  } catch (err) {
-    console.error("Token refresh error:", err);
-    return null;
-  }
+  const { error } = await supabase
+    .from("ringcentral_connections")
+    .update({
+      access_token: payload.access_token,
+      refresh_token: payload.refresh_token || connection.refresh_token,
+      token_expires_at: new Date(Date.now() + Number(payload.expires_in) * 1000).toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", connection.id)
+    .eq("company_id", connection.company_id);
+  if (error) throw new Error("Failed to persist RingCentral token refresh");
+  return payload.access_token;
 }
 
-// Get file size without downloading
-async function getFileSize(url: string): Promise<number> {
-  try {
-    const response = await fetch(url, { method: "HEAD" });
-    const contentLength = response.headers.get("content-length");
-    return contentLength ? parseInt(contentLength, 10) : 0;
-  } catch {
-    return 0;
-  }
-}
-
-// Download file and convert to base64
-async function downloadFileAsBase64(url: string): Promise<{ base64: string; contentType: string; fileName: string; size: number } | null> {
-  try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      console.error("Failed to download file:", response.status);
-      return null;
-    }
-    
-    const contentType = response.headers.get("content-type") || "application/octet-stream";
-    const arrayBuffer = await response.arrayBuffer();
-    const uint8Array = new Uint8Array(arrayBuffer);
-    const size = uint8Array.length;
-    
-    // Convert to base64 in chunks to avoid stack overflow
-    let binary = "";
-    const chunkSize = 8192;
-    for (let i = 0; i < uint8Array.length; i += chunkSize) {
-      const chunk = uint8Array.subarray(i, Math.min(i + chunkSize, uint8Array.length));
-      for (let j = 0; j < chunk.length; j++) {
-        binary += String.fromCharCode(chunk[j]);
-      }
-    }
-    const base64 = btoa(binary);
-    
-    // Extract filename from URL
-    const urlParts = url.split("/");
-    const fileName = urlParts[urlParts.length - 1] || "attachment";
-    
-    return { base64, contentType, fileName, size };
-  } catch (err) {
-    console.error("Error downloading file:", err);
-    return null;
-  }
-}
-
-// Send MMS with attachment (only for files under size limit)
-async function sendMMS(
-  accessToken: string,
-  fromNumber: string,
-  toNumber: string,
-  message: string,
-  attachmentUrl: string
-): Promise<{ success: boolean; messageId?: string; error?: string }> {
-  try {
-    // Check file size first
-    const fileSize = await getFileSize(attachmentUrl);
-    
-    if (fileSize > MAX_MMS_SIZE || fileSize === 0) {
-      // File too large - send as SMS with link instead
-      console.log("File too large for MMS, sending as SMS with link");
-      
-      // Extract filename from URL for friendly display
-      let fileName = "Document";
-      try {
-        const urlPath = new URL(attachmentUrl).pathname;
-        const pathParts = urlPath.split("/");
-        const rawName = pathParts[pathParts.length - 1];
-        fileName = decodeURIComponent(rawName).replace(/^\d{13,}_/, '') || "Document";
-      } catch {
-        // Keep default
-      }
-      
-      const textWithLink = message 
-        ? `${message}\n\n📎 ${fileName}: ${attachmentUrl}`
-        : `📎 ${fileName}: ${attachmentUrl}`;
-      
-      return await sendSMS(accessToken, fromNumber, toNumber, textWithLink);
-    }
-    
-    const fileData = await downloadFileAsBase64(attachmentUrl);
-    if (!fileData) {
-      return { success: false, error: "Failed to download attachment" };
-    }
-
-    const boundary = `----RCBoundary${Date.now()}`;
-    
-    // Build multipart body
-    let body = "";
-    
-    // JSON part
-    body += `--${boundary}\r\n`;
-    body += "Content-Type: application/json\r\n\r\n";
-    body += JSON.stringify({
-      from: { phoneNumber: fromNumber },
-      to: [{ phoneNumber: toNumber }],
-      text: message,
-    });
-    body += "\r\n";
-    
-    // Attachment part
-    body += `--${boundary}\r\n`;
-    body += `Content-Type: ${fileData.contentType}\r\n`;
-    body += `Content-Disposition: attachment; filename="${fileData.fileName}"\r\n`;
-    body += "Content-Transfer-Encoding: base64\r\n\r\n";
-    body += fileData.base64;
-    body += "\r\n";
-    
-    body += `--${boundary}--\r\n`;
-
-    const response = await fetch(`${RC_API_BASE}/account/~/extension/~/sms`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": `multipart/mixed; boundary=${boundary}`,
-      },
-      body: body,
-    });
-
-    if (response.ok) {
-      const result = await response.json();
-      return { success: true, messageId: result.id };
-    } else {
-      const errorText = await response.text();
-      console.error("MMS send failed:", errorText);
-      return { success: false, error: errorText };
-    }
-  } catch (err) {
-    console.error("MMS error:", err);
-    return { success: false, error: err instanceof Error ? err.message : "Unknown error" };
-  }
-}
-
-// Send SMS (text only)
-async function sendSMS(
-  accessToken: string,
-  fromNumber: string,
-  toNumber: string,
-  message: string
-): Promise<{ success: boolean; messageId?: string; status?: string; error?: string }> {
+async function sendSMS(accessToken: string, from: string, to: string, text: string): Promise<SendResult> {
   try {
     const response = await fetch(`${RC_API_BASE}/account/~/extension/~/sms`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body: JSON.stringify({
-        from: { phoneNumber: fromNumber },
-        to: [{ phoneNumber: toNumber }],
-        text: message,
-      }),
+      headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ from: { phoneNumber: from }, to: [{ phoneNumber: to }], text }),
     });
-
-    if (response.ok) {
-      const result = await response.json();
-      return { success: true, messageId: result.id, status: result.messageStatus };
-    } else {
-      const errorText = await response.text();
-      console.error("SMS send failed:", errorText);
-      return { success: false, error: errorText };
-    }
-  } catch (err) {
-    console.error("SMS error:", err);
-    return { success: false, error: err instanceof Error ? err.message : "Unknown error" };
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) return { success: false, error: `RingCentral HTTP ${response.status}` };
+    return { success: true, messageId: typeof payload.id === "string" ? payload.id : undefined };
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : "RingCentral request failed" };
   }
+}
+
+async function fetchAttachment(url: string): Promise<{ base64: string; contentType: string; fileName: string } | null> {
+  const head = await fetch(url, { method: "HEAD" }).catch(() => null);
+  const size = Number(head?.headers.get("content-length") || 0);
+  if (!head?.ok || size === 0 || size > MAX_MMS_SIZE) return null;
+
+  const response = await fetch(url);
+  if (!response.ok) return null;
+  const bytes = new Uint8Array(await response.arrayBuffer());
+  let binary = "";
+  for (let i = 0; i < bytes.length; i += 8192) {
+    const chunk = bytes.subarray(i, Math.min(i + 8192, bytes.length));
+    for (const byte of chunk) binary += String.fromCharCode(byte);
+  }
+  return {
+    base64: btoa(binary),
+    contentType: response.headers.get("content-type") || "application/octet-stream",
+    fileName: decodeURIComponent(new URL(url).pathname.split("/").pop() || "attachment"),
+  };
+}
+
+async function sendAttachment(
+  accessToken: string,
+  from: string,
+  to: string,
+  text: string,
+  url: string,
+): Promise<SendResult> {
+  const attachment = await fetchAttachment(url);
+  if (!attachment) {
+    return sendSMS(accessToken, from, to, text ? `${text}\n\n📎 ${url}` : `📎 ${url}`);
+  }
+
+  const boundary = `----RCBoundary${crypto.randomUUID()}`;
+  const body = [
+    `--${boundary}\r\nContent-Type: application/json\r\n\r\n${JSON.stringify({
+      from: { phoneNumber: from },
+      to: [{ phoneNumber: to }],
+      text,
+    })}\r\n`,
+    `--${boundary}\r\nContent-Type: ${attachment.contentType}\r\nContent-Disposition: attachment; filename="${attachment.fileName.replace(/["\r\n]/g, "_")}"\r\nContent-Transfer-Encoding: base64\r\n\r\n${attachment.base64}\r\n`,
+    `--${boundary}--\r\n`,
+  ].join("");
+
+  const response = await fetch(`${RC_API_BASE}/account/~/extension/~/sms`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": `multipart/mixed; boundary=${boundary}` },
+    body,
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) return { success: false, error: `RingCentral HTTP ${response.status}` };
+  return { success: true, messageId: typeof payload.id === "string" ? payload.id : undefined };
 }
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    const authError = await authorizeStaffRequest(
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
+    const authorization = await getAuthorizedStaffIdentity(
       req,
       supabase,
       ["admin", "office_manager", "virtual_assistant"],
     );
-    if (authError) return authError;
+    if (authorization.error) return authorization.error;
+    const companyId = authorization.identity.companyId;
 
-    const { broadcast_id, company_id } = await req.json();
+    const { broadcast_id } = await req.json();
+    if (typeof broadcast_id !== "string" || !broadcast_id) return json({ error: "broadcast_id is required" }, 400);
 
-    if (!broadcast_id) {
-      return new Response(
-        JSON.stringify({ error: "broadcast_id is required" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // Get company's RingCentral connection
-    let rcConnection: RingCentralConnection | null = null;
-    
-    if (company_id) {
-      const { data } = await supabase
-        .from("ringcentral_connections")
-        .select("*")
-        .eq("company_id", company_id)
-        .single();
-      rcConnection = data as RingCentralConnection | null;
-    } else {
-      // Get the first company if no company_id provided (single-tenant fallback)
-      const { data: companyData } = await supabase
-        .from("company_settings")
-        .select("id")
-        .limit(1)
-        .single();
-
-      if (companyData) {
-        const { data } = await supabase
-          .from("ringcentral_connections")
-          .select("*")
-          .eq("company_id", companyData.id)
-          .single();
-        rcConnection = data as RingCentralConnection | null;
-      }
-    }
-
-    // Get broadcast details
     const { data: broadcast, error: broadcastError } = await supabase
       .from("broadcast_messages")
       .select("*")
       .eq("id", broadcast_id)
-      .single();
+      .eq("company_id", companyId)
+      .maybeSingle();
+    if (broadcastError || !broadcast) return json({ error: "Broadcast not found" }, 404);
 
-    if (broadcastError || !broadcast) {
-      return new Response(
-        JSON.stringify({ error: "Broadcast not found" }),
-        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // Get attachment URLs from broadcast
-    const attachmentUrls: string[] = broadcast.attachment_urls || [];
-    const hasAttachments = attachmentUrls.length > 0;
-
+    const attachmentUrls = Array.isArray(broadcast.attachment_urls)
+      ? broadcast.attachment_urls.filter((value: unknown): value is string => typeof value === "string")
+      : [];
     if (attachmentUrls.some((url) => !isAllowedAttachmentUrl(url, supabaseUrl))) {
-      return new Response(JSON.stringify({ error: "Broadcast contains an invalid attachment URL" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return json({ error: "Broadcast contains an invalid attachment URL" }, 400);
     }
 
-    // Get recipients
+    const { data: connection, error: connectionError } = await supabase
+      .from("ringcentral_connections")
+      .select("*")
+      .eq("company_id", companyId)
+      .maybeSingle();
+    if (connectionError || !connection) return json({ error: "RingCentral is not connected" }, 409);
+
+    const accessToken = await refreshAccessToken(supabase, connection as Connection);
+    const fromNumber = connection.phone_number || RC_FROM_NUMBER;
+    if (!fromNumber) return json({ error: "No SMS phone number configured" }, 400);
+
     const { data: recipients, error: recipientsError } = await supabase
       .from("broadcast_recipients")
       .select("*")
       .eq("broadcast_id", broadcast_id)
       .eq("status", "pending");
-
-    if (recipientsError) {
-      throw recipientsError;
-    }
+    if (recipientsError) throw recipientsError;
 
     let sentCount = 0;
     let failedCount = 0;
-
-    // Check if RingCentral is connected via OAuth
-    if (!rcConnection) {
-      return new Response(
-        JSON.stringify({ error: "RingCentral is not connected" }),
-        { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    } else {
-      // RingCentral is connected - refresh token if needed and send real messages
-      const accessToken = await refreshAccessToken(supabase, rcConnection);
-      
-      if (!accessToken) {
-        return new Response(
-          JSON.stringify({ error: "Failed to authenticate with RingCentral. Please reconnect your account." }),
-          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+    for (const recipient of (recipients || []) as Recipient[]) {
+      if (!recipient.phone) {
+        await supabase.from("broadcast_recipients").update({ status: "failed", error_message: "No phone number" }).eq("id", recipient.id);
+        failedCount++;
+        continue;
       }
 
-      // Use phone_number from connection or fallback to environment variable
-      const fromNumber = rcConnection.phone_number || RC_FROM_NUMBER;
-
-      if (!fromNumber) {
-        return new Response(
-          JSON.stringify({ error: "No SMS phone number configured. Please set RINGCENTRAL_FROM_NUMBER or reconnect RingCentral." }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      
-      // Send messages to each recipient
-      for (const recipient of recipients as BroadcastRecipient[]) {
-        if (!recipient.phone) {
-          await supabase
-            .from("broadcast_recipients")
-            .update({
-              status: "failed",
-              error_message: "No phone number",
-            })
-            .eq("id", recipient.id);
-          failedCount++;
-          continue;
-        }
-
-        try {
-          // Format phone number (ensure E.164 format)
-          const formattedPhone = formatPhoneNumber(recipient.phone);
-          let sendResult: { success: boolean; messageId?: string; status?: string; error?: string };
-
-          if (hasAttachments) {
-            // Send MMS with first attachment (RingCentral supports one attachment per message)
-            // For multiple attachments, we need to send multiple messages
-            for (let i = 0; i < attachmentUrls.length; i++) {
-              const isLastAttachment = i === attachmentUrls.length - 1;
-              const messageText = isLastAttachment ? (broadcast.message || "") : "";
-              
-              sendResult = await sendMMS(
-                accessToken,
-                fromNumber,
-                formattedPhone,
-                messageText,
-                attachmentUrls[i]
-              );
-
-              if (!sendResult.success) {
-                console.error("Failed to send broadcast MMS");
-                break;
-              }
-            }
-          } else {
-            // Send regular SMS
-            sendResult = await sendSMS(accessToken, fromNumber, formattedPhone, broadcast.message || "");
-          }
-
-          if (sendResult!.success) {
-            await supabase
-              .from("broadcast_recipients")
-              .update({
-                status: "sent",
-                sent_at: new Date().toISOString(),
-              })
-              .eq("id", recipient.id);
-
-            // Create message record for conversation history
-            const { data: conversation } = await supabase
-              .from("conversations")
-              .select("id")
-              .eq("customer_id", recipient.customer_id)
-              .single();
-
-            if (conversation) {
-              await supabase.from("messages").insert({
-                conversation_id: conversation.id,
-                content: broadcast.message || "",
-                sender_type: "user",
-                attachment_url: attachmentUrls[0] || null,
-              });
-            }
-
-            sentCount++;
-          } else {
-            await supabase
-              .from("broadcast_recipients")
-              .update({
-                status: "failed",
-                error_message: (sendResult!.error || "Unknown error").substring(0, 500),
-              })
-              .eq("id", recipient.id);
-            
-            failedCount++;
-          }
-        } catch (err) {
-          console.error("Error sending broadcast recipient:", err);
-          
-          await supabase
-            .from("broadcast_recipients")
-            .update({
-              status: "failed",
-              error_message: err instanceof Error ? err.message : "Unknown error",
-            })
-            .eq("id", recipient.id);
-          
-          failedCount++;
+      const phone = formatPhoneNumber(recipient.phone);
+      let result: SendResult = { success: false, error: "No message attempted" };
+      if (attachmentUrls.length === 0) {
+        result = await sendSMS(accessToken, fromNumber, phone, broadcast.message || "");
+      } else {
+        for (let i = 0; i < attachmentUrls.length; i++) {
+          result = await sendAttachment(
+            accessToken,
+            fromNumber,
+            phone,
+            i === attachmentUrls.length - 1 ? (broadcast.message || "") : "",
+            attachmentUrls[i],
+          );
+          if (!result.success) break;
         }
       }
+
+      if (!result.success) {
+        await supabase
+          .from("broadcast_recipients")
+          .update({ status: "failed", error_message: (result.error || "Unknown error").slice(0, 500) })
+          .eq("id", recipient.id);
+        failedCount++;
+        continue;
+      }
+
+      await supabase
+        .from("broadcast_recipients")
+        .update({ status: "sent", sent_at: new Date().toISOString() })
+        .eq("id", recipient.id);
+
+      const { data: conversation } = await supabase
+        .from("conversations")
+        .select("id")
+        .eq("company_id", companyId)
+        .eq("customer_id", recipient.customer_id)
+        .maybeSingle();
+      if (conversation) {
+        await supabase.from("messages").insert({
+          conversation_id: conversation.id,
+          content: broadcast.message || "",
+          sender_type: "user",
+          attachment_url: attachmentUrls[0] || null,
+          ringcentral_message_id: result.messageId || null,
+        });
+      }
+      sentCount++;
     }
 
-    // Update broadcast status
+    const total = recipients?.length || 0;
     await supabase
       .from("broadcast_messages")
       .update({
-        status: failedCount === recipients?.length ? "failed" : "completed",
+        status: failedCount === total && total > 0 ? "failed" : "completed",
         sent_count: sentCount,
         failed_count: failedCount,
-        sent_at: new Date().toISOString(),
+        sent_at: sentCount > 0 ? new Date().toISOString() : null,
         completed_at: new Date().toISOString(),
       })
-      .eq("id", broadcast_id);
+      .eq("id", broadcast_id)
+      .eq("company_id", companyId);
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        sent_count: sentCount,
-        failed_count: failedCount,
-        total: recipients?.length || 0,
-      }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return json({ success: true, sent_count: sentCount, failed_count: failedCount, total });
   } catch (error) {
     console.error("Broadcast error:", error);
-    return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return json({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
   }
 });
-
-// Helper function to format phone numbers to E.164
-function formatPhoneNumber(phone: string): string {
-  // Remove all non-numeric characters
-  const cleaned = phone.replace(/\D/g, "");
-  
-  // If it starts with 1 and is 11 digits, it's already US format
-  if (cleaned.startsWith("1") && cleaned.length === 11) {
-    return `+${cleaned}`;
-  }
-  
-  // If it's 10 digits, assume US and add +1
-  if (cleaned.length === 10) {
-    return `+1${cleaned}`;
-  }
-  
-  // Otherwise, assume it's already in correct format
-  return cleaned.startsWith("+") ? cleaned : `+${cleaned}`;
-}
