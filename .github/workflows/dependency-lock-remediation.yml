@@ -1,0 +1,29 @@
+name: Dependency lock remediation
+
+on:
+  push:
+    branches: [DEV]
+
+permissions:
+  contents: read
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Generate audited lockfile
+        run: npm audit fix --package-lock-only
+      - name: Verify audit
+        run: npm audit --audit-level=high
+      - name: Upload corrected lockfile
+        uses: actions/upload-artifact@v4
+        with:
+          name: corrected-package-lock
+          path: package-lock.json
