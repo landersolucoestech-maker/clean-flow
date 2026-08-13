@@ -327,93 +327,93 @@ export function Transactions() {
       />
 
       {/* KPI Cards - 5 cards */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
         {/* Total Revenue */}
-        <Card className="bg-card border-border">
+        <Card className="border-border/80 shadow-sm">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-muted-foreground">Total Revenue</span>
               <DollarSign className="w-4 h-4 text-muted-foreground" />
             </div>
-            <p className="text-2xl font-bold text-green-500">{formatCurrency(kpis.receitaMensal)}</p>
+            <p className="text-2xl font-bold tracking-tight text-success">{formatCurrency(kpis.receitaMensal)}</p>
             <div className="flex items-center justify-between mt-1">
               <span className="text-xs text-muted-foreground">paid revenue</span>
-              <span className="text-xs text-green-500">+0%</span>
+              <span className="text-xs font-medium text-success">+0%</span>
             </div>
           </CardContent>
         </Card>
 
         {/* Total Expenses */}
-        <Card className="bg-card border-border">
+        <Card className="border-border/80 shadow-sm">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-muted-foreground">Total Expenses</span>
               <Receipt className="w-4 h-4 text-muted-foreground" />
             </div>
-            <p className="text-2xl font-bold text-red-500">{formatCurrency(kpis.despesasMensais)}</p>
+            <p className="text-2xl font-bold tracking-tight text-destructive">{formatCurrency(kpis.despesasMensais)}</p>
             <div className="flex items-center justify-between mt-1">
               <span className="text-xs text-muted-foreground">paid expenses</span>
-              <span className="text-xs text-green-500">+0%</span>
+              <span className="text-xs font-medium text-success">+0%</span>
             </div>
           </CardContent>
         </Card>
 
         {/* Profit */}
-        <Card className="bg-card border-border">
+        <Card className="border-border/80 shadow-sm">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-muted-foreground">Profit</span>
               <TrendingUp className="w-4 h-4 text-muted-foreground" />
             </div>
-            <p className="text-2xl font-bold text-blue-500">{formatCurrency(kpis.lucroLiquido)}</p>
+            <p className="text-2xl font-bold tracking-tight text-primary-dark">{formatCurrency(kpis.lucroLiquido)}</p>
             <div className="flex items-center justify-between mt-1">
               <span className="text-xs text-muted-foreground">margin 0%</span>
-              <span className="text-xs text-green-500">+0%</span>
+              <span className="text-xs font-medium text-success">+0%</span>
             </div>
           </CardContent>
         </Card>
 
         {/* To Be Received */}
-        <Card className="bg-card border-border">
+        <Card className="border-border/80 shadow-sm">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-muted-foreground">To Be Received</span>
               <ArrowUpRight className="w-4 h-4 text-muted-foreground" />
             </div>
-            <p className="text-2xl font-bold text-green-500">{formatCurrency(kpis.contasReceber)}</p>
+            <p className="text-2xl font-bold tracking-tight text-success">{formatCurrency(kpis.contasReceber)}</p>
             <div className="flex items-center justify-between mt-1">
               <span className="text-xs text-muted-foreground">pending revenue</span>
-              <span className="text-xs text-green-500">+0%</span>
+              <span className="text-xs font-medium text-success">+0%</span>
             </div>
           </CardContent>
         </Card>
 
         {/* To Be Paid */}
-        <Card className="bg-card border-border">
+        <Card className="border-border/80 shadow-sm">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-muted-foreground">To Be Paid</span>
               <ArrowDownLeft className="w-4 h-4 text-muted-foreground" />
             </div>
-            <p className="text-2xl font-bold text-red-500">{formatCurrency(kpis.contasPagar)}</p>
+            <p className="text-2xl font-bold tracking-tight text-destructive">{formatCurrency(kpis.contasPagar)}</p>
             <div className="flex items-center justify-between mt-1">
               <span className="text-xs text-muted-foreground">pending expenses</span>
-              <span className="text-xs text-green-500">+0%</span>
+              <span className="text-xs font-medium text-success">+0%</span>
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Search and Filters Row */}
-      <div className="flex flex-wrap gap-4 items-center">
+      <div className="flex flex-col gap-3 rounded-2xl border border-border/80 bg-card p-4 shadow-sm lg:flex-row lg:flex-wrap lg:items-center">
         {/* Search Input */}
-        <div className="relative w-[300px]">
+        <div className="relative w-full min-w-0 flex-1 lg:max-w-[360px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Buscar transações..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 bg-muted/30"
+            className="pl-10"
           />
         </div>
 
@@ -489,16 +489,16 @@ export function Transactions() {
           </Button>
         )}
 
-        <FilterSelect value={typeFilter} onValueChange={setTypeFilter} options={typeOptions} className="w-[140px]" />
-        <FilterSelect value={statusFilter} onValueChange={setStatusFilter} options={statusOptions} className="w-[140px]" />
-        <FilterSelect value={categoryFilter} onValueChange={setCategoryFilter} options={categoryOptions} className="w-[160px]" />
+        <FilterSelect value={typeFilter} onValueChange={setTypeFilter} options={typeOptions} className="w-full sm:w-[140px]" />
+        <FilterSelect value={statusFilter} onValueChange={setStatusFilter} options={statusOptions} className="w-full sm:w-[140px]" />
+        <FilterSelect value={categoryFilter} onValueChange={setCategoryFilter} options={categoryOptions} className="w-full sm:w-[160px]" />
       </div>
 
       {/* Transactions Card List */}
-      <Card>
-        <CardContent className="p-0">
+      <Card className="overflow-hidden border-border/80 shadow-sm">
+        <CardContent className="overflow-x-auto p-0">
           {/* Table Header */}
-          <div className="flex items-center gap-4 px-6 py-3 border-b border-border bg-muted/30">
+          <div className="flex min-w-[820px] items-center gap-4 border-b border-border bg-surface-muted/80 px-6 py-3">
             <Checkbox 
               checked={selectedIds.length === filteredTransactions.length && filteredTransactions.length > 0}
               onCheckedChange={handleSelectAll}
@@ -538,7 +538,7 @@ export function Transactions() {
               {filteredTransactions.map((transaction) => (
                 <div 
                   key={transaction.id} 
-                  className="flex items-center gap-4 px-6 py-4 hover:bg-muted/30 transition-colors"
+                  className="flex min-w-[820px] items-center gap-4 px-6 py-4 transition-colors hover:bg-accent/40"
                 >
                   {/* Checkbox */}
                   <Checkbox 
@@ -566,8 +566,8 @@ export function Transactions() {
                       className={cn(
                         "text-xs",
                         transaction.type === "receita" 
-                          ? "bg-green-500/20 text-green-500 hover:bg-green-500/30" 
-                          : "bg-red-500/20 text-red-500 hover:bg-red-500/30"
+                          ? "bg-success/15 text-success hover:bg-success/20" 
+                          : "bg-destructive/15 text-destructive hover:bg-destructive/20"
                       )}
                     >
                       {transaction.type === "receita" ? "Revenue" : "Expense"}
@@ -587,8 +587,8 @@ export function Transactions() {
                       className={cn(
                         "text-xs",
                         normalizeKey(transaction.status) === "pendente" 
-                          ? "bg-amber-500/20 text-amber-500 hover:bg-amber-500/30" 
-                          : "bg-green-500/20 text-green-500 hover:bg-green-500/30"
+                          ? "bg-warning/15 text-warning-foreground hover:bg-warning/20" 
+                          : "bg-success/15 text-success hover:bg-success/20"
                       )}
                     >
                       {normalizeKey(transaction.status) === "pendente" ? "Pendente" : "Concluído"}
@@ -599,7 +599,7 @@ export function Transactions() {
                   <div className="w-[120px] text-right">
                     <p className={cn(
                       "text-sm font-bold",
-                      transaction.type === "receita" ? "text-green-500" : "text-red-500"
+                      transaction.type === "receita" ? "text-success" : "text-destructive"
                     )}>
                       {transaction.type === "receita" ? "+" : "-"}{formatCurrency(Math.abs(Number(transaction.amount)))}
                     </p>
