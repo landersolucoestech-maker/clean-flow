@@ -9,6 +9,7 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: [
+      { find: "@/components/shared", replacement: webSrc("shared/components/index.ts") },
       { find: "@/components/admin", replacement: webSrc("modules/admin/components") },
       { find: "@/components/billing", replacement: webSrc("modules/billing/components") },
       { find: "@/components/calendar", replacement: webSrc("modules/schedule/calendar") },
@@ -23,7 +24,6 @@ export default defineConfig({
       { find: "@/components/reports", replacement: webSrc("modules/reports/components") },
       { find: "@/components/schedule", replacement: webSrc("modules/schedule/components") },
       { find: "@/components/settings", replacement: webSrc("modules/settings/components") },
-      { find: "@/components/shared", replacement: webSrc("shared/components") },
       { find: "@/components/support", replacement: webSrc("modules/support/components") },
       { find: "@/components/transactions", replacement: webSrc("modules/transactions/components") },
       { find: "@/components/ui", replacement: webSrc("shared/ui") },
