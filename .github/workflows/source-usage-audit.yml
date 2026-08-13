@@ -1,0 +1,27 @@
+name: Source usage audit
+
+on:
+  push:
+    branches: [DEV]
+    paths:
+      - .github/workflows/source-usage-audit.yml
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Locate spreadsheet dependency usage
+        run: |
+          echo '=== xlsx-js-style ==='
+          grep -RIn --exclude-dir=node_modules --exclude='package-lock.json' --exclude='bun.lockb' 'xlsx-js-style' . || true
+          echo '=== exceljs imports ==='
+          grep -RIn --exclude-dir=node_modules --exclude='package-lock.json' --exclude='bun.lockb' -E "from ['\"]exceljs['\"]|import\(['\"]exceljs['\"]\)" apps/web/src || true
+      - name: Locate language context consumers
+        run: |
+          echo '=== LanguageContext imports ==='
+          grep -RIn --include='*.ts' --include='*.tsx' "@/contexts/LanguageContext" apps/web/src || true
