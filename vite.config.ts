@@ -2,7 +2,8 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 
-const webSrc = (...segments: string[]) => path.resolve(import.meta.dirname, "apps/web/src", ...segments);
+const repoPath = (...segments: string[]) => path.resolve(import.meta.dirname, ...segments);
+const webSrc = (...segments: string[]) => repoPath("apps/web/src", ...segments);
 
 export default defineConfig({
   server: { host: "::", port: 8080 },
@@ -17,16 +18,16 @@ export default defineConfig({
       { find: "@/components/customers", replacement: webSrc("modules/customers/components") },
       { find: "@/components/dashboard", replacement: webSrc("modules/dashboard/components") },
       { find: "@/components/jobs", replacement: webSrc("modules/jobs/components") },
-      { find: "@/components/layout", replacement: webSrc("shared/layout") },
+      { find: "@/components/layout", replacement: webSrc("app/layout") },
       { find: "@/components/leads", replacement: webSrc("modules/leads/components") },
       { find: "@/components/payroll", replacement: webSrc("modules/payroll/components") },
-      { find: "@/components/providers", replacement: webSrc("shared/providers") },
+      { find: "@/components/providers/QuickBooksSyncProvider", replacement: webSrc("modules/billing/providers/QuickBooksSyncProvider.tsx") },
       { find: "@/components/reports", replacement: webSrc("modules/reports/components") },
       { find: "@/components/schedule", replacement: webSrc("modules/schedule/components") },
       { find: "@/components/settings", replacement: webSrc("modules/settings/components") },
       { find: "@/components/support", replacement: webSrc("modules/support/components") },
       { find: "@/components/transactions", replacement: webSrc("modules/transactions/components") },
-      { find: "@/components/ui", replacement: webSrc("shared/ui") },
+      { find: "@/components/ui", replacement: webSrc("shared/components/ui") },
       { find: "@/hooks/use-toast", replacement: webSrc("shared/hooks/use-toast.ts") },
       { find: "@/hooks/useAddressAutocomplete", replacement: webSrc("modules/customers/hooks/useAddressAutocomplete.ts") },
       { find: "@/hooks/useAutomationConfigs", replacement: webSrc("modules/settings/hooks/useAutomationConfigs.ts") },
@@ -58,10 +59,13 @@ export default defineConfig({
       { find: "@/hooks/useSupportTickets", replacement: webSrc("modules/support/hooks/useSupportTickets.ts") },
       { find: "@/hooks/useTransactionRules", replacement: webSrc("modules/transactions/hooks/useTransactionRules.ts") },
       { find: "@/hooks/useTransactions", replacement: webSrc("modules/transactions/hooks/useTransactions.ts") },
-      { find: "@/contexts", replacement: webSrc("shared/contexts") },
-      { find: "@/integrations", replacement: webSrc("shared/integrations") },
+      { find: "@/contexts", replacement: webSrc("app/providers") },
+      { find: "@/integrations", replacement: webSrc("app/infrastructure") },
+      { find: "@/lib/serviceEnums", replacement: repoPath("packages/contracts/serviceEnums.ts") },
       { find: "@/lib", replacement: webSrc("shared/lib") },
-      { find: "@/stores", replacement: webSrc("shared/stores") },
+      { find: "@/stores/permissions.store", replacement: webSrc("modules/auth/stores/permissions.store.ts") },
+      { find: "@/stores/quickbooks.store", replacement: webSrc("modules/billing/stores/quickbooks.store.ts") },
+      { find: "@/stores/types", replacement: repoPath("packages/types/core.ts") },
       { find: "@", replacement: webSrc() },
     ],
   },
