@@ -11,14 +11,15 @@ export interface QuickBooksConnection {
 
 export async function getQuickBooksConnection(
   adminClient: SupabaseClient,
+  companyId: string,
 ): Promise<QuickBooksConnection> {
   const { data, error } = await adminClient
     .from("quickbooks_connections")
     .select("id, company_id, realm_id, access_token, refresh_token, token_expires_at")
-    .limit(1)
+    .eq("company_id", companyId)
     .maybeSingle();
 
-  if (error || !data) throw new Error("QuickBooks is not connected");
+  if (error || !data) throw new Error("QuickBooks is not connected for this company");
   const connection = data as QuickBooksConnection;
   if (new Date(connection.token_expires_at).getTime() > Date.now() + 60_000) {
     return connection;
@@ -56,7 +57,8 @@ export async function getQuickBooksConnection(
       refresh_token: refreshed.refresh_token,
       token_expires_at: refreshed.token_expires_at,
     })
-    .eq("id", connection.id);
+    .eq("id", connection.id)
+    .eq("company_id", companyId);
   if (updateError) throw new Error("Failed to persist refreshed QuickBooks token");
 
   return refreshed;
