@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.112.0";
 import { Resend } from "https://esm.sh/resend@2.0.0";
-import { authorizeStaffRequest } from "../_shared/authorize.ts";
+import { authorizeServiceRequest, getAuthorizedStaffIdentity } from "../_shared/authorize.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -10,6 +10,19 @@ const corsHeaders = {
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 const EMAIL_FROM = Deno.env.get("EMAIL_FROM");
+
+interface InvoiceCustomer {
+  name: string;
+  email: string;
+  payment_method: string | null;
+}
+
+function json(body: Record<string, unknown>, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
 
 function escapeHtml(value: unknown): string {
   return String(value ?? "")
@@ -24,300 +37,252 @@ function safeHeader(value: unknown): string {
   return String(value ?? "").replace(/[\r\n]+/g, " ").slice(0, 200);
 }
 
-interface InvoiceCustomer {
-  name: string;
-  email: string;
-  payment_method: string | null;
-  preferred_language?: string | null;
-}
-
-function getInvoiceCustomer(
-  customer: InvoiceCustomer | InvoiceCustomer[] | null | undefined,
-): InvoiceCustomer | null {
+function getInvoiceCustomer(customer: InvoiceCustomer | InvoiceCustomer[] | null | undefined): InvoiceCustomer | null {
   return Array.isArray(customer) ? customer[0] ?? null : customer ?? null;
 }
 
-// Get payment info based on customer preference
-function getPaymentInfo(
-  paymentMethod: string | null,
-  zelleKey: string | null,
-  venmoKey: string | null
-): string {
+function getPaymentInfo(paymentMethod: string | null, zelleKey: string | null, venmoKey: string | null): string {
   if (!paymentMethod) return "";
-  
   const method = paymentMethod.toLowerCase();
-  
-  if (method === "zelle" && zelleKey) {
-    return `<p><strong>💳 Pay via Zelle:</strong> ${escapeHtml(zelleKey)}</p>`;
-  }
-  
-  if (method === "venmo" && venmoKey) {
-    return `<p><strong>💳 Pay via Venmo:</strong> ${escapeHtml(venmoKey)}</p>`;
-  }
-  
+  if (method === "zelle" && zelleKey) return `<p><strong>💳 Pay via Zelle:</strong> ${escapeHtml(zelleKey)}</p>`;
+  if (method === "venmo" && venmoKey) return `<p><strong>💳 Pay via Venmo:</strong> ${escapeHtml(venmoKey)}</p>`;
   return "";
 }
 
+function reminderHtml(params: {
+  customerName: string;
+  invoiceNumber: string;
+  total: number;
+  dueDate: string;
+  companyName: string;
+  paymentInfo: string;
+  overdue: boolean;
+  daysOverdue?: number;
+}): string {
+  const { customerName, invoiceNumber, total, dueDate, companyName, paymentInfo, overdue, daysOverdue } = params;
+  return overdue
+    ? `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #dc2626;">Payment Overdue</h2>
+        <p>Dear ${escapeHtml(customerName)},</p>
+        <p>Invoice <strong>${escapeHtml(invoiceNumber)}</strong> for <strong>$${total.toFixed(2)}</strong> was due on <strong>${escapeHtml(dueDate)}</strong>${daysOverdue == null ? "" : ` and is now <strong>${daysOverdue} days overdue</strong>`}.</p>
+        ${paymentInfo}<p>Please make payment as soon as possible.</p>
+        <p>If you have already made payment, please disregard this notice.</p>
+        <p>Best regards,<br>${escapeHtml(companyName)}</p></div>`
+    : `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #1a1a2e;">Payment Reminder</h2>
+        <p>Dear ${escapeHtml(customerName)},</p>
+        <p>This is a friendly reminder that invoice <strong>${escapeHtml(invoiceNumber)}</strong> for <strong>$${total.toFixed(2)}</strong> is due on <strong>${escapeHtml(dueDate)}</strong>.</p>
+        ${paymentInfo}<p>Please ensure timely payment.</p>
+        <p>Thank you for your business!</p>
+        <p>Best regards,<br>${escapeHtml(companyName)}</p></div>`;
+}
+
 serve(async (req: Request) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    if (!EMAIL_FROM || !Deno.env.get("RESEND_API_KEY")) {
-      return new Response(JSON.stringify({ error: "Email service is not configured" }), {
-        status: 503,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    const authError = await authorizeStaffRequest(
-      req,
-      supabase,
-      ["admin", "office_manager"],
-      { allowServiceRole: true },
-    );
-    if (authError) return authError;
+    const resendKey = Deno.env.get("RESEND_API_KEY");
+    if (!EMAIL_FROM || !resendKey) return json({ error: "Email service is not configured" }, 503);
 
-    // Parse body once and extract all needed fields
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
     const body = await req.json();
-    const { action, invoiceId, type } = body;
+    const { action, invoiceId, type, company_id: requestedCompanyId } = body;
+
+    const authHeader = req.headers.get("Authorization") || "";
+    const token = authHeader.match(/^Bearer\s+(.+)$/i)?.[1] || "";
+    const isServiceRequest = token === serviceRoleKey;
+
+    let staffCompanyId: string | null = null;
+    if (isServiceRequest) {
+      const serviceError = authorizeServiceRequest(req);
+      if (serviceError) return serviceError;
+    } else {
+      const authorization = await getAuthorizedStaffIdentity(req, supabase, ["admin", "office_manager"]);
+      if (authorization.error) return authorization.error;
+      staffCompanyId = authorization.identity.companyId;
+      if (requestedCompanyId && requestedCompanyId !== staffCompanyId) return json({ error: "Company scope mismatch" }, 403);
+    }
+
+    const sendOne = async (params: {
+      companyId: string;
+      invoice: {
+        id: string;
+        invoice_number: string;
+        total: number | null;
+        due_date: string;
+        customer: InvoiceCustomer | InvoiceCustomer[] | null;
+      };
+      reminderType: "upcoming" | "overdue";
+      companyName: string;
+      zelleKey: string | null;
+      venmoKey: string | null;
+      now: Date;
+    }) => {
+      const { companyId, invoice, reminderType, companyName, zelleKey, venmoKey, now } = params;
+      const customer = getInvoiceCustomer(invoice.customer);
+      if (!customer?.email) return false;
+
+      const overdue = reminderType === "overdue";
+      const dueDate = new Date(`${invoice.due_date}T12:00:00Z`);
+      const daysOverdue = overdue ? Math.max(0, Math.floor((now.getTime() - dueDate.getTime()) / 86_400_000)) : undefined;
+      const paymentInfo = getPaymentInfo(customer.payment_method, zelleKey, venmoKey);
+      const result = await resend.emails.send({
+        from: EMAIL_FROM,
+        to: [customer.email],
+        subject: safeHeader(overdue
+          ? `OVERDUE: Invoice ${invoice.invoice_number}${daysOverdue == null ? "" : ` - ${daysOverdue} days past due`}`
+          : `Reminder: Invoice ${invoice.invoice_number} is due soon`),
+        html: reminderHtml({
+          customerName: customer.name,
+          invoiceNumber: invoice.invoice_number,
+          total: Number(invoice.total || 0),
+          dueDate: invoice.due_date,
+          companyName,
+          paymentInfo,
+          overdue,
+          daysOverdue,
+        }),
+      });
+      if (result.error) throw new Error(result.error.message || "Resend delivery failed");
+
+      const timestampColumn = overdue ? "overdue_reminder_sent_at" : "reminder_sent_at";
+      const updateData: Record<string, unknown> = { [timestampColumn]: now.toISOString() };
+      if (overdue) updateData.status = "overdue";
+      const { error: updateError } = await supabase
+        .from("invoices")
+        .update(updateData)
+        .eq("id", invoice.id)
+        .eq("company_id", companyId);
+      if (updateError) throw updateError;
+
+      const { error: logError } = await supabase.from("invoice_reminders").insert({
+        company_id: companyId,
+        invoice_id: invoice.id,
+        reminder_type: reminderType,
+        email_to: customer.email,
+      });
+      if (logError) console.warn("Reminder sent but logging failed", logError);
+      return true;
+    };
 
     if (action === "send-reminders") {
+      let companyIds: string[] = [];
+      if (staffCompanyId) {
+        companyIds = [staffCompanyId];
+      } else if (typeof requestedCompanyId === "string" && requestedCompanyId) {
+        companyIds = [requestedCompanyId];
+      } else {
+        const { data: companies, error: companiesError } = await supabase.from("company_settings").select("id");
+        if (companiesError) throw companiesError;
+        companyIds = (companies || []).map((company) => company.id);
+      }
+
       const now = new Date();
-      const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
-
-      // Fetch company settings for payment keys
-      const { data: companySettings } = await supabase
-        .from("company_settings")
-        .select("zelle_payment_key, venmo_payment_key, trade_name, preferred_language")
-        .maybeSingle();
-
-      const zelleKey = companySettings?.zelle_payment_key || null;
-      const venmoKey = companySettings?.venmo_payment_key || null;
-      const companyName = companySettings?.trade_name || "Our Company";
-
-      // Fetch upcoming invoices (due in next 3 days)
-      const { data: upcomingInvoices } = await supabase
-        .from("invoices")
-        .select(`
-          id, invoice_number, total, due_date, status, customer_id, reminder_sent_at,
-          customer:customers(name, email, payment_method, preferred_language)
-        `)
-        .in("status", ["sent", "viewed"])
-        .gte("due_date", now.toISOString().split("T")[0])
-        .lte("due_date", threeDaysFromNow.toISOString().split("T")[0])
-        .is("reminder_sent_at", null);
-
-      // Fetch overdue invoices
-      const { data: overdueInvoices } = await supabase
-        .from("invoices")
-        .select(`
-          id, invoice_number, total, due_date, status, customer_id, overdue_reminder_sent_at,
-          customer:customers(name, email, payment_method, preferred_language)
-        `)
-        .in("status", ["sent", "viewed", "overdue"])
-        .lt("due_date", now.toISOString().split("T")[0])
-        .is("overdue_reminder_sent_at", null);
-
+      const today = now.toISOString().split("T")[0];
+      const threeDaysFromNow = new Date(now.getTime() + 3 * 86_400_000).toISOString().split("T")[0];
       let sentCount = 0;
       const errors: string[] = [];
 
-      // Send upcoming reminders
-      for (const invoice of (upcomingInvoices || [])) {
-        const customer = getInvoiceCustomer(invoice.customer);
-        if (!customer?.email) continue;
-
+      for (const companyId of companyIds) {
         try {
-          const paymentInfo = getPaymentInfo(customer.payment_method, zelleKey, venmoKey);
+          const { data: settings, error: settingsError } = await supabase
+            .from("company_settings")
+            .select("zelle_payment_key, venmo_payment_key, trade_name, legal_name")
+            .eq("id", companyId)
+            .single();
+          if (settingsError) throw settingsError;
+          const companyName = settings.trade_name || settings.legal_name || "Our Company";
+          const zelleKey = settings.zelle_payment_key || null;
+          const venmoKey = settings.venmo_payment_key || null;
 
-          await resend.emails.send({
-            from: EMAIL_FROM,
-            to: [customer.email],
-            subject: safeHeader(`Reminder: Invoice ${invoice.invoice_number} is due soon`),
-            html: `
-              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                <h2 style="color: #1a1a2e;">Payment Reminder</h2>
-                <p>Dear ${escapeHtml(customer.name)},</p>
-                <p>This is a friendly reminder that invoice <strong>${escapeHtml(invoice.invoice_number)}</strong> for <strong>$${invoice.total?.toFixed(2)}</strong> is due on <strong>${escapeHtml(invoice.due_date)}</strong>.</p>
-                ${paymentInfo}
-                <p>Please ensure timely payment to avoid any late fees.</p>
-                <p>Thank you for your business!</p>
-                <p>Best regards,<br>${escapeHtml(companyName)}</p>
-              </div>
-            `,
-          });
+          const [upcomingResult, overdueResult] = await Promise.all([
+            supabase.from("invoices")
+              .select("id, invoice_number, total, due_date, customer:customers(name, email, payment_method)")
+              .eq("company_id", companyId)
+              .in("status", ["sent", "viewed"])
+              .gte("due_date", today)
+              .lte("due_date", threeDaysFromNow)
+              .is("reminder_sent_at", null),
+            supabase.from("invoices")
+              .select("id, invoice_number, total, due_date, customer:customers(name, email, payment_method)")
+              .eq("company_id", companyId)
+              .in("status", ["sent", "viewed", "overdue"])
+              .lt("due_date", today)
+              .is("overdue_reminder_sent_at", null),
+          ]);
+          if (upcomingResult.error) throw upcomingResult.error;
+          if (overdueResult.error) throw overdueResult.error;
 
-          await supabase
-            .from("invoices")
-            .update({ reminder_sent_at: now.toISOString() })
-            .eq("id", invoice.id);
-
-          await supabase
-            .from("invoice_reminders")
-            .insert({
-              invoice_id: invoice.id,
-              reminder_type: "upcoming",
-              email_to: customer.email,
-            });
-
-          sentCount++;
-        } catch (err) {
-          errors.push(`Failed to send reminder for ${invoice.invoice_number}: ${err}`);
+          for (const invoice of upcomingResult.data || []) {
+            try {
+              if (await sendOne({ companyId, invoice, reminderType: "upcoming", companyName, zelleKey, venmoKey, now })) sentCount++;
+            } catch (error) {
+              errors.push(`${companyId}/${invoice.invoice_number}: ${error instanceof Error ? error.message : String(error)}`);
+            }
+          }
+          for (const invoice of overdueResult.data || []) {
+            try {
+              if (await sendOne({ companyId, invoice, reminderType: "overdue", companyName, zelleKey, venmoKey, now })) sentCount++;
+            } catch (error) {
+              errors.push(`${companyId}/${invoice.invoice_number}: ${error instanceof Error ? error.message : String(error)}`);
+            }
+          }
+        } catch (error) {
+          errors.push(`${companyId}: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
 
-      // Send overdue reminders
-      for (const invoice of (overdueInvoices || [])) {
-        const customer = getInvoiceCustomer(invoice.customer);
-        if (!customer?.email) continue;
-
-        try {
-          const dueDate = new Date(invoice.due_date);
-          const daysOverdue = Math.floor((now.getTime() - dueDate.getTime()) / (24 * 60 * 60 * 1000));
-          const paymentInfo = getPaymentInfo(customer.payment_method, zelleKey, venmoKey);
-
-          await resend.emails.send({
-            from: EMAIL_FROM,
-            to: [customer.email],
-            subject: safeHeader(`OVERDUE: Invoice ${invoice.invoice_number} - ${daysOverdue} days past due`),
-            html: `
-              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                <h2 style="color: #dc2626;">Payment Overdue</h2>
-                <p>Dear ${escapeHtml(customer.name)},</p>
-                <p>Invoice <strong>${escapeHtml(invoice.invoice_number)}</strong> for <strong>$${invoice.total?.toFixed(2)}</strong> was due on <strong>${escapeHtml(invoice.due_date)}</strong> and is now <strong>${daysOverdue} days overdue</strong>.</p>
-                ${paymentInfo}
-                <p>Please make payment as soon as possible to avoid further action.</p>
-                <p>If you have already made payment, please disregard this notice.</p>
-                <p>Thank you.</p>
-                <p>Best regards,<br>${escapeHtml(companyName)}</p>
-              </div>
-            `,
-          });
-
-          await supabase
-            .from("invoices")
-            .update({ 
-              overdue_reminder_sent_at: now.toISOString(),
-              status: "overdue"
-            })
-            .eq("id", invoice.id);
-
-          await supabase
-            .from("invoice_reminders")
-            .insert({
-              invoice_id: invoice.id,
-              reminder_type: "overdue",
-              email_to: customer.email,
-            });
-
-          sentCount++;
-        } catch (err) {
-          errors.push(`Failed to send overdue reminder for ${invoice.invoice_number}: ${err}`);
-        }
-      }
-
-      return new Response(
-        JSON.stringify({ 
-          success: true, 
-          sentCount,
-          errors: errors.length > 0 ? errors : undefined
-        }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return json({ success: true, sentCount, errors: errors.length ? errors : undefined });
     }
 
     if (action === "send-single") {
+      if (typeof invoiceId !== "string" || !invoiceId) return json({ error: "invoiceId is required" }, 400);
 
-      // Fetch company settings for payment keys
-      const { data: companySettings } = await supabase
+      let companyId = staffCompanyId || (typeof requestedCompanyId === "string" ? requestedCompanyId : null);
+      if (!companyId && isServiceRequest) {
+        const { data: invoiceOwner, error: ownerError } = await supabase
+          .from("invoices")
+          .select("company_id")
+          .eq("id", invoiceId)
+          .single();
+        if (ownerError || !invoiceOwner?.company_id) return json({ error: "Invoice not found" }, 404);
+        companyId = invoiceOwner.company_id;
+      }
+      if (!companyId) return json({ error: "Company context is required" }, 400);
+
+      const { data: settings, error: settingsError } = await supabase
         .from("company_settings")
-        .select("zelle_payment_key, venmo_payment_key, trade_name")
-        .maybeSingle();
-
-      const zelleKey = companySettings?.zelle_payment_key || null;
-      const venmoKey = companySettings?.venmo_payment_key || null;
-      const companyName = companySettings?.trade_name || "Our Company";
-
-      const { data: invoice } = await supabase
-        .from("invoices")
-        .select(`
-          id, invoice_number, total, due_date, status,
-          customer:customers(name, email, payment_method)
-        `)
-        .eq("id", invoiceId)
+        .select("zelle_payment_key, venmo_payment_key, trade_name, legal_name")
+        .eq("id", companyId)
         .single();
+      if (settingsError) throw settingsError;
 
-      if (!invoice) {
-        throw new Error("Invoice not found");
-      }
+      const { data: invoice, error: invoiceError } = await supabase
+        .from("invoices")
+        .select("id, invoice_number, total, due_date, customer:customers(name, email, payment_method)")
+        .eq("id", invoiceId)
+        .eq("company_id", companyId)
+        .single();
+      if (invoiceError || !invoice) return json({ error: "Invoice not found" }, 404);
 
-      const customer = getInvoiceCustomer(invoice.customer);
-      if (!customer?.email) {
-        throw new Error("Customer email not found");
-      }
-
-      const isOverdue = type === "overdue";
-      const subject = safeHeader(isOverdue
-        ? `OVERDUE: Invoice ${invoice.invoice_number}` 
-        : `Reminder: Invoice ${invoice.invoice_number} is due soon`);
-
-      const paymentInfo = getPaymentInfo(customer.payment_method, zelleKey, venmoKey);
-
-      await resend.emails.send({
-        from: EMAIL_FROM,
-        to: [customer.email],
-        subject,
-        html: isOverdue
-          ? `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-              <h2 style="color: #dc2626;">Payment Overdue</h2>
-              <p>Dear ${escapeHtml(customer.name)},</p>
-              <p>Invoice <strong>${escapeHtml(invoice.invoice_number)}</strong> for <strong>$${invoice.total?.toFixed(2)}</strong> is overdue.</p>
-              ${paymentInfo}
-              <p>Please make payment as soon as possible.</p>
-              <p>Best regards,<br>${escapeHtml(companyName)}</p>
-            </div>
-          `
-          : `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-              <h2 style="color: #1a1a2e;">Payment Reminder</h2>
-              <p>Dear ${escapeHtml(customer.name)},</p>
-              <p>Invoice <strong>${escapeHtml(invoice.invoice_number)}</strong> for <strong>$${invoice.total?.toFixed(2)}</strong> is due on <strong>${escapeHtml(invoice.due_date)}</strong>.</p>
-              ${paymentInfo}
-              <p>Please ensure timely payment.</p>
-              <p>Best regards,<br>${escapeHtml(companyName)}</p>
-            </div>
-          `,
+      const reminderType: "upcoming" | "overdue" = type === "overdue" ? "overdue" : "upcoming";
+      await sendOne({
+        companyId,
+        invoice,
+        reminderType,
+        companyName: settings.trade_name || settings.legal_name || "Our Company",
+        zelleKey: settings.zelle_payment_key || null,
+        venmoKey: settings.venmo_payment_key || null,
+        now: new Date(),
       });
-
-      await supabase
-        .from("invoice_reminders")
-        .insert({
-          invoice_id: invoiceId,
-          reminder_type: type,
-          email_to: customer.email,
-        });
-
-      return new Response(
-        JSON.stringify({ success: true }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return json({ success: true });
     }
 
-    return new Response(
-      JSON.stringify({ error: "Invalid action" }),
-      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
-
+    return json({ error: "Invalid action" }, 400);
   } catch (error: unknown) {
     console.error("Reminder Error:", error);
-    const message = error instanceof Error ? error.message : "Unknown error";
-    return new Response(
-      JSON.stringify({ error: message }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return json({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
   }
 });
