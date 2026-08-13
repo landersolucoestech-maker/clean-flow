@@ -7,83 +7,73 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-interface MapByAddressRequest {
-  address: string;
-  width?: number;
-  height?: number;
+function json(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json", "Cache-Control": "private, max-age=60" },
+  });
 }
 
-async function geocodeAddress(address: string, apiKey: string): Promise<{ lat: number; lon: number } | null> {
-  try {
-    const url = `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(address)}&apiKey=${apiKey}`;
-    const res = await fetch(url);
-    const data = await res.json();
+function clamp(value: unknown, min: number, max: number, fallback: number): number {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? Math.min(max, Math.max(min, Math.round(numeric))) : fallback;
+}
 
-    if (data?.features?.length) {
-      const [lon, lat] = data.features[0].geometry.coordinates;
-      return { lat, lon };
-    }
-  } catch (e) {
-    console.error("Error geocoding address:", e);
+function bytesToBase64(bytes: Uint8Array): string {
+  let binary = "";
+  for (let offset = 0; offset < bytes.length; offset += 8192) {
+    binary += String.fromCharCode(...bytes.subarray(offset, Math.min(offset + 8192, bytes.length)));
   }
-  return null;
+  return btoa(binary);
 }
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     const apiKey = Deno.env.get("GEOAPIFY_API_KEY");
-    if (!supabaseUrl || !serviceRoleKey || !apiKey) {
-      return new Response(
-        JSON.stringify({ error: "Map service is not configured" }),
-        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    }
+    if (!supabaseUrl || !serviceRoleKey || !apiKey) return json({ error: "Map service is not configured" }, 503);
 
     const supabase = createClient(supabaseUrl, serviceRoleKey);
-    const authError = await authorizeStaffRequest(req, supabase, [
-      "admin", "cleaner", "driver", "cleaning_manager", "office_manager", "virtual_assistant",
-    ]);
+    const authError = await authorizeStaffRequest(req, supabase, ["admin", "cleaner", "driver", "cleaning_manager", "office_manager", "virtual_assistant"]);
     if (authError) return authError;
 
-    const body: MapByAddressRequest = await req.json();
-    const { address, width = 580, height = 300 } = body;
+    const body = await req.json();
+    const address = typeof body.address === "string" ? body.address.trim().slice(0, 500) : "";
+    if (!address) return json({ error: "address is required" }, 400);
+    const width = clamp(body.width, 320, 1600, 900);
+    const height = clamp(body.height, 240, 1000, 500);
 
-    if (!address || address.trim().length < 5) {
-      return new Response(
-        JSON.stringify({ error: "Invalid address" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    }
+    const geocodeParams = new URLSearchParams({ text: address, limit: "1", apiKey });
+    const geocodeResponse = await fetch(`https://api.geoapify.com/v1/geocode/search?${geocodeParams.toString()}`);
+    if (!geocodeResponse.ok) return json({ error: "Could not geocode address" }, 502);
+    const geocode = await geocodeResponse.json();
+    const coordinates = geocode.features?.[0]?.geometry?.coordinates;
+    if (!Array.isArray(coordinates) || coordinates.length < 2) return json({ error: "Address not found" }, 404);
+    const lon = Number(coordinates[0]);
+    const lat = Number(coordinates[1]);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return json({ error: "Address coordinates are invalid" }, 502);
 
-    const safeWidth = Number.isFinite(width) ? Math.min(1920, Math.max(100, Math.round(width))) : 580;
-    const safeHeight = Number.isFinite(height) ? Math.min(1080, Math.max(100, Math.round(height))) : 300;
-
-    const coords = await geocodeAddress(address, apiKey);
-    if (!coords) {
-      return new Response(
-        JSON.stringify({ error: "Address not found" }),
-        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    }
-
-    const marker = `lonlat:${coords.lon},${coords.lat};color:%233b82f6;size:medium`;
-    const mapUrl = `https://maps.geoapify.com/v1/staticmap?style=osm-bright&width=${safeWidth}&height=${safeHeight}&center=lonlat:${coords.lon},${coords.lat}&zoom=15&marker=${marker}&apiKey=${apiKey}`;
-
-    return new Response(
-      JSON.stringify({ mapUrl, center: coords }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    );
+    const mapParams = new URLSearchParams({
+      style: "osm-bright",
+      width: String(width),
+      height: String(height),
+      center: `lonlat:${lon},${lat}`,
+      zoom: "15",
+      marker: `lonlat:${lon},${lat};type:awesome;color:%233b82f6;size:large;icon:location-dot;icontype:awesome`,
+      apiKey,
+    });
+    const mapResponse = await fetch(`https://maps.geoapify.com/v1/staticmap?${mapParams.toString()}`);
+    if (!mapResponse.ok) return json({ error: "Could not render map" }, 502);
+    const contentType = mapResponse.headers.get("content-type") || "image/png";
+    if (!contentType.startsWith("image/")) return json({ error: "Map provider returned an invalid response" }, 502);
+    const bytes = new Uint8Array(await mapResponse.arrayBuffer());
+    if (bytes.byteLength > 4 * 1024 * 1024) return json({ error: "Rendered map is too large" }, 502);
+    return json({ mapUrl: `data:${contentType};base64,${bytesToBase64(bytes)}` });
   } catch (error) {
-    console.error("Error in geoapify-map-fallback:", error);
-    return new Response(
-      JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    );
+    console.error("Geoapify fallback map error:", error);
+    return json({ error: "Could not render map" }, 500);
   }
 });
