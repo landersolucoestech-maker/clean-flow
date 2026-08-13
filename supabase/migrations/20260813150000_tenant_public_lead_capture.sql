@@ -30,7 +30,6 @@ BEGIN
     RAISE EXCEPTION 'Invalid lead payload';
   END IF;
 
-  -- Tenant is part of the lock key so identical contacts at different companies do not block each other.
   PERFORM pg_advisory_xact_lock(
     hashtextextended(target_company_id::text || ':' || coalesce(lead_email, lead_phone), 0)
   );
@@ -111,5 +110,28 @@ $$;
 REVOKE ALL ON FUNCTION public.capture_website_lead(jsonb, uuid) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.capture_website_lead(jsonb, uuid) TO service_role;
 
--- The pre-tenant signature must not remain callable by the service role.
-REVOKE ALL ON FUNCTION public.capture_website_lead(jsonb) FROM PUBLIC, anon, authenticated, service_role;
+-- Compatibility wrapper: safe only when ownership is unambiguous.
+CREATE OR REPLACE FUNCTION public.capture_website_lead(form_data jsonb)
+RETURNS jsonb
+LANGUAGE plpgsql
+VOLATILE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  company_count integer;
+  only_company_id uuid;
+BEGIN
+  SELECT count(*), min(id) INTO company_count, only_company_id
+  FROM public.company_settings;
+
+  IF company_count <> 1 OR only_company_id IS NULL THEN
+    RAISE EXCEPTION 'Lead capture tenant is ambiguous; an explicit company key is required';
+  END IF;
+
+  RETURN public.capture_website_lead(form_data, only_company_id);
+END
+$$;
+
+REVOKE ALL ON FUNCTION public.capture_website_lead(jsonb) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.capture_website_lead(jsonb) TO service_role;
