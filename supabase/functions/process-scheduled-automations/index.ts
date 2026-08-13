@@ -124,7 +124,7 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      let companyName = settingsCache.get(companyId);
+      let companyName: string = settingsCache.get(companyId) || "";
       if (!companyName) {
         const { data: settings } = await supabase
           .from("company_settings")
