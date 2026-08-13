@@ -1,6 +1,5 @@
 import { useState, useRef } from "react";
-import { Header } from "@/components/layout/Header";
-import { Sidebar } from "@/components/layout/Sidebar";
+import { PageLayout } from "@/components/layout/PageLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -320,34 +319,25 @@ export function Customers() {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen bg-background">
-        <Sidebar />
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <Header />
-          <main className="flex-1 flex items-center justify-center">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          </main>
+      <PageLayout>
+        <div className="flex min-h-[50vh] items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-      </div>
+      </PageLayout>
     );
   }
 
-  return <div className="flex h-screen bg-background">
-      <Sidebar />
-      
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
-        
-        <main className="flex-1 overflow-y-auto p-6 space-y-6">
+  return <PageLayout>
+      <div className="space-y-6">
           {/* Page Header */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">{t("customers.title")}</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{t("customers.title")}</h1>
               <p className="text-muted-foreground">
                 {t("customers.subtitle")}
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 lg:justify-end">
               <input
                 type="file"
                 ref={fileInputRef}
@@ -376,7 +366,7 @@ export function Customers() {
                 <Download className="w-4 h-4 mr-2" />
                 {t("common.exportExcel")}
               </Button>
-              <Button variant="hero" size="lg" className="flex items-center space-x-2" onClick={() => setIsCustomerModalOpen(true)}>
+              <Button variant="hero" className="flex items-center gap-2" onClick={() => setIsCustomerModalOpen(true)}>
                 <Plus className="w-4 h-4" />
                 <span>{t("customers.addCustomer")}</span>
               </Button>
@@ -393,7 +383,7 @@ export function Customers() {
           <CustomerDetailsModal open={isDetailsModalOpen} onOpenChange={setIsDetailsModalOpen} customer={selectedCustomer} />
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
@@ -402,7 +392,7 @@ export function Customers() {
                     <p className="text-2xl font-bold text-foreground">{newCustomersThisMonth}</p>
                     <p className="text-xs text-success">+{newCustomersThisWeek} {t("common.thisWeek")}</p>
                   </div>
-                  <div className="p-2 bg-success/10 rounded-lg">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-success/10">
                     <UserPlus className="w-5 h-5 text-success" />
                   </div>
                 </div>
@@ -417,7 +407,7 @@ export function Customers() {
                     <p className="text-2xl font-bold text-foreground">{activeCount}</p>
                     <p className="text-xs text-success">{activePercentage}% {t("common.ofTotal")}</p>
                   </div>
-                  <div className="p-2 bg-primary/10 rounded-lg">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-light">
                     <UserCheck className="w-5 h-5 text-primary" />
                   </div>
                 </div>
@@ -432,7 +422,7 @@ export function Customers() {
                     <p className="text-2xl font-bold text-foreground">{inactiveCount}</p>
                     <p className="text-xs text-muted-foreground">{inactivePercentage}% {t("common.ofTotal")}</p>
                   </div>
-                  <div className="p-2 bg-destructive/10 rounded-lg">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10">
                     <UserX className="w-5 h-5 text-destructive" />
                   </div>
                 </div>
@@ -447,7 +437,7 @@ export function Customers() {
                     <p className="text-2xl font-bold text-foreground">{totalCount}</p>
                     <p className="text-xs text-muted-foreground">{t("common.registered")}</p>
                   </div>
-                  <div className="p-2 bg-secondary/50 rounded-lg">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary-light">
                     <Users className="w-5 h-5 text-foreground" />
                   </div>
                 </div>
@@ -462,7 +452,7 @@ export function Customers() {
                     <p className="text-2xl font-bold text-foreground">{recurringCount}</p>
                     <p className="text-xs text-success">{recurringPercentage}% {t("common.ofActive")}</p>
                   </div>
-                  <div className="p-2 bg-warning/10 rounded-lg">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-warning/10">
                     <Repeat className="w-5 h-5 text-warning" />
                   </div>
                 </div>
@@ -471,13 +461,13 @@ export function Customers() {
           </div>
 
           {/* Search and Filter Bar */}
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col gap-3 rounded-2xl border border-border/80 bg-card p-4 shadow-sm lg:flex-row lg:items-center">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input placeholder={searchField === "all" ? "Search by name, phone, email or address..." : searchField === "name" ? "Search by name..." : searchField === "phone" ? "Search by phone..." : searchField === "email" ? "Search by email..." : "Search by address..."} value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 bg-background border-border" />
+              <Input placeholder={searchField === "all" ? "Search by name, phone, email or address..." : searchField === "name" ? "Search by name..." : searchField === "phone" ? "Search by phone..." : searchField === "email" ? "Search by email..." : "Search by address..."} value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10" />
             </div>
             <Select value={searchField} onValueChange={setSearchField}>
-              <SelectTrigger className="w-[160px] bg-background border-border">
+              <SelectTrigger className="w-full lg:w-[160px]">
                 <SelectValue placeholder="Search by" />
               </SelectTrigger>
               <SelectContent className="bg-popover border-border">
@@ -489,7 +479,7 @@ export function Customers() {
               </SelectContent>
             </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[140px] bg-background border-border">
+              <SelectTrigger className="w-full lg:w-[140px]">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent className="bg-popover border-border">
@@ -501,8 +491,8 @@ export function Customers() {
           </div>
 
           {/* Customer Directory */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
+          <Card className="border-border/80 shadow-sm">
+            <CardHeader className="flex flex-row items-center justify-between gap-3 pb-4">
               <CardTitle>{t("customers.contactList")}</CardTitle>
               {selectedIds.size > 0 && (
                 <Button
@@ -603,12 +593,12 @@ export function Customers() {
                       </TableRow>)}
                   </TableBody>
                 </Table>) : (/* Customer Grid */
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {filteredCustomers.map(customer => <Card key={customer.id} className="relative">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  {filteredCustomers.map(customer => <Card key={customer.id} className="relative border-border/80 shadow-sm transition-shadow hover:shadow-md">
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-light">
                               <span className="text-primary font-semibold text-sm">
                                 {(customer.name || "").split(' ').map(n => n[0]).join('').slice(0, 2) || "?"}
                               </span>
@@ -656,7 +646,7 @@ export function Customers() {
                             <span className="truncate">{customer.address}</span>
                           </div>
                         </div>
-                        <div className="flex items-center justify-between mt-4 pt-3 border-t border-border">
+                        <div className="mt-4 flex items-center justify-between border-t border-border/80 pt-3">
                           <Badge variant={customer.status === "Active" ? "default" : "secondary"}>
                             {customer.status}
                           </Badge>
@@ -669,7 +659,6 @@ export function Customers() {
                 </div>)}
             </CardContent>
           </Card>
-        </main>
       </div>
-    </div>;
+    </PageLayout>;
 }
