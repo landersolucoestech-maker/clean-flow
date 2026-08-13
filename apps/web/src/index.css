@@ -1,156 +1,124 @@
 @tailwind base;
 
-/* Custom thin scrollbar */
 .scrollbar-thin {
   scrollbar-width: thin;
   scrollbar-color: hsl(var(--border)) transparent;
 }
-.scrollbar-thin::-webkit-scrollbar {
-  width: 4px;
-}
-.scrollbar-thin::-webkit-scrollbar-track {
-  background: transparent;
-}
+.scrollbar-thin::-webkit-scrollbar { width: 4px; }
+.scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
 .scrollbar-thin::-webkit-scrollbar-thumb {
   background-color: hsl(var(--border));
-  border-radius: 2px;
+  border-radius: 999px;
 }
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background-color: hsl(var(--muted-foreground));
 }
+
 @tailwind components;
 @tailwind utilities;
 
-/* CleanPro - Professional Cleaning Service Management SaaS Design System */
-
+/* Clean Flow visual system inspired by the provided MAID FLOW reference. */
 @layer base {
   :root {
-    /* Background & Surface Colors */
-    --background: 240 10% 98%;
-    --foreground: 215 25% 10%;
+    --background: 210 20% 98%;
+    --foreground: 216 56% 14%;
     --surface: 0 0% 100%;
-    --surface-muted: 240 5% 96%;
+    --surface-muted: 210 20% 97%;
 
-    /* Brand Colors - Professional Blue Theme */
-    --primary: 213 94% 68%;
+    --primary: 160 80% 36%;
     --primary-foreground: 0 0% 100%;
-    --primary-light: 213 94% 78%;
-    --primary-dark: 213 94% 58%;
+    --primary-light: 160 56% 91%;
+    --primary-dark: 166 82% 28%;
 
-    /* Secondary - Teal Accent */
-    --secondary: 176 100% 44%;
+    --secondary: 182 69% 42%;
     --secondary-foreground: 0 0% 100%;
-    --secondary-light: 176 100% 54%;
+    --secondary-light: 182 48% 92%;
 
-    /* Supporting Colors */
-    --accent: 220 15% 95%;
-    --accent-foreground: 215 25% 15%;
-    --muted: 220 10% 92%;
-    --muted-foreground: 215 15% 45%;
+    --accent: 164 50% 94%;
+    --accent-foreground: 216 56% 14%;
+    --muted: 210 20% 94%;
+    --muted-foreground: 215 16% 47%;
 
-    /* Status Colors */
-    --success: 142 71% 45%;
+    --success: 153 67% 43%;
     --success-foreground: 0 0% 100%;
-    --warning: 45 93% 58%;
-    --warning-foreground: 0 0% 100%;
-    --rose: 334 78% 56%;
+    --warning: 38 94% 58%;
+    --warning-foreground: 216 56% 14%;
+    --rose: 350 83% 66%;
     --rose-foreground: 0 0% 100%;
-    --destructive: 0 84% 60%;
+    --destructive: 0 78% 58%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Brand partner colors (used via semantic Tailwind tokens) */
     --brand-google: 217 89% 61%;
     --brand-google-foreground: 0 0% 100%;
     --brand-quickbooks: 112 71% 36%;
     --brand-quickbooks-foreground: 0 0% 100%;
 
-    /* Card & UI Elements */
     --card: 0 0% 100%;
-    --card-foreground: 215 25% 10%;
+    --card-foreground: 216 56% 14%;
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 10%;
+    --popover-foreground: 216 56% 14%;
 
-    /* Borders & Inputs */
-    --border: 220 15% 88%;
-    --input: 220 15% 88%;
-    --ring: 213 94% 68%;
+    --border: 214 25% 88%;
+    --input: 214 25% 88%;
+    --ring: 166 82% 34%;
 
-    --radius: 0.75rem;
+    --radius: 0.875rem;
 
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-dark)));
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
     --gradient-surface: linear-gradient(135deg, hsl(var(--surface)), hsl(var(--surface-muted)));
-    --gradient-hero: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
+    --gradient-hero: linear-gradient(135deg, hsl(var(--primary-dark)), hsl(var(--secondary)));
 
-    /* Shadows */
-    --shadow-sm: 0 1px 2px 0 hsl(var(--primary) / 0.05);
-    --shadow-md: 0 4px 6px -1px hsl(var(--primary) / 0.1);
-    --shadow-lg: 0 10px 15px -3px hsl(var(--primary) / 0.1);
-    --shadow-xl: 0 20px 25px -5px hsl(var(--primary) / 0.15);
+    --shadow-sm: 0 1px 2px rgb(15 23 42 / 0.04);
+    --shadow-md: 0 8px 24px rgb(15 23 42 / 0.06);
+    --shadow-lg: 0 14px 40px rgb(15 23 42 / 0.08);
+    --shadow-xl: 0 24px 60px rgb(15 23 42 / 0.10);
 
-    /* Sidebar */
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 216 32% 28%;
+    --sidebar-primary: 160 80% 36%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 164 50% 94%;
+    --sidebar-accent-foreground: 166 82% 28%;
+    --sidebar-border: 214 25% 91%;
+    --sidebar-ring: 160 80% 36%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --background: 216 56% 8%;
+    --foreground: 210 25% 96%;
+    --card: 216 48% 11%;
+    --card-foreground: 210 25% 96%;
+    --popover: 216 48% 11%;
+    --popover-foreground: 210 25% 96%;
+    --primary: 160 72% 44%;
+    --primary-foreground: 216 56% 8%;
+    --secondary: 182 61% 40%;
+    --secondary-foreground: 216 56% 8%;
+    --muted: 216 25% 18%;
+    --muted-foreground: 214 16% 67%;
+    --accent: 166 28% 17%;
+    --accent-foreground: 210 25% 96%;
+    --destructive: 0 62% 42%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 216 24% 21%;
+    --input: 216 24% 21%;
+    --ring: 160 72% 44%;
+    --sidebar-background: 216 48% 10%;
+    --sidebar-foreground: 210 25% 92%;
+    --sidebar-primary: 160 72% 44%;
+    --sidebar-primary-foreground: 216 56% 8%;
+    --sidebar-accent: 166 28% 17%;
+    --sidebar-accent-foreground: 210 25% 96%;
+    --sidebar-border: 216 24% 21%;
+    --sidebar-ring: 160 72% 44%;
   }
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-
+  * { @apply border-border; }
+  html { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    min-width: 320px;
   }
 }
