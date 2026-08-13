@@ -5,24 +5,26 @@
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
-
-    /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "isolatedModules": true,
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
-
-    /* Linting */
     "strict": false,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noImplicitAny": false,
     "noFallthroughCasesInSwitch": false,
-
     "baseUrl": ".",
     "paths": {
+      "@/components/*": ["./apps/web/src/shared/compat/components/*"],
+      "@/pages/*": ["./apps/web/src/shared/compat/pages/*"],
+      "@/hooks/*": ["./apps/web/src/shared/compat/hooks/*"],
+      "@/contexts/*": ["./apps/web/src/shared/contexts/*"],
+      "@/integrations/*": ["./apps/web/src/shared/integrations/*"],
+      "@/lib/*": ["./apps/web/src/shared/lib/*"],
+      "@/stores/*": ["./apps/web/src/shared/stores/*"],
       "@/*": ["./apps/web/src/*"]
     }
   },
