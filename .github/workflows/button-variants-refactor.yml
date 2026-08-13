@@ -1,74 +1,13 @@
-name: Button variants refactor
+name: Button variants refactor archive
 
 on:
-  push:
-    branches: [DEV]
-    paths:
-      - .github/workflows/button-variants-refactor.yml
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  refactor:
+  archived:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: DEV
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - name: Split button variants
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          import re
-
-          ui = Path('apps/web/src/shared/components/ui')
-          button = ui / 'button.tsx'
-          text = button.read_text(encoding='utf-8')
-
-          text = text.replace(
-              'import { cva, type VariantProps } from "class-variance-authority"',
-              'import { type VariantProps } from "class-variance-authority"'
-          )
-          text = text.replace(
-              'import { cn } from "@/lib/utils"\n',
-              'import { cn } from "@/lib/utils"\nimport { buttonVariants } from "./button-variants"\n'
-          )
-
-          pattern = re.compile(r'\nconst buttonVariants = cva\(.*?\n\)\n\nexport interface', re.S)
-          if not pattern.search(text):
-              raise SystemExit('buttonVariants block not found')
-          text = pattern.sub('\nexport interface', text, count=1)
-          text = text.replace('export { Button, buttonVariants }', 'export { Button }')
-          button.write_text(text, encoding='utf-8')
-
-          variants = ui / 'button-variants.ts'
-          variants.write_text('''import { cva } from "class-variance-authority"\n\nexport const buttonVariants = cva(\n  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-semibold ring-offset-background transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",\n  {\n    variants: {\n      variant: {\n        default: "bg-primary text-primary-foreground shadow-sm hover:bg-primary-dark",\n        destructive: "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",\n        outline: "border border-input bg-card text-foreground shadow-sm hover:border-primary/30 hover:bg-accent",\n        secondary: "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/90",\n        ghost: "text-foreground hover:bg-accent hover:text-accent-foreground",\n        link: "text-primary underline-offset-4 hover:underline",\n        hero: "border-0 bg-gradient-hero text-white shadow-md hover:opacity-95",\n        success: "bg-success text-success-foreground shadow-sm hover:bg-success/90",\n        warning: "bg-warning text-warning-foreground shadow-sm hover:bg-warning/90",\n      },\n      size: {\n        default: "h-10 px-4 py-2",\n        sm: "h-9 rounded-lg px-3",\n        lg: "h-11 px-6 text-base",\n        xl: "h-12 px-8 text-base",\n        icon: "h-10 w-10",\n      },\n    },\n    defaultVariants: {\n      variant: "default",\n      size: "default",\n    },\n  },\n)\n''', encoding='utf-8')
-
-          for name in ('alert-dialog.tsx', 'calendar.tsx'):
-              path = ui / name
-              source = path.read_text(encoding='utf-8')
-              old = '@/components/ui/button'
-              if 'buttonVariants' not in source or old not in source:
-                  raise SystemExit(f'Expected buttonVariants import not found in {name}')
-              source = source.replace(old, '@/components/ui/button-variants', 1)
-              path.write_text(source, encoding='utf-8')
-          PY
-      - run: npm ci
-      - name: Verify lint without warnings
-        run: npm run lint -- --max-warnings=0
-      - name: Verify typecheck
-        run: npm run typecheck
-      - name: Commit verified refactor
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/web/src/shared/components/ui
-          git diff --cached --quiet && exit 0
-          git commit -m "refactor: isolate button variants"
-          git push origin HEAD:DEV
+      - run: echo "Button variants refactor completed; this workflow is archived and read-only."
