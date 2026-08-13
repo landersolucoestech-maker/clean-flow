@@ -7,7 +7,7 @@ interface SyncResult {
   success: boolean;
   synced_conversations: number;
   synced_messages: number;
-  skipped_no_customer: number;
+  skipped_no_customer?: number;
   total_rc_messages: number;
 }
 
@@ -16,29 +16,11 @@ export function useRingCentralSync() {
   const [lastSyncResult, setLastSyncResult] = useState<SyncResult | null>(null);
   const queryClient = useQueryClient();
 
-  const getCompanyId = async (): Promise<string | null> => {
-    const { data } = await supabase
-      .from("company_settings")
-      .select("id")
-      .limit(1)
-      .single();
-    return data?.id || null;
-  };
-
   const syncMessages = async (daysBack: number = 30) => {
     setIsSyncing(true);
     try {
-      const companyId = await getCompanyId();
-      if (!companyId) {
-        toast.error("Company not configured");
-        return null;
-      }
-
       const { data, error } = await supabase.functions.invoke("ringcentral-sync-messages", {
-        body: {
-          company_id: companyId,
-          days_back: daysBack,
-        },
+        body: { days_back: daysBack },
       });
 
       if (error) {
@@ -47,21 +29,15 @@ export function useRingCentralSync() {
         return null;
       }
 
-      if (data.error) {
+      if (data?.error) {
         toast.error(data.error);
         return null;
       }
 
       setLastSyncResult(data);
-      
-      // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
       queryClient.invalidateQueries({ queryKey: ["messages"] });
-
-      toast.success(
-        `Synced ${data.synced_messages} messages from ${data.synced_conversations} conversations`
-      );
-
+      toast.success(`Synced ${data.synced_messages} messages from ${data.synced_conversations} conversations`);
       return data as SyncResult;
     } catch (error) {
       console.error("Sync error:", error);
@@ -72,9 +48,5 @@ export function useRingCentralSync() {
     }
   };
 
-  return {
-    syncMessages,
-    isSyncing,
-    lastSyncResult,
-  };
+  return { syncMessages, isSyncing, lastSyncResult };
 }
