@@ -182,10 +182,10 @@ Deno.serve(async (req) => {
       .maybeSingle();
     if (broadcastError || !broadcast) return json({ error: "Broadcast not found" }, 404);
 
-    const attachmentUrls = Array.isArray(broadcast.attachment_urls)
+    const attachmentUrls: string[] = Array.isArray(broadcast.attachment_urls)
       ? broadcast.attachment_urls.filter((value: unknown): value is string => typeof value === "string")
       : [];
-    if (attachmentUrls.some((url) => !isAllowedAttachmentUrl(url, supabaseUrl))) {
+    if (attachmentUrls.some((url: string) => !isAllowedAttachmentUrl(url, supabaseUrl))) {
       return json({ error: "Broadcast contains an invalid attachment URL" }, 400);
     }
 
