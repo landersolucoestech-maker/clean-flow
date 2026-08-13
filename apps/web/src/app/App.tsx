@@ -1,11 +1,11 @@
 import { lazy, Suspense } from "react";
-import { Toaster } from "../shared/ui/toaster";
-import { Toaster as Sonner } from "../shared/ui/sonner";
-import { TooltipProvider } from "../shared/ui/tooltip";
+import { Toaster } from "../shared/components/ui/toaster";
+import { Toaster as Sonner } from "../shared/components/ui/sonner";
+import { TooltipProvider } from "../shared/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { LanguageProvider } from "../shared/contexts/LanguageContext";
-import { QuickBooksSyncProvider } from "../shared/providers/QuickBooksSyncProvider";
+import { LanguageProvider } from "./providers/LanguageContext";
+import { QuickBooksSyncProvider } from "../modules/billing/providers/QuickBooksSyncProvider";
 import { AuthenticatedRoute, PlatformAdminRoute } from "../modules/auth/RouteGuards";
 
 const HomePage = lazy(() => import("./HomePage"));
