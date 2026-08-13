@@ -8,7 +8,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { QuickBooksSyncProvider } from "@/components/providers/QuickBooksSyncProvider";
 import { AuthenticatedRoute, PlatformAdminRoute } from "../modules/auth/RouteGuards";
 
-const Index = lazy(() => import("@/pages/Index"));
+const HomePage = lazy(() => import("./HomePage"));
 const Auth = lazy(() => import("@/pages/Auth").then(({ Auth }) => ({ default: Auth })));
 const Customers = lazy(() => import("@/pages/Customers").then(({ Customers }) => ({ default: Customers })));
 const Schedule = lazy(() => import("@/pages/Schedule").then(({ Schedule }) => ({ default: Schedule })));
@@ -47,7 +47,7 @@ const App = () => (
           <BrowserRouter>
             <Suspense fallback={<div className="flex min-h-screen items-center justify-center text-muted-foreground">Carregando...</div>}>
               <Routes>
-                <Route path="/" element={<AuthenticatedRoute><Index /></AuthenticatedRoute>} />
+                <Route path="/" element={<AuthenticatedRoute><HomePage /></AuthenticatedRoute>} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/setup" element={<AuthenticatedRoute allowUnconfigured><Setup /></AuthenticatedRoute>} />
                 <Route path="/set-password" element={<AuthenticatedRoute><SetPassword /></AuthenticatedRoute>} />
