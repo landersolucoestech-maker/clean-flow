@@ -405,14 +405,14 @@ export function Schedule() {
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header />
 
-        <main className="flex-1 flex flex-col overflow-hidden p-6">
+        <main className="flex flex-1 flex-col overflow-hidden px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
           {/* Page Header */}
-          <div className="flex items-center justify-between shrink-0 mb-4">
+          <div className="mb-4 flex shrink-0 flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">{t("schedule.title")}</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{t("schedule.title")}</h1>
               <p className="text-muted-foreground">{t("schedule.subtitle")}</p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 lg:justify-end">
               <input
                 type="file"
                 ref={fileInputRef}
@@ -471,7 +471,7 @@ export function Schedule() {
                     {t("common.exportExcel")}
                   </Button>
 
-                  <Button variant="hero" size="lg" className="flex items-center space-x-2" onClick={handleNewAppointment}>
+                  <Button variant="hero" className="flex items-center gap-2" onClick={handleNewAppointment}>
                     <Plus className="w-4 h-4" />
                     <span>{t("common.createJob")}</span>
                   </Button>
@@ -481,8 +481,8 @@ export function Schedule() {
           </div>
 
           {/* Calendar */}
-          <Card className="flex-1 overflow-hidden">
-            <CardContent className="p-0 h-full">
+          <Card className="flex-1 overflow-hidden border-border/80 shadow-sm">
+            <CardContent className="h-full p-0">
               <CalendarGrid
                 appointments={filteredAppointments}
                 staffMembers={staffMembers}
