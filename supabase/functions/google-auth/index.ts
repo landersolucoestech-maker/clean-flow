@@ -8,7 +8,6 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
-
 const GOOGLE_CLIENT_ID = Deno.env.get("GOOGLE_CLIENT_ID");
 const GOOGLE_CLIENT_SECRET = Deno.env.get("GOOGLE_CLIENT_SECRET");
 const GOOGLE_CALLBACK_PATH = "/integrations/google/callback";
@@ -37,12 +36,9 @@ serve(async (req) => {
     }
 
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
-    const authorization = await getAuthorizedStaffIdentity(
-      req,
-      adminClient,
-      ["admin", "office_manager"],
-    );
+    const authorization = await getAuthorizedStaffIdentity(req, adminClient, ["admin", "office_manager"]);
     if (authorization.error) return authorization.error;
+    const identity = authorization.identity;
 
     const body = await req.json();
     const action = body.action;
@@ -64,22 +60,15 @@ serve(async (req) => {
           const candidate = new URL(body.returnUrl, origin);
           if (candidate.origin === origin) returnUrl = candidate.toString();
         } catch {
-          // Keep safe default.
+          // Keep the safe default.
         }
       }
-
-      const { data: company, error: companyError } = await adminClient
-        .from("company_settings")
-        .select("id")
-        .limit(1)
-        .single();
-      if (companyError || !company) return jsonResponse({ error: "Company settings not found" }, 404);
 
       const redirectUri = `${origin}${GOOGLE_CALLBACK_PATH}`;
       const state = await createOAuthState({
         provider: "google",
-        userId: authorization.identity.userId,
-        companyId: company.id,
+        userId: identity.userId,
+        companyId: identity.companyId,
         redirectUri,
         returnUrl,
         expiresAt: Date.now() + 10 * 60 * 1000,
@@ -108,8 +97,8 @@ serve(async (req) => {
       if (
         !stateData
         || stateData.provider !== "google"
-        || stateData.userId !== authorization.identity.userId
-        || !stateData.companyId
+        || stateData.userId !== identity.userId
+        || stateData.companyId !== identity.companyId
       ) {
         return jsonResponse({ error: "Invalid or expired OAuth state" }, 400);
       }
@@ -137,14 +126,14 @@ serve(async (req) => {
       const { data: existing } = await adminClient
         .from("google_connections")
         .select("refresh_token")
-        .eq("company_id", stateData.companyId)
+        .eq("company_id", identity.companyId)
         .maybeSingle();
       const refreshToken = tokens.refresh_token || existing?.refresh_token;
       if (!refreshToken) return jsonResponse({ error: "Google did not provide a refresh token" }, 400);
 
       const scopes = String(tokens.scope || SCOPES).split(/\s+/).filter(Boolean);
       const { error: storeError } = await adminClient.from("google_connections").upsert({
-        company_id: stateData.companyId,
+        company_id: identity.companyId,
         google_user_id: userInfo.id || null,
         email: userInfo.email || null,
         name: userInfo.name || null,
@@ -162,15 +151,11 @@ serve(async (req) => {
 
     if (action === "status") {
       try {
-        const connection = await getGoogleConnection(adminClient);
+        const connection = await getGoogleConnection(adminClient, identity.companyId);
         return jsonResponse({
           connected: true,
           scopes: connection.scopes,
-          userInfo: {
-            email: connection.email,
-            name: connection.name,
-            picture: connection.picture_url,
-          },
+          userInfo: { email: connection.email, name: connection.name, picture: connection.picture_url },
         });
       } catch {
         return jsonResponse({ connected: false, scopes: [], userInfo: null });
@@ -178,16 +163,11 @@ serve(async (req) => {
     }
 
     if (action === "disconnect") {
-      const { data: connection, error: findError } = await adminClient
+      const { error } = await adminClient
         .from("google_connections")
-        .select("id")
-        .limit(1)
-        .maybeSingle();
-      if (findError) throw findError;
-      if (connection) {
-        const { error } = await adminClient.from("google_connections").delete().eq("id", connection.id);
-        if (error) throw error;
-      }
+        .delete()
+        .eq("company_id", identity.companyId);
+      if (error) throw error;
       return jsonResponse({ success: true, connected: false });
     }
 
