@@ -77,11 +77,17 @@ Deno.serve(async (req) => {
 
       const { data: existing } = await adminClient
         .from("staff")
-        .select("id")
+        .select("id, is_active")
         .eq("company_id", identity.companyId)
         .ilike("email", email)
         .maybeSingle();
-      if (existing) return response({ error: "A staff member already uses this email in this company" }, 409);
+      if (existing) {
+        return response({
+          error: existing.is_active
+            ? "A staff member already uses this email in this company"
+            : "An inactive staff record already uses this email; reactivate or update that record instead",
+        }, 409);
+      }
 
       const redirectTo = new URL("/set-password", siteUrl).toString();
       const { data: invitation, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(email, {
@@ -177,28 +183,37 @@ Deno.serve(async (req) => {
     if (action === "delete") {
       const id = optionalText(body.id, 36);
       if (!id) return response({ error: "Staff id is required" }, 400);
-      if (id === identity.staffId) return response({ error: "You cannot delete your own account" }, 409);
+      if (id === identity.staffId) return response({ error: "You cannot remove your own account" }, 409);
 
       const { data: staff, error: findError } = await adminClient
         .from("staff")
-        .select("auth_user_id")
+        .select("id, auth_user_id, is_active")
         .eq("id", id)
         .eq("company_id", identity.companyId)
         .single();
       if (findError || !staff) return response({ error: "Staff member not found" }, 404);
+      if (!staff.is_active && !staff.auth_user_id) return response({ success: true, archived: true });
 
-      const { error: deleteError } = await adminClient
+      const { error: archiveError } = await adminClient
         .from("staff")
-        .delete()
+        .update({ is_active: false, auth_user_id: null })
         .eq("id", id)
         .eq("company_id", identity.companyId);
-      if (deleteError) return response({ error: "Unable to delete staff record" }, 400);
+      if (archiveError) return response({ error: "Unable to deactivate staff record" }, 400);
 
       if (staff.auth_user_id) {
-        const { error } = await adminClient.auth.admin.deleteUser(staff.auth_user_id);
-        if (error) console.error("Staff record deleted but Auth user cleanup failed");
+        const { error: authError } = await adminClient.auth.admin.deleteUser(staff.auth_user_id);
+        if (authError) {
+          await adminClient
+            .from("staff")
+            .update({ auth_user_id: staff.auth_user_id })
+            .eq("id", id)
+            .eq("company_id", identity.companyId);
+          return response({ error: "Staff was not removed because login cleanup failed" }, 502);
+        }
       }
-      return response({ success: true });
+
+      return response({ success: true, archived: true });
     }
 
     return response({ error: "Invalid action" }, 400);
