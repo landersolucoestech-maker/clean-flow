@@ -42,7 +42,7 @@ import {
 import { cn, getCurrentDateInEST, formatDateToISO, formatDateDisplay } from "@/lib/utils";
 import { toast } from "sonner";
 import { DatePickerString } from "@/components/ui/date-picker";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/contexts/useLanguage";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useCreateInvoice, useGenerateInvoiceNumber } from "@/hooks/useInvoices";
 import { useJobs } from "@/hooks/useJobs";

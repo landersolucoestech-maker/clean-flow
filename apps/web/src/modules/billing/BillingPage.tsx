@@ -67,7 +67,7 @@ import { useCreateJob } from "@/hooks/useJobs";
 import { useQuickBooks } from "@/hooks/useQuickBooks";
 import { useQuickBooksSync } from "@/hooks/useQuickBooksSync";
 import { formatDateDisplay } from "@/lib/utils";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/contexts/useLanguage";
 import { toast } from "sonner";
 import { useCompanySettings } from "@/hooks/useCompanySettings";
 import { useCustomers } from "@/hooks/useCustomers";

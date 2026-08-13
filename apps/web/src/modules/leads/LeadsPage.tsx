@@ -55,7 +55,7 @@ import { toast } from "sonner";
 import { useLeads, useUpdateLead, useDeleteLead, LEAD_STATUSES, LEAD_ORIGINS } from "@/hooks/useLeads";
 import { useCreateJob } from "@/hooks/useJobs";
 import { useCustomers } from "@/hooks/useCustomers";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/contexts/useLanguage";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { formatDateByLanguage } from "@/hooks/useCompanyLanguage";
 

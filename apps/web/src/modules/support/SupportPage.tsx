@@ -25,7 +25,7 @@ import {
 import { useSupportTickets, SupportTicket, TicketStatus } from "@/hooks/useSupportTickets";
 import { CreateTicketModal } from "@/components/support/CreateTicketModal";
 import { TicketDetailsModal } from "@/components/support/TicketDetailsModal";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/contexts/useLanguage";
 import {
   Plus,
   Search,

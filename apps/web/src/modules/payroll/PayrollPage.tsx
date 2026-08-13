@@ -29,7 +29,7 @@ import { PayrollRulesModal } from "@/components/payroll/PayrollRulesModal";
 import { usePayrollRecords, useCreatePayrollRecords, useUpdatePayrollStatus, useDeletePayrollRecords, PayrollRecord as DBPayrollRecord } from "@/hooks/usePayrollRecords";
 import { usePayrollRules } from "@/hooks/usePayrollRules";
 import { useStaff } from "@/hooks/useStaff";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/contexts/useLanguage";
 import { useJobs } from "@/hooks/useJobs";
 import { useCompanySettings } from "@/hooks/useCompanySettings";
 import { formatCurrency } from "@/lib/currency";

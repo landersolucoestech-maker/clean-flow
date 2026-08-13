@@ -11,7 +11,7 @@ import { useJobGpsAlerts } from "@/hooks/useJobGpsAlerts";
 import { AppointmentModal } from "@/components/schedule/AppointmentModal";
 import type { EditJobData } from "@/components/schedule/AppointmentModal";
 import type { Appointment as CalendarAppointment } from "@/components/calendar/CalendarGrid";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/contexts/useLanguage";
 import { format } from "date-fns";
 
 const ITEMS_PER_PAGE = 3;

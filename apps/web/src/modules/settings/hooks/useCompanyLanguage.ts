@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useLanguage, Language } from "@/contexts/LanguageContext";
+import { useLanguage, Language } from "@/contexts/useLanguage";
 import { useEffect } from "react";
 
 /**

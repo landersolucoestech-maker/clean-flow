@@ -30,7 +30,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/contexts/useLanguage";
 import { parseDateString, formatDateToISO } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuickBooksSync } from "@/hooks/useQuickBooksSync";

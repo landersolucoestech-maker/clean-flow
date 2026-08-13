@@ -2,7 +2,7 @@ import { PageLayout } from "@/components/layout/PageLayout";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { UpcomingJobs } from "@/components/dashboard/UpcomingJobs";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/contexts/useLanguage";
 import { useJobs } from "@/hooks/useJobs";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useInvoices } from "@/hooks/useInvoices";

@@ -8,7 +8,7 @@ import type { Appointment as CalendarAppointment } from "@/components/calendar/C
 import { AppointmentModal } from "@/components/schedule/AppointmentModal";
 import { FilterModal } from "@/components/schedule/FilterModal";
 import type { FilterState } from "@/components/schedule/FilterModal";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/contexts/useLanguage";
 import { Plus, Upload, Download, Loader2, Trash2, CheckSquare, X, Filter } from "lucide-react";
 import { toast } from "sonner";
 import { useCustomers } from "@/hooks/useCustomers";

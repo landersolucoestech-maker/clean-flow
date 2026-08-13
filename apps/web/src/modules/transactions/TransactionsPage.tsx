@@ -37,7 +37,7 @@ import { cn } from "@/lib/utils";
 import { TransactionModal } from "@/components/transactions/TransactionModal";
 import { useTransactions, useDeleteTransaction, Transaction } from "@/hooks/useTransactions";
 import { useSyncInvoicesToTransactions } from "@/hooks/useInvoices";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/contexts/useLanguage";
 
 export function Transactions() {
   const { t } = useLanguage();

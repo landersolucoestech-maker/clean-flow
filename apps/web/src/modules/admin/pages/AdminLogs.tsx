@@ -22,7 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { usePlatformAdmin } from "@/hooks/usePlatformAdmin";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/contexts/useLanguage";
 import { Search, FileText, AlertTriangle } from "lucide-react";
 
 export function AdminLogs() {

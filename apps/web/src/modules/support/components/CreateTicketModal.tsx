@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useSupportTickets, TicketPriority, TicketCategory } from "@/hooks/useSupportTickets";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/contexts/useLanguage";
 
 interface CreateTicketModalProps {
   open: boolean;

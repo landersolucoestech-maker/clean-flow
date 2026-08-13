@@ -35,7 +35,7 @@ import {
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Customer, CustomerAddress, useCreateCustomer, useUpdateCustomer } from "@/hooks/useCustomers";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/contexts/useLanguage";
 import { AddressAutocompleteInput } from "./AddressAutocompleteInput";
 import { AddressSuggestion } from "@/hooks/useAddressAutocomplete";
 import { useCustomerRelationships, useCreateRelationship, useEndRelationship } from "@/hooks/useCustomerRelationships";

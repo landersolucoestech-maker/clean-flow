@@ -15,7 +15,7 @@ import { TeamUserModal } from "@/components/settings/TeamUserModal";
 import { AutomationsTab } from "@/components/settings/AutomationsTab";
 import { IntegrationsTab } from "@/components/settings/IntegrationsTab";
 import { AuditTab } from "@/components/settings/AuditTab";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/contexts/useLanguage";
 import { useStaff, useCurrentStaff, Staff } from "@/hooks/useStaff";
 import { useCompanySettings, useUpdateCompanySettings, BusinessHours } from "@/hooks/useCompanySettings";
 import { supabase } from "@/integrations/supabase/client";

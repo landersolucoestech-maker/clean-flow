@@ -27,7 +27,7 @@ import { Plus, Trash2, MessageSquare, Calendar, User, Tag, X, Building2, PawPrin
 import { AddressAutocompleteInput } from "@/components/customers/AddressAutocompleteInput";
 import { AddressSuggestion } from "@/hooks/useAddressAutocomplete";
 import { toast } from "sonner";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/contexts/useLanguage";
 
 export interface Interaction {
   id: string;

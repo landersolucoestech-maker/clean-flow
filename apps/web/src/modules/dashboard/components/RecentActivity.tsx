@@ -7,7 +7,7 @@ import { useJobs } from "@/hooks/useJobs";
 import { useInvoices } from "@/hooks/useInvoices";
 import { formatDistanceToNow, format } from "date-fns";
 import { ptBR, es, enUS } from "date-fns/locale";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/contexts/useLanguage";
 
 interface Activity {
   id: string;

@@ -30,7 +30,7 @@ import { useLeads } from "@/hooks/useLeads";
 import { useTransactions } from "@/hooks/useTransactions";
 import { usePayrollRecords } from "@/hooks/usePayrollRecords";
 import { useStaff } from "@/hooks/useStaff";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/contexts/useLanguage";
 
 interface ReportData {
   id: string;

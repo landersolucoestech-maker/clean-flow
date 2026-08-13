@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useSupportTickets, SupportTicket, TicketStatus } from "@/hooks/useSupportTickets";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/contexts/useLanguage";
 import { Send, User, Headphones } from "lucide-react";
 
 interface TicketDetailsModalProps {

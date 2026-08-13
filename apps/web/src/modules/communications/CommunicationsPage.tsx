@@ -48,7 +48,7 @@ import { useStaff } from "@/hooks/useStaff";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR, enUS, es } from "date-fns/locale";
 import { toast } from "sonner";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/contexts/useLanguage";
 import { BroadcastModal } from "@/components/communications/BroadcastModal";
 import { NewMessageModal } from "@/components/communications/NewMessageModal";
 import { useRingCentralSync } from "@/hooks/useRingCentralSync";

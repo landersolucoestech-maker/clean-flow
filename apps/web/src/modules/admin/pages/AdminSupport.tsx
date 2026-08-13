@@ -37,7 +37,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { usePlatformAdmin } from "@/hooks/usePlatformAdmin";
 import { useSupportTickets, TicketStatus, TicketUpdate } from "@/hooks/useSupportTickets";
 import type { AdminTicket } from "@/hooks/usePlatformAdmin";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/contexts/useLanguage";
 import {
   Search,
   AlertCircle,

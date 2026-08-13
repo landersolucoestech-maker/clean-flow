@@ -5,7 +5,7 @@ import { AppointmentDetailsView } from "./AppointmentDetailsView";
 import { useCleanersAndDrivers } from "@/hooks/useStaff";
 import { useCustomers } from "@/hooks/useCustomers";
 import { Loader2, Repeat } from "lucide-react";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/contexts/useLanguage";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,

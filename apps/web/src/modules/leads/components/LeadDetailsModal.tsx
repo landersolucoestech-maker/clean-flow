@@ -49,7 +49,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/contexts/useLanguage";
 import { useCreateLeadInteraction, INTERACTION_TYPES } from "@/hooks/useLeads";
 import { supabase } from "@/integrations/supabase/client";
 

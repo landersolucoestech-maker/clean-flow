@@ -14,7 +14,7 @@ import { CustomerDetailsModal } from "@/components/customers/CustomerDetailsModa
 import { useCustomers, useDeleteCustomer, useBulkDeleteCustomers, useImportCustomers, Customer, ImportedCustomerRow } from "@/hooks/useCustomers";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/contexts/useLanguage";
 import { readSpreadsheetFile } from "@/lib/spreadsheet";
 
 export function Customers() {

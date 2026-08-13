@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LanguageSwitcher } from "./LanguageSwitcher";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/contexts/useLanguage";
 import { useCompanySettings } from "@/hooks/useCompanySettings";
 import { useCurrentStaff } from "@/hooks/useStaff";
 import { supabase } from "@/integrations/supabase/client";
