@@ -27,26 +27,26 @@ export function ActionDropdown({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon">
-          <MoreHorizontal className="w-4 h-4" />
+        <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg text-muted-foreground hover:text-foreground">
+          <MoreHorizontal className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="bg-background border border-border">
+      <DropdownMenuContent align="end" className="min-w-40 rounded-xl border-border bg-popover p-1.5 shadow-lg">
         {onView && (
-          <DropdownMenuItem onClick={onView}>
-            <Eye className="w-4 h-4 mr-2" />
+          <DropdownMenuItem onClick={onView} className="cursor-pointer rounded-lg">
+            <Eye className="mr-2 h-4 w-4 text-muted-foreground" />
             {viewLabel}
           </DropdownMenuItem>
         )}
         {onEdit && (
-          <DropdownMenuItem onClick={onEdit}>
-            <Pencil className="w-4 h-4 mr-2" />
+          <DropdownMenuItem onClick={onEdit} className="cursor-pointer rounded-lg">
+            <Pencil className="mr-2 h-4 w-4 text-muted-foreground" />
             {editLabel}
           </DropdownMenuItem>
         )}
         {onDelete && (
-          <DropdownMenuItem onClick={onDelete} className="text-red-600">
-            <Trash2 className="w-4 h-4 mr-2" />
+          <DropdownMenuItem onClick={onDelete} className="cursor-pointer rounded-lg text-destructive focus:text-destructive">
+            <Trash2 className="mr-2 h-4 w-4" />
             {deleteLabel}
           </DropdownMenuItem>
         )}
