@@ -1,7 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import type { TablesInsert } from "@/integrations/supabase/types";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -57,6 +55,8 @@ import { useCustomers } from "@/hooks/useCustomers";
 import { useLanguage } from "@/contexts/useLanguage";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { formatDateByLanguage } from "@/hooks/useCompanyLanguage";
+import { fetchJobsForLeadIds, fetchLeadInvoices } from "../services/leadsPageQueries";
+import { syncLeadAddresses } from "../services/leadAddressSync";
 
 interface AddressData {
   id: string;
@@ -169,14 +169,7 @@ export function Leads() {
   // Fetch invoices to determine payment status for each lead (using invoice_type)
   const { data: invoicesData = [] } = useQuery({
     queryKey: ["invoices-for-leads"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("invoices")
-        .select("id, lead_id, status, notes, total, invoice_type, amount_paid")
-        .not("lead_id", "is", null);
-      if (error) throw error;
-      return data || [];
-    },
+    queryFn: fetchLeadInvoices,
   });
 
   // Create a map of lead_id to invoice status using invoice_type field
@@ -328,15 +321,7 @@ export function Leads() {
 
   const { data: jobsForLeads = [] } = useQuery({
     queryKey: ["jobs-for-leads", leadDbIds],
-    queryFn: async () => {
-      if (!leadDbIds.length) return [];
-      const { data, error } = await supabase
-        .from("jobs")
-        .select("id, lead_id")
-        .in("lead_id", leadDbIds);
-      if (error) throw error;
-      return data || [];
-    },
+    queryFn: () => fetchJobsForLeadIds(leadDbIds),
     enabled: leadDbIds.length > 0,
   });
 
@@ -463,83 +448,11 @@ export function Leads() {
         visit_date: updatedEstimate.visitDate || null,
       });
 
-      // Upsert lead_addresses (street/city/state/zip) based on the EditLeadModal form
-      const uuidRegex =
-        /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-      const formatFullAddress = (street: string, city?: string, state?: string, postalCode?: string) => {
-        const s = (street || "").trim();
-        const c = (city || "").trim();
-        const st = (state || "").trim();
-        const zip = (postalCode || "").trim();
-        return `${s}${c ? `, ${c}` : ""}${st ? `, ${st}` : ""} ${zip}`.trim();
-      };
-
-      const uiAddresses = (updatedEstimate.addresses || [])
-        .map((a) => {
-          const street = (a.street || a.address || "").trim();
-          if (!street) return null;
-
-          const city = (a.city || "").trim();
-          const state = (a.state || "").trim();
-          const postalCode = (a.postalCode || "").trim();
-
-          const row: TablesInsert<"lead_addresses"> & { id?: string } = {
-            lead_id: dbId,
-            name: (a.addressName || "").trim() || "Home",
-            address: formatFullAddress(street, city, state, postalCode),
-            street: street || null,
-            city: city || null,
-            state: state || null,
-            postal_code: postalCode || null,
-            notes: (a.notes || "").trim() || null,
-          };
-
-          if (a.id && uuidRegex.test(a.id)) row.id = a.id;
-          return row;
-        })
-        .filter((row): row is TablesInsert<"lead_addresses"> & { id?: string } => row !== null);
-
-      const { data: existingAddrRows, error: existingAddrErr } = await supabase
-        .from("lead_addresses")
-        .select("id")
-        .eq("lead_id", dbId);
-
-      if (existingAddrErr) throw existingAddrErr;
-
-      const existingIds = (existingAddrRows || []).map((row) => row.id);
-      const keepIds = uiAddresses.flatMap((row) => row.id ? [row.id] : []);
-      const deleteIds = existingIds.filter((id: string) => !keepIds.includes(id));
-
-      if (deleteIds.length > 0) {
-        const { error: delErr } = await supabase
-          .from("lead_addresses")
-          .delete()
-          .in("id", deleteIds);
-        if (delErr) throw delErr;
-      }
-
-      const upsertRows = uiAddresses.filter((row) => row.id);
-      const insertRows = uiAddresses.filter((row) => !row.id);
-
-      if (upsertRows.length > 0) {
-        const { error: upsertErr } = await supabase
-          .from("lead_addresses")
-          .upsert(upsertRows, { onConflict: "id" });
-        if (upsertErr) throw upsertErr;
-      }
-
-      if (insertRows.length > 0) {
-        const { error: insertErr } = await supabase
-          .from("lead_addresses")
-          .insert(insertRows);
-        if (insertErr) throw insertErr;
-      }
+      await syncLeadAddresses(dbId, updatedEstimate.addresses || []);
 
       await queryClient.invalidateQueries({ queryKey: ["leads"] });
     } catch (error) {
-      console.error("Error saving estimate:", error);
-      toast.error("Erro ao salvar alterações");
+      toast.error(error instanceof Error ? error.message : "Erro ao salvar alterações");
     }
   };
 
