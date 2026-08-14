@@ -1,0 +1,84 @@
+name: Reports visual refactor
+
+on:
+  push:
+    branches: [DEV]
+    paths:
+      - .github/workflows/reports-visual-refactor.yml
+
+permissions:
+  contents: write
+
+jobs:
+  refactor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: DEV
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Refine reports shell and visual presentation
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          p = Path('apps/web/src/modules/reports/ReportsPage.tsx')
+          text = p.read_text(encoding='utf-8')
+
+          def rep(old, new, count=1):
+              global text
+              if old not in text:
+                  raise SystemExit(f'Expected text not found: {old[:160]}')
+              text = text.replace(old, new, count)
+
+          rep('import { Header } from "@/components/layout/Header";\nimport { Sidebar } from "@/components/layout/Sidebar";', 'import { PageLayout } from "@/components/layout/PageLayout";')
+
+          color_replacements = {
+            'text-orange-500': 'text-warning',
+            'bg-orange-500/10': 'bg-warning/10',
+            'text-blue-500': 'text-primary',
+            'bg-blue-500/10': 'bg-primary-light',
+            'text-green-500': 'text-success',
+            'bg-green-500/10': 'bg-success/10',
+            'text-purple-500': 'text-primary-dark',
+            'bg-purple-500/10': 'bg-primary-light',
+            'text-cyan-500': 'text-info',
+            'bg-cyan-500/10': 'bg-info/10',
+            'text-yellow-500': 'text-warning',
+            'bg-yellow-500/10': 'bg-warning/10',
+            'text-indigo-500': 'text-secondary-foreground',
+            'bg-indigo-500/10': 'bg-secondary-light',
+          }
+          for old, new in color_replacements.items():
+              text = text.replace(old, new)
+
+          rep('''  return (\n    <div className="flex h-screen bg-background">\n      <Sidebar />\n\n      <div className="flex-1 flex flex-col overflow-hidden">\n        <Header />\n\n        <main className="flex-1 overflow-y-auto p-6 space-y-6 pl-[10px] pb-0 pr-[10px] pt-px mx-[8px] py-0 my-[4px]">''', '''  return (\n    <PageLayout>\n      <div className="space-y-6">''')
+          rep('''          <div className="flex items-center justify-between">''', '''          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">''')
+          rep('''              <h1 className="text-3xl font-bold text-foreground">{t("reports.title")}</h1>''', '''              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{t("reports.title")}</h1>''')
+          rep('''                <Button className="bg-primary hover:bg-primary/90" disabled={isLoading}>''', '''                <Button disabled={isLoading}>''')
+          rep('''              <DropdownMenuContent align="end" className="w-56 bg-background">''', '''              <DropdownMenuContent align="end" className="w-56">''')
+          rep('''        </main>\n      </div>\n    </div>''', '''      </div>\n    </PageLayout>''')
+
+          p.write_text(text, encoding='utf-8')
+          PY
+      - run: npm ci
+      - name: Lint
+        run: npm run lint -- --max-warnings=0
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Commit verified reports refactor
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/web/src/modules/reports/ReportsPage.tsx
+          git diff --cached --quiet && exit 0
+          git commit -m "style: modernize reports page shell and layout"
+          git push origin HEAD:DEV
