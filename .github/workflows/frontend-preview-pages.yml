@@ -1,6 +1,6 @@
 # Dev-only visual preview. No production Supabase is used here.
 # Publishes the latest validated UI correction pass from dev.
-# Refresh marker: professional visual-system normalization.
+# Refresh marker: final professional workspace and CRM anatomy pass.
 name: Frontend Preview Pages
 
 on:
