@@ -1,5 +1,6 @@
 name: Frontend Audit Fixes
 
+# Retry after isolating non-component appointment status config.
 on:
   push:
     branches: [dev]
@@ -33,7 +34,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx apps/web/src/modules/schedule/components/AppointmentDetailsPrimitives.tsx apps/web/src/modules/schedule/components/AppointmentNotesSections.tsx apps/web/src/modules/schedule/components/AppointmentManualTimeEditor.tsx apps/web/src/modules/schedule/components/AppointmentBillingSummary.tsx apps/web/src/modules/schedule/types/appointmentDetails.ts
+          git add apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx apps/web/src/modules/schedule/components/AppointmentDetailsPrimitives.tsx apps/web/src/modules/schedule/components/AppointmentNotesSections.tsx apps/web/src/modules/schedule/components/AppointmentManualTimeEditor.tsx apps/web/src/modules/schedule/components/AppointmentBillingSummary.tsx apps/web/src/modules/schedule/types/appointmentDetails.ts apps/web/src/modules/schedule/utils/appointmentStatus.ts
           git diff --cached --quiet && exit 0
           git commit -m "refactor(frontend): decompose appointment details"
           git push origin HEAD:dev
