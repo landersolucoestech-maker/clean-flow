@@ -2,9 +2,9 @@ name: Quality
 
 on:
   push:
-    branches: [DEV]
+    branches: [dev]
   pull_request:
-    branches: [main, DEV]
+    branches: [main, dev]
 
 permissions:
   contents: read
