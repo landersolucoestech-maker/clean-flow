@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import type { Contact, ContactDraft } from "../types/contact";
 import {
   createContactRecord,
@@ -10,28 +11,48 @@ import {
 
 export function useContacts() {
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const [storageScope, setStorageScope] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
+  useEffect(() => {
+    let active = true;
+    void supabase.auth.getSession().then(({ data, error: sessionError }) => {
+      if (!active) return;
+      if (sessionError) {
+        setError(sessionError);
+        setIsLoading(false);
+        return;
+      }
+      setStorageScope(data.session?.user.id || "authenticated-user");
+    });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const reload = useCallback(() => {
+    if (!storageScope) return;
     try {
       setError(null);
-      setContacts(readContacts());
+      setContacts(readContacts(storageScope));
     } catch (cause) {
       setError(cause instanceof Error ? cause : new Error("Failed to load contacts"));
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [storageScope]);
 
   useEffect(() => {
     reload();
   }, [reload]);
 
   const persist = useCallback((next: Contact[]) => {
-    writeContacts(next);
+    if (!storageScope) throw new Error("Contact storage scope is not ready");
+    writeContacts(storageScope, next);
     setContacts(next);
-  }, []);
+  }, [storageScope]);
 
   const createContact = useCallback((draft: ContactDraft) => {
     const created = createContactRecord(draft);
