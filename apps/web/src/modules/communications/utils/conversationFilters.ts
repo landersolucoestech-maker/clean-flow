@@ -14,6 +14,12 @@ interface StaffStatusRecord {
   is_active?: boolean | null;
 }
 
+export function buildCustomerStatusById(customers: CustomerStatusRecord[]): Map<string, string> {
+  return new Map(
+    customers.map((customer) => [customer.id, customer.status?.toLowerCase() || "unknown"]),
+  );
+}
+
 export function filterCustomerConversations(
   conversations: Conversation[],
   customers: CustomerStatusRecord[],
@@ -21,9 +27,7 @@ export function filterCustomerConversations(
   statusFilter: CustomerStatusFilter,
   activeFilter: ConversationFilter,
 ): Conversation[] {
-  const statusByCustomer = new Map(
-    customers.map((customer) => [customer.id, customer.status?.toLowerCase() || "unknown"]),
-  );
+  const statusByCustomer = buildCustomerStatusById(customers);
   const normalizedSearch = search.toLowerCase();
 
   return conversations.filter((conversation) => {
