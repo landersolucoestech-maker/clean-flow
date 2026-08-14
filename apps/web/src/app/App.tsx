@@ -10,7 +10,7 @@ import { AuthenticatedRoute, PlatformAdminRoute } from "../modules/auth/guards/R
 
 const HomePage = lazy(() => import("./HomePage"));
 const Auth = lazy(() => import("../modules/auth/pages/AuthPage").then(({ Auth }) => ({ default: Auth })));
-const Customers = lazy(() => import("../modules/crm/customers/pages/CustomersPage").then(({ Customers }) => ({ default: Customers })));
+const CrmPage = lazy(() => import("../modules/crm/pages/CrmPage").then(({ CrmPage }) => ({ default: CrmPage })));
 const Leads = lazy(() => import("../modules/crm/leads/pages/LeadsPage").then(({ Leads }) => ({ default: Leads })));
 const Contacts = lazy(() => import("../modules/crm/contacts/pages/ContactsPage").then(({ Contacts }) => ({ default: Contacts })));
 const Schedule = lazy(() => import("../modules/schedule/pages/SchedulePage").then(({ Schedule }) => ({ default: Schedule })));
@@ -41,54 +41,37 @@ const FINANCE_ROLES = ["admin", "office_manager"] as const;
 const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <LanguageProvider>
-      <QuickBooksSyncProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter basename={baseUrl || undefined}>
-            <Suspense fallback={<div className="flex min-h-screen items-center justify-center text-muted-foreground">Carregando...</div>}>
-              <Routes>
-                <Route path="/" element={<AuthenticatedRoute><HomePage /></AuthenticatedRoute>} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/setup" element={<AuthenticatedRoute allowUnconfigured><Setup /></AuthenticatedRoute>} />
-                <Route path="/set-password" element={<AuthenticatedRoute><SetPassword /></AuthenticatedRoute>} />
-                <Route path="/schedule" element={<AuthenticatedRoute><Schedule /></AuthenticatedRoute>} />
-
-                <Route path="/crm" element={<AuthenticatedRoute allowedRoles={OPERATIONAL_ROLES}><Navigate to="/crm/customers" replace /></AuthenticatedRoute>} />
-                <Route path="/crm/customers" element={<AuthenticatedRoute allowedRoles={OPERATIONAL_ROLES}><Customers /></AuthenticatedRoute>} />
-                <Route path="/crm/leads" element={<AuthenticatedRoute allowedRoles={OPERATIONAL_ROLES}><Leads /></AuthenticatedRoute>} />
-                <Route path="/crm/contacts" element={<AuthenticatedRoute allowedRoles={OPERATIONAL_ROLES}><Contacts /></AuthenticatedRoute>} />
-                <Route path="/customers" element={<AuthenticatedRoute allowedRoles={OPERATIONAL_ROLES}><Navigate to="/crm/customers" replace /></AuthenticatedRoute>} />
-                <Route path="/leads" element={<AuthenticatedRoute allowedRoles={OPERATIONAL_ROLES}><Navigate to="/crm/leads" replace /></AuthenticatedRoute>} />
-
-                <Route path="/invoices" element={<AuthenticatedRoute allowedRoles={FINANCE_ROLES}><Billing /></AuthenticatedRoute>} />
-                <Route path="/transactions" element={<AuthenticatedRoute allowedRoles={FINANCE_ROLES}><Transactions /></AuthenticatedRoute>} />
-                <Route path="/rules" element={<AuthenticatedRoute allowedRoles={FINANCE_ROLES}><Rules /></AuthenticatedRoute>} />
-                <Route path="/communications" element={<AuthenticatedRoute allowedRoles={OPERATIONAL_ROLES}><Communications /></AuthenticatedRoute>} />
-                <Route path="/reports" element={<AuthenticatedRoute allowedRoles={FINANCE_ROLES}><Reports /></AuthenticatedRoute>} />
-                <Route path="/settings" element={<AuthenticatedRoute><Settings /></AuthenticatedRoute>} />
-                <Route path="/integrations" element={<AuthenticatedRoute allowedRoles={FINANCE_ROLES}><Settings /></AuthenticatedRoute>} />
-                <Route path="/payroll" element={<AuthenticatedRoute allowedRoles={FINANCE_ROLES}><Payroll /></AuthenticatedRoute>} />
-                <Route path="/support" element={<AuthenticatedRoute><Support /></AuthenticatedRoute>} />
-                <Route path="/admin" element={<PlatformAdminRoute><AdminDashboard /></PlatformAdminRoute>} />
-                <Route path="/admin/clients" element={<PlatformAdminRoute><AdminClients /></PlatformAdminRoute>} />
-                <Route path="/admin/auth" element={<AdminAuth />} />
-                <Route path="/admin/logs" element={<PlatformAdminRoute><AdminLogs /></PlatformAdminRoute>} />
-                <Route path="/admin/support" element={<PlatformAdminRoute><AdminSupport /></PlatformAdminRoute>} />
-                <Route path="/sync-logs" element={<AuthenticatedRoute allowedRoles={FINANCE_ROLES}><SyncLogs /></AuthenticatedRoute>} />
-                <Route path="/integrations/ringcentral/callback" element={<RingCentralCallback />} />
-                <Route path="/integrations/dialpad/callback" element={<DialpadCallback />} />
-                <Route path="/integrations/google/callback" element={<GoogleCallback />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
-          </BrowserRouter>
-        </TooltipProvider>
-      </QuickBooksSyncProvider>
-    </LanguageProvider>
-  </QueryClientProvider>
+  <QueryClientProvider client={queryClient}><LanguageProvider><QuickBooksSyncProvider><TooltipProvider><Toaster /><Sonner /><BrowserRouter basename={baseUrl || undefined}><Suspense fallback={<div className="flex min-h-screen items-center justify-center text-muted-foreground">Carregando...</div>}><Routes>
+    <Route path="/" element={<AuthenticatedRoute><HomePage /></AuthenticatedRoute>} />
+    <Route path="/auth" element={<Auth />} />
+    <Route path="/setup" element={<AuthenticatedRoute allowUnconfigured><Setup /></AuthenticatedRoute>} />
+    <Route path="/set-password" element={<AuthenticatedRoute><SetPassword /></AuthenticatedRoute>} />
+    <Route path="/schedule" element={<AuthenticatedRoute><Schedule /></AuthenticatedRoute>} />
+    <Route path="/crm" element={<AuthenticatedRoute allowedRoles={OPERATIONAL_ROLES}><CrmPage /></AuthenticatedRoute>} />
+    <Route path="/crm/customers" element={<AuthenticatedRoute allowedRoles={OPERATIONAL_ROLES}><Navigate to="/crm" replace /></AuthenticatedRoute>} />
+    <Route path="/crm/leads" element={<AuthenticatedRoute allowedRoles={OPERATIONAL_ROLES}><Leads /></AuthenticatedRoute>} />
+    <Route path="/crm/contacts" element={<AuthenticatedRoute allowedRoles={OPERATIONAL_ROLES}><Contacts /></AuthenticatedRoute>} />
+    <Route path="/customers" element={<AuthenticatedRoute allowedRoles={OPERATIONAL_ROLES}><Navigate to="/crm" replace /></AuthenticatedRoute>} />
+    <Route path="/leads" element={<AuthenticatedRoute allowedRoles={OPERATIONAL_ROLES}><Navigate to="/crm/leads" replace /></AuthenticatedRoute>} />
+    <Route path="/invoices" element={<AuthenticatedRoute allowedRoles={FINANCE_ROLES}><Billing /></AuthenticatedRoute>} />
+    <Route path="/transactions" element={<AuthenticatedRoute allowedRoles={FINANCE_ROLES}><Transactions /></AuthenticatedRoute>} />
+    <Route path="/rules" element={<AuthenticatedRoute allowedRoles={FINANCE_ROLES}><Rules /></AuthenticatedRoute>} />
+    <Route path="/communications" element={<AuthenticatedRoute allowedRoles={OPERATIONAL_ROLES}><Communications /></AuthenticatedRoute>} />
+    <Route path="/reports" element={<AuthenticatedRoute allowedRoles={FINANCE_ROLES}><Reports /></AuthenticatedRoute>} />
+    <Route path="/settings" element={<AuthenticatedRoute><Settings /></AuthenticatedRoute>} />
+    <Route path="/integrations" element={<AuthenticatedRoute allowedRoles={FINANCE_ROLES}><Settings /></AuthenticatedRoute>} />
+    <Route path="/payroll" element={<AuthenticatedRoute allowedRoles={FINANCE_ROLES}><Payroll /></AuthenticatedRoute>} />
+    <Route path="/support" element={<AuthenticatedRoute><Support /></AuthenticatedRoute>} />
+    <Route path="/admin" element={<PlatformAdminRoute><AdminDashboard /></PlatformAdminRoute>} />
+    <Route path="/admin/clients" element={<PlatformAdminRoute><AdminClients /></PlatformAdminRoute>} />
+    <Route path="/admin/auth" element={<AdminAuth />} />
+    <Route path="/admin/logs" element={<PlatformAdminRoute><AdminLogs /></PlatformAdminRoute>} />
+    <Route path="/admin/support" element={<PlatformAdminRoute><AdminSupport /></PlatformAdminRoute>} />
+    <Route path="/sync-logs" element={<AuthenticatedRoute allowedRoles={FINANCE_ROLES}><SyncLogs /></AuthenticatedRoute>} />
+    <Route path="/integrations/ringcentral/callback" element={<RingCentralCallback />} />
+    <Route path="/integrations/dialpad/callback" element={<DialpadCallback />} />
+    <Route path="/integrations/google/callback" element={<GoogleCallback />} />
+    <Route path="*" element={<NotFound />} />
+  </Routes></Suspense></BrowserRouter></TooltipProvider></QuickBooksSyncProvider></LanguageProvider></QueryClientProvider>
 );
-
 export default App;
