@@ -36,21 +36,21 @@ export function Header({ actions }: HeaderProps) {
   };
 
   return (
-    <header className="sticky top-0 z-30 flex min-h-16 items-center justify-between gap-3 border-b border-border/80 bg-card/95 px-4 py-2 backdrop-blur sm:px-6 lg:px-8">
-      <div className="flex min-w-0 items-center gap-3">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-light text-primary-dark">
+    <header className="sticky top-0 z-30 flex min-h-14 items-center justify-between gap-3 border-b border-border/70 bg-card/95 px-4 py-2 backdrop-blur sm:px-5 lg:px-6 xl:px-8">
+      <div className="flex min-w-0 items-center gap-2.5">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary-light text-primary-dark">
           <HeaderIcon className="h-4 w-4" />
         </div>
         <div className="min-w-0">
           {isCrm ? (
             <>
-              <p className="truncate text-sm font-semibold text-foreground">CRM</p>
-              <p className="truncate text-[11px] text-muted-foreground">Centralize customer relationships and opportunities.</p>
+              <p className="truncate text-sm font-semibold leading-tight text-foreground">CRM</p>
+              <p className="hidden truncate text-[11px] leading-tight text-muted-foreground sm:block">Centralize customer relationships and opportunities.</p>
             </>
           ) : (
             <>
-              <p className="truncate text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Workspace</p>
-              <p className="truncate text-sm font-semibold text-foreground">
+              <p className="hidden truncate text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground sm:block">Workspace</p>
+              <p className="truncate text-sm font-semibold leading-tight text-foreground">
                 {companySettings?.trade_name || companySettings?.legal_name || "Clean Flow"}
               </p>
             </>
@@ -58,20 +58,20 @@ export function Header({ actions }: HeaderProps) {
         </div>
       </div>
 
-      <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-        {actions && <div className="hidden min-w-0 items-center gap-2 md:flex">{actions}</div>}
+      <div className="flex min-w-0 items-center gap-2">
+        {actions && <div className="flex min-w-0 items-center gap-2">{actions}</div>}
         <LanguageSwitcher />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-10 gap-2 rounded-xl px-2 sm:px-3">
-              <Avatar className="h-8 w-8">
+            <Button variant="ghost" className="h-9 gap-2 rounded-lg px-1.5 sm:px-2.5">
+              <Avatar className="h-7 w-7">
                 <AvatarFallback className="bg-primary-light text-primary-dark">
                   <User className="h-4 w-4" />
                 </AvatarFallback>
               </Avatar>
-              <div className="hidden max-w-40 text-left sm:block">
-                <p className="truncate text-xs font-semibold text-foreground">{currentStaff?.name || t("header.profile")}</p>
-                <p className="truncate text-[11px] text-muted-foreground">{currentStaff?.email || ""}</p>
+              <div className="hidden max-w-36 text-left lg:block">
+                <p className="truncate text-xs font-semibold leading-tight text-foreground">{currentStaff?.name || t("header.profile")}</p>
+                <p className="truncate text-[10px] leading-tight text-muted-foreground">{currentStaff?.email || ""}</p>
               </div>
             </Button>
           </DropdownMenuTrigger>
