@@ -1,19 +1,15 @@
-export type {
-  ImportedJobRow,
-  Job,
-  JobFieldsUpdate,
-  JobFormData,
-} from "./useJobsLegacy";
+export type { Job, JobFormData } from "../types/job";
+export type { ImportedJobRow, JobFieldsUpdate } from "./useJobMaintenance";
 
 export {
   useImportJobs,
   useUpdateJob,
   useUpdateJobFields,
-} from "./useJobsLegacy";
+} from "./useJobMaintenance";
 
 export {
   useJobs,
   useJobsByCustomer,
   useCreateJob,
   useDeleteJob,
-} from "./useJobsCritical";
+} from "./useJobCore";

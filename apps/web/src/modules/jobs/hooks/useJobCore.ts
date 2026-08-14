@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/app/infrastructure/supabase/client";
 import { toast } from "sonner";
 import { useGoogleCalendarSync } from "../../settings/hooks/useGoogleCalendarSync";
-import type { Job, JobFormData } from "./useJobsLegacy";
+import type { Job, JobFormData } from "../types/job";
 
 function getFrequencyDays(serviceType: string | null | undefined): number | null {
   if (!serviceType) return null;
