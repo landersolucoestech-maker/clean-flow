@@ -1,16 +1,13 @@
 name: Frontend Payroll Refactor
 
 on:
-  push:
-    branches: [dev]
-    paths:
-      - ".github/workflows/frontend-payroll-refactor.yml"
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  refactor:
+  validate:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -23,53 +20,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Extract payroll view responsibilities
-        run: |
-          node <<'NODE'
-          const fs = require('node:fs');
-          const path = 'apps/web/src/modules/payroll/PayrollPage.tsx';
-          let src = fs.readFileSync(path, 'utf8');
-
-          const typeBlockStart = src.indexOf('interface PayrollRecord {');
-          const typeBlockEndMarker = 'type SortDirection = "asc" | "desc";';
-          const typeBlockEnd = src.indexOf(typeBlockEndMarker);
-          if (typeBlockStart < 0 || typeBlockEnd < 0) throw new Error('Payroll view type block not found');
-          src = src.slice(0, typeBlockStart) + src.slice(typeBlockEnd + typeBlockEndMarker.length);
-
-          const importAnchor = 'import { getErrorMessage } from "@/lib/errors";';
-          if (!src.includes(importAnchor)) throw new Error('Payroll import anchor missing');
-          src = src.replace(importAnchor, `${importAnchor}\nimport type { PayrollListRow, PayrollRecord, PayrollSortDirection, PayrollSortField } from "./types/payrollView";\nimport { buildPayrollListRows, sortPayrollRecords } from "./utils/payrollView";`);
-
-          src = src.replace(/\bSortField\b/g, 'PayrollSortField').replace(/\bSortDirection\b/g, 'PayrollSortDirection');
-
-          const listStart = src.indexOf('  // Consolidated list (period + team member) - USING REAL VALUES');
-          const listEnd = src.indexOf('  const payrollGroupIdToRecordIds = useMemo(() => {');
-          if (listStart < 0 || listEnd < 0 || listEnd <= listStart) throw new Error('Payroll list aggregation block not found');
-          const replacement = `  // Consolidated list (period + team member)\n  const payrollListRows: PayrollListRow[] = useMemo(\n    () => buildPayrollListRows(filteredData, staffList, sortField, sortDirection),\n    [filteredData, staffList, sortField, sortDirection],\n  );\n\n`;
-          src = src.slice(0, listStart) + replacement + src.slice(listEnd);
-
-          const sortStart = src.indexOf('  const sortData = (data: PayrollRecord[]');
-          const sortEnd = src.indexOf('  const handleSort = (field: PayrollSortField) => {');
-          if (sortStart < 0 || sortEnd < 0 || sortEnd <= sortStart) throw new Error('Inline sortData block not found');
-          src = src.slice(0, sortStart) + src.slice(sortEnd);
-          src = src.replace(/\bsortData\(/g, 'sortPayrollRecords(');
-
-          if (/interface PayrollRecord|interface PayrollListRow|type PayrollSortField =|const sortData =/.test(src)) {
-            throw new Error('Payroll view duplication remains in PayrollPage');
-          }
-
-          fs.writeFileSync(path, src);
-          NODE
       - run: node scripts/frontend-audit.mjs
       - run: npx eslint apps/web/src packages --max-warnings=0
       - run: npm run typecheck
       - run: npx vitest run apps/web/src
       - run: npm run build
-      - name: Commit payroll view refactor
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/web/src/modules/payroll/PayrollPage.tsx
-          git diff --cached --quiet && exit 0
-          git commit -m "refactor(frontend): extract payroll view responsibilities"
-          git push origin HEAD:dev
