@@ -1,13 +1,16 @@
 name: Frontend Audit Fixes
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [dev]
+    paths:
+      - ".github/workflows/frontend-audit-fixes.yml"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  validate:
+  refactor:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -20,8 +23,43 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Isolate invoice modal data access
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = 'apps/web/src/modules/schedule/components/InvoiceModal.tsx';
+          let src = fs.readFileSync(path, 'utf8');
+
+          src = src.replace('import { supabase } from "@/integrations/supabase/client";\n', '');
+          const anchor = 'import { useQuickBooksStore } from "@/stores/quickbooks.store";';
+          if (!src.includes(anchor)) throw new Error('Invoice import anchor missing');
+          src = src.replace(anchor, `${anchor}\nimport { findInvoiceCustomerByName, findOrCreateQuickBooksCustomer } from "@/modules/billing/services/invoicePreparationService";`);
+
+          const lookupStart = src.indexOf('        // Otherwise, look up by name');
+          const lookupEnd = src.indexOf('      };\n      fetchCustomerId();', lookupStart);
+          if (lookupStart < 0 || lookupEnd < 0) throw new Error('Customer lookup block missing');
+          const lookupReplacement = `        // Otherwise, look up by name through the billing service.\n        try {\n          const customer = await findInvoiceCustomerByName(appointment.customer);\n          setCustomerId(customer?.id ?? null);\n          setCustomerEmail(customer?.email ?? null);\n        } catch {\n          setCustomerId(null);\n          setCustomerEmail(null);\n        }\n`;
+          src = src.slice(0, lookupStart) + lookupReplacement + src.slice(lookupEnd);
+
+          const qbStart = src.indexOf('          // If no mapping exists, try to find or create customer in QuickBooks');
+          const qbEnd = src.indexOf('          \n          if (qbCustomerId) {', qbStart);
+          if (qbStart < 0 || qbEnd < 0) throw new Error('QuickBooks customer block missing');
+          const qbReplacement = `          // Resolve the QuickBooks customer through the billing service.\n          if (!qbCustomerId && appointment?.customer) {\n            const resolvedCustomer = await findOrCreateQuickBooksCustomer(appointment.customer, customerEmail);\n            if (resolvedCustomer) {\n              qbCustomerId = resolvedCustomer.id;\n              useQuickBooksStore.getState().setCustomerMapping(customerId, qbCustomerId);\n              if (resolvedCustomer.created) {\n                addSyncLog({\n                  type: "customer",\n                  action: "create",\n                  status: "success",\n                  message: \`Customer \${appointment.customer} created in QuickBooks\`,\n                });\n              }\n            }\n          }\n`;
+          src = src.slice(0, qbStart) + qbReplacement + src.slice(qbEnd);
+
+          if (src.includes('supabase.')) throw new Error('Direct Supabase access remains in InvoiceModal');
+          fs.writeFileSync(path, src);
+          NODE
       - run: node scripts/frontend-audit.mjs
       - run: npx eslint apps/web/src packages --max-warnings=0
       - run: npm run typecheck
       - run: npx vitest run apps/web/src
       - run: npm run build
+      - name: Commit invoice modal refactor
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/web/src/modules/schedule/components/InvoiceModal.tsx apps/web/src/modules/billing/services/invoicePreparationService.ts
+          git diff --cached --quiet && exit 0
+          git commit -m "refactor(frontend): isolate invoice preparation data access"
+          git push origin HEAD:dev
