@@ -1,134 +1,13 @@
-name: Scheduled reminder provider metadata patch
+name: Provider routing cleanup archive
 
 on:
-  push:
-    branches: [DEV]
-    paths:
-      - .github/workflows/provider-routing-cleanup.yml
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  patch:
+  archived:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: DEV
-      - name: Patch scheduled reminders without touching idempotency
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          path = Path('supabase/functions/scheduled-reminders/index.ts')
-          text = path.read_text(encoding='utf-8')
-
-          old = '''): Promise<{ ok: boolean; providerId?: string; error?: string }> {
-  try {
-    const response = await fetch(`${supabaseUrl}/functions/v1/send-sms-message`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${serviceRoleKey}`,
-      },
-      body: JSON.stringify({ company_id: companyId, to_phone: phone, message }),
-    });
-    const payload = await response.json().catch(() => ({}));
-    if (!response.ok) return { ok: false, error: `RingCentral HTTP ${response.status}` };
-    return { ok: true, providerId: typeof payload.message_id === "string" ? payload.message_id : undefined };
-  } catch (error) {
-    return { ok: false, error: error instanceof Error ? error.message : "RingCentral request failed" };
-  }
-}'''
-          new = '''): Promise<{ ok: boolean; provider?: "ringcentral" | "dialpad"; providerId?: string; error?: string }> {
-  try {
-    const response = await fetch(`${supabaseUrl}/functions/v1/send-sms-message`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${serviceRoleKey}`,
-      },
-      body: JSON.stringify({ company_id: companyId, to_phone: phone, message }),
-    });
-    const payload = await response.json().catch(() => ({}));
-    const provider = payload?.provider === "dialpad" ? "dialpad" : payload?.provider === "ringcentral" ? "ringcentral" : undefined;
-    if (!response.ok || payload?.success !== true || !provider) {
-      return { ok: false, error: typeof payload?.error === "string" ? payload.error : `SMS gateway HTTP ${response.status}` };
-    }
-    return {
-      ok: true,
-      provider,
-      providerId: payload?.message_id != null ? String(payload.message_id) : undefined,
-    };
-  } catch (error) {
-    return { ok: false, error: error instanceof Error ? error.message : "SMS gateway request failed" };
-  }
-}'''
-          if old not in text:
-              raise SystemExit('sendSms contract not found')
-          text = text.replace(old, new, 1)
-
-          old = '''async function recordConversationMessage(
-  supabase: SupabaseClient,
-  companyId: string,
-  customerId: string,
-  message: string,
-): Promise<void> {'''
-          new = '''async function recordConversationMessage(
-  supabase: SupabaseClient,
-  companyId: string,
-  customerId: string,
-  message: string,
-  provider: "ringcentral" | "dialpad",
-  providerId?: string,
-): Promise<void> {'''
-          if old not in text:
-              raise SystemExit('recordConversationMessage signature not found')
-          text = text.replace(old, new, 1)
-
-          old = '''  const { error: messageError } = await supabase.from("messages").insert({
-    conversation_id: conversationId,
-    content: message,
-    sender_type: "user",
-    read: true,
-  });'''
-          new = '''  const messageRecord: Record<string, unknown> = {
-    conversation_id: conversationId,
-    content: message,
-    sender_type: "user",
-    read: true,
-    provider,
-    provider_message_id: providerId || null,
-    delivery_status: "sent",
-    delivery_attempts: 1,
-    last_delivery_attempt_at: new Date().toISOString(),
-  };
-  if (provider === "ringcentral") messageRecord.ringcentral_message_id = providerId || null;
-  const { error: messageError } = await supabase.from("messages").insert(messageRecord);'''
-          if old not in text:
-              raise SystemExit('message insert block not found')
-          text = text.replace(old, new, 1)
-
-          old_call = 'await recordConversationMessage(supabase, company.id, customer.id, message);'
-          new_call = '''if (!delivery.provider) throw new Error("SMS provider metadata missing after successful delivery");
-      await recordConversationMessage(supabase, company.id, customer.id, message, delivery.provider, delivery.providerId);'''
-          if text.count(old_call) != 2:
-              raise SystemExit(f'expected 2 conversation calls, found {text.count(old_call)}')
-          text = text.replace(old_call, new_call)
-
-          path.write_text(text, encoding='utf-8')
-          PY
-      - name: Verify targeted diff
-        run: |
-          git diff --check
-          grep -n "RingCentral HTTP\|RingCentral request failed" supabase/functions/scheduled-reminders/index.ts && exit 1 || true
-          grep -n "provider_message_id\|delivery.provider" supabase/functions/scheduled-reminders/index.ts
-      - name: Commit patch
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add supabase/functions/scheduled-reminders/index.ts
-          git diff --cached --quiet && exit 0
-          git commit -m "refactor: persist provider metadata for scheduled reminders"
-          git push origin HEAD:DEV
+      - run: echo "Provider routing cleanup completed; workflow archived and read-only."
