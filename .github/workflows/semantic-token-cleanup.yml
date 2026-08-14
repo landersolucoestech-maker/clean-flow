@@ -1,0 +1,128 @@
+name: Semantic token cleanup
+
+on:
+  push:
+    branches: [DEV]
+    paths:
+      - .github/workflows/semantic-token-cleanup.yml
+
+permissions:
+  contents: write
+
+jobs:
+  refactor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: DEV
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Replace operational hardcoded colors with semantic tokens
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          files = [
+            'apps/web/src/modules/transactions/TransactionsPage.tsx',
+            'apps/web/src/modules/transactions/RulesPage.tsx',
+            'apps/web/src/modules/payroll/components/CalculatePayrollModal.tsx',
+            'apps/web/src/modules/settings/components/IntegrationsTabContent.tsx',
+            'apps/web/src/modules/settings/components/AuditTab.tsx',
+            'apps/web/src/modules/customers/components/CustomerDetailsModal.tsx',
+            'apps/web/src/modules/leads/LeadsPage.tsx',
+            'apps/web/src/modules/leads/components/LeadDetailsModal.tsx',
+            'apps/web/src/modules/reports/components/AnalyticsTab.tsx',
+            'apps/web/src/modules/support/components/TicketDetailsModal.tsx',
+          ]
+
+          mapping = {
+            'text-green-600': 'text-success',
+            'text-green-500': 'text-success',
+            'text-green-700': 'text-success',
+            'bg-green-500/5': 'bg-success/5',
+            'bg-green-500/10': 'bg-success/10',
+            'bg-green-500/20': 'bg-success/15',
+            'bg-green-500/30': 'bg-success/20',
+            'bg-green-600': 'bg-success',
+            'bg-green-700': 'bg-success/90',
+            'border-green-500/20': 'border-success/20',
+            'border-green-500/30': 'border-success/30',
+            'border-green-300': 'border-success/30',
+            'text-red-600': 'text-destructive',
+            'text-red-500': 'text-destructive',
+            'text-red-700': 'text-destructive',
+            'bg-red-500/10': 'bg-destructive/10',
+            'bg-red-500/20': 'bg-destructive/15',
+            'bg-red-500/30': 'bg-destructive/20',
+            'bg-red-600': 'bg-destructive',
+            'bg-red-700': 'bg-destructive/90',
+            'border-red-500/20': 'border-destructive/20',
+            'text-yellow-600': 'text-warning-foreground',
+            'text-yellow-500': 'text-warning-foreground',
+            'bg-yellow-500/10': 'bg-warning/10',
+            'bg-yellow-500/20': 'bg-warning/15',
+            'bg-yellow-500/30': 'bg-warning/20',
+            'border-yellow-500/20': 'border-warning/20',
+            'text-orange-600': 'text-warning-foreground',
+            'text-orange-500': 'text-warning-foreground',
+            'text-orange-700': 'text-warning-foreground',
+            'bg-orange-100': 'bg-warning/10',
+            'bg-orange-500/5': 'bg-warning/5',
+            'bg-orange-500/10': 'bg-warning/10',
+            'bg-orange-500/20': 'bg-warning/15',
+            'bg-orange-500/30': 'bg-warning/20',
+            'bg-orange-500': 'bg-warning',
+            'bg-orange-600': 'bg-warning/90',
+            'border-orange-300': 'border-warning/30',
+            'border-orange-500/30': 'border-warning/30',
+            'text-blue-600': 'text-primary',
+            'text-blue-500': 'text-primary',
+            'text-blue-700': 'text-primary-dark',
+            'bg-blue-500/10': 'bg-primary-light',
+            'bg-blue-500/20': 'bg-primary/15',
+            'bg-blue-500/30': 'bg-primary/20',
+            'border-blue-500/20': 'border-primary/20',
+            'bg-blue-100': 'bg-primary-light',
+            'text-gray-500': 'text-muted-foreground',
+            'bg-gray-500/20': 'bg-muted',
+            'bg-gray-100': 'bg-muted',
+            'text-gray-800': 'text-foreground',
+          }
+
+          total = 0
+          for file in files:
+              p = Path(file)
+              text = p.read_text(encoding='utf-8')
+              before = text
+              for old, new in mapping.items():
+                  text = text.replace(old, new)
+              # known lead fallback dot: preserve neutral semantic status
+              text = text.replace('color: "bg-gray-500"', 'color: "bg-muted-foreground"')
+              if text != before:
+                  p.write_text(text, encoding='utf-8')
+                  count = sum(before.count(old) for old in mapping)
+                  total += count
+                  print(f'updated {file}')
+          print(f'approx replacements: {total}')
+          PY
+      - run: npm ci
+      - name: Lint
+        run: npm run lint -- --max-warnings=0
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Commit verified semantic cleanup
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/web/src/modules
+          git diff --cached --quiet && exit 0
+          git commit -m "style: replace operational colors with semantic tokens"
+          git push origin HEAD:DEV
