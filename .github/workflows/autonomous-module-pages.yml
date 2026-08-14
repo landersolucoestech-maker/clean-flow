@@ -95,6 +95,26 @@ jobs:
               text = text.replace("import('./", "import('../")
               path.write_text(text)
 
+          crm_relative_fixes = {
+              Path('apps/web/src/modules/crm/contacts/pages/ContactsPage.tsx'): {
+                  'from "../components/CrmTabs"': 'from "../../components/CrmTabs"',
+                  "from '../components/CrmTabs'": "from '../../components/CrmTabs'",
+              },
+              Path('apps/web/src/modules/crm/customers/pages/CustomersPage.tsx'): {
+                  'from "../components/CrmPageBridge"': 'from "../../components/CrmPageBridge"',
+                  "from '../components/CrmPageBridge'": "from '../../components/CrmPageBridge'",
+              },
+              Path('apps/web/src/modules/crm/leads/pages/LeadsPage.tsx'): {
+                  'from "../components/CrmPageBridge"': 'from "../../components/CrmPageBridge"',
+                  "from '../components/CrmPageBridge'": "from '../../components/CrmPageBridge'",
+              },
+          }
+          for path, replacements in crm_relative_fixes.items():
+              text = path.read_text()
+              for old, new in replacements.items():
+                  text = text.replace(old, new)
+              path.write_text(text)
+
           app = Path('apps/web/src/app/App.tsx')
           text = app.read_text()
           replacements = {
