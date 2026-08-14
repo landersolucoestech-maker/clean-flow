@@ -41,14 +41,14 @@ export function CustomerDetailsHeader({ customer, inactiveInfo }: CustomerDetail
 export function CustomerDetailsTabsList() {
   return (
     <TabsList className="grid w-full grid-cols-8 h-auto">
-      <TabsTrigger value="overview" className="text-xs px-1 py-2">Overview</TabsTrigger>
-      <TabsTrigger value="timeline" className="text-xs px-1 py-2">Timeline</TabsTrigger>
+      <TabsTrigger value="overview" className="text-xs px-1 py-2"><T k="literal.crm.overview.0efc2e6b" /></TabsTrigger>
+      <TabsTrigger value="timeline" className="text-xs px-1 py-2"><T k="literal.crm.timeline.018514a3" /></TabsTrigger>
       <TabsTrigger value="contact" className="text-xs px-1 py-2"><T k="common.contact" /></TabsTrigger>
       <TabsTrigger value="addresses" className="text-xs px-1 py-2"><T k="modal.addresses" /></TabsTrigger>
       <TabsTrigger value="jobs" className="text-xs px-1 py-2"><T k="audit.jobs" /></TabsTrigger>
       <TabsTrigger value="invoices" className="text-xs px-1 py-2"><T k="sidebar.invoices" /></TabsTrigger>
-      <TabsTrigger value="chat" className="text-xs px-1 py-2">Chat</TabsTrigger>
-      <TabsTrigger value="contract" className="text-xs px-1 py-2">Contract</TabsTrigger>
+      <TabsTrigger value="chat" className="text-xs px-1 py-2"><T k="literal.crm.chat.2ced57f1" /></TabsTrigger>
+      <TabsTrigger value="contract" className="text-xs px-1 py-2"><T k="literal.crm.contract.5a0ba3bb" /></TabsTrigger>
     </TabsList>
   );
 }

@@ -142,7 +142,7 @@ export function IntegrationsTab() {
               Google Workspace
               {googleConnected && (
                 <Badge variant="default" className="bg-success text-success-foreground ml-2">
-                  Conectado
+                  <T k="settings.connected" />
                 </Badge>
               )}
             </div>
@@ -150,7 +150,7 @@ export function IntegrationsTab() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Conecte sua conta Google para sincronizar Calendar e, futuramente, integrar Ads e Local Services.
+            <T k="literal.settings.conecte_sua_conta_google_para_sincronizar_ca.a732e61d" />
           </p>
           
           {googleConnected && googleUser && (
@@ -176,10 +176,10 @@ export function IntegrationsTab() {
                 <div className={`p-3 rounded-lg border ${hasCalendarAccess() ? 'border-success/50 bg-success/5' : 'border-muted bg-muted/50'}`}>
                   <div className="flex items-center gap-2">
                     <Calendar className={`w-4 h-4 ${hasCalendarAccess() ? 'text-success' : 'text-muted-foreground'}`} />
-                    <span className="font-medium text-sm">Google Calendar</span>
+                    <span className="font-medium text-sm"><T k="literal.settings.google_calendar.570374e4" /></span>
                     {hasCalendarAccess() && <Check className="w-4 h-4 text-success ml-auto" />}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">Sincronização automática ativa</p>
+                  <p className="text-xs text-muted-foreground mt-1"><T k="literal.settings.sincronizacao_automatica_ativa.91c1f2bc" /></p>
                 </div>
                 <div className={`p-3 rounded-lg border ${hasAdsAccess() ? 'border-success/50 bg-success/5' : 'border-muted bg-muted/50'}`}>
                   <div className="flex items-center gap-2">
@@ -187,15 +187,15 @@ export function IntegrationsTab() {
                     <span className="font-medium text-sm"><T k="leads.origin.google_ads" /></span>
                     {hasAdsAccess() && <Check className="w-4 h-4 text-success ml-auto" />}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">Importar leads de campanhas</p>
+                  <p className="text-xs text-muted-foreground mt-1"><T k="literal.settings.importar_leads_de_campanhas.22d37fe6" /></p>
                 </div>
                 <div className={`p-3 rounded-lg border ${hasLocalServicesAccess() ? 'border-success/50 bg-success/5' : 'border-muted bg-muted/50'}`}>
                   <div className="flex items-center gap-2">
                     <Shield className={`w-4 h-4 ${hasLocalServicesAccess() ? 'text-success' : 'text-muted-foreground'}`} />
-                    <span className="font-medium text-sm">Local Services</span>
+                    <span className="font-medium text-sm"><T k="literal.settings.local_services.46680cf7" /></span>
                     {hasLocalServicesAccess() && <Check className="w-4 h-4 text-success ml-auto" />}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">Leads do Google Garantido</p>
+                  <p className="text-xs text-muted-foreground mt-1"><T k="literal.settings.leads_do_google_garantido.f520258b" /></p>
                 </div>
               </div>
 
@@ -204,8 +204,8 @@ export function IntegrationsTab() {
                 <div className="p-3 bg-muted/30 rounded-lg border">
                   <div className="flex items-center justify-between gap-4">
                     <div>
-                      <p className="text-sm font-medium">Calendário para Jobs</p>
-                      <p className="text-xs text-muted-foreground">Escolha qual calendário receberá os agendamentos</p>
+                      <p className="text-sm font-medium"><T k="literal.settings.calendario_para_jobs.eda55760" /></p>
+                      <p className="text-xs text-muted-foreground"><T k="literal.settings.escolha_qual_calendario_recebera_os_agendame.aec95263" /></p>
                     </div>
                     <Select value={selectedCalendar} onValueChange={handleCalendarChange}>
                       <SelectTrigger className="w-[280px]">
@@ -223,7 +223,7 @@ export function IntegrationsTab() {
                               )}
                               <span>{cal.summary}</span>
                               {cal.primary && (
-                                <Badge variant="outline" className="text-xs ml-1">Principal</Badge>
+                                <Badge variant="outline" className="text-xs ml-1"><T k="literal.settings.principal.f3b86b13" /></Badge>
                               )}
                             </div>
                           </SelectItem>
@@ -239,8 +239,8 @@ export function IntegrationsTab() {
                 <div className="p-3 bg-muted/30 rounded-lg border">
                   <div className="flex items-center justify-between gap-4">
                     <div>
-                      <p className="text-sm font-medium">Calendário para Leads</p>
-                      <p className="text-xs text-muted-foreground">Escolha um calendário separado para agendamentos de leads</p>
+                      <p className="text-sm font-medium"><T k="literal.settings.calendario_para_leads.0fb8999e" /></p>
+                      <p className="text-xs text-muted-foreground"><T k="literal.settings.escolha_um_calendario_separado_para_agendame.3b25ed01" /></p>
                     </div>
                     <Select value={selectedLeadsCalendar || "none"} onValueChange={handleLeadsCalendarChange}>
                       <SelectTrigger className="w-[280px]">
@@ -248,7 +248,7 @@ export function IntegrationsTab() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">
-                          <span className="text-muted-foreground">Desativado</span>
+                          <span className="text-muted-foreground"><T k="admin.auth.disabled" /></span>
                         </SelectItem>
                         {calendars.map((cal) => (
                           <SelectItem key={cal.id} value={cal.id}>
@@ -261,7 +261,7 @@ export function IntegrationsTab() {
                               )}
                               <span>{cal.summary}</span>
                               {cal.primary && (
-                                <Badge variant="outline" className="text-xs ml-1">Principal</Badge>
+                                <Badge variant="outline" className="text-xs ml-1"><T k="literal.settings.principal.f3b86b13" /></Badge>
                               )}
                             </div>
                           </SelectItem>
@@ -274,7 +274,7 @@ export function IntegrationsTab() {
               {hasCalendarAccess() && loadingCalendars && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Carregando calendários...
+                  <T k="literal.settings.carregando_calendarios.671918cc" />
                 </div>
               )}
             </div>
@@ -285,7 +285,7 @@ export function IntegrationsTab() {
               <>
                 <Button variant="outline" size="sm" disabled>
                   <Check className="w-4 h-4 mr-2 text-success" />
-                  Conta Vinculada
+                  <T k="literal.settings.conta_vinculada.d8df85b9" />
                 </Button>
                 <Button 
                   variant="ghost" 
@@ -294,7 +294,7 @@ export function IntegrationsTab() {
                   onClick={disconnectGoogle}
                 >
                   <LogOut className="w-4 h-4 mr-2" />
-                  Desconectar
+                  <T k="settings.disconnect" />
                 </Button>
               </>
             ) : (
@@ -322,7 +322,7 @@ export function IntegrationsTab() {
           
           {!googleConnected && (
             <p className="text-xs text-muted-foreground">
-              O login abre em uma nova aba (o Google bloqueia OAuth dentro do preview). Depois de autorizar, você volta automaticamente ao app.
+              <T k="literal.settings.o_login_abre_em_uma_nova_aba_o_google_bloque.01e961d3" />
             </p>
           )}
         </CardContent>
@@ -337,7 +337,7 @@ export function IntegrationsTab() {
               QuickBooks Online
               {qbConnected && (
                 <Badge variant="default" className="bg-success text-success-foreground ml-2">
-                  Conectado
+                  <T k="settings.connected" />
                 </Badge>
               )}
             </div>
@@ -345,12 +345,12 @@ export function IntegrationsTab() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Conecte sua conta QuickBooks para sincronizar automaticamente clientes, invoices, pagamentos e folha de pagamento.
+            <T k="literal.settings.conecte_sua_conta_quickbooks_para_sincroniza.b956a5a2" />
           </p>
           
           {qbConnected && companyName && (
             <div className="p-3 bg-muted rounded-lg">
-              <p className="text-sm font-medium">Empresa conectada:</p>
+              <p className="text-sm font-medium"><T k="literal.settings.empresa_conectada.2bf35d5e" /></p>
               <p className="text-lg font-semibold text-foreground">{companyName}</p>
             </div>
           )}
@@ -360,7 +360,7 @@ export function IntegrationsTab() {
               <>
                 <Button variant="outline" size="sm" disabled>
                   <Check className="w-4 h-4 mr-2 text-success" />
-                  Sincronização Ativa
+                  <T k="literal.settings.sincronizacao_ativa.9ab283f1" />
                 </Button>
                 <Button 
                   variant="ghost" 
@@ -369,7 +369,7 @@ export function IntegrationsTab() {
                   onClick={disconnectQB}
                 >
                   <LogOut className="w-4 h-4 mr-2" />
-                  Desconectar
+                  <T k="settings.disconnect" />
                 </Button>
               </>
             ) : (
@@ -408,7 +408,7 @@ export function IntegrationsTab() {
               RingCentral
               {rcConnected && (
                 <Badge variant="default" className="bg-success text-success-foreground ml-2">
-                  Conectado
+                  <T k="settings.connected" />
                 </Badge>
               )}
             </div>
@@ -416,7 +416,7 @@ export function IntegrationsTab() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Conecte sua conta RingCentral para enviar e receber SMS com seus clientes diretamente pelo sistema.
+            <T k="literal.settings.conecte_sua_conta_ringcentral_para_enviar_e_.a9ad76a5" />
           </p>
           
           {rcConnected && rcConnection && (
@@ -426,7 +426,7 @@ export function IntegrationsTab() {
                   <Phone className="w-5 h-5 text-warning-foreground" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium">Número SMS:</p>
+                  <p className="text-sm font-medium"><T k="literal.settings.numero_sms.51c39b45" /></p>
                   <p className="text-lg font-semibold text-foreground">{rcConnection.phone_number || "N/A"}</p>
                 </div>
               </div>
@@ -441,7 +441,7 @@ export function IntegrationsTab() {
               <>
                 <Button variant="outline" size="sm" disabled>
                   <Check className="w-4 h-4 mr-2 text-success" />
-                  SMS Ativo
+                  <T k="literal.settings.sms_ativo.bfcac61b" />
                 </Button>
                 <Button 
                   variant="ghost" 
@@ -451,7 +451,7 @@ export function IntegrationsTab() {
                   disabled={rcLoading}
                 >
                   <LogOut className="w-4 h-4 mr-2" />
-                  Desconectar
+                  <T k="settings.disconnect" />
                 </Button>
               </>
             ) : (
@@ -481,7 +481,7 @@ export function IntegrationsTab() {
 
               <div className="space-y-2">
                 <p className="text-xs font-medium text-muted-foreground">
-                  Redirect URI deste ambiente (copie e cadastre no RingCentral):
+                  <T k="literal.settings.redirect_uri_deste_ambiente_copie_e_cadastre.a50de264" />
                 </p>
                 <div className="flex items-center gap-2">
                   <Input
@@ -510,7 +510,7 @@ export function IntegrationsTab() {
                           )}
                         </Button>
                       </TooltipTrigger>
-                      <TooltipContent>Copiar</TooltipContent>
+                      <TooltipContent><T k="literal.settings.copiar.88541077" /></TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
                 </div>
@@ -518,11 +518,11 @@ export function IntegrationsTab() {
                 {rcAuthDebug?.clientId && (
                   <div className="space-y-1">
                     <p className="text-xs text-muted-foreground">
-                      Client ID em uso no sistema: <span className="font-mono">{rcAuthDebug.clientId}</span>
+                      <T k="literal.settings.client_id_em_uso_no_sistema.c04dc9f2" /> <span className="font-mono">{rcAuthDebug.clientId}</span>
                     </p>
                     {rcAuthDebug.scope && (
                       <p className="text-xs text-muted-foreground">
-                        Scope solicitado: <span className="font-mono">{rcAuthDebug.scope}</span>
+                        <T k="literal.settings.scope_solicitado.443182b5" /> <span className="font-mono">{rcAuthDebug.scope}</span>
                       </p>
                     )}
                   </div>
@@ -539,20 +539,20 @@ export function IntegrationsTab() {
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-lg">
               <Globe className="w-5 h-5 text-success" />
-              Website Lead Capture
+              <T k="literal.settings.website_lead_capture.a973daee" />
               <Badge variant="default" className="bg-success text-success-foreground ml-2">
-                Ativo
+                <T k="common.active" />
               </Badge>
             </div>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Capture leads automaticamente do seu site. Use o webhook abaixo nos formulários do seu website.
+            <T k="literal.settings.capture_leads_automaticamente_do_seu_site_us.2dfb7c4e" />
           </p>
           
           <div className="p-3 bg-muted/30 rounded-lg border">
-            <p className="text-sm font-medium mb-2">Webhook URL</p>
+            <p className="text-sm font-medium mb-2"><T k="literal.settings.webhook_url.fa7517b6" /></p>
             <div className="flex items-center gap-2">
               <Input
                 value={websiteLeadCaptureUrl}
@@ -580,7 +580,7 @@ export function IntegrationsTab() {
                       )}
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>Copiar</TooltipContent>
+                  <TooltipContent><T k="literal.settings.copiar.88541077" /></TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </div>
@@ -590,13 +590,13 @@ export function IntegrationsTab() {
             <div className="p-2 rounded-lg border border-success/30 bg-success/5">
               <div className="flex items-center gap-2">
                 <FileText className="w-4 h-4 text-success" />
-                <span className="text-sm font-medium">Auto Lead Creation</span>
+                <span className="text-sm font-medium"><T k="literal.settings.auto_lead_creation.27a15ea6" /></span>
               </div>
             </div>
             <div className="p-2 rounded-lg border border-success/30 bg-success/5">
               <div className="flex items-center gap-2">
                 <User className="w-4 h-4 text-success" />
-                <span className="text-sm font-medium">Customer Matching</span>
+                <span className="text-sm font-medium"><T k="literal.settings.customer_matching.826d5b0b" /></span>
               </div>
             </div>
           </div>
@@ -609,35 +609,35 @@ export function IntegrationsTab() {
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-lg">
               <Mail className="w-5 h-5 text-success" />
-              Resend Email
+              <T k="literal.settings.resend_email.c5aa56b3" />
               <Badge variant="default" className="bg-success text-success-foreground ml-2">
-                Conectado
+                <T k="settings.connected" />
               </Badge>
             </div>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Envio de emails transacionais para invoices, lembretes, review requests e mais.
+            <T k="literal.settings.envio_de_emails_transacionais_para_invoices_.5490451d" />
           </p>
           
           <div className="grid grid-cols-2 gap-2">
             <div className="p-2 rounded-lg border border-success/30 bg-success/5">
               <div className="flex items-center gap-2">
                 <FileText className="w-4 h-4 text-success" />
-                <span className="text-sm font-medium">Invoice Emails</span>
+                <span className="text-sm font-medium"><T k="literal.settings.invoice_emails.352dea48" /></span>
               </div>
             </div>
             <div className="p-2 rounded-lg border border-success/30 bg-success/5">
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-success" />
-                <span className="text-sm font-medium">Reminders</span>
+                <span className="text-sm font-medium"><T k="literal.settings.reminders.ae8c3939" /></span>
               </div>
             </div>
             <div className="p-2 rounded-lg border border-success/30 bg-success/5">
               <div className="flex items-center gap-2">
                 <Megaphone className="w-4 h-4 text-success" />
-                <span className="text-sm font-medium">Review Requests</span>
+                <span className="text-sm font-medium"><T k="literal.settings.review_requests.0bf76986" /></span>
               </div>
             </div>
             <div className="p-2 rounded-lg border border-success/30 bg-success/5">
@@ -650,7 +650,7 @@ export function IntegrationsTab() {
 
           <Button variant="outline" size="sm" disabled>
             <Check className="w-4 h-4 mr-2 text-success" />
-            Email Configurado
+            <T k="literal.settings.email_configurado.8aaef296" />
           </Button>
         </CardContent>
       </Card>

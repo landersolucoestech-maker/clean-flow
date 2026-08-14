@@ -1490,20 +1490,20 @@ export function Payroll() {
                         </div>
                       </TableHead>
                       <TableHead>
-                        <div className="flex items-center">Valor por Serviço</div>
+                        <div className="flex items-center"><T k="literal.payroll.valor_por_servico.cf03ff21" /></div>
                       </TableHead>
                       <TableHead>
-                        <div className="flex items-center">Qtd Jobs</div>
+                        <div className="flex items-center"><T k="literal.payroll.qtd_jobs.38718097" /></div>
                       </TableHead>
                       <TableHead>
-                        <div className="flex items-center">Bônus</div>
+                        <div className="flex items-center"><T k="literal.payroll.bonus.ad1b0b12" /></div>
                       </TableHead>
                       <TableHead
                         className="cursor-pointer hover:bg-muted/50"
                         onClick={() => handleSort("baseValue")}
                       >
                         <div className="flex items-center">
-                          Valor Total
+                          <T k="estimate.totalAmount" />
                           <SortIcon field="baseValue" />
                         </div>
                       </TableHead>
@@ -1586,11 +1586,11 @@ export function Payroll() {
                               <DropdownMenuContent align="end">
                                 <DropdownMenuItem onClick={() => handlePreviewPDF(row)}>
                                   <Eye className="mr-2 h-4 w-4" />
-                                  Preview PDF
+                                  <T k="literal.payroll.preview_pdf.37b66fde" />
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => handleDownloadPDF(row)}>
                                   <FileDown className="mr-2 h-4 w-4" />
-                                  Download PDF
+                                  <T k="literal.crm.download_pdf.98e5ef06" />
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   onClick={() => handleSendPDFViaSMS(row)}

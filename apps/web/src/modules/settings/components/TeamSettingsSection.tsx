@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import type { Dispatch, SetStateAction } from "react";
 import { AlertTriangle, Edit, Plus, Shield, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -140,7 +141,7 @@ export function TeamSettingsSection({
                       ) : (
                         <Badge variant="outline" className="border-warning/30 bg-warning/10 text-warning-foreground">
                           <AlertTriangle className="mr-1 h-3 w-3" />
-                          Sem Team
+                          <T k="literal.settings.sem_team.58c9ef63" />
                         </Badge>
                       ))}
                       <Badge variant={role === "driver" ? "default" : "secondary"}>{getRoleLabel(role)}</Badge>
@@ -170,7 +171,7 @@ export function TeamSettingsSection({
             <Shield className="h-5 w-5" />
             {t("settings.rolesPermissions")}
           </CardTitle>
-          <CardDescription>Access is enforced by the supported operational roles below.</CardDescription>
+          <CardDescription><T k="literal.settings.access_is_enforced_by_the_supported_operatio.9dc2945c" /></CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-2">
           {STAFF_ROLE_OPTIONS.map((role) => (

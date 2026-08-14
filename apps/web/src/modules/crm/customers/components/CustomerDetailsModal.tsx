@@ -140,7 +140,7 @@ export function CustomerDetailsModal({
               <div className="p-4 rounded-lg bg-muted/30 space-y-2">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <User className="w-4 h-4" />
-                  <span className="text-xs">Source</span>
+                  <span className="text-xs"><T k="literal.crm.source.6da13add" /></span>
                 </div>
                 <p className="text-sm font-medium capitalize">{customer.source || "-"}</p>
               </div>
@@ -162,7 +162,7 @@ export function CustomerDetailsModal({
               <div className="p-4 rounded-lg bg-muted/30 space-y-2">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <MapPin className="w-4 h-4" />
-                  <span className="text-xs">Primary Address</span>
+                  <span className="text-xs"><T k="literal.crm.primary_address.181e292d" /></span>
                 </div>
                 <p className="text-sm font-medium">{customer.address}</p>
               </div>
@@ -204,7 +204,7 @@ export function CustomerDetailsModal({
                     <ChevronDown className={`h-4 w-4 transition-transform ${additionalNotesExpanded ? "" : "-rotate-90"}`} />
                   </Button>
                   <FileText className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm font-medium text-foreground">Additional Info</span>
+                  <span className="text-sm font-medium text-foreground"><T k="literal.crm.additional_info.bdcc9d9b" /></span>
                 </div>
                 {additionalNotesExpanded && (
                   <div className="ml-8">
@@ -220,7 +220,7 @@ export function CustomerDetailsModal({
             {/* Header */}
             <div className="flex items-center gap-2">
               <History className="w-5 h-5 text-primary" />
-              <h3 className="font-semibold">Relationship History</h3>
+              <h3 className="font-semibold"><T k="literal.crm.relationship_history.f35b1c1d" /></h3>
             </div>
 
             {/* Inactive Status Alert */}
@@ -228,16 +228,16 @@ export function CustomerDetailsModal({
               <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20 space-y-3">
                 <div className="flex items-center gap-2">
                   <AlertCircle className="w-5 h-5 text-destructive" />
-                  <span className="text-sm font-semibold text-destructive">Customer Inactive</span>
+                  <span className="text-sm font-semibold text-destructive"><T k="literal.crm.customer_inactive.68b8ef4a" /></span>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground">Inactive Since</p>
+                    <p className="text-xs text-muted-foreground"><T k="literal.crm.inactive_since.9ee466b9" /></p>
                     <p className="text-sm font-medium">{inactiveInfo.date ? formatCustomerDate(inactiveInfo.date) : "-"}</p>
                   </div>
                   {inactiveInfo.reason && (
                     <div className="space-y-1 col-span-2">
-                      <p className="text-xs text-muted-foreground">Reason</p>
+                      <p className="text-xs text-muted-foreground"><T k="literal.crm.reason.f219cc06" /></p>
                       <p className="text-sm font-medium">{inactiveInfo.reason}</p>
                     </div>
                   )}
@@ -254,8 +254,8 @@ export function CustomerDetailsModal({
             ) : customerRelationships.length === 0 ? (
               <div className="border rounded-lg p-8 text-center">
                 <History className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground">No relationship history found</p>
-                <p className="text-xs text-muted-foreground mt-1">History will appear when customer status changes</p>
+                <p className="text-sm text-muted-foreground"><T k="literal.crm.no_relationship_history_found.711590ca" /></p>
+                <p className="text-xs text-muted-foreground mt-1"><T k="literal.crm.history_will_appear_when_customer_status_cha.f0c3b599" /></p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -290,12 +290,12 @@ export function CustomerDetailsModal({
                           </div>
                           {rel.end_reason && (
                             <p className="text-xs text-muted-foreground">
-                              <span className="font-medium">Reason:</span> {rel.end_reason}
+                              <span className="font-medium"><T k="literal.crm.reason.2c25e64f" /></span> {rel.end_reason}
                             </p>
                           )}
                           {rel.notes && (
                             <p className="text-xs text-muted-foreground">
-                              <span className="font-medium">Notes:</span> {rel.notes}
+                              <span className="font-medium"><T k="literal.crm.notes.9c3befe7" /></span> {rel.notes}
                             </p>
                           )}
                         </div>
@@ -402,13 +402,13 @@ export function CustomerDetailsModal({
                     </div>
                     <div>
                       <p className="text-sm font-semibold text-foreground">{addr.name || `Address ${index + 1}`}</p>
-                      <p className="text-xs text-muted-foreground">Service Location</p>
+                      <p className="text-xs text-muted-foreground"><T k="literal.crm.service_location.f23872df" /></p>
                     </div>
                   </div>
 
                   {/* Full Address */}
                   <div className="p-3 rounded-md bg-background/50">
-                    <p className="text-xs text-muted-foreground mb-1">Full Address</p>
+                    <p className="text-xs text-muted-foreground mb-1"><T k="literal.crm.full_address.f8defd85" /></p>
                     <p className="text-sm font-medium">{fullAddress}</p>
                   </div>
 
@@ -460,13 +460,13 @@ export function CustomerDetailsModal({
                     <MapPin className="w-4 h-4 text-primary" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-foreground">Primary Address</p>
-                    <p className="text-xs text-muted-foreground">Service Location</p>
+                    <p className="text-sm font-semibold text-foreground"><T k="literal.crm.primary_address.181e292d" /></p>
+                    <p className="text-xs text-muted-foreground"><T k="literal.crm.service_location.f23872df" /></p>
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-3">
                   <div className="p-3 rounded-md bg-background/50 col-span-3">
-                    <p className="text-xs text-muted-foreground mb-1">Full Address</p>
+                    <p className="text-xs text-muted-foreground mb-1"><T k="literal.crm.full_address.f8defd85" /></p>
                     <p className="text-sm font-medium">{customer.address || "-"}</p>
                   </div>
                   <div className="p-3 rounded-md bg-background/50">
@@ -512,7 +512,7 @@ export function CustomerDetailsModal({
             ) : customerJobs.length === 0 ? (
               <div className="border rounded-lg p-8 text-center">
                 <Briefcase className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground">No jobs found for this customer</p>
+                <p className="text-sm text-muted-foreground"><T k="literal.crm.no_jobs_found_for_this_customer.75c1d6df" /></p>
               </div>
             ) : (
               <div className="border rounded-lg divide-y max-h-[300px] overflow-y-auto">
@@ -572,7 +572,7 @@ export function CustomerDetailsModal({
                         <div className="flex items-start gap-2 p-2 rounded bg-muted/40">
                           <MessageSquare className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <p className="text-xs font-medium text-muted-foreground">Feedback</p>
+                            <p className="text-xs font-medium text-muted-foreground"><T k="literal.crm.feedback.c8d7677e" /></p>
                             <p className="text-sm whitespace-pre-wrap break-words">{job.feedback}</p>
                           </div>
                         </div>
@@ -593,14 +593,14 @@ export function CustomerDetailsModal({
             ) : customerInvoices.length === 0 ? (
               <div className="border rounded-lg p-8 text-center">
                 <Receipt className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground">No invoices found for this customer</p>
+                <p className="text-sm text-muted-foreground"><T k="literal.crm.no_invoices_found_for_this_customer.f626280b" /></p>
               </div>
             ) : (
               <div className="border rounded-lg overflow-hidden">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Invoice #</TableHead>
+                      <TableHead><T k="literal.crm.invoice.51d86044" /></TableHead>
                       <TableHead><T k="jobs.jobId" /></TableHead>
                       <TableHead><T k="common.date" /></TableHead>
                       <TableHead><T k="jobs.amount" /></TableHead>
@@ -657,7 +657,7 @@ export function CustomerDetailsModal({
                 <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
                   <FileX className="w-6 h-6 text-muted-foreground" />
                 </div>
-                <p className="text-sm font-medium text-foreground mb-1">No Terms Signed</p>
+                <p className="text-sm font-medium text-foreground mb-1"><T k="literal.crm.no_terms_signed.eca4a629" /></p>
                 <p className="text-xs text-muted-foreground">This customer hasn't signed any terms & conditions yet.</p>
               </div>
             ) : (
@@ -676,7 +676,7 @@ export function CustomerDetailsModal({
                       </div>
                       <Badge className="bg-success/10 text-success hover:bg-success/15">
                         <CheckCircle className="w-3 h-3 mr-1" />
-                        Signed
+                        <T k="literal.crm.signed.6e3665d8" />
                       </Badge>
                     </div>
                   </div>
@@ -685,11 +685,11 @@ export function CustomerDetailsModal({
                     {/* Signature Info */}
                     <div className="grid grid-cols-2 gap-4">
                       <div className="p-3 rounded-lg bg-muted/30">
-                        <p className="text-xs text-muted-foreground mb-1">Signed By</p>
+                        <p className="text-xs text-muted-foreground mb-1"><T k="literal.crm.signed_by.2e9a840a" /></p>
                         <p className="text-sm font-medium">{term.signed_by}</p>
                       </div>
                       <div className="p-3 rounded-lg bg-muted/30">
-                        <p className="text-xs text-muted-foreground mb-1">Signed On</p>
+                        <p className="text-xs text-muted-foreground mb-1"><T k="literal.crm.signed_on.c28fc9c2" /></p>
                         <p className="text-sm font-medium">
                           {new Date(term.signed_at).toLocaleDateString("en-US", { 
                             month: "short", 
@@ -715,7 +715,7 @@ export function CustomerDetailsModal({
                     {/* Signature Display */}
                     {term.signature_text && (
                       <div className="p-4 rounded-lg bg-muted/30 border border-border">
-                        <p className="text-xs text-muted-foreground mb-2">Customer Signature</p>
+                        <p className="text-xs text-muted-foreground mb-2"><T k="literal.crm.customer_signature.36378087" /></p>
                         <div className="flex items-center gap-3">
                           <div className="flex-1 p-3 bg-background rounded border border-border">
                             <p className="font-signature text-xl italic text-foreground">{term.signature_text}</p>
@@ -731,12 +731,12 @@ export function CustomerDetailsModal({
                         <>
                           <Button variant="outline" size="sm" className="flex-1" onClick={() => window.open(term.document_url!, '_blank')}>
                             <Eye className="w-4 h-4 mr-2" />
-                            View Full Document
+                            <T k="literal.crm.view_full_document.393b15df" />
                           </Button>
                           <Button variant="outline" size="sm" className="flex-1" asChild>
                             <a href={term.document_url} download>
                               <Download className="w-4 h-4 mr-2" />
-                              Download PDF
+                              <T k="literal.crm.download_pdf.98e5ef06" />
                             </a>
                           </Button>
                         </>

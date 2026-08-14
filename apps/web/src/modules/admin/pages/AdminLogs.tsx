@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useState } from "react";
 import { format } from "date-fns";
 import { AdminLayout } from "@/components/admin/AdminLayout";
@@ -49,8 +50,8 @@ export function AdminLogs() {
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Logs e Auditoria</h1>
-          <p className="text-muted-foreground mt-1">Monitore atividades e erros do sistema</p>
+          <h1 className="text-2xl font-bold text-foreground"><T k="literal.admin.logs_e_auditoria.d63c3548" /></h1>
+          <p className="text-muted-foreground mt-1"><T k="literal.admin.monitore_atividades_e_erros_do_sistema.3b744ac1" /></p>
         </div>
 
         {/* Tabs */}
@@ -61,14 +62,14 @@ export function AdminLogs() {
               className="data-[state=active]:bg-card data-[state=active]:shadow-sm rounded-md px-4"
             >
               <FileText className="w-4 h-4 mr-2" />
-              Auditoria
+              <T k="audit.title" />
             </TabsTrigger>
             <TabsTrigger 
               value="erros"
               className="data-[state=active]:bg-card data-[state=active]:shadow-sm rounded-md px-4"
             >
               <AlertTriangle className="w-4 h-4 mr-2" />
-              Erros
+              <T k="literal.admin.erros.009530ba" />
             </TabsTrigger>
           </TabsList>
 
@@ -77,7 +78,7 @@ export function AdminLogs() {
               <CardHeader className="border-b border-border/60 pb-4">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base font-semibold text-foreground">
-                    Log de Auditoria
+                    <T k="literal.admin.log_de_auditoria.2fd3e612" />
                   </CardTitle>
                   <div className="flex items-center gap-3">
                     <Select value={typeFilter} onValueChange={setTypeFilter}>
@@ -85,7 +86,7 @@ export function AdminLogs() {
                         <SelectValue placeholder="Todos os tipos" />
                       </SelectTrigger>
                       <SelectContent className="bg-card">
-                        <SelectItem value="all">Todos os tipos</SelectItem>
+                        <SelectItem value="all"><T k="literal.admin.todos_os_tipos.067ff0b5" /></SelectItem>
                         {uniqueTypes.map((type) => (
                           <SelectItem key={type} value={type}>
                             {type}
@@ -108,21 +109,21 @@ export function AdminLogs() {
               <CardContent className="p-0">
                 {isLoadingLogs ? (
                   <div className="p-8 text-center text-muted-foreground">
-                    Carregando...
+                    <T k="common.loading" />
                   </div>
                 ) : filteredLogs.length === 0 ? (
                   <div className="p-8 text-center text-muted-foreground">
-                    Nenhum log encontrado
+                    <T k="admin.logs.no_logs" />
                   </div>
                 ) : (
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-background hover:bg-background">
-                        <TableHead className="text-muted-foreground font-medium">Data/Hora</TableHead>
-                        <TableHead className="text-muted-foreground font-medium">Ação</TableHead>
-                        <TableHead className="text-muted-foreground font-medium">Tipo</TableHead>
-                        <TableHead className="text-muted-foreground font-medium">Alvo</TableHead>
-                        <TableHead className="text-muted-foreground font-medium">Detalhes</TableHead>
+                        <TableHead className="text-muted-foreground font-medium"><T k="admin.logs.timestamp" /></TableHead>
+                        <TableHead className="text-muted-foreground font-medium"><T k="admin.logs.action" /></TableHead>
+                        <TableHead className="text-muted-foreground font-medium"><T k="transactions.type" /></TableHead>
+                        <TableHead className="text-muted-foreground font-medium"><T k="literal.admin.alvo.58a82deb" /></TableHead>
+                        <TableHead className="text-muted-foreground font-medium"><T k="admin.logs.details" /></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -157,7 +158,7 @@ export function AdminLogs() {
           <TabsContent value="erros" className="mt-6">
             <Card className="bg-card border border-border/80 shadow-sm">
               <CardContent className="p-8 text-center text-muted-foreground">
-                Nenhum erro registrado
+                <T k="literal.admin.nenhum_erro_registrado.673463c1" />
               </CardContent>
             </Card>
           </TabsContent>

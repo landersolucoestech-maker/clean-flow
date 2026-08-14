@@ -307,11 +307,11 @@ export function Transactions() {
     <>
       <Button variant="outline" size="sm" onClick={() => navigate("/rules")}>
         <Settings2 className="mr-2 h-4 w-4" />
-        Regras
+        <T k="transactions.rules" />
       </Button>
       <Button size="sm" onClick={() => setShowNewTransactionModal(true)}>
         <Plus className="mr-2 h-4 w-4" />
-        Nova Transação
+        <T k="transactions.newTransaction" />
       </Button>
     </>
   );
@@ -329,7 +329,7 @@ export function Transactions() {
             </div>
             <p className="text-2xl font-bold tracking-tight text-success">{formatCurrency(kpis.receitaMensal)}</p>
             <div className="flex items-center justify-between mt-1">
-              <span className="text-xs text-muted-foreground">paid revenue</span>
+              <span className="text-xs text-muted-foreground"><T k="literal.transactions.paid_revenue.e1ab92a0" /></span>
               <span className="text-xs font-medium text-success">+0%</span>
             </div>
           </CardContent>
@@ -344,7 +344,7 @@ export function Transactions() {
             </div>
             <p className="text-2xl font-bold tracking-tight text-destructive">{formatCurrency(kpis.despesasMensais)}</p>
             <div className="flex items-center justify-between mt-1">
-              <span className="text-xs text-muted-foreground">paid expenses</span>
+              <span className="text-xs text-muted-foreground"><T k="literal.transactions.paid_expenses.577bc7c5" /></span>
               <span className="text-xs font-medium text-success">+0%</span>
             </div>
           </CardContent>
@@ -354,7 +354,7 @@ export function Transactions() {
         <Card className="border-border/80 shadow-sm">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-muted-foreground">Profit</span>
+              <span className="text-sm text-muted-foreground"><T k="literal.transactions.profit.8544a477" /></span>
               <TrendingUp className="w-4 h-4 text-muted-foreground" />
             </div>
             <p className="text-2xl font-bold tracking-tight text-primary-dark">{formatCurrency(kpis.lucroLiquido)}</p>
@@ -369,12 +369,12 @@ export function Transactions() {
         <Card className="border-border/80 shadow-sm">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-muted-foreground">To Be Received</span>
+              <span className="text-sm text-muted-foreground"><T k="literal.transactions.to_be_received.46d0dc4a" /></span>
               <ArrowUpRight className="w-4 h-4 text-muted-foreground" />
             </div>
             <p className="text-2xl font-bold tracking-tight text-success">{formatCurrency(kpis.contasReceber)}</p>
             <div className="flex items-center justify-between mt-1">
-              <span className="text-xs text-muted-foreground">pending revenue</span>
+              <span className="text-xs text-muted-foreground"><T k="literal.transactions.pending_revenue.464ae882" /></span>
               <span className="text-xs font-medium text-success">+0%</span>
             </div>
           </CardContent>
@@ -384,12 +384,12 @@ export function Transactions() {
         <Card className="border-border/80 shadow-sm">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-muted-foreground">To Be Paid</span>
+              <span className="text-sm text-muted-foreground"><T k="literal.transactions.to_be_paid.72acf352" /></span>
               <ArrowDownLeft className="w-4 h-4 text-muted-foreground" />
             </div>
             <p className="text-2xl font-bold tracking-tight text-destructive">{formatCurrency(kpis.contasPagar)}</p>
             <div className="flex items-center justify-between mt-1">
-              <span className="text-xs text-muted-foreground">pending expenses</span>
+              <span className="text-xs text-muted-foreground"><T k="literal.transactions.pending_expenses.7a7bf7c4" /></span>
               <span className="text-xs font-medium text-success">+0%</span>
             </div>
           </CardContent>
@@ -486,7 +486,7 @@ export function Transactions() {
         <FilterSelect value={categoryFilter} onValueChange={setCategoryFilter} options={categoryOptions} className="w-full sm:w-[160px]" />
         <Button variant="outline" size="sm" className="lg:ml-auto" onClick={handleExport} disabled={filteredTransactions.length === 0}>
           <Download className="mr-2 h-4 w-4" />
-          Exportar dados
+          <T k="literal.transactions.exportar_dados.775ffa0a" />
         </Button>
       </div>
 

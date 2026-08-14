@@ -34,7 +34,7 @@ export function ContactDetailsDialog({ open, onOpenChange, contact, onEdit, canE
             <Badge variant="secondary">{contact.contactType}</Badge>
             <Badge variant={contact.status === "Active" ? "default" : "outline"}>{contact.status}</Badge>
           </div>
-          <DialogDescription>Corporate contact details</DialogDescription>
+          <DialogDescription><T k="literal.crm.corporate_contact_details.796120f0" /></DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
@@ -63,7 +63,7 @@ export function ContactDetailsDialog({ open, onOpenChange, contact, onEdit, canE
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}><T k="common.close" /></Button>
-          {canEdit && <Button onClick={() => onEdit(contact)}>Edit Contact</Button>}
+          {canEdit && <Button onClick={() => onEdit(contact)}><T k="literal.crm.edit_contact.454e7ded" /></Button>}
         </DialogFooter>
       </DialogContent>
     </Dialog>

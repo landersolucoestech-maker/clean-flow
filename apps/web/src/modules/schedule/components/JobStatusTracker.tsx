@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import React, { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -169,7 +170,7 @@ const GPSMapView: React.FC<GPSMapViewProps> = ({ statusHistory, isLoading, jobAd
     return (
       <div className="text-center text-muted-foreground p-8">
         <History className="h-12 w-12 mx-auto mb-4 opacity-50" />
-        <p>No status records found</p>
+        <p><T k="literal.schedule.no_status_records_found.24ae5c14" /></p>
       </div>
     );
   }
@@ -184,11 +185,11 @@ const GPSMapView: React.FC<GPSMapViewProps> = ({ statusHistory, isLoading, jobAd
         </div>
       ) : mapError ? (
         <div className="flex flex-col items-center justify-center h-[200px] bg-muted/30 rounded-lg text-muted-foreground">
-          <AlertCircle className="h-8 w-8 mb-2" /><p className="text-sm">Could not load map</p>
+          <AlertCircle className="h-8 w-8 mb-2" /><p className="text-sm"><T k="literal.schedule.could_not_load_map.483f61e1" /></p>
         </div>
       ) : (
         <div className="text-center text-muted-foreground p-6 bg-muted/30 rounded-lg">
-          <MapPin className="h-10 w-10 mx-auto mb-2 opacity-60" /><p className="text-sm">No map available</p>
+          <MapPin className="h-10 w-10 mx-auto mb-2 opacity-60" /><p className="text-sm"><T k="literal.schedule.no_map_available.be98ce00" /></p>
         </div>
       )}
       {pointsForMap.length > 0 && (
@@ -199,7 +200,7 @@ const GPSMapView: React.FC<GPSMapViewProps> = ({ statusHistory, isLoading, jobAd
             rel="noopener noreferrer"
             className="text-primary hover:underline flex items-center justify-center gap-1"
           >
-            <Map className="h-3 w-3" /> Open trajectory in Google Maps
+            <Map className="h-3 w-3" /> <T k="literal.schedule.open_trajectory_in_google_maps.1cd6c763" />
           </a>
         </div>
       )}
@@ -257,22 +258,22 @@ export const JobStatusTracker: React.FC<JobStatusTrackerProps> = ({
     <Card className="shadow-sm">
       <CardHeader className="py-2 px-4">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-sm flex items-center gap-2"><MapPin className="h-4 w-4" />GPS Tracking</CardTitle>
+          <CardTitle className="text-sm flex items-center gap-2"><MapPin className="h-4 w-4" /><T k="literal.schedule.gps_tracking.d89629d2" /></CardTitle>
           <Dialog open={historyOpen} onOpenChange={setHistoryOpen}>
             <DialogTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-7 px-2"><History className="h-3 w-3 mr-1" /><span className="text-xs">History</span></Button>
+              <Button variant="ghost" size="sm" className="h-7 px-2"><History className="h-3 w-3 mr-1" /><span className="text-xs"><T k="literal.schedule.history.90ccd649" /></span></Button>
             </DialogTrigger>
             <DialogContent className="max-w-3xl">
               <DialogHeader>
-                <DialogTitle className="flex items-center gap-2"><Map className="h-5 w-5" />GPS Map</DialogTitle>
-                <DialogDescription>Shows the position captured at the time of status marking.</DialogDescription>
+                <DialogTitle className="flex items-center gap-2"><Map className="h-5 w-5" /><T k="literal.schedule.gps_map.154ba1bb" /></DialogTitle>
+                <DialogDescription><T k="literal.schedule.shows_the_position_captured_at_the_time_of_s.dc66f397" /></DialogDescription>
               </DialogHeader>
               <GPSMapView statusHistory={statusHistory || []} isLoading={historyLoading} jobAddress={jobAddress ?? null} />
             </DialogContent>
           </Dialog>
         </div>
-        {triggerOnly && <div className="flex items-center gap-2 text-xs text-amber-600 mt-1"><AlertCircle className="h-3 w-3" /><span>Your profile can only mark steps.</span></div>}
-        {!staffId && <div className="flex items-center gap-2 text-xs text-destructive mt-1"><AlertCircle className="h-3 w-3" /><span>Link this login email to an active staff member to update status.</span></div>}
+        {triggerOnly && <div className="flex items-center gap-2 text-xs text-amber-600 mt-1"><AlertCircle className="h-3 w-3" /><span><T k="literal.schedule.your_profile_can_only_mark_steps.c7713dcd" /></span></div>}
+        {!staffId && <div className="flex items-center gap-2 text-xs text-destructive mt-1"><AlertCircle className="h-3 w-3" /><span><T k="literal.schedule.link_this_login_email_to_an_active_staff_mem.7b5112bf" /></span></div>}
       </CardHeader>
       {canTrackStatus && (
         <CardContent className="px-4 pb-3 pt-0">

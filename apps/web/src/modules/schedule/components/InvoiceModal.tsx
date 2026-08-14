@@ -370,7 +370,7 @@ export function InvoiceModal({ open, onOpenChange, appointment, depositAmount, i
             {isDepositInvoice ? "50% Deposit Invoice" : "Create Invoice"}
           </DialogTitle>
           <DialogDescription>
-            Create and send an invoice for the completed job.
+            <T k="literal.schedule.create_and_send_an_invoice_for_the_completed.6be9c00b" />
           </DialogDescription>
         </DialogHeader>
 
@@ -462,7 +462,7 @@ export function InvoiceModal({ open, onOpenChange, appointment, depositAmount, i
 
           {/* Customer Info */}
           <div className="space-y-2">
-            <Label className="text-muted-foreground text-xs">Bill To</Label>
+            <Label className="text-muted-foreground text-xs"><T k="literal.schedule.bill_to.c0acb224" /></Label>
             <div className="p-3 bg-muted/30 rounded-lg">
               <div className="flex items-center gap-2 mb-1">
                 <User className="w-4 h-4 text-primary" />

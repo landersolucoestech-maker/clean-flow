@@ -175,7 +175,7 @@ export function NewMessageModal({
             <T k="communications.newMessage" />
           </DialogTitle>
           <DialogDescription>
-            Start a new conversation with a customer or team member
+            <T k="literal.communications.start_a_new_conversation_with_a_customer_or_.e4a05653" />
           </DialogDescription>
         </DialogHeader>
 
@@ -210,7 +210,7 @@ export function NewMessageModal({
                     {filteredCustomers.length === 0 ? (
                       <div className="flex flex-col items-center justify-center py-8 text-center">
                         <p className="text-muted-foreground">
-                          No customers with phone numbers found
+                          <T k="literal.communications.no_customers_with_phone_numbers_found.dcce3476" />
                         </p>
                       </div>
                     ) : (
@@ -261,7 +261,7 @@ export function NewMessageModal({
                     {filteredTeamMembers.length === 0 ? (
                       <div className="flex flex-col items-center justify-center py-8 text-center">
                         <p className="text-muted-foreground">
-                          No team members with phone numbers found
+                          <T k="literal.communications.no_team_members_with_phone_numbers_found.915c7c88" />
                         </p>
                       </div>
                     ) : (
@@ -302,7 +302,7 @@ export function NewMessageModal({
             <>
               {/* Selected Recipient */}
               <div className="space-y-2">
-                <Label>To</Label>
+                <Label><T k="literal.communications.to.ae79ea1e" /></Label>
                 <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/30">
                   <div className="flex items-center gap-2">
                     {selectedRecipient.type === "customer" ? (
@@ -322,14 +322,14 @@ export function NewMessageModal({
                     size="sm"
                     onClick={() => setSelectedRecipient(null)}
                   >
-                    Change
+                    <T k="literal.communications.change.64fbd995" />
                   </Button>
                 </div>
               </div>
 
               {/* Message Input */}
               <div className="space-y-2 flex-1">
-                <Label>Message</Label>
+                <Label><T k="literal.communications.message.68f4145f" /></Label>
                 <Textarea
                   placeholder="Type your message..."
                   value={message}
@@ -354,12 +354,12 @@ export function NewMessageModal({
               {isSending ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Sending...
+                  <T k="literal.communications.sending.c338c191" />
                 </>
               ) : (
                 <>
                   <Send className="w-4 h-4 mr-2" />
-                  Send Message
+                  <T k="literal.communications.send_message.6dcd1512" />
                 </>
               )}
             </Button>

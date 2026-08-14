@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useState, useEffect } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import {
@@ -70,7 +71,7 @@ export function PayrollPDFPreviewModal({
             Payroll PDF - {employeeName}
           </DialogTitle>
           <DialogDescription>
-            Prévia do PDF gerado
+            <T k="literal.payroll.previa_do_pdf_gerado.79916614" />
           </DialogDescription>
         </DialogHeader>
 
@@ -78,7 +79,7 @@ export function PayrollPDFPreviewModal({
           {isGenerating ? (
             <>
               <Loader2 className="w-12 h-12 animate-spin text-primary" />
-              <p className="text-sm text-muted-foreground">Gerando PDF...</p>
+              <p className="text-sm text-muted-foreground"><T k="literal.payroll.gerando_pdf.5e2900c2" /></p>
             </>
           ) : pdfUrl ? (
             <div className="flex flex-col items-center gap-4 w-full">
@@ -94,7 +95,7 @@ export function PayrollPDFPreviewModal({
                   error={
                     <div className="flex flex-col items-center justify-center p-8 gap-2">
                       <Eye className="w-8 h-8 text-muted-foreground" />
-                      <p className="text-sm text-muted-foreground">Erro ao carregar PDF</p>
+                      <p className="text-sm text-muted-foreground"><T k="literal.payroll.erro_ao_carregar_pdf.17546dc9" /></p>
                     </div>
                   }
                 >
@@ -134,14 +135,14 @@ export function PayrollPDFPreviewModal({
           ) : (
             <>
               <Eye className="w-12 h-12 text-muted-foreground" />
-              <p className="text-muted-foreground">Nenhum PDF disponível</p>
+              <p className="text-muted-foreground"><T k="literal.payroll.nenhum_pdf_disponivel.a128808a" /></p>
             </>
           )}
         </div>
 
         <DialogFooter className="flex flex-col sm:flex-row gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Fechar
+            <T k="common.close" />
           </Button>
           <Button
             variant="outline"
@@ -150,7 +151,7 @@ export function PayrollPDFPreviewModal({
             className="gap-2"
           >
             <Download className="w-4 h-4" />
-            Download
+            <T k="literal.payroll.download.a479c9c3" />
           </Button>
           <Button
             onClick={onSendSMS}
@@ -161,12 +162,12 @@ export function PayrollPDFPreviewModal({
             {isSending ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Enviando...
+                <T k="literal.payroll.enviando.21fc978c" />
               </>
             ) : (
               <>
                 <Send className="w-4 h-4" />
-                Enviar via SMS
+                <T k="literal.payroll.enviar_via_sms.79760fb7" />
               </>
             )}
           </Button>

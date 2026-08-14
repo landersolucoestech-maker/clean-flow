@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Building2, Loader2 } from "lucide-react";
@@ -42,15 +43,15 @@ export function Setup() {
           <div className="mb-2 flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <Building2 className="h-6 w-6" />
           </div>
-          <CardTitle>Configuração inicial</CardTitle>
+          <CardTitle><T k="literal.auth.configuracao_inicial.816f9946" /></CardTitle>
           <CardDescription>
-            Crie a empresa e vincule sua conta como o primeiro administrador.
+            <T k="literal.auth.crie_a_empresa_e_vincule_sua_conta_como_o_pr.c690fbbd" />
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="space-y-2">
-              <Label htmlFor="company-name">Nome da empresa</Label>
+              <Label htmlFor="company-name"><T k="literal.auth.nome_da_empresa.bd63d0a5" /></Label>
               <Input
                 id="company-name"
                 value={companyName}
@@ -61,7 +62,7 @@ export function Setup() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="staff-name">Seu nome</Label>
+              <Label htmlFor="staff-name"><T k="literal.auth.seu_nome.a6ef941e" /></Label>
               <Input
                 id="staff-name"
                 value={staffName}

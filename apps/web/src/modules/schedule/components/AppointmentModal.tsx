@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { InvoiceModal } from "./InvoiceModal";
@@ -722,7 +723,7 @@ export function AppointmentModal({
               <div className="flex items-center gap-2">
                 <Repeat className="w-4 h-4 text-muted-foreground" />
                 <Label htmlFor="generateRecurring" className="text-sm font-normal cursor-pointer">
-                  Gerar agendamentos recorrentes automaticamente (próximo mês)
+                  <T k="literal.schedule.gerar_agendamentos_recorrentes_automaticamen.a2bf34e2" />
                 </Label>
               </div>
             </div>

@@ -88,10 +88,10 @@ export function ReviewRequestPreviewModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Star className="h-5 w-5 text-warning" />
-            Preview Review Request
+            <T k="literal.schedule.preview_review_request.c7c1b8de" />
           </DialogTitle>
           <DialogDescription>
-            Select which review links to include and customize the message
+            <T k="literal.schedule.select_which_review_links_to_include_and_cus.0eab59f7" />
           </DialogDescription>
         </DialogHeader>
 
@@ -99,7 +99,7 @@ export function ReviewRequestPreviewModal({
           {/* Review Link Selection */}
           {hasAnyLink && (
             <div className="space-y-3">
-              <Label>Include Review Links</Label>
+              <Label><T k="literal.schedule.include_review_links.559d742a" /></Label>
               <div className="space-y-2">
                 {googleReviewUrl && (
                   <div className="flex items-center space-x-2">
@@ -113,7 +113,7 @@ export function ReviewRequestPreviewModal({
                       className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-2"
                     >
                       <span className="text-lg">🌐</span>
-                      Google Review
+                      <T k="literal.schedule.google_review.fbd8998e" />
                     </label>
                   </div>
                 )}
@@ -129,7 +129,7 @@ export function ReviewRequestPreviewModal({
                       className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-2"
                     >
                       <span className="text-lg">🏡</span>
-                      Nextdoor Review
+                      <T k="literal.schedule.nextdoor_review.229a4c4c" />
                     </label>
                   </div>
                 )}
@@ -138,7 +138,7 @@ export function ReviewRequestPreviewModal({
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="message">Message</Label>
+            <Label htmlFor="message"><T k="literal.communications.message.68f4145f" /></Label>
             <Textarea
               id="message"
               value={message}
@@ -152,10 +152,10 @@ export function ReviewRequestPreviewModal({
           <div className="rounded-lg bg-muted p-3 space-y-2">
             <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
               <MessageSquare className="h-3 w-3" />
-              Message Preview
+              <T k="literal.schedule.message_preview.584654dd" />
             </p>
             <div className="bg-background rounded-md p-3 text-sm whitespace-pre-wrap border">
-              {message || <span className="text-muted-foreground italic">No message</span>}
+              {message || <span className="text-muted-foreground italic"><T k="literal.schedule.no_message.1572818c" /></span>}
             </div>
           </div>
 

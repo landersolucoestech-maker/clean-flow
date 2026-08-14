@@ -513,7 +513,7 @@ export function CustomerModal({
           {formData.status === "inactive" && (
             <div className="p-3 border rounded-lg bg-muted/30 space-y-3">
               <div className="grid gap-2">
-                <Label>Inactive Since</Label>
+                <Label><T k="literal.crm.inactive_since.9ee466b9" /></Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -545,7 +545,7 @@ export function CustomerModal({
                 </Popover>
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="inactiveReason">Reason for Inactivity</Label>
+                <Label htmlFor="inactiveReason"><T k="literal.crm.reason_for_inactivity.5468d01c" /></Label>
                 <Textarea
                   id="inactiveReason"
                   value={formData.inactiveReason}
@@ -635,7 +635,7 @@ export function CustomerModal({
               {/* Billing Contact Name & Relationship */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="billingContactName">Contact Name</Label>
+                  <Label htmlFor="billingContactName"><T k="literal.crm.contact_name.8a42a57d" /></Label>
                   <Input
                     id="billingContactName"
                     value={formData.billingContactName}
@@ -646,7 +646,7 @@ export function CustomerModal({
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="billingContactRelationship">Relationship</Label>
+                  <Label htmlFor="billingContactRelationship"><T k="literal.crm.relationship.9b4a86cb" /></Label>
                   <Select
                     value={formData.billingContactRelationship}
                     onValueChange={(value) =>
@@ -657,15 +657,15 @@ export function CustomerModal({
                       <SelectValue placeholder="Select relationship" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="self">Self (Same as customer)</SelectItem>
-                      <SelectItem value="spouse">Spouse</SelectItem>
-                      <SelectItem value="daughter">Daughter</SelectItem>
-                      <SelectItem value="son">Son</SelectItem>
-                      <SelectItem value="parent">Parent</SelectItem>
-                      <SelectItem value="sibling">Sibling</SelectItem>
-                      <SelectItem value="caregiver">Caregiver</SelectItem>
-                      <SelectItem value="property_manager">Property Manager</SelectItem>
-                      <SelectItem value="accountant">Accountant</SelectItem>
+                      <SelectItem value="self"><T k="literal.crm.self_same_as_customer.b022c124" /></SelectItem>
+                      <SelectItem value="spouse"><T k="literal.crm.spouse.04aee080" /></SelectItem>
+                      <SelectItem value="daughter"><T k="literal.crm.daughter.006bf747" /></SelectItem>
+                      <SelectItem value="son"><T k="literal.crm.son.cdff1da1" /></SelectItem>
+                      <SelectItem value="parent"><T k="literal.crm.parent.23d692f0" /></SelectItem>
+                      <SelectItem value="sibling"><T k="literal.crm.sibling.55727ec5" /></SelectItem>
+                      <SelectItem value="caregiver"><T k="literal.crm.caregiver.aefdc316" /></SelectItem>
+                      <SelectItem value="property_manager"><T k="literal.crm.property_manager.4ce7be6e" /></SelectItem>
+                      <SelectItem value="accountant"><T k="literal.crm.accountant.ac21a476" /></SelectItem>
                       <SelectItem value="other"><T k="leads.origin.other" /></SelectItem>
                     </SelectContent>
                   </Select>
@@ -676,7 +676,7 @@ export function CustomerModal({
               <div className="grid gap-2">
                 <Label htmlFor="billingContactEmail" className="flex items-center gap-2">
                   <Mail className="w-4 h-4" />
-                  Billing Email
+                  <T k="literal.crm.billing_email.5f8527ef" />
                 </Label>
                 <Input
                   id="billingContactEmail"
@@ -688,7 +688,7 @@ export function CustomerModal({
                   placeholder="billing@email.com"
                 />
                 <span className="text-xs text-muted-foreground">
-                  Invoices will be sent to this email
+                  <T k="literal.crm.invoices_will_be_sent_to_this_email.6d454b0f" />
                 </span>
               </div>
 
@@ -726,7 +726,7 @@ export function CustomerModal({
 
               {/* Billing Contact Notes */}
               <div className="grid gap-2">
-                <Label htmlFor="billingContactNotes">Billing Notes</Label>
+                <Label htmlFor="billingContactNotes"><T k="literal.crm.billing_notes.bb973961" /></Label>
                 <Textarea
                   id="billingContactNotes"
                   value={formData.billingContactNotes}

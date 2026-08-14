@@ -37,7 +37,7 @@ export function AdminClients() {
   const getStatusBadge = () => {
     return (
       <Badge className="bg-success/10 text-success hover:bg-success/10 font-medium">
-        Cadastrado
+        <T k="literal.admin.cadastrado.3dd11dc5" />
       </Badge>
     );
   };
@@ -74,13 +74,13 @@ export function AdminClients() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Gerenciamento de Clientes</h1>
-            <p className="text-muted-foreground mt-1">Consulte as empresas cadastradas no sistema</p>
+            <h1 className="text-2xl font-bold text-foreground"><T k="literal.admin.gerenciamento_de_clientes.a940ea6b" /></h1>
+            <p className="text-muted-foreground mt-1"><T k="literal.admin.consulte_as_empresas_cadastradas_no_sistema.669ae96c" /></p>
           </div>
           <div className="flex items-center gap-3">
             <Button variant="outline" className="text-foreground border-border" onClick={handleExport} disabled={filteredClients.length === 0}>
               <Download className="w-4 h-4 mr-2" />
-              Exportar
+              <T k="common.export" />
             </Button>
           </div>
         </div>
@@ -90,7 +90,7 @@ export function AdminClients() {
           <CardHeader className="border-b border-border/60 pb-4">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base font-semibold text-foreground">
-                Lista de Clientes
+                <T k="literal.admin.lista_de_clientes.909df9f3" />
               </CardTitle>
               <div className="relative w-72">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground/70 w-4 h-4" />
@@ -106,20 +106,20 @@ export function AdminClients() {
           <CardContent className="p-0">
             {isLoadingCompanies ? (
               <div className="p-8 text-center text-muted-foreground">
-                Carregando...
+                <T k="common.loading" />
               </div>
             ) : filteredClients.length === 0 ? (
               <div className="p-8 text-center text-muted-foreground">
-                Nenhum cliente encontrado
+                <T k="literal.admin.nenhum_cliente_encontrado.c94a8f66" />
               </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow className="bg-background hover:bg-background">
-                    <TableHead className="text-muted-foreground font-medium">Empresa</TableHead>
-                    <TableHead className="text-muted-foreground font-medium">Moeda</TableHead>
+                    <TableHead className="text-muted-foreground font-medium"><T k="admin.clients.company" /></TableHead>
+                    <TableHead className="text-muted-foreground font-medium"><T k="admin.clients.currency" /></TableHead>
                     <TableHead className="text-muted-foreground font-medium"><T k="admin.clients.status" /></TableHead>
-                    <TableHead className="text-muted-foreground font-medium">Cadastro</TableHead>
+                    <TableHead className="text-muted-foreground font-medium"><T k="literal.admin.cadastro.21749854" /></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

@@ -245,7 +245,7 @@ export function LeadDetailsModal({
     if (validationErrors.length > 0) {
       toast.error(
         <div className="space-y-1">
-          <p className="font-semibold">Preencha os campos obrigatórios:</p>
+          <p className="font-semibold"><T k="literal.crm.preencha_os_campos_obrigatorios.4dafd3df" /></p>
           <ul className="text-sm list-disc pl-4">
             {validationErrors.slice(0, 5).map((err, idx) => (
               <li key={idx}>{err}</li>
@@ -268,7 +268,7 @@ export function LeadDetailsModal({
       if (invoice) {
         toast.success(
           <div>
-            <p className="font-semibold">Estimate aprovado com sucesso!</p>
+            <p className="font-semibold"><T k="literal.crm.estimate_aprovado_com_sucesso.4ab6e6c6" /></p>
             <p className="text-sm">Invoice {invoice.invoice_number} gerado (50% depósito)</p>
           </div>
         );
@@ -426,7 +426,7 @@ export function LeadDetailsModal({
             <>
               <div className="space-y-3">
                 <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                  Property Information
+                  <T k="literal.crm.property_information.ca8911ec" />
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-muted/30 rounded-lg">
                   {estimate.propertyType && (
@@ -546,7 +546,7 @@ export function LeadDetailsModal({
                 <div className="flex items-center gap-2">
                   <User className="w-4 h-4 text-muted-foreground" />
                   <div>
-                    <p className="text-xs text-muted-foreground">Indicado por</p>
+                    <p className="text-xs text-muted-foreground"><T k="literal.crm.indicado_por.45599786" /></p>
                     <p className="font-medium">{estimate.referredBy}</p>
                   </div>
                 </div>
@@ -555,7 +555,7 @@ export function LeadDetailsModal({
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-muted-foreground" />
                   <div>
-                    <p className="text-xs text-muted-foreground">Data da Visita</p>
+                    <p className="text-xs text-muted-foreground"><T k="leads.visitDate" /></p>
                     <p className="font-medium">{formatDate(estimate.visitDate)}</p>
                   </div>
                 </div>
@@ -577,7 +577,7 @@ export function LeadDetailsModal({
               <div className="flex items-center gap-2">
                 <DollarSign className="w-4 h-4 text-muted-foreground" />
                 <div>
-                  <p className="text-xs text-muted-foreground">Valor Total</p>
+                  <p className="text-xs text-muted-foreground"><T k="estimate.totalAmount" /></p>
                   <p className="font-semibold text-lg text-primary">{estimate.amount}</p>
                 </div>
               </div>
@@ -744,7 +744,7 @@ export function LeadDetailsModal({
               <div className="p-4 bg-muted/30 rounded-lg text-center">
                 <MapPin className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
                 <p className="text-sm text-muted-foreground">
-                  Nenhum endereço cadastrado
+                  <T k="literal.crm.nenhum_endereco_cadastrado.af9499e2" />
                 </p>
               </div>
             )}
@@ -766,14 +766,14 @@ export function LeadDetailsModal({
                 className="flex items-center gap-1"
               >
                 <Plus className="w-4 h-4" />
-                Add Interaction
+                <T k="literal.crm.add_interaction.5e56ca5d" />
               </Button>
             </div>
 
             {/* Add Interaction Form */}
             {showAddInteraction && (
               <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg space-y-4">
-                <h4 className="font-medium text-sm">Nova Interação</h4>
+                <h4 className="font-medium text-sm"><T k="literal.crm.nova_interacao.5d4a9596" /></h4>
                 <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label>Tipo *</Label>
@@ -802,7 +802,7 @@ export function LeadDetailsModal({
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Data</Label>
+                    <Label><T k="common.date" /></Label>
                     <Input
                       type="date"
                       value={newInteraction.date}
@@ -810,7 +810,7 @@ export function LeadDetailsModal({
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Hora</Label>
+                    <Label><T k="common.time" /></Label>
                     <Input
                       type="time"
                       value={newInteraction.time}
@@ -819,7 +819,7 @@ export function LeadDetailsModal({
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Descrição</Label>
+                  <Label><T k="invoice.description" /></Label>
                   <Textarea
                     value={newInteraction.description}
                     onChange={(e) => setNewInteraction(prev => ({ ...prev, description: e.target.value }))}
@@ -833,7 +833,7 @@ export function LeadDetailsModal({
                     size="sm"
                     onClick={() => setShowAddInteraction(false)}
                   >
-                    Cancelar
+                    <T k="leads.form.cancel" />
                   </Button>
                   <Button 
                     size="sm"
@@ -900,9 +900,9 @@ export function LeadDetailsModal({
                 <div className="flex items-start gap-2">
                   <AlertCircle className="w-5 h-5 text-primary mt-0.5" />
                   <div>
-                    <h4 className="font-semibold text-foreground">Aprovar Estimate</h4>
+                    <h4 className="font-semibold text-foreground"><T k="literal.crm.aprovar_estimate.3df06bbc" /></h4>
                     <p className="text-sm text-muted-foreground">
-                      Ao aprovar este estimate, as seguintes ações serão executadas:
+                      <T k="literal.crm.ao_aprovar_este_estimate_as_seguintes_acoes_.36b592d5" />
                     </p>
                   </div>
                 </div>
@@ -913,7 +913,7 @@ export function LeadDetailsModal({
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle className="w-4 h-4 text-success" />
-                    Campos de preferências serão liberados para edição
+                    <T k="literal.crm.campos_de_preferencias_serao_liberados_para_.2abc9a79" />
                   </li>
                   <li className="flex items-center gap-2">
                     <Briefcase className="w-4 h-4 text-primary" />
@@ -931,7 +931,7 @@ export function LeadDetailsModal({
                 <div className="flex items-center gap-2">
                   <Receipt className="w-5 h-5 text-amber-600" />
                   <div>
-                    <h4 className="font-semibold text-amber-700">Aguardando Pagamento</h4>
+                    <h4 className="font-semibold text-amber-700"><T k="literal.crm.aguardando_pagamento.c458a268" /></h4>
                     <p className="text-sm text-amber-600">
                       O invoice de 50% (${depositAmount}) foi gerado. Aguardando confirmação do pagamento para liberar a criação do Job.
                     </p>
@@ -949,9 +949,9 @@ export function LeadDetailsModal({
                   <div className="flex items-center gap-2">
                     <CheckCircle className="w-5 h-5 text-success" />
                     <div>
-                      <h4 className="font-semibold text-success">Pagamento Confirmado!</h4>
+                      <h4 className="font-semibold text-success"><T k="literal.crm.pagamento_confirmado.5e4317cc" /></h4>
                       <p className="text-sm text-success">
-                        O depósito foi recebido. Você pode criar o Job agora.
+                        <T k="literal.crm.o_deposito_foi_recebido_voce_pode_criar_o_jo.bc14305a" />
                       </p>
                     </div>
                   </div>
@@ -961,7 +961,7 @@ export function LeadDetailsModal({
                       className="flex items-center gap-2 bg-success hover:bg-success/90"
                     >
                       <Briefcase className="w-4 h-4" />
-                      Criar Job
+                      <T k="leads.createJob" />
                     </Button>
                   )}
                 </div>
@@ -1023,12 +1023,12 @@ export function LeadDetailsModal({
                 {isApproving ? (
                   <>
                     <Clock className="w-4 h-4 animate-spin" />
-                    Aprovando...
+                    <T k="literal.crm.aprovando.a3ddcc62" />
                   </>
                 ) : (
                   <>
                     <CheckCircle className="w-4 h-4" />
-                    Approve Estimate
+                    <T k="literal.crm.approve_estimate.3fa5984c" />
                   </>
                 )}
               </Button>

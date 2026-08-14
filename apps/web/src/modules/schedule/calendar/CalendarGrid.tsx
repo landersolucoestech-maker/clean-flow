@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Pencil } from "lucide-react";
@@ -296,7 +297,7 @@ export function CalendarGrid({
       <div className="w-48 bg-muted border-r border-border flex flex-col h-full">
         {/* Teams Header */}
         <div className="p-3 border-b border-border shrink-0">
-          <span className="text-sm font-medium">TEAMS</span>
+          <span className="text-sm font-medium"><T k="literal.schedule.teams.9fc6fb7e" /></span>
         </div>
 
         {/* Teams List with scrollbar - takes available space */}
@@ -319,7 +320,7 @@ export function CalendarGrid({
         {/* Service Status - fixed at bottom */}
         <div className="border-t border-border p-3 shrink-0 mt-auto">
           <div className="text-sm font-medium mb-2 text-muted-foreground">
-            SERVICE STATUS
+            <T k="literal.schedule.service_status.10ef0cf9" />
           </div>
           <div className="space-y-2">
             {serviceStatuses.map((status, index) => <div key={index} className="flex items-center space-x-2 text-xs">

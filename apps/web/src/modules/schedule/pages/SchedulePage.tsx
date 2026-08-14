@@ -554,7 +554,7 @@ export function Schedule() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete {selectedIds.size} jobs?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the selected jobs.
+              <T k="literal.schedule.this_action_cannot_be_undone_this_will_perma.1dcf5c3f" />
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -570,7 +570,7 @@ export function Schedule() {
               {isDeleting ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Deleting...
+                  <T k="literal.schedule.deleting.e16cac65" />
                 </>
               ) : (
                 "Delete"

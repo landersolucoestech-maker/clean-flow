@@ -671,7 +671,7 @@ export function Leads() {
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <h2 className="text-base font-semibold text-foreground"><T k="leads.title" /></h2>
-                  <p className="mt-0.5 text-sm text-muted-foreground">Manage the sales pipeline from first contact through conversion.</p>
+                  <p className="mt-0.5 text-sm text-muted-foreground"><T k="literal.crm.manage_the_sales_pipeline_from_first_contact.d637847e" /></p>
                 </div>
               </div>
             </div>
@@ -735,11 +735,11 @@ export function Leads() {
                   <TableHeader>
                     <TableRow>
                       <TableHead><T k="leads.table.lead" /></TableHead>
-                      <TableHead>Primary Contact</TableHead>
+                      <TableHead><T k="literal.crm.primary_contact.e020c4fb" /></TableHead>
                       <TableHead><T k="leads.origin.email" /></TableHead>
                       <TableHead><T k="leads.origin" /></TableHead>
                       <TableHead><T k="common.status" /></TableHead>
-                      <TableHead>Invoice Status</TableHead>
+                      <TableHead><T k="literal.crm.invoice_status.15943823" /></TableHead>
                       <TableHead><T k="common.date" /></TableHead>
                       <TableHead><T k="leads.table.value" /></TableHead>
                       <TableHead className="text-right"><T k="leads.actions" /></TableHead>
@@ -842,7 +842,7 @@ export function Leads() {
                                 if (depositPaid && invoiceStatus.final === "none") {
                                   return (
                                     <Badge variant="outline" className="border-primary/30 bg-primary-light text-xs text-primary-dark">
-                                      Deposit Paid
+                                      <T k="literal.crm.deposit_paid.06f819f9" />
                                     </Badge>
                                   );
                                 }
@@ -850,7 +850,7 @@ export function Leads() {
                                 if (invoiceStatus.deposit === "pending") {
                                   return (
                                     <Badge variant="outline" className="border-warning/30 bg-warning/10 text-xs text-warning-foreground">
-                                      Deposit Pending
+                                      <T k="literal.crm.deposit_pending.98f526cb" />
                                     </Badge>
                                   );
                                 }
@@ -887,11 +887,11 @@ export function Leads() {
                                   <DropdownMenuSeparator />
                                   <DropdownMenuItem onClick={() => handleApprove(estimate.id)}>
                                     <CheckCircle className="mr-2 h-4 w-4 text-success" />
-                                    Aprovar
+                                    <T k="leads.approve" />
                                   </DropdownMenuItem>
                                   <DropdownMenuItem onClick={() => handleReject(estimate.id)}>
                                     <XCircle className="mr-2 h-4 w-4 text-destructive" />
-                                    Marcar como Perdido
+                                    <T k="leads.markAsLost" />
                                   </DropdownMenuItem>
                                   <DropdownMenuSeparator />
                                   <DropdownMenuItem 
@@ -899,7 +899,7 @@ export function Leads() {
                                     className="text-destructive"
                                   >
                                     <Trash2 className="w-4 h-4 mr-2" />
-                                    Excluir
+                                    <T k="leads.delete" />
                                   </DropdownMenuItem>
                                 </DropdownMenuContent>
                               </DropdownMenu>

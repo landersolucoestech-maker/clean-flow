@@ -171,7 +171,7 @@ export function JobDetailsModal({
           <div className="p-4 rounded-lg bg-muted/30 space-y-3">
             <h4 className="text-sm font-medium text-foreground flex items-center gap-2">
               <Users className="w-4 h-4" />
-              Assigned Staff
+              <T k="literal.jobs.assigned_staff.8f9aab8e" />
             </h4>
             <div className="space-y-2">
               <div className="flex items-center gap-3">
@@ -234,11 +234,11 @@ export function JobDetailsModal({
         <DialogFooter className="mt-4 flex flex-col gap-2 sm:flex-row">
           <Button variant="outline" onClick={handleEdit} className="flex-1">
             <Pencil className="w-4 h-4 mr-2" />
-            Editar
+            <T k="common.edit" />
           </Button>
           <Button variant="destructive" onClick={handleDelete} className="flex-1">
             <Trash2 className="w-4 h-4 mr-2" />
-            Excluir
+            <T k="common.delete" />
           </Button>
         </DialogFooter>
       </DialogContent>

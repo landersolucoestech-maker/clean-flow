@@ -97,7 +97,7 @@ function TeamSelector({ value, onChange }: { value: string; onChange: (value: st
           <SelectValue placeholder="Select team" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="none">Sem team definido</SelectItem>
+          <SelectItem value="none"><T k="literal.settings.sem_team_definido.699638a0" /></SelectItem>
           {teamOptions.map((teamNum) => (
             <SelectItem key={teamNum} value={teamNum}>
               Team {teamNum}
@@ -200,7 +200,7 @@ export function TeamUserModal({
       <DialogContent className="sm:max-w-[500px] max-h-[85vh] overflow-hidden flex flex-col">
         <DialogHeader className="flex-shrink-0">
           <DialogTitle>{mode === "create" ? "Add Team Member" : "Edit Team Member"}</DialogTitle>
-          <DialogDescription>Fill in the team member information below</DialogDescription>
+          <DialogDescription><T k="literal.settings.fill_in_the_team_member_information_below.da606bd3" /></DialogDescription>
         </DialogHeader>
 
         <ScrollArea className="flex-1 overflow-auto">
@@ -247,7 +247,7 @@ export function TeamUserModal({
           </div>
 
           <div className="space-y-2">
-            <Label>Phone Number</Label>
+            <Label><T k="literal.settings.phone_number.ab25d61b" /></Label>
             <Input
               value={formData.phoneNumber}
               onChange={(e) => handleChange("phoneNumber", e.target.value)}
@@ -257,7 +257,7 @@ export function TeamUserModal({
 
           {mode === "create" && (
             <p className="text-sm text-muted-foreground">
-              An invitation email will let this team member set a private password.
+              <T k="literal.settings.an_invitation_email_will_let_this_team_membe.70738a20" />
             </p>
           )}
 
@@ -269,10 +269,10 @@ export function TeamUserModal({
                 <SelectValue placeholder="Select payment method" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="zelle">Zelle</SelectItem>
+                <SelectItem value="zelle"><T k="literal.settings.zelle.2a9876e6" /></SelectItem>
                 <SelectItem value="quickbooks">QuickBooks</SelectItem>
-                <SelectItem value="check">Check</SelectItem>
-                <SelectItem value="cash">Cash</SelectItem>
+                <SelectItem value="check"><T k="literal.settings.check.4b5e84be" /></SelectItem>
+                <SelectItem value="cash"><T k="literal.settings.cash.758ec54e" /></SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -287,21 +287,21 @@ export function TeamUserModal({
                 required
               />
               <p className="text-xs text-muted-foreground">
-                This will be used to send payments via Zelle.
+                <T k="literal.settings.this_will_be_used_to_send_payments_via_zelle.e78cd09e" />
               </p>
             </div>
           )}
 
           {formData.paymentMethod === "quickbooks" && (
             <div className="space-y-2">
-              <Label>QuickBooks Vendor/Employee ID</Label>
+              <Label><T k="literal.settings.quickbooks_vendor_employee_id.67ba260c" /></Label>
               <Input
                 value={formData.quickbooksVendorId}
                 onChange={(e) => handleChange("quickbooksVendorId", e.target.value)}
                 placeholder="Enter QuickBooks vendor or employee ID"
               />
               <p className="text-xs text-muted-foreground">
-                This employee will be linked to QuickBooks for payment processing. Leave blank to auto-create.
+                <T k="literal.settings.this_employee_will_be_linked_to_quickbooks_f.10ce4b7a" />
               </p>
             </div>
           )}
@@ -318,9 +318,9 @@ export function TeamUserModal({
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Delete Team Member</AlertDialogTitle>
+                  <AlertDialogTitle><T k="literal.settings.delete_team_member.50032753" /></AlertDialogTitle>
                   <AlertDialogDescription>
-                    Are you sure you want to delete this team member? This action cannot be undone.
+                    <T k="literal.settings.are_you_sure_you_want_to_delete_this_team_me.8b1aa436" />
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

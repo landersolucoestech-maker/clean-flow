@@ -96,15 +96,15 @@ export function AdminSupport() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "open":
-        return <Badge className="bg-destructive/10 text-destructive hover:bg-destructive/10">Aberto</Badge>;
+        return <Badge className="bg-destructive/10 text-destructive hover:bg-destructive/10"><T k="support.status.open" /></Badge>;
       case "in_progress":
-        return <Badge className="bg-warning/10 text-warning-foreground hover:bg-warning/10">Em Andamento</Badge>;
+        return <Badge className="bg-warning/10 text-warning-foreground hover:bg-warning/10"><T k="jobs.inProgress" /></Badge>;
       case "resolved":
-        return <Badge className="bg-success/10 text-success hover:bg-success/10">Resolvido</Badge>;
+        return <Badge className="bg-success/10 text-success hover:bg-success/10"><T k="support.status.resolved" /></Badge>;
       case "waiting_customer":
-        return <Badge className="bg-primary-light text-primary-dark hover:bg-primary-light">Aguardando</Badge>;
+        return <Badge className="bg-primary-light text-primary-dark hover:bg-primary-light"><T k="support.stats.waiting" /></Badge>;
       case "closed":
-        return <Badge className="bg-muted text-foreground hover:bg-muted">Fechado</Badge>;
+        return <Badge className="bg-muted text-foreground hover:bg-muted"><T k="settings.closed" /></Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -114,11 +114,11 @@ export function AdminSupport() {
     switch (priority) {
       case "high":
       case "urgent":
-        return <Badge className="bg-destructive text-white hover:bg-destructive">Alta</Badge>;
+        return <Badge className="bg-destructive text-white hover:bg-destructive"><T k="support.priority.high" /></Badge>;
       case "medium":
-        return <Badge className="bg-primary text-white hover:bg-primary">Média</Badge>;
+        return <Badge className="bg-primary text-white hover:bg-primary"><T k="support.priority.medium" /></Badge>;
       case "low":
-        return <Badge variant="outline" className="text-muted-foreground border-border">Baixa</Badge>;
+        return <Badge variant="outline" className="text-muted-foreground border-border"><T k="support.priority.low" /></Badge>;
       default:
         return <Badge variant="outline">{priority}</Badge>;
     }
@@ -135,8 +135,8 @@ export function AdminSupport() {
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Tickets de Suporte</h1>
-          <p className="text-muted-foreground mt-1">Gerencie todas as solicitações de suporte dos usuários</p>
+          <h1 className="text-2xl font-bold text-foreground"><T k="literal.admin.tickets_de_suporte.613d664a" /></h1>
+          <p className="text-muted-foreground mt-1"><T k="literal.admin.gerencie_todas_as_solicitacoes_de_suporte_do.d2cb63c2" /></p>
         </div>
 
         {/* Stats Cards */}
@@ -150,8 +150,8 @@ export function AdminSupport() {
               </div>
               <div className="mt-4">
                 <p className="text-2xl font-bold text-foreground">{openTickets}</p>
-                <p className="text-sm text-muted-foreground mt-1">Tickets Abertos</p>
-                <p className="text-xs text-muted-foreground/70">Aguardando atendimento</p>
+                <p className="text-sm text-muted-foreground mt-1"><T k="literal.admin.tickets_abertos.47fe9163" /></p>
+                <p className="text-xs text-muted-foreground/70"><T k="literal.admin.aguardando_atendimento.4b74e19d" /></p>
               </div>
             </CardContent>
           </Card>
@@ -165,8 +165,8 @@ export function AdminSupport() {
               </div>
               <div className="mt-4">
                 <p className="text-2xl font-bold text-foreground">{inProgressTickets}</p>
-                <p className="text-sm text-muted-foreground mt-1">Em Andamento</p>
-                <p className="text-xs text-muted-foreground/70">Sendo atendidos</p>
+                <p className="text-sm text-muted-foreground mt-1"><T k="jobs.inProgress" /></p>
+                <p className="text-xs text-muted-foreground/70"><T k="literal.admin.sendo_atendidos.31acbe65" /></p>
               </div>
             </CardContent>
           </Card>
@@ -180,8 +180,8 @@ export function AdminSupport() {
               </div>
               <div className="mt-4">
                 <p className="text-2xl font-bold text-foreground">{resolvedTickets}</p>
-                <p className="text-sm text-muted-foreground mt-1">Resolvidos</p>
-                <p className="text-xs text-muted-foreground/70">Finalizados</p>
+                <p className="text-sm text-muted-foreground mt-1"><T k="support.stats.resolved" /></p>
+                <p className="text-xs text-muted-foreground/70"><T k="literal.admin.finalizados.7399a37e" /></p>
               </div>
             </CardContent>
           </Card>
@@ -196,7 +196,7 @@ export function AdminSupport() {
               <div className="mt-4">
                 <p className="text-2xl font-bold text-foreground">{totalTickets}</p>
                 <p className="text-sm text-muted-foreground mt-1"><T k="invoice.total" /></p>
-                <p className="text-xs text-muted-foreground/70">Todos os tickets</p>
+                <p className="text-xs text-muted-foreground/70"><T k="literal.admin.todos_os_tickets.2de97562" /></p>
               </div>
             </CardContent>
           </Card>
@@ -208,9 +208,9 @@ export function AdminSupport() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <CardTitle className="text-base font-semibold text-foreground">
-                  Lista de Tickets
+                  <T k="literal.admin.lista_de_tickets.b5e155a2" />
                 </CardTitle>
-                <p className="text-sm text-muted-foreground mt-1">Visualize e gerencie todos os tickets de suporte</p>
+                <p className="text-sm text-muted-foreground mt-1"><T k="literal.admin.visualize_e_gerencie_todos_os_tickets_de_sup.586c9680" /></p>
               </div>
               <div className="flex items-center gap-3">
                 <div className="relative w-72">
@@ -227,11 +227,11 @@ export function AdminSupport() {
                     <SelectValue placeholder="Todos os Status" />
                   </SelectTrigger>
                   <SelectContent className="bg-card">
-                    <SelectItem value="all">Todos os Status</SelectItem>
-                    <SelectItem value="open">Aberto</SelectItem>
-                    <SelectItem value="in_progress">Em Andamento</SelectItem>
-                    <SelectItem value="resolved">Resolvido</SelectItem>
-                    <SelectItem value="closed">Fechado</SelectItem>
+                    <SelectItem value="all"><T k="admin.support.all_status" /></SelectItem>
+                    <SelectItem value="open"><T k="support.status.open" /></SelectItem>
+                    <SelectItem value="in_progress"><T k="jobs.inProgress" /></SelectItem>
+                    <SelectItem value="resolved"><T k="support.status.resolved" /></SelectItem>
+                    <SelectItem value="closed"><T k="settings.closed" /></SelectItem>
                   </SelectContent>
                 </Select>
                 <Select value={priorityFilter} onValueChange={setPriorityFilter}>
@@ -239,10 +239,10 @@ export function AdminSupport() {
                     <SelectValue placeholder="Todas Prioridades" />
                   </SelectTrigger>
                   <SelectContent className="bg-card">
-                    <SelectItem value="all">Todas Prioridades</SelectItem>
-                    <SelectItem value="high">Alta</SelectItem>
-                    <SelectItem value="medium">Média</SelectItem>
-                    <SelectItem value="low">Baixa</SelectItem>
+                    <SelectItem value="all"><T k="literal.admin.todas_prioridades.57c5c06a" /></SelectItem>
+                    <SelectItem value="high"><T k="support.priority.high" /></SelectItem>
+                    <SelectItem value="medium"><T k="support.priority.medium" /></SelectItem>
+                    <SelectItem value="low"><T k="support.priority.low" /></SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -251,25 +251,25 @@ export function AdminSupport() {
           <CardContent className="p-0">
             {isLoadingTickets ? (
               <div className="p-8 text-center text-muted-foreground">
-                Carregando...
+                <T k="common.loading" />
               </div>
             ) : filteredTickets.length === 0 ? (
               <div className="p-8 text-center text-muted-foreground">
-                Nenhum ticket encontrado
+                <T k="support.no_tickets" />
               </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow className="bg-background hover:bg-background">
                     <TableHead className="text-muted-foreground font-medium"><T k="transactions.id" /></TableHead>
-                    <TableHead className="text-muted-foreground font-medium">Título</TableHead>
-                    <TableHead className="text-muted-foreground font-medium">Usuário</TableHead>
-                    <TableHead className="text-muted-foreground font-medium">Organização</TableHead>
+                    <TableHead className="text-muted-foreground font-medium"><T k="literal.admin.titulo.98a5efa6" /></TableHead>
+                    <TableHead className="text-muted-foreground font-medium"><T k="literal.admin.usuario.f32c1345" /></TableHead>
+                    <TableHead className="text-muted-foreground font-medium"><T k="literal.admin.organizacao.1ddb1fd2" /></TableHead>
                     <TableHead className="text-muted-foreground font-medium"><T k="admin.clients.status" /></TableHead>
-                    <TableHead className="text-muted-foreground font-medium">Prioridade</TableHead>
-                    <TableHead className="text-muted-foreground font-medium">Categoria</TableHead>
-                    <TableHead className="text-muted-foreground font-medium">Criado em</TableHead>
-                    <TableHead className="text-muted-foreground font-medium text-right">Ações</TableHead>
+                    <TableHead className="text-muted-foreground font-medium"><T k="admin.support.priority" /></TableHead>
+                    <TableHead className="text-muted-foreground font-medium"><T k="support.category" /></TableHead>
+                    <TableHead className="text-muted-foreground font-medium"><T k="admin.clients.created" /></TableHead>
+                    <TableHead className="text-muted-foreground font-medium text-right"><T k="common.actions" /></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -312,13 +312,13 @@ export function AdminSupport() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="bg-card">
                             <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setSelectedTicket(ticket); }}>
-                              Ver detalhes
+                              <T k="estimate.viewDetails" />
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleStatusChange(ticket.id, "in_progress"); }}>
-                              Marcar em andamento
+                              <T k="literal.admin.marcar_em_andamento.1f42ee8e" />
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleStatusChange(ticket.id, "resolved"); }}>
-                              Marcar resolvido
+                              <T k="literal.admin.marcar_resolvido.2323bbf5" />
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>

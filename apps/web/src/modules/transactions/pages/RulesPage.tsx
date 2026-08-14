@@ -168,9 +168,9 @@ export function Rules() {
   const getTypeBadge = (type: string) => {
     switch (type) {
       case "receita":
-        return <Badge className="bg-success/15 text-success hover:bg-success/20">Receita</Badge>;
+        return <Badge className="bg-success/15 text-success hover:bg-success/20"><T k="transactions.revenue" /></Badge>;
       case "despesa":
-        return <Badge className="bg-destructive/15 text-destructive hover:bg-destructive/20">Despesa</Badge>;
+        return <Badge className="bg-destructive/15 text-destructive hover:bg-destructive/20"><T k="transactions.expense" /></Badge>;
       default:
         return <Badge variant="secondary">{type}</Badge>;
     }
@@ -196,7 +196,7 @@ export function Rules() {
         actions={
           <Button onClick={openCreateModal}>
             <Plus className="w-4 h-4 mr-2" />
-            Nova Regra
+            <T k="literal.transactions.nova_regra.48275605" />
           </Button>
         }
       />
@@ -242,19 +242,19 @@ export function Rules() {
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/50">
-                <TableHead>Nome</TableHead>
-                <TableHead>Condição</TableHead>
-                <TableHead>Categoria</TableHead>
-                <TableHead>Tipo</TableHead>
+                <TableHead><T k="common.name" /></TableHead>
+                <TableHead><T k="literal.transactions.condicao.db4792f1" /></TableHead>
+                <TableHead><T k="transactions.category" /></TableHead>
+                <TableHead><T k="transactions.type" /></TableHead>
                 <TableHead><T k="common.status" /></TableHead>
-                <TableHead className="text-right">Ações</TableHead>
+                <TableHead className="text-right"><T k="common.actions" /></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredRules.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                    Nenhuma regra encontrada
+                    <T k="literal.transactions.nenhuma_regra_encontrada.9ed67392" />
                   </TableCell>
                 </TableRow>
               ) : (
@@ -291,11 +291,11 @@ export function Rules() {
       <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Nova Regra</DialogTitle>
+            <DialogTitle><T k="literal.transactions.nova_regra.48275605" /></DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Nome da Regra</label>
+              <label className="text-sm font-medium"><T k="literal.transactions.nome_da_regra.b002cbcc" /></label>
               <Input 
                 placeholder="Ex: Combustível" 
                 value={formName}
@@ -303,7 +303,7 @@ export function Rules() {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Condição</label>
+              <label className="text-sm font-medium"><T k="literal.transactions.condicao.db4792f1" /></label>
               <Input 
                 placeholder="Ex: Descrição contém 'posto'" 
                 value={formCondition}
@@ -311,19 +311,19 @@ export function Rules() {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Tipo</label>
+              <label className="text-sm font-medium"><T k="transactions.type" /></label>
               <Select value={formType} onValueChange={(v) => setFormType(v as "receita" | "despesa")}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o tipo" />
                 </SelectTrigger>
                 <SelectContent className="bg-background border border-border">
-                  <SelectItem value="receita">Receita</SelectItem>
-                  <SelectItem value="despesa">Despesa</SelectItem>
+                  <SelectItem value="receita"><T k="transactions.revenue" /></SelectItem>
+                  <SelectItem value="despesa"><T k="transactions.expense" /></SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Categoria</label>
+              <label className="text-sm font-medium"><T k="transactions.category" /></label>
               <Input 
                 placeholder="Ex: Transporte" 
                 value={formCategory}
@@ -332,7 +332,7 @@ export function Rules() {
             </div>
             <div className="flex justify-end gap-2 pt-4">
               <Button variant="outline" onClick={() => setShowCreateModal(false)}>
-                Cancelar
+                <T k="common.cancel" />
               </Button>
               <Button onClick={handleCreateRule} disabled={createRule.isPending}>
                 {createRule.isPending ? "Criando..." : "Criar Regra"}
@@ -346,25 +346,25 @@ export function Rules() {
       <Dialog open={showViewModal} onOpenChange={setShowViewModal}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Detalhes da Regra</DialogTitle>
+            <DialogTitle><T k="literal.transactions.detalhes_da_regra.c787e27b" /></DialogTitle>
           </DialogHeader>
           {selectedRule && (
             <div className="space-y-4 py-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">Nome</p>
+                  <p className="text-sm text-muted-foreground"><T k="common.name" /></p>
                   <p className="font-medium">{selectedRule.name}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Tipo</p>
+                  <p className="text-sm text-muted-foreground"><T k="transactions.type" /></p>
                   {getTypeBadge(selectedRule.type)}
                 </div>
                 <div className="col-span-2">
-                  <p className="text-sm text-muted-foreground">Condição</p>
+                  <p className="text-sm text-muted-foreground"><T k="literal.transactions.condicao.db4792f1" /></p>
                   <p className="font-medium">{selectedRule.condition}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Categoria</p>
+                  <p className="text-sm text-muted-foreground"><T k="transactions.category" /></p>
                   <p className="font-medium">{selectedRule.category}</p>
                 </div>
                 <div>
@@ -372,7 +372,7 @@ export function Rules() {
                   <p className="font-medium">{selectedRule.is_active ? "Ativa" : "Inativa"}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Criada em</p>
+                  <p className="text-sm text-muted-foreground"><T k="literal.transactions.criada_em.4d75057d" /></p>
                   <p className="font-medium">
                     {new Date(selectedRule.created_at).toLocaleDateString("pt-BR")}
                   </p>
@@ -380,7 +380,7 @@ export function Rules() {
               </div>
               <div className="flex justify-end pt-4">
                 <Button variant="outline" onClick={() => setShowViewModal(false)}>
-                  Fechar
+                  <T k="common.close" />
                 </Button>
               </div>
             </div>
@@ -392,38 +392,38 @@ export function Rules() {
       <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Editar Regra</DialogTitle>
+            <DialogTitle><T k="literal.transactions.editar_regra.aa5f7dbb" /></DialogTitle>
           </DialogHeader>
           {selectedRule && (
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Nome da Regra</label>
+                <label className="text-sm font-medium"><T k="literal.transactions.nome_da_regra.b002cbcc" /></label>
                 <Input 
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Condição</label>
+                <label className="text-sm font-medium"><T k="literal.transactions.condicao.db4792f1" /></label>
                 <Input 
                   value={formCondition}
                   onChange={(e) => setFormCondition(e.target.value)}
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Tipo</label>
+                <label className="text-sm font-medium"><T k="transactions.type" /></label>
                 <Select value={formType} onValueChange={(v) => setFormType(v as "receita" | "despesa")}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-background border border-border">
-                    <SelectItem value="receita">Receita</SelectItem>
-                    <SelectItem value="despesa">Despesa</SelectItem>
+                    <SelectItem value="receita"><T k="transactions.revenue" /></SelectItem>
+                    <SelectItem value="despesa"><T k="transactions.expense" /></SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Categoria</label>
+                <label className="text-sm font-medium"><T k="transactions.category" /></label>
                 <Input 
                   value={formCategory}
                   onChange={(e) => setFormCategory(e.target.value)}
@@ -431,7 +431,7 @@ export function Rules() {
               </div>
               <div className="flex justify-end gap-2 pt-4">
                 <Button variant="outline" onClick={() => setShowEditModal(false)}>
-                  Cancelar
+                  <T k="common.cancel" />
                 </Button>
                 <Button onClick={handleUpdateRule} disabled={updateRule.isPending}>
                   {updateRule.isPending ? "Salvando..." : "Salvar"}

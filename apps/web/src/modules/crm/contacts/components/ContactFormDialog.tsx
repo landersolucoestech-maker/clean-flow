@@ -82,7 +82,7 @@ export function ContactFormDialog({ open, onOpenChange, contact, onSubmit }: Con
         <DialogHeader>
           <DialogTitle>{contact ? "Edit Contact" : "Create Contact"}</DialogTitle>
           <DialogDescription>
-            Manage a supplier, partner, service provider or other corporate contact.
+            <T k="literal.crm.manage_a_supplier_partner_service_provider_o.4fedc713" />
           </DialogDescription>
         </DialogHeader>
 
@@ -97,7 +97,7 @@ export function ContactFormDialog({ open, onOpenChange, contact, onSubmit }: Con
               <Input id="contact-company" value={form.company} onChange={(event) => setField("company", event.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label>Contact Type</Label>
+              <Label><T k="literal.crm.contact_type.fcbedcab" /></Label>
               <Select value={form.contactType} onValueChange={(value) => setField("contactType", value as ContactType)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -127,7 +127,7 @@ export function ContactFormDialog({ open, onOpenChange, contact, onSubmit }: Con
               <Input id="contact-website" value={form.website} onChange={(event) => setField("website", event.target.value)} placeholder="https://" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="contact-role">Job Title / Role</Label>
+              <Label htmlFor="contact-role"><T k="literal.crm.job_title_role.94997e4c" /></Label>
               <Input id="contact-role" value={form.jobTitle} onChange={(event) => setField("jobTitle", event.target.value)} />
             </div>
           </div>

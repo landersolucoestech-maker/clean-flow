@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { CheckCircle, Loader2, XCircle } from "lucide-react";
@@ -72,8 +73,8 @@ export default function DialpadCallback() {
         </CardHeader>
         <CardContent className="text-center">
           <p className={`text-lg ${status === "error" ? "text-destructive" : "text-foreground"}`}>{message}</p>
-          {status === "success" && <p className="mt-2 text-sm text-muted-foreground">Esta janela fechará automaticamente...</p>}
-          {status === "error" && <p className="mt-2 text-sm text-muted-foreground">Você pode fechar esta janela e tentar novamente.</p>}
+          {status === "success" && <p className="mt-2 text-sm text-muted-foreground"><T k="literal.communications.esta_janela_fechara_automaticamente.b7a66cfb" /></p>}
+          {status === "error" && <p className="mt-2 text-sm text-muted-foreground"><T k="literal.communications.voce_pode_fechar_esta_janela_e_tentar_novame.32feae95" /></p>}
         </CardContent>
       </Card>
     </div>

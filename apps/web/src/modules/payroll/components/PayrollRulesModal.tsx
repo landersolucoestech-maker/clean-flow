@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useState, useMemo } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -158,8 +159,8 @@ export function PayrollRulesModal({ open, onOpenChange }: PayrollRulesModalProps
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <div>
-            <h2 className="text-2xl font-semibold">Regras de Pagamento e Bônus</h2>
-            <p className="text-muted-foreground">Configure as regras por funcionário</p>
+            <h2 className="text-2xl font-semibold"><T k="literal.payroll.regras_de_pagamento_e_bonus.8dae6022" /></h2>
+            <p className="text-muted-foreground"><T k="literal.payroll.configure_as_regras_por_funcionario.b80f921f" /></p>
           </div>
           <Button 
             onClick={handleSaveAll} 
@@ -186,7 +187,7 @@ export function PayrollRulesModal({ open, onOpenChange }: PayrollRulesModalProps
               <div className="p-4 border-b">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Users className="w-5 h-5" />
-                  <span className="font-medium">Funcionários</span>
+                  <span className="font-medium"><T k="audit.staff" /></span>
                 </div>
               </div>
               <ScrollArea className="h-[450px]">
@@ -263,9 +264,9 @@ export function PayrollRulesModal({ open, onOpenChange }: PayrollRulesModalProps
                   {/* Formula card */}
                   <Card className="bg-muted/30">
                     <CardContent className="p-4">
-                      <h4 className="font-semibold mb-2">Fórmula de Cálculo:</h4>
+                      <h4 className="font-semibold mb-2"><T k="literal.payroll.formula_de_calculo.f923d572" /></h4>
                       <p className="text-sm">
-                        <strong>Pagamento Total</strong> = Valor por Serviço × Quantidade de Jobs
+                        <strong><T k="literal.payroll.pagamento_total.71b19218" /></strong> = Valor por Serviço × Quantidade de Jobs
                       </p>
                       <div className="mt-3 text-sm text-muted-foreground">
                         <p>• Valor por serviço: <strong>${selectedStaff.baseValue}</strong></p>
@@ -287,7 +288,7 @@ export function PayrollRulesModal({ open, onOpenChange }: PayrollRulesModalProps
                 </div>
               ) : (
                 <div className="flex items-center justify-center h-full text-muted-foreground">
-                  Selecione um funcionário para configurar as regras
+                  <T k="literal.payroll.selecione_um_funcionario_para_configurar_as_.9913272a" />
                 </div>
               )}
             </div>

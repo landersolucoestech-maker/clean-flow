@@ -63,7 +63,7 @@ export function AdminAuth() {
           className="absolute top-6 left-6 text-slate-400 hover:text-white hover:bg-white/10"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to User Login
+          <T k="literal.admin.back_to_user_login.842948de" />
         </Button>
 
         <div className="w-full max-w-md">
@@ -71,15 +71,15 @@ export function AdminAuth() {
             <div className="w-20 h-20 bg-gradient-to-br from-violet-500 via-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-4 shadow-2xl shadow-purple-500/30">
               <Shield className="w-10 h-10 text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-white">Admin Portal</h1>
-            <p className="text-slate-400 mt-2">Platform Administration Access</p>
+            <h1 className="text-3xl font-bold text-white"><T k="literal.admin.admin_portal.c864d803" /></h1>
+            <p className="text-slate-400 mt-2"><T k="literal.admin.platform_administration_access.c480ca44" /></p>
           </div>
 
           <Card className="border-0 shadow-2xl bg-slate-900/80 backdrop-blur-xl border border-slate-800">
             <CardHeader className="text-center pb-2">
-              <CardTitle className="text-xl text-white">Secure Login</CardTitle>
+              <CardTitle className="text-xl text-white"><T k="literal.admin.secure_login.c09bb040" /></CardTitle>
               <CardDescription className="text-slate-400">
-                Enter your administrator credentials
+                <T k="literal.admin.enter_your_administrator_credentials.03a9f580" />
               </CardDescription>
             </CardHeader>
             <CardContent className="pt-4">
@@ -101,7 +101,7 @@ export function AdminAuth() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-slate-300">Password</Label>
+                  <Label htmlFor="password" className="text-slate-300"><T k="literal.admin.password.8be3c943" /></Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                     <Input
@@ -126,7 +126,7 @@ export function AdminAuth() {
                   ) : (
                     <>
                       <KeyRound className="w-5 h-5 mr-2" />
-                      Access Admin Panel
+                      <T k="literal.admin.access_admin_panel.11737e16" />
                     </>
                   )}
                 </Button>
@@ -136,7 +136,7 @@ export function AdminAuth() {
                 <div className="flex items-center justify-center text-slate-500">
                   <div className="flex items-center gap-2 text-xs">
                     <Shield className="w-4 h-4" />
-                    <span>Secure platform authentication</span>
+                    <span><T k="literal.admin.secure_platform_authentication.010e0a68" /></span>
                   </div>
                 </div>
               </div>
@@ -144,7 +144,7 @@ export function AdminAuth() {
           </Card>
 
           <p className="text-center text-sm text-slate-500 mt-6">
-            Only authorized platform administrators can access this area.
+            <T k="literal.admin.only_authorized_platform_administrators_can_.6acbe0ef" />
           </p>
         </div>
       </div>

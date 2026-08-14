@@ -77,7 +77,7 @@ export function FilterModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Filter className="w-5 h-5 text-primary" />
-            Filter Appointments
+            <T k="literal.schedule.filter_appointments.1bf1a970" />
           </DialogTitle>
         </DialogHeader>
 
@@ -86,15 +86,15 @@ export function FilterModal({
           <div className="space-y-3">
             <Label className="flex items-center gap-2 text-base font-semibold">
               <Users className="w-4 h-4" />
-              Staff Members
+              <T k="literal.schedule.staff_members.60cacc0d" />
             </Label>
             {isLoadingStaff ? (
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Loading staff...
+                <T k="literal.schedule.loading_staff.58b3d85d" />
               </div>
             ) : staffMembers.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No staff members found</p>
+              <p className="text-sm text-muted-foreground"><T k="literal.schedule.no_staff_members_found.5c29c7a9" /></p>
             ) : (
               <div className="grid grid-cols-2 gap-2">
                 {staffMembers.map((staff) => (
@@ -120,7 +120,7 @@ export function FilterModal({
           <div className="space-y-3">
             <Label className="flex items-center gap-2 text-base font-semibold">
               <Briefcase className="w-4 h-4" />
-              Services
+              <T k="literal.schedule.services.5cbd5840" />
             </Label>
             <div className="grid grid-cols-2 gap-2">
               {services.map((service) => (
@@ -169,12 +169,12 @@ export function FilterModal({
 
         <DialogFooter className="flex gap-2">
           <Button variant="outline" onClick={handleClear}>
-            Clear All
+            <T k="literal.schedule.clear_all.3a88a6d1" />
           </Button>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             <T k="common.cancel" />
           </Button>
-          <Button onClick={handleApply}>Apply Filters</Button>
+          <Button onClick={handleApply}><T k="literal.schedule.apply_filters.6b2a78a8" /></Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

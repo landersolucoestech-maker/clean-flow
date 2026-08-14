@@ -81,7 +81,7 @@ export function LeadPreferencesHistorySections({
               >
                 <SelectTrigger className="w-full"><SelectValue placeholder="Select time" /></SelectTrigger>
                 <SelectContent className="z-50 border-border bg-popover">
-                  <SelectItem value="none">Select time...</SelectItem>
+                  <SelectItem value="none"><T k="literal.crm.select_time.ce9f119c" /></SelectItem>
                   {PREFERRED_TIMES.map((time) => <SelectItem key={time.value} value={time.value}>{time.label}</SelectItem>)}
                 </SelectContent>
               </Select>
@@ -104,11 +104,11 @@ export function LeadPreferencesHistorySections({
                   className="pl-10"
                 />
               </div>
-              {isIntegrationLead && !formData.visitDate && <p className="text-xs text-destructive">Required for integration leads</p>}
+              {isIntegrationLead && !formData.visitDate && <p className="text-xs text-destructive"><T k="literal.crm.required_for_integration_leads.230e6826" /></p>}
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="agreedAmount">Agreed Amount</Label>
+                <Label htmlFor="agreedAmount"><T k="literal.crm.agreed_amount.d7655e5d" /></Label>
                 <Input
                   id="agreedAmount"
                   value={formData.agreedAmount}

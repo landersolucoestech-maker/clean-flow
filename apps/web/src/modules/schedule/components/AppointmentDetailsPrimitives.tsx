@@ -46,7 +46,7 @@ export function TeamWithMembers({ teamNum, color }: { teamNum: string; color: st
         Team {teamNum}
       </Badge>
       <div className="pl-1 text-xs text-muted-foreground">
-        {isLoading ? <span><T k="common.loading" /></span> : uniqueStaffMembers.length > 0 ? uniqueStaffMembers.map((staff) => staff.name).join(", ") : <span className="italic">No members assigned</span>}
+        {isLoading ? <span><T k="common.loading" /></span> : uniqueStaffMembers.length > 0 ? uniqueStaffMembers.map((staff) => staff.name).join(", ") : <span className="italic"><T k="literal.schedule.no_members_assigned.06aecdae" /></span>}
       </div>
     </div>
   );

@@ -205,13 +205,13 @@ export function AutomationsTab() {
                 <T k="settings.automations" />
               </CardTitle>
               <CardDescription>
-                Configure automated messages for job status changes and reminders.
+                <T k="literal.settings.configure_automated_messages_for_job_status_.6a4f7256" />
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
               <Button variant="outline" onClick={() => setShowAddModal(true)} className="gap-2">
                 <Plus className="w-4 h-4" />
-                Add Automation
+                <T k="literal.settings.add_automation.4c7ddc2f" />
               </Button>
               <Button 
                 onClick={handleSaveAllChanges}
@@ -277,7 +277,7 @@ export function AutomationsTab() {
                 <div className="border-t border-border pt-4 space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label>Label</Label>
+                      <Label><T k="literal.settings.label.74341e3c" /></Label>
                       <Input 
                         value={getFieldValue(automation, "label")} 
                         onChange={(e) => handleEditField(automation.id, "label", e.target.value)}
@@ -303,7 +303,7 @@ export function AutomationsTab() {
 
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
                     <div className="space-y-2">
-                      <Label>Trigger</Label>
+                      <Label><T k="literal.settings.trigger.d3f06a58" /></Label>
                       <Select 
                         value={getFieldValue(automation, "trigger_type")} 
                         onValueChange={(v) => handleEditField(automation.id, "trigger_type", v)}
@@ -320,7 +320,7 @@ export function AutomationsTab() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label>Delay Type</Label>
+                      <Label><T k="literal.settings.delay_type.9a4c6b48" /></Label>
                       <Select 
                         value={getFieldValue(automation, "delay_type") || "hours"} 
                         onValueChange={(v) => handleEditField(automation.id, "delay_type", v)}
@@ -329,8 +329,8 @@ export function AutomationsTab() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="hours">Hours</SelectItem>
-                          <SelectItem value="days">Days</SelectItem>
+                          <SelectItem value="hours"><T k="literal.settings.hours.9e25a34e" /></SelectItem>
+                          <SelectItem value="days"><T k="literal.settings.days.f6bb0f46" /></SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -347,7 +347,7 @@ export function AutomationsTab() {
                     {(getFieldValue(automation, "trigger_type") === "time_before" || 
                       getFieldValue(automation, "trigger_type") === "time_after") && (
                       <div className="space-y-2">
-                        <Label>Send At Time</Label>
+                        <Label><T k="literal.settings.send_at_time.adb1a405" /></Label>
                         <Input 
                           type="time" 
                           value={getFieldValue(automation, "send_at_time") || "10:00"} 
@@ -360,7 +360,7 @@ export function AutomationsTab() {
                   {getFieldValue(automation, "trigger_type") === "time_after" && (
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label>Condition</Label>
+                        <Label><T k="literal.settings.condition.2f497932" /></Label>
                         <Select 
                           value={getFieldValue(automation, "condition") || ""} 
                           onValueChange={(v) => handleEditField(automation.id, "condition", v)}
@@ -379,7 +379,7 @@ export function AutomationsTab() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label>Message To</Label>
+                      <Label><T k="literal.settings.message_to.0372a609" /></Label>
                       <Select 
                         value={getFieldValue(automation, "message_to")} 
                         onValueChange={(v) => handleEditField(automation.id, "message_to", v)}
@@ -397,7 +397,7 @@ export function AutomationsTab() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Message</Label>
+                    <Label><T k="literal.communications.message.68f4145f" /></Label>
                     <Textarea 
                       value={getFieldValue(automation, "message")} 
                       onChange={(e) => handleEditField(automation.id, "message", e.target.value)}
@@ -435,7 +435,7 @@ export function AutomationsTab() {
       <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Add New Automation</DialogTitle>
+            <DialogTitle><T k="literal.settings.add_new_automation.ee8210c2" /></DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="grid grid-cols-2 gap-4">
@@ -483,7 +483,7 @@ export function AutomationsTab() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Message To</Label>
+                <Label><T k="literal.settings.message_to.0372a609" /></Label>
                 <Select 
                   value={newAutomation.message_to} 
                   onValueChange={(v) => setNewAutomation(prev => ({ ...prev, message_to: v }))}
@@ -503,7 +503,7 @@ export function AutomationsTab() {
             {(newAutomation.trigger_type === "time_before" || newAutomation.trigger_type === "time_after") && (
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label>Delay Type</Label>
+                  <Label><T k="literal.settings.delay_type.9a4c6b48" /></Label>
                   <Select 
                     value={newAutomation.delay_type || "days"} 
                     onValueChange={(v) => setNewAutomation(prev => ({ ...prev, delay_type: v }))}
@@ -512,8 +512,8 @@ export function AutomationsTab() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="hours">Hours</SelectItem>
-                      <SelectItem value="days">Days</SelectItem>
+                      <SelectItem value="hours"><T k="literal.settings.hours.9e25a34e" /></SelectItem>
+                      <SelectItem value="days"><T k="literal.settings.days.f6bb0f46" /></SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -528,7 +528,7 @@ export function AutomationsTab() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Send At Time</Label>
+                  <Label><T k="literal.settings.send_at_time.adb1a405" /></Label>
                   <Input 
                     type="time" 
                     value={newAutomation.send_at_time || "10:00"} 
@@ -540,7 +540,7 @@ export function AutomationsTab() {
 
             {newAutomation.trigger_type === "time_after" && (
               <div className="space-y-2">
-                <Label>Condition</Label>
+                <Label><T k="literal.settings.condition.2f497932" /></Label>
                 <Select 
                   value={newAutomation.condition || ""} 
                   onValueChange={(v) => setNewAutomation(prev => ({ ...prev, condition: v }))}
@@ -585,9 +585,9 @@ export function AutomationsTab() {
       <AlertDialog open={!!deleteConfirmId} onOpenChange={() => setDeleteConfirmId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Automation</AlertDialogTitle>
+            <AlertDialogTitle><T k="literal.settings.delete_automation.06d6caa3" /></AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this automation? This action cannot be undone.
+              <T k="literal.settings.are_you_sure_you_want_to_delete_this_automat.196bcf84" />
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

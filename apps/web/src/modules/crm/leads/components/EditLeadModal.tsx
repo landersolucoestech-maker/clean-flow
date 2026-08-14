@@ -589,7 +589,7 @@ export function EditLeadModal({ open, onOpenChange, estimate, onSave }: EditLead
                       </Badge>
                     ))
                   ) : (
-                    <span className="text-sm text-muted-foreground">No tags selected</span>
+                    <span className="text-sm text-muted-foreground"><T k="literal.crm.no_tags_selected.64fcdedb" /></span>
                   )}
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -633,7 +633,7 @@ export function EditLeadModal({ open, onOpenChange, estimate, onSave }: EditLead
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="leadSource" className="flex items-center gap-1">
-                  Lead Source <span className="text-destructive">*</span>
+                  <T k="literal.crm.lead_source.272a3bc1" /> <span className="text-destructive">*</span>
                 </Label>
                 <Select
                   value={formData.leadSource || "none"}
@@ -656,7 +656,7 @@ export function EditLeadModal({ open, onOpenChange, estimate, onSave }: EditLead
                     <SelectValue placeholder="Select source" />
                   </SelectTrigger>
                   <SelectContent className="bg-popover border-border z-50">
-                    <SelectItem value="none">Select source...</SelectItem>
+                    <SelectItem value="none"><T k="literal.crm.select_source.234237b8" /></SelectItem>
                     {ORIGIN_OPTIONS.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
@@ -672,7 +672,7 @@ export function EditLeadModal({ open, onOpenChange, estimate, onSave }: EditLead
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="stage">Lead Status</Label>
+                <Label htmlFor="stage"><T k="literal.crm.lead_status.72a23358" /></Label>
                 <Select
                   value={formData.stage}
                   onValueChange={(value) => setFormData({ ...formData, stage: value })}
@@ -695,7 +695,7 @@ export function EditLeadModal({ open, onOpenChange, estimate, onSave }: EditLead
             {formData.leadSource === "referral" && (
               <div className="space-y-4 p-4 bg-muted/30 rounded-lg border border-border/50">
                 <div className="flex items-center gap-4">
-                  <Label className="text-sm font-medium">Referral Source:</Label>
+                  <Label className="text-sm font-medium"><T k="literal.crm.referral_source.dc0b1fdb" /></Label>
                   <div className="flex items-center gap-4">
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input
@@ -711,7 +711,7 @@ export function EditLeadModal({ open, onOpenChange, estimate, onSave }: EditLead
                         }
                         className="w-4 h-4"
                       />
-                      <span className="text-sm">Existing Customer</span>
+                      <span className="text-sm"><T k="literal.crm.existing_customer.be0896d6" /></span>
                     </label>
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input
@@ -727,14 +727,14 @@ export function EditLeadModal({ open, onOpenChange, estimate, onSave }: EditLead
                         }
                         className="w-4 h-4"
                       />
-                      <span className="text-sm">Manual Entry</span>
+                      <span className="text-sm"><T k="literal.crm.manual_entry.a116aeb9" /></span>
                     </label>
                   </div>
                 </div>
 
                 {formData.referralType === "existing" ? (
                   <div className="space-y-2">
-                    <Label>Referring Customer</Label>
+                    <Label><T k="literal.crm.referring_customer.32341917" /></Label>
                     <Select
                       value={formData.referralCustomerId || "none"}
                       onValueChange={(value) =>
@@ -748,7 +748,7 @@ export function EditLeadModal({ open, onOpenChange, estimate, onSave }: EditLead
                         <SelectValue placeholder="Select a customer" />
                       </SelectTrigger>
                       <SelectContent className="bg-popover border-border z-50 max-h-60">
-                        <SelectItem value="none">Select a customer...</SelectItem>
+                        <SelectItem value="none"><T k="literal.crm.select_a_customer.e2973ed7" /></SelectItem>
                         {customers.map((customer) => (
                           <SelectItem key={customer.id} value={customer.id}>
                             <div className="flex items-center gap-2">
@@ -762,7 +762,7 @@ export function EditLeadModal({ open, onOpenChange, estimate, onSave }: EditLead
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <Label htmlFor="referralName">Referrer Name</Label>
+                    <Label htmlFor="referralName"><T k="literal.crm.referrer_name.5e88c88d" /></Label>
                     <Input
                       id="referralName"
                       value={formData.referralName}
@@ -794,7 +794,7 @@ export function EditLeadModal({ open, onOpenChange, estimate, onSave }: EditLead
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
                   <SelectContent className="bg-popover border-border z-50">
-                    <SelectItem value="none">Select type...</SelectItem>
+                    <SelectItem value="none"><T k="literal.crm.select_type.fd192fa7" /></SelectItem>
                     {SERVICE_TYPE_OPTIONS.map((type) => (
                       <SelectItem key={type.value} value={type.value}>
                         {type.label}
@@ -813,7 +813,7 @@ export function EditLeadModal({ open, onOpenChange, estimate, onSave }: EditLead
                     <SelectValue placeholder="Select property" />
                   </SelectTrigger>
                   <SelectContent className="bg-popover border-border z-50">
-                    <SelectItem value="none">Select property...</SelectItem>
+                    <SelectItem value="none"><T k="literal.crm.select_property.d345a641" /></SelectItem>
                     {PROPERTY_TYPES.map((type) => (
                       <SelectItem key={type.value} value={type.value}>
                         {type.label}
@@ -823,7 +823,7 @@ export function EditLeadModal({ open, onOpenChange, estimate, onSave }: EditLead
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Floors / Type of Residence</Label>
+                <Label><T k="literal.crm.floors_type_of_residence.243e7f2e" /></Label>
                 <Select
                   value={formData.residenceType || "none"}
                   onValueChange={(value) => setFormData({ ...formData, residenceType: value === "none" ? "" : value })}
@@ -832,7 +832,7 @@ export function EditLeadModal({ open, onOpenChange, estimate, onSave }: EditLead
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
                   <SelectContent className="bg-popover border-border z-50">
-                    <SelectItem value="none">Select type...</SelectItem>
+                    <SelectItem value="none"><T k="literal.crm.select_type.fd192fa7" /></SelectItem>
                     {RESIDENCE_TYPES.map((type) => (
                       <SelectItem key={type.value} value={type.value}>
                         {type.label}
@@ -884,7 +884,7 @@ export function EditLeadModal({ open, onOpenChange, estimate, onSave }: EditLead
                     <SelectValue placeholder="Select frequency" />
                   </SelectTrigger>
                   <SelectContent className="bg-popover border-border z-50">
-                    <SelectItem value="none">Select frequency...</SelectItem>
+                    <SelectItem value="none"><T k="literal.crm.select_frequency.e50f1e27" /></SelectItem>
                     {FREQUENCY_OPTIONS_UI.map((freq) => (
                       <SelectItem key={freq.value} value={freq.value}>
                         {freq.label}
@@ -1081,7 +1081,7 @@ export function EditLeadModal({ open, onOpenChange, estimate, onSave }: EditLead
 
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
                     <div className="space-y-2">
-                      <Label className="text-xs">Location Name</Label>
+                      <Label className="text-xs"><T k="literal.crm.location_name.266d74e3" /></Label>
                       <Input
                         value={addr.name}
                         onChange={(e) => updateAddress(addr.id, "name", e.target.value)}
@@ -1090,7 +1090,7 @@ export function EditLeadModal({ open, onOpenChange, estimate, onSave }: EditLead
                       />
                     </div>
                     <div className="space-y-2 sm:col-span-2 lg:col-span-2">
-                      <Label className="text-xs">Street Address</Label>
+                      <Label className="text-xs"><T k="literal.crm.street_address.ea00c66e" /></Label>
                       <AddressAutocompleteInput
                         value={addr.address}
                         onChange={(value) => updateAddress(addr.id, "address", value)}
@@ -1137,7 +1137,7 @@ export function EditLeadModal({ open, onOpenChange, estimate, onSave }: EditLead
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-xs">ZIP</Label>
+                        <Label className="text-xs"><T k="literal.crm.zip.d9d220ab" /></Label>
                         <Input
                           value={addr.postalCode}
                           onChange={(e) => updateAddress(addr.id, "postalCode", e.target.value)}
@@ -1149,7 +1149,7 @@ export function EditLeadModal({ open, onOpenChange, estimate, onSave }: EditLead
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Address Notes</Label>
+                    <Label><T k="literal.crm.address_notes.c26a5abb" /></Label>
                     <Input
                       value={addr.notes}
                       onChange={(e) => updateAddress(addr.id, "notes", e.target.value)}

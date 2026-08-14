@@ -562,7 +562,7 @@ export function AppointmentDetailsView({
                   <Users className="h-4 w-4" />
                 </IconBubble>
                 <div className="min-w-0">
-                  <p className="text-xs text-muted-foreground">Team Assigned</p>
+                  <p className="text-xs text-muted-foreground"><T k="literal.schedule.team_assigned.d4b5c5c3" /></p>
                   <div className="mt-1 space-y-3">
                     {appointment.team && appointment.team.trim() ? (
                       Array.from(
@@ -587,7 +587,7 @@ export function AppointmentDetailsView({
                         );
                       })
                     ) : (
-                      <span className="text-sm text-muted-foreground">No team assigned</span>
+                      <span className="text-sm text-muted-foreground"><T k="literal.schedule.no_team_assigned.1902688f" /></span>
                     )}
                   </div>
 
@@ -598,7 +598,7 @@ export function AppointmentDetailsView({
                     onClick={handleOpenReviewPreview}
                   >
                     <Star className="h-4 w-4" />
-                    Request Review
+                    <T k="literal.schedule.request_review.ab3cd192" />
                   </Button>
                 </div>
               </div>
@@ -702,7 +702,7 @@ export function AppointmentDetailsView({
       <Dialog open={addNoteOpen} onOpenChange={setAddNoteOpen}>
         <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
-            <DialogTitle>Add Job Note</DialogTitle>
+            <DialogTitle><T k="literal.schedule.add_job_note.37239fdb" /></DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <Textarea
@@ -716,7 +716,7 @@ export function AppointmentDetailsView({
             <Button variant="outline" onClick={() => setAddNoteOpen(false)}>
               <T k="common.cancel" />
             </Button>
-            <Button onClick={handleAddNote}>Add Note</Button>
+            <Button onClick={handleAddNote}><T k="literal.schedule.add_note.8b851bda" /></Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -725,7 +725,7 @@ export function AppointmentDetailsView({
       <Dialog open={addAdditionalNoteOpen} onOpenChange={setAddAdditionalNoteOpen}>
         <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
-            <DialogTitle>Add Additional Note</DialogTitle>
+            <DialogTitle><T k="literal.schedule.add_additional_note.672808cd" /></DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <Textarea
@@ -739,7 +739,7 @@ export function AppointmentDetailsView({
             <Button variant="outline" onClick={() => setAddAdditionalNoteOpen(false)}>
               <T k="common.cancel" />
             </Button>
-            <Button onClick={handleAddAdditionalNote}>Add Note</Button>
+            <Button onClick={handleAddAdditionalNote}><T k="literal.schedule.add_note.8b851bda" /></Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -748,7 +748,7 @@ export function AppointmentDetailsView({
       <Dialog open={addFeedbackOpen} onOpenChange={setAddFeedbackOpen}>
         <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
-            <DialogTitle>Add Feedback</DialogTitle>
+            <DialogTitle><T k="literal.schedule.add_feedback.598123de" /></DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <Textarea
@@ -762,7 +762,7 @@ export function AppointmentDetailsView({
             <Button variant="outline" onClick={() => setAddFeedbackOpen(false)}>
               <T k="common.cancel" />
             </Button>
-            <Button onClick={handleAddFeedback}>Add Feedback</Button>
+            <Button onClick={handleAddFeedback}><T k="literal.schedule.add_feedback.598123de" /></Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

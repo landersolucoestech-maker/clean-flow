@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useState } from "react";
 import DOMPurify from "dompurify";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -146,14 +147,14 @@ export function AIConsultantCard({ metrics }: AIConsultantCardProps) {
             </div>
             <div>
               <CardTitle className="text-xl flex items-center gap-2">
-                Consultor IA de Performance
+                <T k="literal.reports.consultor_ia_de_performance.f8ef44d9" />
                 <Badge variant="outline" className="text-purple-500 border-purple-500/30">
                   <Sparkles className="w-3 h-3 mr-1" />
-                  AI Powered
+                  <T k="literal.reports.ai_powered.2650d468" />
                 </Badge>
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                Análise inteligente do seu negócio com diagnósticos e recomendações
+                <T k="literal.reports.analise_inteligente_do_seu_negocio_com_diagn.5dea3528" />
               </p>
             </div>
           </div>
@@ -165,17 +166,17 @@ export function AIConsultantCard({ metrics }: AIConsultantCardProps) {
             {isLoading ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Analisando...
+                <T k="literal.reports.analisando.b7fe80ab" />
               </>
             ) : hasAnalyzed ? (
               <>
                 <RefreshCw className="w-4 h-4 mr-2" />
-                Reanalisar
+                <T k="literal.reports.reanalisar.11de78d5" />
               </>
             ) : (
               <>
                 <Sparkles className="w-4 h-4 mr-2" />
-                Analisar Negócio
+                <T k="literal.reports.analisar_negocio.df923cb0" />
               </>
             )}
           </Button>
@@ -187,7 +188,7 @@ export function AIConsultantCard({ metrics }: AIConsultantCardProps) {
             <div className="p-4 bg-purple-500/10 rounded-full mb-4">
               <Bot className="w-12 h-12 text-purple-500" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">Pronto para analisar seu negócio</h3>
+            <h3 className="text-lg font-semibold mb-2"><T k="literal.reports.pronto_para_analisar_seu_negocio.e4679b34" /></h3>
             <p className="text-muted-foreground max-w-md">
               Clique em "Analisar Negócio" para receber diagnósticos, identificar gargalos, 
               antecipar riscos e obter ações práticas para melhorar sua performance.
@@ -204,7 +205,7 @@ export function AIConsultantCard({ metrics }: AIConsultantCardProps) {
             {isLoading && (
               <div className="flex items-center gap-2 text-muted-foreground mt-4">
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Gerando análise...</span>
+                <span><T k="literal.reports.gerando_analise.8c7fbf83" /></span>
               </div>
             )}
           </ScrollArea>

@@ -196,8 +196,8 @@ export function BroadcastModal({ open, onOpenChange, customers }: BroadcastModal
     <Dialog open={open} onOpenChange={(next) => { if (!next) void close(); }}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2"><Users className="h-5 w-5" /> Broadcast Communication</DialogTitle>
-          <DialogDescription>Send one message to selected customers or team members.</DialogDescription>
+          <DialogTitle className="flex items-center gap-2"><Users className="h-5 w-5" /> <T k="literal.communications.broadcast_communication.9ce4f035" /></DialogTitle>
+          <DialogDescription><T k="literal.communications.send_one_message_to_selected_customers_or_te.8673987a" /></DialogDescription>
         </DialogHeader>
 
         <Tabs value={tab} onValueChange={(value) => setTab(value as RecipientTab)}>
@@ -244,7 +244,7 @@ export function BroadcastModal({ open, onOpenChange, customers }: BroadcastModal
               {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Paperclip className="mr-2 h-4 w-4" />}
               Attach
             </Button>
-            <span className="text-xs text-muted-foreground">Maximum 10 MB per file</span>
+            <span className="text-xs text-muted-foreground"><T k="literal.communications.maximum_10_mb_per_file.66a9808f" /></span>
           </div>
 
           {!!attachments.length && (

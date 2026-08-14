@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Loader2, CheckCircle, XCircle } from "lucide-react";
@@ -76,12 +77,12 @@ export default function RingCentralCallback() {
           </p>
           {status === "success" && (
             <p className="text-sm text-muted-foreground mt-2">
-              Esta janela fechará automaticamente...
+              <T k="literal.communications.esta_janela_fechara_automaticamente.b7a66cfb" />
             </p>
           )}
           {status === "error" && (
             <p className="text-sm text-muted-foreground mt-2">
-              Você pode fechar esta janela e tentar novamente.
+              <T k="literal.communications.voce_pode_fechar_esta_janela_e_tentar_novame.32feae95" />
             </p>
           )}
         </CardContent>

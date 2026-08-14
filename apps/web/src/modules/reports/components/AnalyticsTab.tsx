@@ -103,7 +103,7 @@ function MetricCard({
 
             <div className="mt-3 space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Percentil</span>
+                <span className="text-muted-foreground"><T k="literal.reports.percentil.6f3979d8" /></span>
                 <span className={`font-semibold ${getPercentileColor(percentile)}`}>
                   {percentile}%
                 </span>
@@ -118,12 +118,12 @@ function MetricCard({
 
             {marketAverage && (
               <p className="text-xs text-muted-foreground mt-2">
-                Média do mercado: <span className="font-medium">{marketAverage}</span>
+                <T k="literal.reports.media_do_mercado.8583ee66" /> <span className="font-medium">{marketAverage}</span>
               </p>
             )}
             {topPerformers && (
               <p className="text-xs text-muted-foreground">
-                Top performers: <span className="font-medium">{topPerformers}</span>
+                <T k="literal.reports.top_performers.1ce1a764" /> <span className="font-medium">{topPerformers}</span>
               </p>
             )}
             {insight && (
@@ -419,7 +419,7 @@ export function AnalyticsTab() {
         <CardHeader className="pb-2">
           <div className="flex items-center gap-2">
             <Trophy className="w-6 h-6 text-primary" />
-            <CardTitle className="text-xl">Overall Business Performance Score</CardTitle>
+            <CardTitle className="text-xl"><T k="literal.reports.overall_business_performance_score.0d6805cf" /></CardTitle>
           </div>
         </CardHeader>
         <CardContent>
@@ -437,24 +437,24 @@ export function AnalyticsTab() {
               </div>
               <div className="space-y-1">
                 <p className="text-muted-foreground text-sm">
-                  Compared to similar service-based companies in your market.
+                  <T k="literal.reports.compared_to_similar_service_based_companies_.128b963c" />
                 </p>
                 <div className="flex flex-wrap gap-2 mt-3">
                   <Badge variant="outline" className="text-xs">
                     <TrendingUp className="w-3 h-3 mr-1" />
-                    Crescimento de customers
+                    <T k="literal.reports.crescimento_de_customers.a68640df" />
                   </Badge>
                   <Badge variant="outline" className="text-xs">
                     <Briefcase className="w-3 h-3 mr-1" />
-                    Eficiência operacional
+                    <T k="literal.reports.eficiencia_operacional.9ef1af78" />
                   </Badge>
                   <Badge variant="outline" className="text-xs">
                     <DollarSign className="w-3 h-3 mr-1" />
-                    Rentabilidade
+                    <T k="literal.reports.rentabilidade.a3f2f339" />
                   </Badge>
                   <Badge variant="outline" className="text-xs">
                     <Receipt className="w-3 h-3 mr-1" />
-                    Custos
+                    <T k="literal.reports.custos.8c5a2c97" />
                   </Badge>
                 </div>
               </div>
@@ -467,11 +467,11 @@ export function AnalyticsTab() {
       <div>
         <div className="flex items-center gap-2 mb-4">
           <DollarSign className="w-5 h-5 text-primary" />
-          <h2 className="text-lg font-semibold text-foreground">Relatórios Financeiros</h2>
+          <h2 className="text-lg font-semibold text-foreground"><T k="literal.reports.relatorios_financeiros.47d6fec1" /></h2>
         </div>
         
         {/* Revenue */}
-        <h3 className="text-md font-medium text-muted-foreground mb-3">Receita</h3>
+        <h3 className="text-md font-medium text-muted-foreground mb-3"><T k="reports.revenue" /></h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <MetricCard
             icon={<DollarSign className="w-5 h-5 text-primary" />}
@@ -497,7 +497,7 @@ export function AnalyticsTab() {
         </div>
 
         {/* Expenses */}
-        <h3 className="text-md font-medium text-muted-foreground mb-3">Despesas</h3>
+        <h3 className="text-md font-medium text-muted-foreground mb-3"><T k="reports.expenses" /></h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <MetricCard
             icon={<Receipt className="w-5 h-5 text-primary" />}
@@ -522,7 +522,7 @@ export function AnalyticsTab() {
         </div>
 
         {/* Profit */}
-        <h3 className="text-md font-medium text-muted-foreground mb-3">Lucro</h3>
+        <h3 className="text-md font-medium text-muted-foreground mb-3"><T k="literal.reports.lucro.cec4a6eb" /></h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <MetricCard
             icon={<TrendingUp className="w-5 h-5 text-primary" />}
@@ -546,7 +546,7 @@ export function AnalyticsTab() {
       <div>
         <div className="flex items-center gap-2 mb-4">
           <Briefcase className="w-5 h-5 text-primary" />
-          <h2 className="text-lg font-semibold text-foreground">Relatório de Jobs (Operacional)</h2>
+          <h2 className="text-lg font-semibold text-foreground"><T k="literal.reports.relatorio_de_jobs_operacional.ebad18eb" /></h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <MetricCard
@@ -597,7 +597,7 @@ export function AnalyticsTab() {
       <div>
         <div className="flex items-center gap-2 mb-4">
           <Calendar className="w-5 h-5 text-primary" />
-          <h2 className="text-lg font-semibold text-foreground">Relatório de Agendamentos</h2>
+          <h2 className="text-lg font-semibold text-foreground"><T k="literal.reports.relatorio_de_agendamentos.44ab20de" /></h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <KPICard
@@ -632,7 +632,7 @@ export function AnalyticsTab() {
       <div>
         <div className="flex items-center gap-2 mb-4">
           <Users className="w-5 h-5 text-primary" />
-          <h2 className="text-lg font-semibold text-foreground">Relatório de Clientes</h2>
+          <h2 className="text-lg font-semibold text-foreground"><T k="literal.reports.relatorio_de_clientes.96e177a3" /></h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <MetricCard
@@ -665,10 +665,10 @@ export function AnalyticsTab() {
       <div>
         <div className="flex items-center gap-2 mb-4">
           <UserCog className="w-5 h-5 text-primary" />
-          <h2 className="text-lg font-semibold text-foreground">Relatório de Equipe (Payroll & Performance)</h2>
+          <h2 className="text-lg font-semibold text-foreground"><T k="literal.reports.relatorio_de_equipe_payroll_performance.f53ef2e2" /></h2>
         </div>
         
-        <h3 className="text-md font-medium text-muted-foreground mb-3">Equipe</h3>
+        <h3 className="text-md font-medium text-muted-foreground mb-3"><T k="jobs.staff" /></h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <KPICard
             icon={<Users className="w-6 h-6" />}
@@ -720,7 +720,7 @@ export function AnalyticsTab() {
           />
         </div>
 
-        <h3 className="text-md font-medium text-muted-foreground mb-3">Performance</h3>
+        <h3 className="text-md font-medium text-muted-foreground mb-3"><T k="literal.reports.performance.63c90455" /></h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <MetricCard
             icon={<DollarSign className="w-5 h-5 text-primary" />}
@@ -745,7 +745,7 @@ export function AnalyticsTab() {
       <div>
         <div className="flex items-center gap-2 mb-4">
           <MessageSquare className="w-5 h-5 text-primary" />
-          <h2 className="text-lg font-semibold text-foreground">Relatório de Comunicações</h2>
+          <h2 className="text-lg font-semibold text-foreground"><T k="literal.reports.relatorio_de_comunicacoes.2c0eef7a" /></h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <KPICard

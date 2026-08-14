@@ -21,7 +21,7 @@ export function AppointmentBillingSummary({ amount, onSendInvoice }: Appointment
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Cleaning Rate</span>
+            <span className="text-sm text-muted-foreground"><T k="literal.schedule.cleaning_rate.eb967784" /></span>
             <span className="text-sm font-semibold text-foreground">{formattedAmount}</span>
           </div>
           <div className="flex items-center justify-between">
@@ -29,11 +29,11 @@ export function AppointmentBillingSummary({ amount, onSendInvoice }: Appointment
             <span className="text-sm font-semibold text-foreground">{formattedAmount}</span>
           </div>
           <div className="pt-1">
-            <span className="text-sm text-muted-foreground">Invoice status</span>
+            <span className="text-sm text-muted-foreground"><T k="literal.schedule.invoice_status.a5a0bffa" /></span>
             <div className="mt-2 flex items-center gap-2">
               <Button variant="outline" size="sm" className="h-8 gap-1.5 rounded-full px-3 text-xs shadow-none" onClick={onSendInvoice}>
                 <Send className="h-4 w-4" />
-                Send Invoice
+                <T k="literal.schedule.send_invoice.326bdd9f" />
               </Button>
               <Badge className="border-transparent bg-secondary px-2.5 py-1 text-[10px] font-semibold text-secondary-foreground shadow-none"><T k="invoice.sent" /></Badge>
             </div>
@@ -41,7 +41,7 @@ export function AppointmentBillingSummary({ amount, onSendInvoice }: Appointment
         </div>
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Payment status</span>
+            <span className="text-sm text-muted-foreground"><T k="literal.schedule.payment_status.9dfea404" /></span>
             <Badge className="border-transparent bg-secondary px-3 py-1 text-[10px] font-semibold text-secondary-foreground shadow-none"><T k="leads.pending" /></Badge>
           </div>
         </div>

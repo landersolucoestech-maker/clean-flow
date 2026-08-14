@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { loadGoogleCalendarPreferences } from "../hooks/useGoogleCalendarSync";
@@ -25,7 +26,7 @@ export function IntegrationsTab() {
     return (
       <div className="flex min-h-40 items-center justify-center text-muted-foreground">
         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        Carregando integrações...
+        <T k="literal.settings.carregando_integracoes.aba0c8cc" />
       </div>
     );
   }

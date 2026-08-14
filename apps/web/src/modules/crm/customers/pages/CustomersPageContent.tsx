@@ -319,7 +319,7 @@ export function Customers() {
             <CardHeader className="border-b border-border px-4 py-3">
               <div className="flex flex-col gap-1">
                 <CardTitle className="text-sm font-semibold"><T k="customers.title" /></CardTitle>
-                <p className="text-xs text-muted-foreground">Search, filter and manage the customer directory.</p>
+                <p className="text-xs text-muted-foreground"><T k="literal.crm.search_filter_and_manage_the_customer_direct.f86b665e" /></p>
               </div>
             </CardHeader>
             <div className="flex flex-col gap-3 border-b border-border bg-muted/20 p-3 lg:flex-row lg:items-center">

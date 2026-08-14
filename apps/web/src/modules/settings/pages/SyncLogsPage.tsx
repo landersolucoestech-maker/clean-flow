@@ -75,9 +75,9 @@ export function SyncLogs() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "success":
-        return <Badge className="bg-success/10 text-success border-success/20">Success</Badge>;
+        return <Badge className="bg-success/10 text-success border-success/20"><T k="literal.settings.success.42a8f651" /></Badge>;
       case "error":
-        return <Badge variant="destructive">Error</Badge>;
+        return <Badge variant="destructive"><T k="literal.settings.error.7f2f6a15" /></Badge>;
       case "pending":
         return <Badge className="bg-warning/10 text-warning border-warning/20"><T k="settings.pending" /></Badge>;
       default:
@@ -193,9 +193,9 @@ export function SyncLogs() {
           {/* Page Header */}
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Sync Logs</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl"><T k="literal.settings.sync_logs.a85e431b" /></h1>
               <p className="text-muted-foreground">
-                Monitor QuickBooks synchronization activity and troubleshoot issues
+                <T k="literal.settings.monitor_quickbooks_synchronization_activity_.7a340d46" />
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2 lg:justify-end">
@@ -207,7 +207,7 @@ export function SyncLogs() {
               ) : (
                 <Badge variant="outline" className="px-3 py-1">
                   <XCircle className="w-3 h-3 mr-1" />
-                  Not Connected
+                  <T k="literal.settings.not_connected.62f4d557" />
                 </Badge>
               )}
               {!isConnected && (
@@ -215,7 +215,7 @@ export function SyncLogs() {
                   {isLoading ? (
                     <>
                       <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                      Connecting...
+                      <T k="literal.settings.connecting.b98e3f99" />
                     </>
                   ) : (
                     "Connect QuickBooks"
@@ -231,7 +231,7 @@ export function SyncLogs() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Total Syncs</p>
+                    <p className="text-sm font-medium text-muted-foreground"><T k="literal.settings.total_syncs.ee787764" /></p>
                     <p className="text-2xl font-bold text-foreground">{stats.total}</p>
                   </div>
                   <RefreshCw className="w-8 h-8 text-primary" />
@@ -243,7 +243,7 @@ export function SyncLogs() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Successful</p>
+                    <p className="text-sm font-medium text-muted-foreground"><T k="literal.settings.successful.d7932a29" /></p>
                     <p className="text-2xl font-bold text-success">{stats.success}</p>
                   </div>
                   <CheckCircle className="w-8 h-8 text-success" />
@@ -255,7 +255,7 @@ export function SyncLogs() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Errors</p>
+                    <p className="text-sm font-medium text-muted-foreground"><T k="literal.settings.errors.805e86a8" /></p>
                     <p className="text-2xl font-bold text-destructive">{stats.error}</p>
                   </div>
                   <XCircle className="w-8 h-8 text-destructive" />
@@ -267,7 +267,7 @@ export function SyncLogs() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Last Sync</p>
+                    <p className="text-sm font-medium text-muted-foreground"><T k="literal.settings.last_sync.2072a8ad" /></p>
                     <p className="text-lg font-bold text-foreground">
                       {lastSyncAt 
                         ? format(new Date(lastSyncAt), "MMM d, h:mm a")
@@ -285,11 +285,11 @@ export function SyncLogs() {
           <Card className="border-border/80 shadow-sm">
             <CardHeader className="pb-4">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <CardTitle className="text-lg">Sync History</CardTitle>
+                <CardTitle className="text-lg"><T k="literal.settings.sync_history.1fb44e19" /></CardTitle>
                 <div className="flex items-center gap-2">
                   <Button variant="outline" size="sm" onClick={handleExportLogs}>
                     <Download className="w-4 h-4 mr-1" />
-                    Export CSV
+                    <T k="literal.settings.export_csv.5755f9ac" />
                   </Button>
                   <Button 
                     variant="outline" 
@@ -298,7 +298,7 @@ export function SyncLogs() {
                     className="text-destructive hover:text-destructive"
                   >
                     <Trash2 className="w-4 h-4 mr-1" />
-                    Clear Logs
+                    <T k="literal.settings.clear_logs.7c3089dc" />
                   </Button>
                 </div>
               </div>
@@ -323,9 +323,9 @@ export function SyncLogs() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all"><T k="transactions.allTypes" /></SelectItem>
-                    <SelectItem value="invoice">Invoice</SelectItem>
+                    <SelectItem value="invoice"><T k="literal.settings.invoice.f9f38818" /></SelectItem>
                     <SelectItem value="customer"><T k="common.customer" /></SelectItem>
-                    <SelectItem value="payment">Payment</SelectItem>
+                    <SelectItem value="payment"><T k="literal.settings.payment.b41a92be" /></SelectItem>
                     <SelectItem value="payroll"><T k="sidebar.payroll" /></SelectItem>
                   </SelectContent>
                 </Select>
@@ -337,8 +337,8 @@ export function SyncLogs() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all"><T k="common.allStatus" /></SelectItem>
-                    <SelectItem value="success">Success</SelectItem>
-                    <SelectItem value="error">Error</SelectItem>
+                    <SelectItem value="success"><T k="literal.settings.success.42a8f651" /></SelectItem>
+                    <SelectItem value="error"><T k="literal.settings.error.7f2f6a15" /></SelectItem>
                     <SelectItem value="pending"><T k="settings.pending" /></SelectItem>
                   </SelectContent>
                 </Select>
@@ -356,7 +356,7 @@ export function SyncLogs() {
               {filteredLogs.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
                   <RefreshCw className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p className="text-lg font-medium">No sync logs found</p>
+                  <p className="text-lg font-medium"><T k="literal.settings.no_sync_logs_found.9902442d" /></p>
                   <p className="text-sm">
                     {syncLogs.length === 0 
                       ? "Sync activities will appear here once you start syncing with QuickBooks"
@@ -372,9 +372,9 @@ export function SyncLogs() {
                         <TableHead className="w-[100px]"><T k="transactions.type" /></TableHead>
                         <TableHead className="w-[100px]"><T k="admin.logs.action" /></TableHead>
                         <TableHead className="w-[100px]"><T k="common.status" /></TableHead>
-                        <TableHead>Message</TableHead>
-                        <TableHead className="w-[100px]">Local ID</TableHead>
-                        <TableHead className="w-[100px]">QB ID</TableHead>
+                        <TableHead><T k="literal.communications.message.68f4145f" /></TableHead>
+                        <TableHead className="w-[100px]"><T k="literal.settings.local_id.40c363f7" /></TableHead>
+                        <TableHead className="w-[100px]"><T k="literal.settings.qb_id.c108da54" /></TableHead>
                         <TableHead className="w-[80px]"><T k="common.actions" /></TableHead>
                       </TableRow>
                     </TableHeader>
@@ -429,7 +429,7 @@ export function SyncLogs() {
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                  <p>Retry sync operation</p>
+                                  <p><T k="literal.settings.retry_sync_operation.6d3dc1c4" /></p>
                                 </TooltipContent>
                               </Tooltip>
                             )}

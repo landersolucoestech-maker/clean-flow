@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import type { Dispatch, SetStateAction } from "react";
 import { User } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -50,7 +51,7 @@ export function ProfileSettingsSection({
           <div className="space-y-2">
             <Label>{t("common.email")}</Label>
             <Input type="email" value={userEmail} readOnly aria-readonly="true" placeholder={t("settings.enterEmail")} />
-            <p className="text-xs text-muted-foreground">Login email changes are managed by an administrator.</p>
+            <p className="text-xs text-muted-foreground"><T k="literal.settings.login_email_changes_are_managed_by_an_admini.cb097ac5" /></p>
           </div>
         </div>
 

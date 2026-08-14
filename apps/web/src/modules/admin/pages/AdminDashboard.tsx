@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { usePlatformAdmin } from "@/hooks/usePlatformAdmin";
@@ -17,8 +18,8 @@ export function AdminDashboard() {
     <AdminLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Dashboard administrativo</h1>
-          <p className="mt-1 text-muted-foreground">Contagens operacionais atuais do sistema</p>
+          <h1 className="text-2xl font-bold text-foreground"><T k="literal.admin.dashboard_administrativo.b4e1f8b0" /></h1>
+          <p className="mt-1 text-muted-foreground"><T k="literal.admin.contagens_operacionais_atuais_do_sistema.b160e024" /></p>
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
@@ -39,7 +40,7 @@ export function AdminDashboard() {
 
         <Card className="border-border/80 bg-card shadow-sm">
           <CardContent className="p-6 text-sm text-muted-foreground">
-            Métricas de receita, assinatura e conversão não são exibidas porque o projeto ainda não possui um provedor de pagamentos configurado.
+            <T k="literal.admin.metricas_de_receita_assinatura_e_conversao_n.3227a8fa" />
           </CardContent>
         </Card>
       </div>

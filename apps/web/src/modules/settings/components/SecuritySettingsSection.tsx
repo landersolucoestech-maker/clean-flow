@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import type { Dispatch, SetStateAction } from "react";
 import { AlertTriangle, Eye, EyeOff, Key, Lock, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -176,7 +177,7 @@ export function SecuritySettingsSection(props: SecuritySettingsSectionProps) {
             <AlertTriangle className="h-5 w-5" />
             {t("settings.securityPolicies")}
           </CardTitle>
-          <CardDescription>These account-wide policies are managed in Supabase Auth settings.</CardDescription>
+          <CardDescription><T k="literal.settings.these_account_wide_policies_are_managed_in_s.253ddc4a" /></CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

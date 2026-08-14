@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { Check, Copy, Loader2, LogOut, PhoneCall } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -47,12 +48,12 @@ export function DialpadIntegrationPanel() {
           <CardTitle className="flex flex-wrap items-center gap-2 text-lg">
             <PhoneCall className={`h-5 w-5 ${isConnected ? "text-success" : "text-primary"}`} />
             Dialpad
-            {isConnected && <Badge className="bg-success text-success-foreground">Conectado</Badge>}
+            {isConnected && <Badge className="bg-success text-success-foreground"><T k="settings.connected" /></Badge>}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Conecte o Dialpad para enviar e receber SMS/MMS pelo Communications com OAuth, refresh de token e eventos de entrega.
+            <T k="literal.settings.conecte_o_dialpad_para_enviar_e_receber_sms_.15613f55" />
           </p>
 
           {isConnected && connection && (
@@ -78,7 +79,7 @@ export function DialpadIntegrationPanel() {
               <>
                 <Button variant="outline" size="sm" disabled>
                   <Check className="mr-2 h-4 w-4 text-success" />
-                  SMS/MMS ativo
+                  <T k="literal.settings.sms_mms_ativo.2f597ebd" />
                 </Button>
                 <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={disconnect} disabled={isLoading}>
                   {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LogOut className="mr-2 h-4 w-4" />}
@@ -95,7 +96,7 @@ export function DialpadIntegrationPanel() {
 
           {!isConnected && (
             <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">Redirect URI para cadastrar no app OAuth do Dialpad</Label>
+              <Label className="text-xs text-muted-foreground"><T k="literal.settings.redirect_uri_para_cadastrar_no_app_oauth_do_.3394f885" /></Label>
               <div className="flex gap-2">
                 <Input value={redirectUri} readOnly className="h-9 font-mono text-xs" />
                 <TooltipProvider>
@@ -105,7 +106,7 @@ export function DialpadIntegrationPanel() {
                         {copied ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent>Copiar</TooltipContent>
+                    <TooltipContent><T k="literal.settings.copiar.88541077" /></TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
               </div>
@@ -116,18 +117,18 @@ export function DialpadIntegrationPanel() {
 
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Provedor de SMS</CardTitle>
+          <CardTitle className="text-base"><T k="literal.settings.provedor_de_sms.2ab244e9" /></CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-sm text-muted-foreground">
-            Escolha qual integração o Communications deve usar. Automático preserva RingCentral como prioridade e usa Dialpad quando necessário.
+            <T k="literal.settings.escolha_qual_integracao_o_communications_dev.139d5001" />
           </p>
           <Select value={smsProvider} onValueChange={handleProviderChange}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="auto">Automático</SelectItem>
+              <SelectItem value="auto"><T k="literal.settings.automatico.c9c992be" /></SelectItem>
               <SelectItem value="ringcentral" disabled={!ringCentralConnected}>RingCentral{!ringCentralConnected ? " — desconectado" : ""}</SelectItem>
               <SelectItem value="dialpad" disabled={!isConnected}>Dialpad{!isConnected ? " — desconectado" : ""}</SelectItem>
             </SelectContent>

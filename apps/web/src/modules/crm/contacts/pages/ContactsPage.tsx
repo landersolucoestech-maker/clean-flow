@@ -96,14 +96,14 @@ export function Contacts() {
   return (
     <CrmPageBridge>
       <PageLayout
-        headerActions={mayCreate ? <Button size="sm" onClick={openCreate}><Plus className="mr-2 h-4 w-4" />Create Contact</Button> : undefined}
+        headerActions={mayCreate ? <Button size="sm" onClick={openCreate}><Plus className="mr-2 h-4 w-4" /><T k="literal.crm.create_contact.e4a4312d" /></Button> : undefined}
       >
       <div className="space-y-3">
         {!mayView ? (
           <Card className="border-destructive/40">
             <CardContent className="p-6">
-              <h1 className="text-lg font-semibold text-foreground">Contacts access restricted</h1>
-              <p className="mt-1 text-sm text-muted-foreground">Your current role does not have permission to view CRM contacts.</p>
+              <h1 className="text-lg font-semibold text-foreground"><T k="literal.crm.contacts_access_restricted.cf2663ad" /></h1>
+              <p className="mt-1 text-sm text-muted-foreground"><T k="literal.crm.your_current_role_does_not_have_permission_t.8a6caeaf" /></p>
             </CardContent>
           </Card>
         ) : (
@@ -112,7 +112,7 @@ export function Contacts() {
             <div className="flex flex-col gap-3 border-b border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="text-base font-semibold text-foreground"><T k="crm.tabs.contacts" /></h2>
-                <p className="mt-0.5 text-sm text-muted-foreground">Manage suppliers, partners, service providers and other business contacts.</p>
+                <p className="mt-0.5 text-sm text-muted-foreground"><T k="literal.crm.manage_suppliers_partners_service_providers_.1ef718fb" /></p>
               </div>
             </div>
 
@@ -125,7 +125,7 @@ export function Contacts() {
                   <Select value={typeFilter} onValueChange={(value) => { setTypeFilter(value); setPage(1); }}>
                     <SelectTrigger><SelectValue placeholder="Contact Type" /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Contact Types</SelectItem>
+                      <SelectItem value="all"><T k="literal.crm.all_contact_types.d6154564" /></SelectItem>
                       {CONTACT_TYPES.map((type) => <SelectItem key={type} value={type}>{type}</SelectItem>)}
                     </SelectContent>
                   </Select>
@@ -142,7 +142,7 @@ export function Contacts() {
             {error && (
               <Card className="border-destructive/40 bg-destructive/5">
                 <CardContent className="p-4">
-                  <p className="font-medium text-destructive">Unable to load contacts</p>
+                  <p className="font-medium text-destructive"><T k="literal.crm.unable_to_load_contacts.543e081f" /></p>
                   <p className="mt-1 text-sm text-muted-foreground">{error.message}</p>
                 </CardContent>
               </Card>
@@ -156,11 +156,11 @@ export function Contacts() {
                 ) : pageContacts.length === 0 ? (
                   <div className="flex min-h-72 flex-col items-center justify-center px-6 py-12 text-center">
                     <div className="rounded-full bg-muted p-4"><ContactRound className="h-7 w-7 text-muted-foreground" /></div>
-                    <h2 className="mt-4 text-lg font-semibold">No contacts found</h2>
+                    <h2 className="mt-4 text-lg font-semibold"><T k="literal.crm.no_contacts_found.81601534" /></h2>
                     <p className="mt-1 max-w-md text-sm text-muted-foreground">
                       {contacts.length === 0 ? "Create the first corporate contact for this CRM." : "Adjust the search or filters to find a contact."}
                     </p>
-                    {contacts.length === 0 && mayCreate && <Button className="mt-5" onClick={openCreate}><Plus className="mr-2 h-4 w-4" />Create Contact</Button>}
+                    {contacts.length === 0 && mayCreate && <Button className="mt-5" onClick={openCreate}><Plus className="mr-2 h-4 w-4" /><T k="literal.crm.create_contact.e4a4312d" /></Button>}
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
@@ -169,7 +169,7 @@ export function Contacts() {
                         <TableRow>
                           <TableHead><T k="common.name" /></TableHead>
                           <TableHead><T k="settings.company" /></TableHead>
-                          <TableHead>Contact Type</TableHead>
+                          <TableHead><T k="literal.crm.contact_type.fcbedcab" /></TableHead>
                           <TableHead><T k="common.contact" /></TableHead>
                           <TableHead><T k="common.status" /></TableHead>
                           <TableHead className="w-14"><span className="sr-only"><T k="common.actions" /></span></TableHead>
@@ -233,7 +233,7 @@ export function Contacts() {
           <AlertDialog open={Boolean(deleteTarget)} onOpenChange={(open) => !open && setDeleteTarget(null)}>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Delete contact?</AlertDialogTitle>
+                <AlertDialogTitle><T k="literal.crm.delete_contact.be82f324" /></AlertDialogTitle>
                 <AlertDialogDescription>This will remove {deleteTarget?.name} from Contacts. This action cannot be undone.</AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useState, useMemo, useEffect } from "react";
 import {
   Dialog,
@@ -371,7 +372,7 @@ export function CreateInvoiceModal({ open, onOpenChange, initialData }: CreateIn
                 <SelectContent className="bg-popover border-border">
                   {customerJobs.length === 0 ? (
                     <SelectItem value="none" disabled>
-                      No completed jobs
+                      <T k="literal.billing.no_completed_jobs.cf12faa2" />
                     </SelectItem>
                   ) : (
                     customerJobs.map((job) => (
@@ -556,7 +557,7 @@ export function CreateInvoiceModal({ open, onOpenChange, initialData }: CreateIn
 
           {/* Invoice Number Preview */}
           <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-            <span className="text-sm text-muted-foreground">Invoice Number:</span>
+            <span className="text-sm text-muted-foreground"><T k="literal.billing.invoice_number.55a31cfe" /></span>
             <span className="font-mono font-semibold">{nextInvoiceNumber || "Loading..."}</span>
           </div>
         </div>

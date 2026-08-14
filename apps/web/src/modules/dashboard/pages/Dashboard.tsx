@@ -77,19 +77,19 @@ export function Dashboard() {
     <PageLayout contentClassName="space-y-5 lg:space-y-6">
       <section className="flex flex-col gap-1 border-b border-border/70 pb-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">Overview</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary"><T k="literal.crm.overview.0efc2e6b" /></p>
           <h1 className="mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-[28px]">
             {t("dashboard.welcome")}{currentStaff?.name ? `, ${currentStaff.name}` : ""}!
           </h1>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{t("dashboard.subtitle")}</p>
         </div>
-        <p className="hidden text-xs text-muted-foreground lg:block">Operational snapshot for your cleaning business</p>
+        <p className="hidden text-xs text-muted-foreground lg:block"><T k="literal.dashboard.operational_snapshot_for_your_cleaning_busin.2e9ea692" /></p>
       </section>
 
       <section className="space-y-3">
         <div>
-          <h2 className="text-sm font-semibold text-foreground">Business snapshot</h2>
-          <p className="text-xs text-muted-foreground">Key indicators at a glance</p>
+          <h2 className="text-sm font-semibold text-foreground"><T k="literal.dashboard.business_snapshot.237ce5ca" /></h2>
+          <p className="text-xs text-muted-foreground"><T k="literal.dashboard.key_indicators_at_a_glance.b7f98e75" /></p>
         </div>
         <div className={`grid grid-cols-1 gap-3 sm:grid-cols-2 ${canViewFinancials ? "2xl:grid-cols-4" : "xl:grid-cols-2"}`}>
           {canViewFinancials && <StatsCard title={t("dashboard.monthlyRevenue")} value={formatCurrency(stats.monthlyRevenue)} change={`${Number(stats.revenueChange) >= 0 ? "+" : ""}${stats.revenueChange}% ${t("dashboard.fromLastMonth")}`} changeType={Number(stats.revenueChange) >= 0 ? "positive" : "negative"} icon={<DollarSign className="h-5 w-5 text-primary" />} />}
@@ -102,7 +102,7 @@ export function Dashboard() {
       <section className="space-y-3">
         <div>
           <h2 className="text-sm font-semibold text-foreground"><T k="sidebar.operations" /></h2>
-          <p className="text-xs text-muted-foreground">Recent activity and upcoming work</p>
+          <p className="text-xs text-muted-foreground"><T k="literal.dashboard.recent_activity_and_upcoming_work.f87c5c99" /></p>
         </div>
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(340px,0.85fr)]">
           <RecentActivity includeInvoices={canViewFinancials} />

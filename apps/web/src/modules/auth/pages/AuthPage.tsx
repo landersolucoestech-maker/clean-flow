@@ -85,11 +85,11 @@ export function Auth() {
           </div>
 
           <h1 className="text-4xl xl:text-5xl font-bold text-white leading-tight mb-6">
-            Manage your cleaning business with ease
+            <T k="literal.auth.manage_your_cleaning_business_with_ease.23eb0f28" />
           </h1>
 
           <p className="text-xl text-white/80 mb-8 max-w-md">
-            Streamline scheduling, billing, and customer management all in one powerful platform.
+            <T k="literal.auth.streamline_scheduling_billing_and_customer_m.fe8a8bef" />
           </p>
 
           <div className="space-y-4">
@@ -125,8 +125,8 @@ export function Auth() {
 
           <Card className="border-0 shadow-xl bg-card">
             <CardHeader className="text-center pb-2">
-              <CardTitle className="text-2xl font-bold">Welcome</CardTitle>
-              <CardDescription>Sign in with an owner account or a team invitation</CardDescription>
+              <CardTitle className="text-2xl font-bold"><T k="literal.auth.welcome.ca4f9dcf" /></CardTitle>
+              <CardDescription><T k="literal.auth.sign_in_with_an_owner_account_or_a_team_invi.2ad5795c" /></CardDescription>
             </CardHeader>
             <CardContent>
               <div className="w-full">
@@ -148,7 +148,7 @@ export function Auth() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="login-password">Password</Label>
+                    <Label htmlFor="login-password"><T k="literal.admin.password.8be3c943" /></Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <Input
@@ -173,7 +173,7 @@ export function Auth() {
                     onClick={handlePasswordReset}
                     disabled={isLoading}
                   >
-                    Forgot your password?
+                    <T k="literal.auth.forgot_your_password.a2f060b7" />
                   </Button>
                 </form>
 
@@ -182,7 +182,7 @@ export function Auth() {
                     <span className="w-full border-t border-border" />
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+                    <span className="bg-card px-2 text-muted-foreground"><T k="literal.auth.or_continue_with.ef46e9b6" /></span>
                   </div>
                 </div>
 
@@ -198,10 +198,10 @@ export function Auth() {
                     <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
                     <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 0 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                   </svg>
-                  Continue with Google
+                  <T k="literal.auth.continue_with_google.ccc5b0ed" />
                 </Button>
                 <p className="mt-6 text-center text-xs text-muted-foreground">
-                  New team members receive an invitation from an administrator.
+                  <T k="literal.auth.new_team_members_receive_an_invitation_from_.cc26a858" />
                 </p>
               </div>
             </CardContent>
@@ -214,7 +214,7 @@ export function Auth() {
               onClick={() => navigate("/admin/auth")}
               className="text-primary hover:underline font-medium"
             >
-              Sign in here
+              <T k="literal.auth.sign_in_here.3b04d69d" />
             </button>
           </p>
         </div>

@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -46,7 +47,7 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
             </div>
             <div>
               <span className="text-base font-semibold text-foreground">Clean Flow</span>
-              <p className="text-xs text-muted-foreground">Portal Admin</p>
+              <p className="text-xs text-muted-foreground"><T k="literal.admin.portal_admin.84b4285b" /></p>
             </div>
           </div>
         )}
@@ -111,7 +112,7 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
           {!isCollapsed && (
             <>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">Administrador</p>
+                <p className="text-sm font-medium text-foreground truncate"><T k="literal.admin.administrador.d5aa170e" /></p>
               </div>
               <ChevronDown className="w-4 h-4 text-muted-foreground/70" />
             </>

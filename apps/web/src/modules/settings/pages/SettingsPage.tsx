@@ -362,11 +362,11 @@ export function Settings() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="America/New_York">Eastern Time (ET)</SelectItem>
-                  <SelectItem value="America/Chicago">Central Time (CT)</SelectItem>
-                  <SelectItem value="America/Denver">Mountain Time (MT)</SelectItem>
-                  <SelectItem value="America/Los_Angeles">Pacific Time (PT)</SelectItem>
-                  <SelectItem value="America/Sao_Paulo">Brasília Time (BRT)</SelectItem>
+                  <SelectItem value="America/New_York"><T k="literal.settings.eastern_time_et.e1acb4f5" /></SelectItem>
+                  <SelectItem value="America/Chicago"><T k="literal.settings.central_time_ct.91b79ee5" /></SelectItem>
+                  <SelectItem value="America/Denver"><T k="literal.settings.mountain_time_mt.477f7cb7" /></SelectItem>
+                  <SelectItem value="America/Los_Angeles"><T k="literal.settings.pacific_time_pt.2856e8ed" /></SelectItem>
+                  <SelectItem value="America/Sao_Paulo"><T k="literal.settings.brasilia_time_brt.476d60ce" /></SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -377,10 +377,10 @@ export function Settings() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="USD">USD - Dollar</SelectItem>
-                  <SelectItem value="EUR">EUR - Euro</SelectItem>
-                  <SelectItem value="GBP">GBP - Pound</SelectItem>
-                  <SelectItem value="BRL">BRL - Real</SelectItem>
+                  <SelectItem value="USD"><T k="literal.settings.usd_dollar.42b651e0" /></SelectItem>
+                  <SelectItem value="EUR"><T k="literal.settings.eur_euro.dd8e746b" /></SelectItem>
+                  <SelectItem value="GBP"><T k="literal.settings.gbp_pound.13d37c7c" /></SelectItem>
+                  <SelectItem value="BRL"><T k="literal.settings.brl_real.49c46ab7" /></SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -410,15 +410,15 @@ export function Settings() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Star className="w-5 h-5" />
-              Review Links
+              <T k="literal.settings.review_links.1e7d1160" />
             </CardTitle>
-            <CardDescription>Configure review links for customer requests</CardDescription>
+            <CardDescription><T k="literal.settings.configure_review_links_for_customer_requests.c15a61fa" /></CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 flex-1">
             <div className="space-y-2">
               <Label className="flex items-center gap-2 text-sm">
                 <span>🌐</span>
-                Google Review URL
+                <T k="literal.settings.google_review_url.fa061482" />
               </Label>
               <Input 
                 value={googleReviewUrl}
@@ -431,7 +431,7 @@ export function Settings() {
             <div className="space-y-2">
               <Label className="flex items-center gap-2 text-sm">
                 <span>🏡</span>
-                Nextdoor Review URL
+                <T k="literal.settings.nextdoor_review_url.5dae9724" />
               </Label>
               <Input 
                 value={nextdoorReviewUrl}
@@ -444,18 +444,18 @@ export function Settings() {
             <Separator className="my-3" />
             
             <div className="space-y-3">
-              <h4 className="font-medium text-sm">Auto Review Settings</h4>
+              <h4 className="font-medium text-sm"><T k="literal.settings.auto_review_settings.e2773bf6" /></h4>
               
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <Label className="text-xs">Delay Type</Label>
+                  <Label className="text-xs"><T k="literal.settings.delay_type.9a4c6b48" /></Label>
                   <Select value={reviewDelayType} onValueChange={setReviewDelayType}>
                     <SelectTrigger className="h-9">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="hours">Hours</SelectItem>
-                      <SelectItem value="minutes">Minutes</SelectItem>
+                      <SelectItem value="hours"><T k="literal.settings.hours.9e25a34e" /></SelectItem>
+                      <SelectItem value="minutes"><T k="literal.settings.minutes.092f99ea" /></SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -483,14 +483,14 @@ export function Settings() {
               </div>
 
               <div className="space-y-1">
-                <Label className="text-xs">Message To</Label>
+                <Label className="text-xs"><T k="literal.settings.message_to.0372a609" /></Label>
                 <Select value={reviewMessageTo} onValueChange={setReviewMessageTo}>
                   <SelectTrigger className="h-9">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="text_phone_1">Text Phone 1</SelectItem>
-                    <SelectItem value="text_phone_2">Text Phone 2</SelectItem>
+                    <SelectItem value="text_phone_1"><T k="literal.settings.text_phone_1.27612d27" /></SelectItem>
+                    <SelectItem value="text_phone_2"><T k="literal.settings.text_phone_2.505cc810" /></SelectItem>
                     <SelectItem value="email"><T k="common.email" /></SelectItem>
                   </SelectContent>
                 </Select>
@@ -506,7 +506,7 @@ export function Settings() {
               <MapPin className="w-5 h-5" />
               <T k="settings.gpsSettings" />
             </CardTitle>
-            <CardDescription>Configure GPS tracking and alerts</CardDescription>
+            <CardDescription><T k="literal.settings.configure_gps_tracking_and_alerts.a015d80e" /></CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 flex-1">
             <div className="space-y-2">
@@ -520,7 +520,7 @@ export function Settings() {
                   onChange={(e) => setGpsDistanceThreshold(parseInt(e.target.value) || 500)}
                   className="w-24 h-9"
                 />
-                <span className="text-sm text-muted-foreground">meters</span>
+                <span className="text-sm text-muted-foreground"><T k="literal.settings.meters.0aa82f2a" /></span>
               </div>
               <p className="text-xs text-muted-foreground">
                 {t("settings.gpsDistanceDescription")}
@@ -567,15 +567,15 @@ export function Settings() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Wallet className="w-5 h-5" />
-              Payment Settings
+              <T k="literal.settings.payment_settings.1c76298f" />
             </CardTitle>
-            <CardDescription>Configure payment receiving methods</CardDescription>
+            <CardDescription><T k="literal.settings.configure_payment_receiving_methods.f9884c0e" /></CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 flex-1">
             <div className="space-y-2">
               <Label className="flex items-center gap-2 text-sm">
                 <DollarSign className="w-4 h-4 text-primary" />
-                Zelle Payment Key
+                <T k="literal.settings.zelle_payment_key.c6f28a3f" />
               </Label>
               <Input 
                 value={zellePaymentKey}
@@ -584,14 +584,14 @@ export function Settings() {
                 className="h-9"
               />
               <p className="text-xs text-muted-foreground">
-                Zelle registered email or phone number
+                <T k="literal.settings.zelle_registered_email_or_phone_number.758516c6" />
               </p>
             </div>
 
             <div className="space-y-2">
               <Label className="flex items-center gap-2 text-sm">
                 <DollarSign className="w-4 h-4 text-primary" />
-                Venmo Payment Key
+                <T k="literal.settings.venmo_payment_key.d6fbf6a1" />
               </Label>
               <Input 
                 value={venmoPaymentKey}
@@ -600,7 +600,7 @@ export function Settings() {
                 className="h-9"
               />
               <p className="text-xs text-muted-foreground">
-                Venmo username or link
+                <T k="literal.settings.venmo_username_or_link.5b00a244" />
               </p>
             </div>
 
@@ -609,7 +609,7 @@ export function Settings() {
             <div className="p-3 bg-muted/50 rounded-lg border border-border">
               <h4 className="font-medium text-xs flex items-center gap-2 mb-1">
                 <Zap className="w-3 h-3 text-warning" />
-                How it works
+                <T k="literal.settings.how_it_works.1dd6a17c" />
               </h4>
               <ul className="text-xs text-muted-foreground space-y-0.5">
                 <li>• Customer's preferred method selects the link</li>

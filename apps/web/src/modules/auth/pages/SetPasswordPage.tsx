@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { KeyRound, Loader2 } from "lucide-react";
@@ -45,13 +46,13 @@ export function SetPassword() {
           <div className="mb-2 flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <KeyRound className="h-6 w-6" />
           </div>
-          <CardTitle>Set your password</CardTitle>
-          <CardDescription>Finish activating your Clean Flow team account.</CardDescription>
+          <CardTitle><T k="literal.auth.set_your_password.4f9f9c13" /></CardTitle>
+          <CardDescription><T k="literal.auth.finish_activating_your_clean_flow_team_accou.78a3b9f2" /></CardDescription>
         </CardHeader>
         <CardContent>
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="space-y-2">
-              <Label htmlFor="new-password">New password</Label>
+              <Label htmlFor="new-password"><T k="literal.auth.new_password.d850ee18" /></Label>
               <Input
                 id="new-password"
                 type="password"
@@ -63,7 +64,7 @@ export function SetPassword() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirm-password">Confirm password</Label>
+              <Label htmlFor="confirm-password"><T k="literal.auth.confirm_password.4a7c565d" /></Label>
               <Input
                 id="confirm-password"
                 type="password"

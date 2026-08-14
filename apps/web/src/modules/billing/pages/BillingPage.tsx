@@ -311,7 +311,7 @@ export function Billing() {
           {qbConnected && (
             <Button variant="outline" size="sm" onClick={handleSyncWithQB} disabled={syncInvoices.isPending}>
               <RefreshCw className={`mr-2 h-4 w-4 ${syncInvoices.isPending ? "animate-spin" : ""}`} />
-              Sync QuickBooks
+              <T k="literal.billing.sync_quickbooks.649ce1f1" />
             </Button>
           )}
           <Button size="sm" onClick={() => setCreateInvoiceOpen(true)}>
@@ -401,7 +401,7 @@ export function Billing() {
               <CardTitle>{t("billing.recentInvoices")}</CardTitle>
               {statusFilter !== "all" && (
                 <Button variant="ghost" size="sm" onClick={() => setStatusFilter("all")}>
-                  Clear Filter
+                  <T k="literal.billing.clear_filter.f641dcde" />
                 </Button>
               )}
             </CardHeader>
@@ -434,7 +434,7 @@ export function Billing() {
                   <SelectContent className="bg-popover border-border">
                     <SelectItem value="all"><T k="common.allStatus" /></SelectItem>
                     <SelectItem value="sent"><T k="invoice.sent" /></SelectItem>
-                    <SelectItem value="viewed">Viewed</SelectItem>
+                    <SelectItem value="viewed"><T k="literal.billing.viewed.f3575622" /></SelectItem>
                     <SelectItem value="paid"><T k="invoice.paid" /></SelectItem>
                     <SelectItem value="overdue"><T k="payroll.overdue" /></SelectItem>
                   </SelectContent>
@@ -451,7 +451,7 @@ export function Billing() {
                     <TableHead>{t("billing.issueDate")}</TableHead>
                     <TableHead>{t("billing.dueDate")}</TableHead>
                     <TableHead>{t("common.status")}</TableHead>
-                    <TableHead>QB Sync</TableHead>
+                    <TableHead><T k="literal.billing.qb_sync.86d48f0c" /></TableHead>
                     <TableHead>{t("billing.autoGen")}</TableHead>
                     <TableHead className="w-[50px]"></TableHead>
                   </TableRow>
@@ -530,10 +530,10 @@ export function Billing() {
                           {invoice.auto_generated ? (
                             <Badge variant="outline" className="gap-1">
                               <Zap className="w-3 h-3" />
-                              Auto
+                              <T k="literal.billing.auto.c614ba7c" />
                             </Badge>
                           ) : (
-                            <span className="text-xs text-muted-foreground">Manual</span>
+                            <span className="text-xs text-muted-foreground"><T k="literal.billing.manual.4e836fdc" /></span>
                           )}
                         </TableCell>
                         <TableCell onClick={(e) => e.stopPropagation()}>
@@ -548,11 +548,11 @@ export function Billing() {
                                 <>
                                   <DropdownMenuItem onClick={() => handleMarkPaid(invoice)}>
                                     <DollarSign className="w-4 h-4 mr-2" />
-                                    Marcar como Pago
+                                    <T k="literal.billing.marcar_como_pago.4458ea9c" />
                                   </DropdownMenuItem>
                                   <DropdownMenuItem onClick={() => handleSendReminder(invoice, invoice.status === "overdue" ? "overdue" : "upcoming")}>
                                     <Mail className="w-4 h-4 mr-2" />
-                                    Enviar Lembrete
+                                    <T k="literal.billing.enviar_lembrete.93b0a3fa" />
                                   </DropdownMenuItem>
                                 </>
                               )}
@@ -569,7 +569,7 @@ export function Billing() {
                                 className="text-destructive focus:text-destructive"
                               >
                                 <Trash2 className="w-4 h-4 mr-2" />
-                                Delete Invoice
+                                <T k="literal.billing.delete_invoice.6d64f3c6" />
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>

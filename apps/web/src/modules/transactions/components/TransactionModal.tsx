@@ -296,8 +296,8 @@ export function TransactionModal({
                 <SelectValue placeholder="Selecione o tipo" />
               </SelectTrigger>
               <SelectContent className="bg-popover border-border z-50">
-                <SelectItem value="receita">Receita</SelectItem>
-                <SelectItem value="despesa">Despesa</SelectItem>
+                <SelectItem value="receita"><T k="transactions.revenue" /></SelectItem>
+                <SelectItem value="despesa"><T k="transactions.expense" /></SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -332,7 +332,7 @@ export function TransactionModal({
           {/* Tipo de Serviço */}
           {formData.category && (
             <div className="space-y-2">
-              <Label htmlFor="serviceType">Tipo de Serviço</Label>
+              <Label htmlFor="serviceType"><T k="modal.serviceType" /></Label>
               {isFreeText ? (
                 <Input
                   id="serviceType"
@@ -423,7 +423,7 @@ export function TransactionModal({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancelar
+            <T k="common.cancel" />
           </Button>
           <Button 
             onClick={handleSubmit}

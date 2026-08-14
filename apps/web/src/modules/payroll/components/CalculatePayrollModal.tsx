@@ -470,7 +470,7 @@ export function CalculatePayrollModal({
             {includeNonCompleted && (
               <span className="inline-flex items-center gap-1 text-amber-600 text-xs">
                 <AlertTriangle className="h-3 w-3" />
-                Modo fechamento antecipado
+                <T k="literal.payroll.modo_fechamento_antecipado.6806f003" />
               </span>
             )}
           </label>
@@ -479,7 +479,7 @@ export function CalculatePayrollModal({
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-            <span className="ml-2 text-muted-foreground">Carregando dados...</span>
+            <span className="ml-2 text-muted-foreground"><T k="literal.payroll.carregando_dados.423bd789" /></span>
           </div>
         ) : employeeData.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
@@ -498,9 +498,9 @@ export function CalculatePayrollModal({
                   <TableRow>
                     <TableHead className="w-[180px]"><T k="payroll.employee" /></TableHead>
                     <TableHead className="w-[80px]"><T k="audit.jobs" /></TableHead>
-                    <TableHead className="w-[120px]">Valor Jobs</TableHead>
-                    <TableHead>Bônus</TableHead>
-                    <TableHead className="w-[120px]">Valor Final</TableHead>
+                    <TableHead className="w-[120px]"><T k="literal.payroll.valor_jobs.a4875f04" /></TableHead>
+                    <TableHead><T k="literal.payroll.bonus.ad1b0b12" /></TableHead>
+                    <TableHead className="w-[120px]"><T k="literal.payroll.valor_final.d0ad230b" /></TableHead>
                     <TableHead className="w-[50px]"></TableHead>
                   </TableRow>
                 </TableHeader>
@@ -559,14 +559,14 @@ export function CalculatePayrollModal({
                               />
                               <div className="flex gap-2">
                                 <Button size="sm" onClick={() => handleAddBonus(emp.staffId)}>
-                                  Adicionar
+                                  <T k="common.add" />
                                 </Button>
                                 <Button
                                   size="sm"
                                   variant="outline"
                                   onClick={() => setAddingBonusFor(null)}
                                 >
-                                  Cancelar
+                                  <T k="common.cancel" />
                                 </Button>
                               </div>
                             </div>
@@ -577,7 +577,7 @@ export function CalculatePayrollModal({
                               className="gap-1"
                               onClick={() => setAddingBonusFor(emp.staffId)}
                             >
-                              <Plus className="h-3 w-3" /> Bônus
+                              <Plus className="h-3 w-3" /> <T k="literal.payroll.bonus.ad1b0b12" />
                             </Button>
                           )}
 
@@ -629,7 +629,7 @@ export function CalculatePayrollModal({
                   </div>
                   <div className="grid grid-cols-4 gap-4">
                     <div className="space-y-1">
-                      <Label className="text-xs">Valor Base</Label>
+                      <Label className="text-xs"><T k="literal.payroll.valor_base.488dc823" /></Label>
                       <Input
                         type="number"
                         value={
@@ -642,7 +642,7 @@ export function CalculatePayrollModal({
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs">Valor Extra</Label>
+                      <Label className="text-xs"><T k="literal.payroll.valor_extra.ae5e4ad2" /></Label>
                       <Input
                         type="number"
                         value={
@@ -655,7 +655,7 @@ export function CalculatePayrollModal({
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs">Bônus Semanal</Label>
+                      <Label className="text-xs"><T k="literal.payroll.bonus_semanal.1191d68d" /></Label>
                       <Input
                         type="number"
                         value={
@@ -668,7 +668,7 @@ export function CalculatePayrollModal({
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs">Bônus Mensal</Label>
+                      <Label className="text-xs"><T k="literal.payroll.bonus_mensal.2ad9f51f" /></Label>
                       <Input
                         type="number"
                         value={
@@ -707,7 +707,7 @@ export function CalculatePayrollModal({
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs">Bônus Performance</Label>
+                      <Label className="text-xs"><T k="literal.payroll.bonus_performance.9558b111" /></Label>
                       <Input
                         type="number"
                         value={
@@ -720,7 +720,7 @@ export function CalculatePayrollModal({
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs">Bônus Natal</Label>
+                      <Label className="text-xs"><T k="literal.payroll.bonus_natal.e4e20bd8" /></Label>
                       <Input
                         type="number"
                         value={
@@ -740,7 +740,7 @@ export function CalculatePayrollModal({
             <div className="flex justify-between items-center pt-4 border-t">
               <div className="space-y-1">
                 <div className="text-lg font-semibold">
-                  Total Payroll: <span className="text-primary">{formatCurrency(totalPayroll, companyCurrency)}</span>
+                  <T k="literal.payroll.total_payroll.9b79ebb0" /> <span className="text-primary">{formatCurrency(totalPayroll, companyCurrency)}</span>
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {employeeData.length} funcionário(s) • Atualizado em tempo real
@@ -750,13 +750,13 @@ export function CalculatePayrollModal({
 
             <DialogFooter className="gap-2 sm:gap-2">
               <Button variant="outline" onClick={() => onOpenChange(false)}>
-                Cancelar
+                <T k="common.cancel" />
               </Button>
               <Button variant="outline" onClick={handleDownloadExcel} className="gap-2">
                 <Download className="w-4 h-4" />
                 <T k="payroll.downloadExcel" />
               </Button>
-              <Button onClick={handleConfirm}>Confirmar Payroll</Button>
+              <Button onClick={handleConfirm}><T k="literal.payroll.confirmar_payroll.a54b568f" /></Button>
             </DialogFooter>
           </>
         )}

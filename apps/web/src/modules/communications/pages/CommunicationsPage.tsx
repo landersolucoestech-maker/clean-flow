@@ -158,15 +158,15 @@ export function Communications() {
     <>
       <Button variant="outline" size="sm" onClick={() => syncMessages(30)} disabled={isSyncing}>
         <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? "animate-spin" : ""}`} />
-        Sync
+        <T k="literal.communications.sync.905f6309" />
       </Button>
       <Button variant="outline" size="sm" onClick={() => setBroadcastOpen(true)}>
         <Users className="mr-2 h-4 w-4" />
-        Broadcast
+        <T k="literal.communications.broadcast.77ca3fc6" />
       </Button>
       <Button size="sm" onClick={() => setNewMessageOpen(true)}>
         <Plus className="mr-2 h-4 w-4" />
-        New message
+        <T k="literal.communications.new_message.1ed2e7b5" />
       </Button>
     </>
   );
@@ -176,7 +176,7 @@ export function Communications() {
       <section className="grid min-h-0 flex-1 overflow-hidden rounded-lg border border-border bg-card lg:grid-cols-[190px_330px_minmax(0,1fr)] 2xl:grid-cols-[190px_350px_minmax(0,1fr)_280px]">
         <aside className="hidden min-h-0 border-r border-border/80 bg-muted/20 lg:flex lg:flex-col">
           <div className="border-b border-border/80 p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Channels</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground"><T k="literal.communications.channels.18e03e2a" /></p>
           </div>
           <div className="space-y-1 p-2">
             {CHANNELS.map((item) => {
@@ -190,13 +190,13 @@ export function Communications() {
                   className={`flex w-full items-center justify-between rounded-md px-3 py-2.5 text-left text-sm transition-colors ${active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-background hover:text-foreground"}`}
                 >
                   <span className="flex items-center gap-2"><Icon className="h-4 w-4" />{item.label}</span>
-                  {!item.available && <span className={`text-[9px] font-semibold uppercase ${active ? "text-primary-foreground/70" : "text-muted-foreground"}`}>Ready</span>}
+                  {!item.available && <span className={`text-[9px] font-semibold uppercase ${active ? "text-primary-foreground/70" : "text-muted-foreground"}`}><T k="literal.communications.ready.20c7c552" /></span>}
                 </button>
               );
             })}
           </div>
           <div className="mt-auto border-t border-border/80 p-3 text-xs text-muted-foreground">
-            SMS is connected today. Social channels are represented by the same inbox contract and can be activated without rebuilding this screen.
+            <T k="literal.communications.sms_is_connected_today_social_channels_are_r.00db63d2" />
           </div>
         </aside>
 
@@ -232,7 +232,7 @@ export function Communications() {
             ) : visibleConversations.length === 0 ? (
               <div className="flex h-56 flex-col items-center justify-center px-5 text-center">
                 <MessageSquare className="mb-3 h-8 w-8 text-muted-foreground/60" />
-                <p className="text-sm font-medium text-foreground">No conversations here</p>
+                <p className="text-sm font-medium text-foreground"><T k="literal.communications.no_conversations_here.5cb61970" /></p>
                 <p className="mt-1 text-xs leading-5 text-muted-foreground">{channel !== "all" && channel !== "sms" ? "This channel is ready for a future integration." : "Change the filters or start a new conversation."}</p>
               </div>
             ) : (
@@ -267,9 +267,9 @@ export function Communications() {
 
               <ScrollArea className="min-h-0 flex-1 bg-muted/10">
                 <div className="mx-auto flex w-full max-w-4xl flex-col gap-3 p-4 sm:p-6">
-                  {messagesLoading ? <div className="flex h-40 items-center justify-center"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div> : messages.length === 0 ? <div className="flex h-48 flex-col items-center justify-center text-center"><MessageSquare className="mb-3 h-8 w-8 text-muted-foreground/50" /><p className="text-sm font-medium"><T k="support.no_messages" /></p><p className="mt-1 text-xs text-muted-foreground">Send the first message to start this conversation.</p></div> : messages.map((message) => {
+                  {messagesLoading ? <div className="flex h-40 items-center justify-center"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div> : messages.length === 0 ? <div className="flex h-48 flex-col items-center justify-center text-center"><MessageSquare className="mb-3 h-8 w-8 text-muted-foreground/50" /><p className="text-sm font-medium"><T k="support.no_messages" /></p><p className="mt-1 text-xs text-muted-foreground"><T k="literal.communications.send_the_first_message_to_start_this_convers.2e1f2908" /></p></div> : messages.map((message) => {
                     const outgoing = message.sender_type !== "customer" && message.sender_type !== "external";
-                    return <div key={message.id} className={`flex ${outgoing ? "justify-end" : "justify-start"}`}><div className={`max-w-[82%] rounded-lg px-4 py-2.5 text-sm ${outgoing ? "rounded-br-md bg-primary text-primary-foreground" : "rounded-bl-md border border-border bg-card text-foreground"}`}><p className="whitespace-pre-wrap leading-5">{message.content}</p>{message.attachment_url && <a href={message.attachment_url} target="_blank" rel="noreferrer" className="mt-2 block text-xs underline">Open attachment</a>}<p className={`mt-1 text-[10px] ${outgoing ? "text-primary-foreground/70" : "text-muted-foreground"}`}>{new Date(message.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p></div></div>;
+                    return <div key={message.id} className={`flex ${outgoing ? "justify-end" : "justify-start"}`}><div className={`max-w-[82%] rounded-lg px-4 py-2.5 text-sm ${outgoing ? "rounded-br-md bg-primary text-primary-foreground" : "rounded-bl-md border border-border bg-card text-foreground"}`}><p className="whitespace-pre-wrap leading-5">{message.content}</p>{message.attachment_url && <a href={message.attachment_url} target="_blank" rel="noreferrer" className="mt-2 block text-xs underline"><T k="literal.communications.open_attachment.b36bd6b7" /></a>}<p className={`mt-1 text-[10px] ${outgoing ? "text-primary-foreground/70" : "text-muted-foreground"}`}>{new Date(message.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p></div></div>;
                   })}
                 </div>
               </ScrollArea>
@@ -280,13 +280,13 @@ export function Communications() {
               </div>
             </>
           ) : (
-            <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-6 text-center"><div className="mb-4 rounded-lg bg-primary/10 p-4 text-primary"><Inbox className="h-8 w-8" /></div><h2 className="text-lg font-semibold text-foreground"><T k="communications.selectConversation" /></h2><p className="mt-1 max-w-sm text-sm leading-6 text-muted-foreground">Choose a customer or team conversation from the unified inbox, or start a new message.</p><Button className="mt-5" onClick={() => setNewMessageOpen(true)}><Plus className="mr-2 h-4 w-4" />New message</Button></div>
+            <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-6 text-center"><div className="mb-4 rounded-lg bg-primary/10 p-4 text-primary"><Inbox className="h-8 w-8" /></div><h2 className="text-lg font-semibold text-foreground"><T k="communications.selectConversation" /></h2><p className="mt-1 max-w-sm text-sm leading-6 text-muted-foreground"><T k="literal.communications.choose_a_customer_or_team_conversation_from_.52f5b2aa" /></p><Button className="mt-5" onClick={() => setNewMessageOpen(true)}><Plus className="mr-2 h-4 w-4" /><T k="literal.communications.new_message.1ed2e7b5" /></Button></div>
           )}
         </main>
 
         <aside className="hidden min-h-0 border-l border-border/80 bg-muted/10 2xl:flex 2xl:flex-col">
-          <div className="border-b border-border/80 p-4"><p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Contact context</p></div>
-          {selected ? <div className="space-y-5 p-4"><div className="flex items-center gap-3"><Avatar className="h-11 w-11"><AvatarFallback>{initials(conversationName(selected))}</AvatarFallback></Avatar><div className="min-w-0"><p className="truncate text-sm font-semibold">{conversationName(selected)}</p><p className="truncate text-xs text-muted-foreground">{audience === "customers" ? "Customer" : "Team member"}</p></div></div><div className="space-y-3 rounded-md border border-border bg-card p-3"><div><p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Channel</p><p className="mt-1 flex items-center gap-2 text-sm"><Smartphone className="h-3.5 w-3.5" />SMS</p></div><div><p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground"><T k="common.contact" /></p><p className="mt-1 break-words text-sm">{conversationContact(selected)}</p></div><div><p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground"><T k="common.status" /></p><p className="mt-1 text-sm">{selected.unread ? "Unread" : "Read"}</p></div></div><p className="text-xs leading-5 text-muted-foreground">This contextual column is ready to receive CRM details, assignment, tags and future channel metadata as integrations are enabled.</p></div> : <div className="flex flex-1 items-center justify-center p-5 text-center text-xs text-muted-foreground">Contact details appear here when a conversation is selected.</div>}
+          <div className="border-b border-border/80 p-4"><p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground"><T k="literal.communications.contact_context.4f4448cb" /></p></div>
+          {selected ? <div className="space-y-5 p-4"><div className="flex items-center gap-3"><Avatar className="h-11 w-11"><AvatarFallback>{initials(conversationName(selected))}</AvatarFallback></Avatar><div className="min-w-0"><p className="truncate text-sm font-semibold">{conversationName(selected)}</p><p className="truncate text-xs text-muted-foreground">{audience === "customers" ? "Customer" : "Team member"}</p></div></div><div className="space-y-3 rounded-md border border-border bg-card p-3"><div><p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground"><T k="literal.communications.channel.879f0b1b" /></p><p className="mt-1 flex items-center gap-2 text-sm"><Smartphone className="h-3.5 w-3.5" />SMS</p></div><div><p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground"><T k="common.contact" /></p><p className="mt-1 break-words text-sm">{conversationContact(selected)}</p></div><div><p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground"><T k="common.status" /></p><p className="mt-1 text-sm">{selected.unread ? "Unread" : "Read"}</p></div></div><p className="text-xs leading-5 text-muted-foreground"><T k="literal.communications.this_contextual_column_is_ready_to_receive_c.3ae7ba06" /></p></div> : <div className="flex flex-1 items-center justify-center p-5 text-center text-xs text-muted-foreground"><T k="literal.communications.contact_details_appear_here_when_a_conversat.eadcdbed" /></div>}
         </aside>
       </section>
 

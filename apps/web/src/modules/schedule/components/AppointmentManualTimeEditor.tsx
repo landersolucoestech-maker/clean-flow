@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { Pencil, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,7 +28,7 @@ export function AppointmentManualTimeEditor(props: AppointmentManualTimeEditorPr
   return (
     <section aria-label="Job timeline" className="space-y-3">
       <div className="mb-2 flex items-center gap-2">
-        <span className="text-sm font-semibold text-foreground">Manual Time Editing</span>
+        <span className="text-sm font-semibold text-foreground"><T k="literal.schedule.manual_time_editing.117e2ea0" /></span>
       </div>
       {rows.map((row) => {
         const timeValue = row.key === "total" ? props.cleaningTimeTotal : props.timeValues[row.key as keyof AppointmentTimeValues];
