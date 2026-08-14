@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, type ReactNode } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,8 +18,14 @@ import { useQuickBooks } from "@/hooks/useQuickBooks";
 import { useQuickBooksStore } from "@/stores/quickbooks.store";
 import { JobStatusTracker } from "./JobStatusTracker";
 import { ReviewRequestPreviewModal } from "./ReviewRequestPreviewModal";
+import { AppointmentBillingSummary } from "./AppointmentBillingSummary";
+import { AppointmentManualTimeEditor } from "./AppointmentManualTimeEditor";
+import { AppointmentNotesSections } from "./AppointmentNotesSections";
+import { Dot, IconBubble, InfoCell, TeamWithMembers } from "./AppointmentDetailsPrimitives";
+import { getAppointmentStatusConfig } from "../utils/appointmentStatus";
+import type { AppointmentDetailsAppointment, JobNote } from "../types/appointmentDetails";
 import { canEditStatusManually } from "@/hooks/useJobStatusTracking";
-import { useCurrentStaff, useStaffByTeam } from "@/hooks/useStaff";
+import { useCurrentStaff } from "@/hooks/useStaff";
 import { useSendNotificationSMS } from "@/hooks/useSendNotificationSMS";
 import { useCompanySettings } from "@/hooks/useCompanySettings";
 import {
@@ -46,149 +52,13 @@ import {
   AlertCircle,
 } from "lucide-react";
 
-type Appointment = {
-  id: string | number;
-  time: string;
-  customer: string;
-  customerId?: string;
-  customerPhone?: string;
-  address: string;
-  service: string;
-  staff: string;
-  status: string;
-  duration: string;
-  date?: string;
-  team?: string;
-  amount?: number | string;
-  notes?: string;
-  additionalNotes?: string;
-  feedback?: string;
-  timeStarted?: string;
-  timeFinished?: string;
-  onOurWayTime?: string;
-  paymentMethod?: string;
-};
-
-type JobNote = {
-  id: string;
-  text: string;
-  author: string;
-};
-
-
-function IconBubble({ children }: { children: ReactNode }) {
-  return (
-    <div className="h-7 w-7 shrink-0 rounded-full bg-muted text-muted-foreground flex items-center justify-center">
-      {children}
-    </div>
-  );
-}
-
-function InfoCell({
-  icon,
-  label,
-  value,
-  value2,
-}: {
-  icon: ReactNode;
-  label: string;
-  value: ReactNode;
-  value2?: ReactNode;
-}) {
-  return (
-    <div className="flex items-start gap-3 min-w-0">
-      <IconBubble>{icon}</IconBubble>
-      <div className="min-w-0">
-        <p className="text-xs text-muted-foreground">{label}</p>
-        <p className="text-sm font-semibold text-foreground break-words">{value}</p>
-        {value2 ? (
-          <p className="text-sm font-semibold text-foreground break-words">{value2}</p>
-        ) : null}
-      </div>
-    </div>
-  );
-}
-
-function Dot({ className }: { className: string }) {
-  return <div className={`h-2.5 w-2.5 rounded-full ${className}`} />;
-}
-
-function TeamWithMembers({ teamNum, color }: { teamNum: string; color: string }) {
-  const { data: staffMembers, isLoading } = useStaffByTeam(teamNum);
-  
-  // Remove duplicate staff members by id
-  const uniqueStaffMembers = useMemo(() => {
-    if (!staffMembers) return [];
-    const seen = new Set<string>();
-    return staffMembers.filter((staff) => {
-      if (seen.has(staff.id)) return false;
-      seen.add(staff.id);
-      return true;
-    });
-  }, [staffMembers]);
-  
-  return (
-    <div className="space-y-1">
-      <Badge 
-        className={`${color} text-white border-transparent text-[11px] font-semibold px-3 py-1 shadow-none`}
-      >
-        Team {teamNum}
-      </Badge>
-      <div className="pl-1 text-xs text-muted-foreground">
-        {isLoading ? (
-          <span>Loading...</span>
-        ) : uniqueStaffMembers.length > 0 ? (
-          uniqueStaffMembers.map((staff) => staff.name).join(", ")
-        ) : (
-          <span className="italic">No members assigned</span>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function getStatusConfig(status: string) {
-  switch (status.toLowerCase()) {
-    case "completed":
-      return {
-        icon: CheckCircle,
-        colorClass: "bg-success/10 text-success border-success/20",
-        label: "Cleaning Done",
-      };
-    case "in-progress":
-      return {
-        icon: Timer,
-        colorClass: "bg-amber-500/10 text-amber-600 border-amber-500/20",
-        label: "Cleaning Now",
-      };
-    case "on-the-way":
-      return {
-        icon: Navigation,
-        colorClass: "bg-sky-500/10 text-sky-700 border-sky-500/20",
-        label: "On Our Way",
-      };
-    case "cancelled":
-      return {
-        icon: AlertCircle,
-        colorClass: "bg-destructive/10 text-destructive border-destructive/20",
-        label: "Cancelled",
-      };
-    default:
-      return {
-        icon: Clock,
-        colorClass: "bg-primary-light text-primary-dark border-primary/20",
-        label: "Scheduled",
-      };
-  }
-}
-
 export function AppointmentDetailsView({
   appointment,
   onClose,
   onOpenInvoice,
   onEdit,
 }: {
-  appointment: Appointment;
+  appointment: AppointmentDetailsAppointment;
   onClose: () => void;
   onOpenInvoice: () => void;
   onEdit?: () => void;
@@ -636,7 +506,7 @@ export function AppointmentDetailsView({
     });
   };
 
-  const statusConfig = getStatusConfig(appointment.status);
+  const statusConfig = getAppointmentStatusConfig(appointment.status);
   const StatusIcon = statusConfig.icon;
 
   return (
@@ -743,170 +613,23 @@ export function AppointmentDetailsView({
 
           <Separator />
 
-          {/* Job Notes */}
-          <section aria-label="Job notes" className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 shadow-none"
-                  onClick={() => setJobNotesExpanded((v) => !v)}
-                  aria-label={jobNotesExpanded ? "Collapse job notes" : "Expand job notes"}
-                >
-                  <ChevronDown className={`h-4 w-4 transition-transform ${jobNotesExpanded ? "" : "-rotate-90"}`} />
-                </Button>
-                <span className="text-sm font-semibold text-foreground">Job Notes</span>
-              </div>
-
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-7 w-7 shadow-none"
-                aria-label="Add job note"
-                onClick={() => setAddNoteOpen(true)}
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-
-            {jobNotesExpanded && (
-              <div className="space-y-3">
-                {notes.map((n) => (
-                  <article key={n.id} className="flex items-start gap-3 group">
-                    <span className="text-sm shrink-0">⚠️</span>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs text-foreground leading-relaxed">{n.text}</p>
-                      <p className="text-[10px] text-muted-foreground italic">&quot;{n.author}&quot;</p>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive hover:bg-destructive/10"
-                      onClick={() => handleDeleteNote(n.id)}
-                      aria-label="Delete note"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </article>
-                ))}
-              </div>
-            )}
-          </section>
-
-          <Separator />
-
-          {/* Additional Notes */}
-          <section aria-label="Additional notes" className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 shadow-none"
-                  onClick={() => setAdditionalNotesExpanded((v) => !v)}
-                  aria-label={additionalNotesExpanded ? "Collapse additional notes" : "Expand additional notes"}
-                >
-                  <ChevronDown className={`h-4 w-4 transition-transform ${additionalNotesExpanded ? "" : "-rotate-90"}`} />
-                </Button>
-                <span className="text-sm font-semibold text-foreground">Additional Notes</span>
-              </div>
-
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-7 w-7 shadow-none"
-                aria-label="Add additional note"
-                onClick={() => setAddAdditionalNoteOpen(true)}
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-
-            {additionalNotesExpanded && (
-              <div className="space-y-3">
-                {additionalNotes.length === 0 ? (
-                  <p className="text-xs text-muted-foreground italic pl-5">No additional notes yet.</p>
-                ) : (
-                  additionalNotes.map((n) => (
-                    <article key={n.id} className="flex items-start gap-3 group">
-                      <div className="mt-1.5 h-2 w-2 rounded-full bg-muted-foreground/50 shrink-0" />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs text-foreground leading-relaxed">{n.text}</p>
-                        <p className="text-[10px] text-muted-foreground italic">&quot;{n.author}&quot;</p>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive hover:bg-destructive/10"
-                        onClick={() => handleDeleteAdditionalNote(n.id)}
-                        aria-label="Delete note"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </article>
-                  ))
-                )}
-              </div>
-            )}
-          </section>
-
-          <Separator />
-
-          {/* Feedback */}
-          <section aria-label="Feedback" className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 shadow-none"
-                  onClick={() => setFeedbackExpanded((v) => !v)}
-                  aria-label={feedbackExpanded ? "Collapse feedback" : "Expand feedback"}
-                >
-                  <ChevronDown className={`h-4 w-4 transition-transform ${feedbackExpanded ? "" : "-rotate-90"}`} />
-                </Button>
-                <span className="text-sm font-semibold text-foreground">Feedback</span>
-              </div>
-
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-7 w-7 shadow-none"
-                aria-label="Add feedback"
-                onClick={() => setAddFeedbackOpen(true)}
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-
-            {feedbackExpanded && (
-              <div className="space-y-3">
-                {feedbackList.length === 0 ? (
-                  <p className="text-xs text-muted-foreground italic pl-5">No feedback yet.</p>
-                ) : (
-                  feedbackList.map((f) => (
-                    <article key={f.id} className="flex items-start gap-3 group">
-                      <div className="mt-1.5 h-2 w-2 rounded-full bg-muted-foreground/50 shrink-0" />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs text-foreground leading-relaxed">{f.text}</p>
-                        <p className="text-[10px] text-muted-foreground italic">&quot;{f.author}&quot; - {f.date}</p>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive hover:bg-destructive/10"
-                        onClick={() => handleDeleteFeedback(f.id)}
-                        aria-label="Delete feedback"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </article>
-                  ))
-                )}
-              </div>
-            )}
-          </section>
+          <AppointmentNotesSections
+            notes={notes}
+            additionalNotes={additionalNotes}
+            feedbackList={feedbackList}
+            jobNotesExpanded={jobNotesExpanded}
+            additionalNotesExpanded={additionalNotesExpanded}
+            feedbackExpanded={feedbackExpanded}
+            onToggleJobNotes={() => setJobNotesExpanded((value) => !value)}
+            onToggleAdditionalNotes={() => setAdditionalNotesExpanded((value) => !value)}
+            onToggleFeedback={() => setFeedbackExpanded((value) => !value)}
+            onAddJobNote={() => setAddNoteOpen(true)}
+            onAddAdditionalNote={() => setAddAdditionalNoteOpen(true)}
+            onAddFeedback={() => setAddFeedbackOpen(true)}
+            onDeleteJobNote={handleDeleteNote}
+            onDeleteAdditionalNote={handleDeleteAdditionalNote}
+            onDeleteFeedback={handleDeleteFeedback}
+          />
 
           <Separator />
 
@@ -931,152 +654,24 @@ export function AppointmentDetailsView({
           {canManuallyEditTime && (
             <>
               <Separator />
-
-              {/* Manual timeline is restricted to management roles. */}
-              <section aria-label="Job timeline" className="space-y-3">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-sm font-semibold text-foreground">Manual Time Editing</span>
-            </div>
-            {(
-              [
-                { key: "onOurWay", icon: <span className="text-sm">🚗</span>, label: "On Our Way", editable: true },
-                { key: "jobStarted", icon: <span className="text-sm">🏠</span>, label: "Cleaning Now", editable: true },
-                { key: "jobFinished", icon: <span className="text-sm">✓</span>, label: "Cleaning Done", editable: true },
-                { key: "total", icon: <span className="text-sm">🕐</span>, label: "Cleaning Time Total", editable: false },
-              ] as const
-            ).map((row) => {
-              const timeValue = row.key === "total" ? cleaningTimeTotal : timeValues[row.key as keyof typeof timeValues];
-              const isEditing = editingTime === row.key;
-
-              return (
-                <div key={row.label} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <IconBubble>{row.icon}</IconBubble>
-                    <span className="text-sm text-muted-foreground italic truncate">{row.label}</span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    {isEditing ? (
-                      <>
-                        <Input
-                          value={tempTimeValue}
-                          onChange={(e) => setTempTimeValue(e.target.value)}
-                          className="h-7 w-24 text-sm"
-                          placeholder="e.g. 7:30 AM"
-                          autoFocus
-                        />
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-7 w-7 shadow-none text-success"
-                          onClick={handleSaveTime}
-                        >
-                          ✓
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-7 w-7 shadow-none text-destructive"
-                          onClick={handleCancelEditTime}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <span className="text-sm text-foreground">{timeValue || "—"}</span>
-                        {row.editable && (
-                          <>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="h-7 w-7 shadow-none"
-                              aria-label={`Edit ${row.label}`}
-                              onClick={() => handleEditTime(row.key, timeValue)}
-                            >
-                              <Pencil className="h-4 w-4 text-muted-foreground" />
-                            </Button>
-                            {timeValue && (
-                              <Button
-                                variant="outline"
-                                size="icon"
-                                className="h-7 w-7 shadow-none text-destructive hover:text-destructive hover:bg-destructive/10"
-                                aria-label={`Clear ${row.label}`}
-                                onClick={() => handleClearTime(row.key as "onOurWay" | "jobStarted" | "jobFinished")}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            )}
-                          </>
-                        )}
-                      </>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-              </section>
+              <AppointmentManualTimeEditor
+                cleaningTimeTotal={cleaningTimeTotal}
+                timeValues={timeValues}
+                editingTime={editingTime}
+                tempTimeValue={tempTimeValue}
+                onTempTimeChange={setTempTimeValue}
+                onSave={handleSaveTime}
+                onCancel={handleCancelEditTime}
+                onEdit={handleEditTime}
+                onClear={handleClearTime}
+              />
             </>
           )}
 
           <Separator />
 
           {/* Pricing + statuses */}
-          <section aria-label="Billing summary" className="relative">
-            <div className="pointer-events-none absolute -left-8 -top-10 h-24 w-24 rounded-full bg-success/12" />
-            <div className="pointer-events-none absolute -right-8 -top-10 h-24 w-24 rounded-full bg-warning/14" />
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {/* Left column */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Cleaning Rate</span>
-                  <span className="text-sm font-semibold text-foreground">
-                    {appointment.amount != null && appointment.amount !== "" 
-                      ? `$${Number(appointment.amount).toFixed(2)}` 
-                      : "Not set"}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-foreground">Total</span>
-                  <span className="text-sm font-semibold text-foreground">
-                    {appointment.amount != null && appointment.amount !== "" 
-                      ? `$${Number(appointment.amount).toFixed(2)}` 
-                      : "Not set"}
-                  </span>
-                </div>
-
-                <div className="pt-1">
-                  <span className="text-sm text-muted-foreground">Invoice status</span>
-                  <div className="mt-2 flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-8 rounded-full px-3 text-xs gap-1.5 shadow-none"
-                      onClick={handleSendInvoice}
-                    >
-                      <Send className="h-4 w-4" />
-                      Send Invoice
-                    </Button>
-                    <Badge className="border-transparent bg-secondary text-secondary-foreground text-[10px] px-2.5 py-1 font-semibold shadow-none">
-                      Sent
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right column */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Payment status</span>
-                  <Badge className="border-transparent bg-secondary text-secondary-foreground text-[10px] px-3 py-1 font-semibold shadow-none">
-                    Pending
-                  </Badge>
-                </div>
-              </div>
-            </div>
-          </section>
+          <AppointmentBillingSummary amount={appointment.amount} onSendInvoice={handleSendInvoice} />
         </main>
 
         <footer className="flex justify-end gap-2 px-5 py-3 bg-surface-muted border-t border-border">
