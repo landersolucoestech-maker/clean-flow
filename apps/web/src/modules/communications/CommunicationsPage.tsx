@@ -40,7 +40,6 @@ import {
   X,
   UserCircle,
 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useConversations, useTeamConversations, useMessages, useSendMessage, useDeleteConversation, useMarkAsRead, useCreateConversation } from "@/hooks/useConversations";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useStaff } from "@/hooks/useStaff";
@@ -52,6 +51,7 @@ import { BroadcastModal } from "@/components/communications/BroadcastModal";
 import { NewMessageModal } from "@/components/communications/NewMessageModal";
 import { useRingCentralSync } from "@/hooks/useRingCentralSync";
 import { useNotificationSound } from "@/hooks/useNotificationSound";
+import { uploadMessageAttachment } from "./services/messageAttachmentService";
 type RecipientTab = "customers" | "team";
 
 type FilterType = "all" | "unread" | "favorites";
@@ -238,24 +238,7 @@ export function Communications() {
     try {
       // Upload attachment if present
       if (attachmentFile) {
-        // Sanitize filename: remove special chars but keep extension
-        const originalName = attachmentFile.name;
-        const sanitizedName = originalName
-          .replace(/[^a-zA-Z0-9._-]/g, '_')
-          .replace(/_+/g, '_');
-        const fileName = `${selectedConversation}/${Date.now()}_${sanitizedName}`;
-        
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('message-attachments')
-          .upload(fileName, attachmentFile);
-        
-        if (uploadError) throw uploadError;
-        
-        const { data: publicUrl } = supabase.storage
-          .from('message-attachments')
-          .getPublicUrl(uploadData.path);
-        
-        attachmentUrl = publicUrl.publicUrl;
+        attachmentUrl = await uploadMessageAttachment(selectedConversation, attachmentFile);
       }
       
       // Send message
@@ -274,8 +257,7 @@ export function Communications() {
           toast.error(t("communications.errorSendingMessage"));
         }
       });
-    } catch (error) {
-      console.error('Upload error:', error);
+    } catch {
       toast.error("Failed to upload attachment");
     } finally {
       setIsUploading(false);
