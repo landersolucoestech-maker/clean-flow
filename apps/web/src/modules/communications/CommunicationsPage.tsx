@@ -52,89 +52,13 @@ import { NewMessageModal } from "@/components/communications/NewMessageModal";
 import { useRingCentralSync } from "@/hooks/useRingCentralSync";
 import { useNotificationSound } from "@/hooks/useNotificationSound";
 import { uploadMessageAttachment } from "./services/messageAttachmentService";
+import { getConversationPreviewText, getFileNameFromAttachmentUrl, parseMessageContentForAttachments } from "./utils/messageContent";
+import type { AttachmentRef } from "./utils/messageContent";
 type RecipientTab = "customers" | "team";
 
 type FilterType = "all" | "unread" | "favorites";
 type CustomerStatusFilter = "all" | "active" | "inactive";
 type TeamFilter = "all" | "active" | "inactive";
-
-type AttachmentRef = { url: string; fileName: string; isImage: boolean };
-
-const STORAGE_ATTACHMENT_URL_RE =
-  /https?:\/\/[^\s]+\/storage\/v1\/object\/public\/(?:message-attachments|broadcast-attachments)\/[^\s]+/gi;
-
-function normalizeAttachmentUrl(raw: string): string {
-  return raw.replace(/[),.]+$/, "");
-}
-
-function getFileNameFromAttachmentUrl(url: string): string {
-  try {
-    const u = new URL(url);
-    const parts = u.pathname.split("/");
-    const rawName = parts[parts.length - 1] || "documento";
-    const decoded = decodeURIComponent(rawName);
-
-    // Remove prefix like: 1768375402470_meu-arquivo.pdf -> meu-arquivo.pdf
-    const withoutTimestampPrefix = decoded.replace(/^\d{13,}_/, "");
-
-    // Old format: 1768375402470.pdf (we can't recover original name)
-    if (/^\d{13,}\./.test(withoutTimestampPrefix)) {
-      const ext = withoutTimestampPrefix.split(".").pop() || "";
-      return ext ? `documento.${ext}` : "documento";
-    }
-
-    return withoutTimestampPrefix || decoded || "documento";
-  } catch {
-    return "documento";
-  }
-}
-
-function parseMessageContentForAttachments(content?: string | null): {
-  cleanText: string;
-  attachments: AttachmentRef[];
-} {
-  const text = (content || "").trim();
-  if (!text) return { cleanText: "", attachments: [] };
-
-  const rawMatches = text.match(STORAGE_ATTACHMENT_URL_RE) || [];
-  const attachments = rawMatches
-    .map((m) => normalizeAttachmentUrl(m))
-    .filter(Boolean)
-    .map((url) => ({
-      url,
-      fileName: getFileNameFromAttachmentUrl(url),
-      isImage: /\.(jpg|jpeg|png|gif|webp)$/i.test(url),
-    }));
-
-  let cleanText = text;
-  for (const { url } of attachments) {
-    const escapedUrl = url.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    cleanText = cleanText
-      .replace(new RegExp(`\\n?\\s*📎[^\\n]*?:\\s*${escapedUrl}\\s*\\n?`, "g"), "\n")
-      .replace(new RegExp(`\\n?\\s*Attachment:\\s*${escapedUrl}\\s*\\n?`, "gi"), "\n")
-      .replace(new RegExp(escapedUrl, "g"), "");
-  }
-
-  cleanText = cleanText
-    .replace(/📎\s*[^:\n]*:\s*/g, "")
-    .replace(/Attachment:\s*/gi, "")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
-
-  return { cleanText, attachments };
-}
-
-function getConversationPreviewText(text?: string | null): string | null {
-  if (!text) return null;
-  const parsed = parseMessageContentForAttachments(text);
-
-  if (parsed.attachments.length > 0) {
-    // Never show the URL in previews
-    return parsed.cleanText || parsed.attachments[0].fileName;
-  }
-
-  return text;
-}
 
 export function Communications() {
   const { t, language } = useLanguage();
