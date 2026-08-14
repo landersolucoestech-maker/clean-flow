@@ -4,6 +4,7 @@ import type { Session } from "@supabase/supabase-js";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Enums } from "@/integrations/supabase/types";
+import { deriveContactPermissions } from "@/modules/crm/permissions/contactPermissions";
 import { DEFAULT_ROLES, usePermissionsStore } from "@/stores/permissions.store";
 import type { Role } from "@/stores/types";
 
@@ -15,19 +16,6 @@ interface GuardProps {
 
 type AppRole = Enums<"app_role">;
 type StaffIdentity = { id: string; role: AppRole };
-
-function withCrmContactPermissions(permissions: string[]): string[] {
-  if (permissions.includes("*")) return permissions;
-
-  const contactPermissions = [
-    permissions.includes("customers.view") ? "contacts.view" : null,
-    permissions.includes("customers.create") ? "contacts.create" : null,
-    permissions.includes("customers.edit") ? "contacts.edit" : null,
-    permissions.includes("customers.delete") ? "contacts.delete" : null,
-  ].filter((permission): permission is string => Boolean(permission));
-
-  return Array.from(new Set([...permissions, ...contactPermissions]));
-}
 
 function roleForAppRole(appRole: AppRole): Role {
   const admin = DEFAULT_ROLES.find((role) => role.id === "admin")!;
@@ -48,7 +36,7 @@ function roleForAppRole(appRole: AppRole): Role {
     id: appRole,
     name: appRole.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase()),
     company_id: "single-company",
-    permissions: withCrmContactPermissions(template.permissions),
+    permissions: deriveContactPermissions(template.permissions),
   };
 }
 
