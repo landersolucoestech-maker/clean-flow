@@ -1,5 +1,5 @@
 export interface OAuthStatePayload {
-  provider: "ringcentral" | "quickbooks" | "google";
+  provider: "ringcentral" | "quickbooks" | "google" | "dialpad";
   userId: string;
   companyId?: string;
   redirectUri: string;
@@ -60,7 +60,7 @@ export async function verifyOAuthState(state: string, secret: string): Promise<O
     if (!isValid) return null;
 
     const payload = JSON.parse(new TextDecoder().decode(fromBase64Url(encodedPayload))) as OAuthStatePayload;
-    const validProviders = ["ringcentral", "quickbooks", "google"];
+    const validProviders = ["ringcentral", "quickbooks", "google", "dialpad"];
     if (
       !validProviders.includes(payload.provider)
       || !payload.userId
