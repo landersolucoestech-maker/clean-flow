@@ -23,17 +23,17 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: node scripts/extract-settings-business-hours.mjs
+      - run: node scripts/refactor-leads-page-services.mjs
       - run: node scripts/frontend-audit.mjs
       - run: npx eslint apps/web/src packages --max-warnings=0
       - run: npm run typecheck
       - run: npx vitest run apps/web/src
       - run: npm run build
-      - name: Commit business hours extraction
+      - name: Commit leads page service extraction
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/web/src/modules/settings/SettingsPage.tsx apps/web/src/modules/settings/components/BusinessHoursSettingsSection.tsx
+          git add apps/web/src/modules/crm/leads/pages/LeadsPageContent.tsx apps/web/src/modules/crm/leads/services/leadsPageQueries.ts apps/web/src/modules/crm/leads/services/leadAddressSync.ts
           git diff --cached --quiet && exit 0
-          git commit -m "refactor(frontend): extract settings business hours"
+          git commit -m "refactor(frontend): isolate leads page data access"
           git push origin HEAD:dev
