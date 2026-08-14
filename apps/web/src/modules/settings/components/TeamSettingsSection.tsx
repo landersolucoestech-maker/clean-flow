@@ -10,7 +10,7 @@ import type { Staff } from "@/hooks/useStaff";
 
 type Translate = (key: string) => string;
 
-export const STAFF_ROLE_OPTIONS = [
+const STAFF_ROLE_OPTIONS = [
   { value: "admin", label: "Admin" },
   { value: "cleaner", label: "Cleaner" },
   { value: "driver", label: "Driver" },
