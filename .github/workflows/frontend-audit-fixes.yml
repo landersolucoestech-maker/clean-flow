@@ -1,6 +1,6 @@
 name: Frontend Audit Fixes
 
-# One-shot Communications filter extraction runner.
+# Retry Communications filter extraction with structural guards.
 on:
   push:
     branches: [dev]
