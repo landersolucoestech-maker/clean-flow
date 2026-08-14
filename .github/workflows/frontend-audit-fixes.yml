@@ -1,6 +1,5 @@
 name: Frontend Audit Fixes
 
-# Retry after preserving the remaining IconBubble dependency.
 on:
   push:
     branches: [dev]
@@ -24,17 +23,17 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: node scripts/refactor-appointment-details.mjs
+      - run: node scripts/extract-settings-business-hours.mjs
       - run: node scripts/frontend-audit.mjs
       - run: npx eslint apps/web/src packages --max-warnings=0
       - run: npm run typecheck
       - run: npx vitest run apps/web/src
       - run: npm run build
-      - name: Commit appointment details extraction
+      - name: Commit business hours extraction
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx apps/web/src/modules/schedule/components/AppointmentDetailsPrimitives.tsx apps/web/src/modules/schedule/components/AppointmentNotesSections.tsx apps/web/src/modules/schedule/components/AppointmentManualTimeEditor.tsx apps/web/src/modules/schedule/components/AppointmentBillingSummary.tsx apps/web/src/modules/schedule/types/appointmentDetails.ts apps/web/src/modules/schedule/utils/appointmentStatus.ts
+          git add apps/web/src/modules/settings/SettingsPage.tsx apps/web/src/modules/settings/components/BusinessHoursSettingsSection.tsx
           git diff --cached --quiet && exit 0
-          git commit -m "refactor(frontend): decompose appointment details"
+          git commit -m "refactor(frontend): extract settings business hours"
           git push origin HEAD:dev
