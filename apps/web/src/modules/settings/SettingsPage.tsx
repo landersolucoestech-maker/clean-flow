@@ -17,7 +17,7 @@ import { AuditTab } from "@/components/settings/AuditTab";
 import { useLanguage } from "@/contexts/useLanguage";
 import { useStaff, useCurrentStaff, Staff } from "@/hooks/useStaff";
 import { useCompanySettings, useUpdateCompanySettings, BusinessHours } from "@/hooks/useCompanySettings";
-import { supabase } from "@/integrations/supabase/client";
+import { changeCurrentPassword, loadNotificationPreferences, saveCurrentProfile, saveNotificationPreferences } from "./services/settingsAccountService";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -166,22 +166,20 @@ export function Settings() {
 
   useEffect(() => {
     let active = true;
-    void supabase.auth.getUser().then(async ({ data }) => {
-      if (!data.user) return;
-      const { data: preferences } = await supabase
-        .from("user_notification_preferences")
-        .select("*")
-        .eq("auth_user_id", data.user.id)
-        .maybeSingle();
-      if (!active || !preferences) return;
-      setJobUpdatesEmail(preferences.job_updates_email);
-      setJobRemindersSms(preferences.job_reminders_sms);
-      setPaymentNotificationsEmail(preferences.payment_notifications_email);
-      setPaymentAlertsSms(preferences.payment_alerts_sms);
-      setCustomerFeedbackSms(preferences.customer_feedback_sms);
-      setSystemAlertsSms(preferences.system_alerts_sms);
-      setWeeklyReportsEmail(preferences.weekly_reports_email);
-    });
+    void loadNotificationPreferences()
+      .then((preferences) => {
+        if (!active || !preferences) return;
+        setJobUpdatesEmail(preferences.job_updates_email);
+        setJobRemindersSms(preferences.job_reminders_sms);
+        setPaymentNotificationsEmail(preferences.payment_notifications_email);
+        setPaymentAlertsSms(preferences.payment_alerts_sms);
+        setCustomerFeedbackSms(preferences.customer_feedback_sms);
+        setSystemAlertsSms(preferences.system_alerts_sms);
+        setWeeklyReportsEmail(preferences.weekly_reports_email);
+      })
+      .catch(() => {
+        if (active) toast.error("Could not load notification preferences");
+      });
     return () => { active = false; };
   }, []);
 
@@ -220,18 +218,16 @@ export function Settings() {
       toast.error("Full name is required");
       return;
     }
-    const { data, error } = await supabase.functions.invoke("manage-staff", {
-      body: { action: "update-profile", name: fullName.trim(), phone: userPhone.trim() || null },
-    });
-    if (error) {
+    try {
+      const data = await saveCurrentProfile(fullName.trim(), userPhone.trim() || null);
+      await queryClient.invalidateQueries({ queryKey: ["staff"] });
+      if (data?.auth_metadata_synced === false) {
+        toast.warning("Profile saved, but login metadata synchronization needs attention");
+      } else {
+        toast.success("Profile saved successfully!");
+      }
+    } catch {
       toast.error("Could not save profile");
-      return;
-    }
-    await queryClient.invalidateQueries({ queryKey: ["staff"] });
-    if (data?.auth_metadata_synced === false) {
-      toast.warning("Profile saved, but login metadata synchronization needs attention");
-    } else {
-      toast.success("Profile saved successfully!");
     }
   };
 
@@ -276,26 +272,24 @@ export function Settings() {
   };
 
   const handleSaveNotifications = async () => {
-    const { data: authData, error: authError } = await supabase.auth.getUser();
-    if (authError || !authData.user) {
-      toast.error("Authenticated account not found");
-      return;
-    }
-    const { error } = await supabase.from("user_notification_preferences").upsert({
-      auth_user_id: authData.user.id,
-      job_updates_email: jobUpdatesEmail,
-      job_reminders_sms: jobRemindersSms,
-      payment_notifications_email: paymentNotificationsEmail,
-      payment_alerts_sms: paymentAlertsSms,
-      customer_feedback_sms: customerFeedbackSms,
-      system_alerts_sms: systemAlertsSms,
-      weekly_reports_email: weeklyReportsEmail,
-    });
-    if (error) {
+    try {
+      await saveNotificationPreferences({
+        jobUpdatesEmail,
+        jobRemindersSms,
+        paymentNotificationsEmail,
+        paymentAlertsSms,
+        customerFeedbackSms,
+        systemAlertsSms,
+        weeklyReportsEmail,
+      });
+      toast.success("Notification preferences saved!");
+    } catch (error) {
+      if (error instanceof Error && error.message === "AUTHENTICATED_ACCOUNT_NOT_FOUND") {
+        toast.error("Authenticated account not found");
+        return;
+      }
       toast.error("Could not save notification preferences");
-      return;
     }
-    toast.success("Notification preferences saved!");
   };
 
   const handleOpenCreateUser = () => {
@@ -317,26 +311,23 @@ export function Settings() {
       toast.error("Password must be at least 12 characters");
       return;
     }
-    const { data: authData } = await supabase.auth.getUser();
-    const email = authData.user?.email;
-    if (!email) {
-      toast.error("Authenticated account not found");
-      return;
-    }
-    const { error: reauthError } = await supabase.auth.signInWithPassword({ email, password: currentPassword });
-    if (reauthError) {
-      toast.error("Current password is incorrect");
-      return;
-    }
-    const { error } = await supabase.auth.updateUser({ password: newPassword });
-    if (error) {
+    try {
+      await changeCurrentPassword(currentPassword, newPassword);
+      toast.success("Password changed successfully");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error) {
+      if (error instanceof Error && error.message === "AUTHENTICATED_ACCOUNT_NOT_FOUND") {
+        toast.error("Authenticated account not found");
+        return;
+      }
+      if (error instanceof Error && error.message === "CURRENT_PASSWORD_INCORRECT") {
+        toast.error("Current password is incorrect");
+        return;
+      }
       toast.error("Could not change password");
-      return;
     }
-    toast.success("Password changed successfully");
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
   };
 
   const handleUpdateBusinessHours = (index: number, field: string, value: string | boolean) => {
