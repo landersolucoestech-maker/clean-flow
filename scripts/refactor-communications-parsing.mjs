@@ -7,7 +7,7 @@ const importAnchor = 'import { uploadMessageAttachment } from "./services/messag
 if (!source.includes(importAnchor)) throw new Error("Message attachment service import missing");
 source = source.replace(
   importAnchor,
-  `${importAnchor}\nimport { getConversationPreviewText, getFileNameFromAttachmentUrl, parseMessageContentForAttachments } from "./utils/messageContent";`,
+  `${importAnchor}\nimport { getConversationPreviewText, getFileNameFromAttachmentUrl, parseMessageContentForAttachments } from "./utils/messageContent";\nimport type { AttachmentRef } from "./utils/messageContent";`,
 );
 
 const start = source.indexOf("type AttachmentRef =");
@@ -17,5 +17,6 @@ source = source.slice(0, start) + source.slice(end);
 
 if (source.includes("STORAGE_ATTACHMENT_URL_RE")) throw new Error("Attachment parser implementation remains in page");
 if (!source.includes("getConversationPreviewText")) throw new Error("Conversation preview helper not imported");
+if (!source.includes('import type { AttachmentRef } from "./utils/messageContent";')) throw new Error("AttachmentRef type import missing");
 
 fs.writeFileSync(file, source);
