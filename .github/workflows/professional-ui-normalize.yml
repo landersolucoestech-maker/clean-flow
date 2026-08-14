@@ -1,0 +1,121 @@
+name: Professional UI Normalize
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - ".github/professional-ui.trigger"
+
+permissions:
+  contents: write
+
+jobs:
+  normalize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Normalize large module layouts
+        shell: python
+        run: |
+          from pathlib import Path
+
+          def edit(path, replacements):
+              p = Path(path)
+              text = p.read_text()
+              original = text
+              for old, new in replacements:
+                  if old not in text:
+                      print(f"WARN missing pattern in {path}: {old[:90]!r}")
+                  text = text.replace(old, new)
+              if text != original:
+                  p.write_text(text)
+                  print(f"updated {path}")
+
+          edit("apps/web/src/modules/transactions/pages/TransactionsPage.tsx", [
+              ('import { PageHeader } from "@/components/shared";\n', ''),
+              ('contentClassName="space-y-7"', 'contentClassName="space-y-4"'),
+              ('      {/* Page Header */}\n      <PageHeader title={t("transactions.title")} description="Controle financeiro e fluxo de caixa" />\n      <div className="flex flex-wrap gap-2 md:hidden">{primaryActions}</div>\n\n', ''),
+              ('grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5', 'grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5'),
+              ('flex flex-col gap-3 rounded-2xl border border-border/80 bg-card p-4 shadow-sm lg:flex-row lg:flex-wrap lg:items-center', 'flex flex-col gap-3 rounded-lg border border-border bg-card p-3 lg:flex-row lg:flex-wrap lg:items-center'),
+              ('<Card className="overflow-hidden border-border/80 shadow-sm">', '<Card className="overflow-hidden">'),
+          ])
+
+          edit("apps/web/src/modules/schedule/pages/SchedulePage.tsx", [
+              ('      {/* Page Header */}\n          <div className="flex shrink-0 flex-col gap-4 border-b border-border/60 pb-4 lg:flex-row lg:items-end lg:justify-between">\n            <div>\n              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{t("schedule.title")}</h1>\n              <p className="text-muted-foreground">{t("schedule.subtitle")}</p>\n            </div>\n', '      {/* Schedule toolbar */}\n          <div className="flex shrink-0 items-center justify-end">\n'),
+              ('<Card className="flex-1 overflow-hidden border-border/80 shadow-sm">', '<Card className="flex-1 overflow-hidden">'),
+          ])
+
+          edit("apps/web/src/modules/communications/pages/CommunicationsPage.tsx", [
+              ('<PageLayout fullHeight headerActions={headerActions} contentClassName="gap-4 pb-4">', '<PageLayout fullHeight headerActions={headerActions} contentClassName="gap-0 pb-4">'),
+              ('      <section className="flex shrink-0 flex-col gap-1">\n        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Unified inbox</p>\n        <div className="flex flex-wrap items-end justify-between gap-3">\n          <div>\n            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Communications</h1>\n            <p className="mt-1 text-sm text-muted-foreground">Manage customer conversations across every communication channel from one workspace.</p>\n          </div>\n          <div className="flex gap-2 md:hidden">{headerActions}</div>\n        </div>\n      </section>\n\n', ''),
+              ('grid min-h-0 flex-1 overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm', 'grid min-h-0 flex-1 overflow-hidden rounded-lg border border-border bg-card'),
+              ('rounded-xl px-3 py-2.5 text-left text-sm', 'rounded-md px-3 py-2.5 text-left text-sm'),
+              ('flex rounded-xl bg-muted p-1', 'flex rounded-md bg-muted p-1'),
+              ('flex-1 rounded-lg px-3 py-2 text-xs font-semibold', 'flex-1 rounded-sm px-3 py-2 text-xs font-medium'),
+              ('bg-card text-foreground shadow-sm', 'bg-card text-foreground'),
+              ('mb-1 w-full rounded-xl p-3 text-left', 'mb-1 w-full rounded-md p-3 text-left'),
+              ('max-w-[82%] rounded-2xl px-4 py-2.5 text-sm shadow-sm', 'max-w-[82%] rounded-lg px-4 py-2.5 text-sm'),
+              ('space-y-3 rounded-xl border border-border bg-card p-3', 'space-y-3 rounded-md border border-border bg-card p-3'),
+              ('mb-4 rounded-2xl bg-primary-light p-4 text-primary', 'mb-4 rounded-lg bg-primary/10 p-4 text-primary'),
+          ])
+
+          edit("apps/web/src/modules/crm/customers/pages/CustomersPageContent.tsx", [
+              ('contentClassName="gap-4"', 'contentClassName="gap-3"'),
+              ('<div className="space-y-4">', '<div className="space-y-3">'),
+              ('<Card className="overflow-hidden rounded-md border-border/80 shadow-sm">', '<Card className="overflow-hidden">'),
+              ('className="border-b border-border/70 px-5 py-3"', 'className="border-b border-border px-4 py-3"'),
+              ('flex flex-col gap-3 border-b border-border/70 bg-muted/10 p-4 lg:flex-row lg:items-center', 'flex flex-col gap-3 border-b border-border bg-muted/20 p-3 lg:flex-row lg:items-center'),
+          ])
+
+          edit("apps/web/src/modules/crm/leads/pages/LeadsPageContent.tsx", [
+              ('<div className="space-y-6">', '<div className="space-y-3">'),
+              ('<Card className="overflow-hidden rounded-md border-border/80 shadow-sm">', '<Card className="overflow-hidden">'),
+              ('className="border-b border-border/70 px-5 py-4"', 'className="border-b border-border px-4 py-3"'),
+              ('flex flex-col gap-3 border-b border-border/70 bg-muted/10 p-4 lg:flex-row lg:flex-wrap lg:items-center', 'flex flex-col gap-3 border-b border-border bg-muted/20 p-3 lg:flex-row lg:flex-wrap lg:items-center'),
+          ])
+
+          edit("apps/web/src/modules/crm/contacts/pages/ContactsPage.tsx", [
+              ('<div className="space-y-6">', '<div className="space-y-3">'),
+              ('<Card>\n              <CardContent className="p-4 sm:p-5">', '<Card className="overflow-hidden">\n              <CardContent className="border-b border-border bg-muted/20 p-3">'),
+              ('<Card>\n              <CardContent className="p-0">', '<Card className="overflow-hidden">\n              <CardContent className="p-0">'),
+          ])
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npx eslint apps/web/src packages --max-warnings=0
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Tests
+        run: npx vitest run apps/web/src
+
+      - name: Build
+        run: npm run build
+
+      - name: Commit validated normalization and remove one-shot workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .github/professional-ui.trigger .github/workflows/professional-ui-normalize.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/web/src .github
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "refactor(web): normalize professional workspace layouts"
+          git push origin HEAD:dev
