@@ -8,6 +8,7 @@ const corsHeaders = {
 
 type CustomerContact = { phone: string | null; phone2: string | null };
 type StaffContact = { phone: string | null };
+type SmsProvider = "ringcentral" | "dialpad";
 
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -33,6 +34,24 @@ function isAllowedAttachmentUrl(value: string, supabaseUrl: string): boolean {
   } catch {
     return false;
   }
+}
+
+async function resolveProvider(
+  admin: ReturnType<typeof createClient>,
+  companyId: string,
+): Promise<SmsProvider | null> {
+  const [{ data: settings }, { data: ringCentral }, { data: dialpad }] = await Promise.all([
+    admin.from("company_settings").select("sms_provider").eq("id", companyId).maybeSingle(),
+    admin.from("ringcentral_connections").select("id").eq("company_id", companyId).maybeSingle(),
+    admin.from("dialpad_connections").select("id").eq("company_id", companyId).maybeSingle(),
+  ]);
+
+  const preferred = settings?.sms_provider || "auto";
+  if (preferred === "ringcentral") return ringCentral ? "ringcentral" : null;
+  if (preferred === "dialpad") return dialpad ? "dialpad" : null;
+  if (ringCentral) return "ringcentral";
+  if (dialpad) return "dialpad";
+  return null;
 }
 
 Deno.serve(async (req) => {
@@ -74,6 +93,9 @@ Deno.serve(async (req) => {
     const phone = customer?.phone || customer?.phone2 || staff?.phone || null;
     if (!phone) return json({ error: "Recipient has no phone number" }, 409);
 
+    const provider = await resolveProvider(admin, companyId);
+    if (!provider) return json({ error: "No SMS provider is connected for this company" }, 409);
+
     const { data: message, error: insertError } = await admin
       .from("messages")
       .insert({
@@ -82,6 +104,7 @@ Deno.serve(async (req) => {
         sender_type: "user",
         attachment_url: attachmentUrl,
         read: true,
+        provider,
         delivery_status: "pending",
         delivery_attempts: 1,
         last_delivery_attempt_at: new Date().toISOString(),
@@ -90,7 +113,8 @@ Deno.serve(async (req) => {
       .single();
     if (insertError || !message) throw insertError || new Error("Unable to persist outbound message");
 
-    const providerResponse = await fetch(`${supabaseUrl}/functions/v1/ringcentral-send-message`, {
+    const functionName = provider === "dialpad" ? "dialpad-send-message" : "ringcentral-send-message";
+    const providerResponse = await fetch(`${supabaseUrl}/functions/v1/${functionName}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -108,29 +132,34 @@ Deno.serve(async (req) => {
     if (!providerResponse.ok) {
       const deliveryError = typeof providerPayload.error === "string"
         ? providerPayload.error
-        : `RingCentral HTTP ${providerResponse.status}`;
+        : `${provider} HTTP ${providerResponse.status}`;
       await admin
         .from("messages")
         .update({ delivery_status: "failed", delivery_error: deliveryError.slice(0, 500) })
         .eq("id", message.id);
-      return json({ error: deliveryError, message_id: message.id, delivery_status: "failed" }, 502);
+      return json({ error: deliveryError, message_id: message.id, delivery_status: "failed", provider }, 502);
     }
 
-    const providerId = typeof providerPayload.message_id === "string" ? providerPayload.message_id : null;
+    const providerId = providerPayload.message_id != null ? String(providerPayload.message_id) : null;
+    const deliveryUpdate: Record<string, unknown> = {
+      delivery_status: "sent",
+      delivery_error: null,
+      provider,
+      provider_message_id: providerId,
+    };
+    if (provider === "ringcentral") deliveryUpdate.ringcentral_message_id = providerId;
+
     const { error: sentError } = await admin
       .from("messages")
-      .update({
-        delivery_status: "sent",
-        delivery_error: null,
-        ringcentral_message_id: providerId,
-      })
+      .update(deliveryUpdate)
       .eq("id", message.id);
     if (sentError) {
       console.error("Message delivered but local delivery state update failed", sentError);
       return json({
         success: true,
-        message: { ...message, delivery_status: "pending" },
+        message: { ...message, delivery_status: "pending", provider },
         provider_message_id: providerId,
+        provider,
         warning: "Delivered but local delivery status requires reconciliation",
       }, 202);
     }
@@ -149,8 +178,9 @@ Deno.serve(async (req) => {
 
     return json({
       success: true,
-      message: { ...message, delivery_status: "sent", ringcentral_message_id: providerId },
+      message: { ...message, delivery_status: "sent", provider, provider_message_id: providerId },
       provider_message_id: providerId,
+      provider,
     });
   } catch (error) {
     console.error("Conversation message delivery error:", error);
