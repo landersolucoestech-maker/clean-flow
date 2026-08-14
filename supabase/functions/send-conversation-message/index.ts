@@ -1,4 +1,4 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.112.0";
+import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.112.0";
 import { getAuthorizedStaffIdentity } from "../_shared/authorize.ts";
 
 const corsHeaders = {
@@ -9,6 +9,8 @@ const corsHeaders = {
 type CustomerContact = { phone: string | null; phone2: string | null };
 type StaffContact = { phone: string | null };
 type SmsProvider = "ringcentral" | "dialpad";
+type SmsProviderPreference = "auto" | SmsProvider;
+type SmsProviderSettings = { sms_provider: SmsProviderPreference | null };
 
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -37,16 +39,17 @@ function isAllowedAttachmentUrl(value: string, supabaseUrl: string): boolean {
 }
 
 async function resolveProvider(
-  admin: ReturnType<typeof createClient>,
+  admin: SupabaseClient,
   companyId: string,
 ): Promise<SmsProvider | null> {
-  const [{ data: settings }, { data: ringCentral }, { data: dialpad }] = await Promise.all([
+  const [{ data: settingsData }, { data: ringCentral }, { data: dialpad }] = await Promise.all([
     admin.from("company_settings").select("sms_provider").eq("id", companyId).maybeSingle(),
     admin.from("ringcentral_connections").select("id").eq("company_id", companyId).maybeSingle(),
     admin.from("dialpad_connections").select("id").eq("company_id", companyId).maybeSingle(),
   ]);
 
-  const preferred = settings?.sms_provider || "auto";
+  const settings = settingsData as SmsProviderSettings | null;
+  const preferred: SmsProviderPreference = settings?.sms_provider || "auto";
   if (preferred === "ringcentral") return ringCentral ? "ringcentral" : null;
   if (preferred === "dialpad") return dialpad ? "dialpad" : null;
   if (ringCentral) return "ringcentral";
