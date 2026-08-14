@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { Badge } from "@/components/ui/badge";
 import { DialogTitle } from "@/components/ui/dialog";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -42,10 +43,10 @@ export function CustomerDetailsTabsList() {
     <TabsList className="grid w-full grid-cols-8 h-auto">
       <TabsTrigger value="overview" className="text-xs px-1 py-2">Overview</TabsTrigger>
       <TabsTrigger value="timeline" className="text-xs px-1 py-2">Timeline</TabsTrigger>
-      <TabsTrigger value="contact" className="text-xs px-1 py-2">Contact</TabsTrigger>
-      <TabsTrigger value="addresses" className="text-xs px-1 py-2">Addresses</TabsTrigger>
-      <TabsTrigger value="jobs" className="text-xs px-1 py-2">Jobs</TabsTrigger>
-      <TabsTrigger value="invoices" className="text-xs px-1 py-2">Invoices</TabsTrigger>
+      <TabsTrigger value="contact" className="text-xs px-1 py-2"><T k="common.contact" /></TabsTrigger>
+      <TabsTrigger value="addresses" className="text-xs px-1 py-2"><T k="modal.addresses" /></TabsTrigger>
+      <TabsTrigger value="jobs" className="text-xs px-1 py-2"><T k="audit.jobs" /></TabsTrigger>
+      <TabsTrigger value="invoices" className="text-xs px-1 py-2"><T k="sidebar.invoices" /></TabsTrigger>
       <TabsTrigger value="chat" className="text-xs px-1 py-2">Chat</TabsTrigger>
       <TabsTrigger value="contract" className="text-xs px-1 py-2">Contract</TabsTrigger>
     </TabsList>

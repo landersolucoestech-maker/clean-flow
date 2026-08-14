@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useState, useMemo, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -495,8 +496,8 @@ export function CalculatePayrollModal({
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[180px]">Team Member</TableHead>
-                    <TableHead className="w-[80px]">Jobs</TableHead>
+                    <TableHead className="w-[180px]"><T k="payroll.employee" /></TableHead>
+                    <TableHead className="w-[80px]"><T k="audit.jobs" /></TableHead>
                     <TableHead className="w-[120px]">Valor Jobs</TableHead>
                     <TableHead>Bônus</TableHead>
                     <TableHead className="w-[120px]">Valor Final</TableHead>
@@ -753,7 +754,7 @@ export function CalculatePayrollModal({
               </Button>
               <Button variant="outline" onClick={handleDownloadExcel} className="gap-2">
                 <Download className="w-4 h-4" />
-                Download Excel
+                <T k="payroll.downloadExcel" />
               </Button>
               <Button onClick={handleConfirm}>Confirmar Payroll</Button>
             </DialogFooter>

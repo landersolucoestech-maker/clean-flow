@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import type { ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { useStaffByTeam } from "@/hooks/useStaff";
@@ -45,7 +46,7 @@ export function TeamWithMembers({ teamNum, color }: { teamNum: string; color: st
         Team {teamNum}
       </Badge>
       <div className="pl-1 text-xs text-muted-foreground">
-        {isLoading ? <span>Loading...</span> : uniqueStaffMembers.length > 0 ? uniqueStaffMembers.map((staff) => staff.name).join(", ") : <span className="italic">No members assigned</span>}
+        {isLoading ? <span><T k="common.loading" /></span> : uniqueStaffMembers.length > 0 ? uniqueStaffMembers.map((staff) => staff.name).join(", ") : <span className="italic">No members assigned</span>}
       </div>
     </div>
   );

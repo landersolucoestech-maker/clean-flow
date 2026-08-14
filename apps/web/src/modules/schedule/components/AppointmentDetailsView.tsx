@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useMemo, useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -683,7 +684,7 @@ export function AppointmentDetailsView({
               onClick={onEdit}
             >
               <Pencil className="h-4 w-4" />
-              Edit
+              <T k="common.edit" />
             </Button>
           )}
           <Button
@@ -692,7 +693,7 @@ export function AppointmentDetailsView({
             className="h-8 rounded-full px-4 text-xs shadow-none"
             onClick={onClose}
           >
-            Close
+            <T k="common.close" />
           </Button>
         </footer>
       </div>
@@ -713,7 +714,7 @@ export function AppointmentDetailsView({
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setAddNoteOpen(false)}>
-              Cancel
+              <T k="common.cancel" />
             </Button>
             <Button onClick={handleAddNote}>Add Note</Button>
           </DialogFooter>
@@ -736,7 +737,7 @@ export function AppointmentDetailsView({
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setAddAdditionalNoteOpen(false)}>
-              Cancel
+              <T k="common.cancel" />
             </Button>
             <Button onClick={handleAddAdditionalNote}>Add Note</Button>
           </DialogFooter>
@@ -759,7 +760,7 @@ export function AppointmentDetailsView({
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setAddFeedbackOpen(false)}>
-              Cancel
+              <T k="common.cancel" />
             </Button>
             <Button onClick={handleAddFeedback}>Add Feedback</Button>
           </DialogFooter>

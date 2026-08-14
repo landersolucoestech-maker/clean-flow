@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useState, useEffect, useCallback } from "react";
 import {
   Dialog,
@@ -167,7 +168,7 @@ export function ReviewRequestPreviewModal({
 
         <DialogFooter className="gap-2 sm:gap-0">
           <Button variant="outline" onClick={onClose} disabled={isSending}>
-            Cancel
+            <T k="common.cancel" />
           </Button>
           <Button 
             onClick={handleSend} 

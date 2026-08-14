@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useState } from "react";
 import { format } from "date-fns";
 import { AdminLayout } from "@/components/admin/AdminLayout";
@@ -117,7 +118,7 @@ export function AdminClients() {
                   <TableRow className="bg-background hover:bg-background">
                     <TableHead className="text-muted-foreground font-medium">Empresa</TableHead>
                     <TableHead className="text-muted-foreground font-medium">Moeda</TableHead>
-                    <TableHead className="text-muted-foreground font-medium">Status</TableHead>
+                    <TableHead className="text-muted-foreground font-medium"><T k="admin.clients.status" /></TableHead>
                     <TableHead className="text-muted-foreground font-medium">Cadastro</TableHead>
                   </TableRow>
                 </TableHeader>

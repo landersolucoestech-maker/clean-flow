@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useState, useEffect } from "react";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { Button } from "@/components/ui/button";
@@ -490,7 +491,7 @@ export function Settings() {
                   <SelectContent>
                     <SelectItem value="text_phone_1">Text Phone 1</SelectItem>
                     <SelectItem value="text_phone_2">Text Phone 2</SelectItem>
-                    <SelectItem value="email">Email</SelectItem>
+                    <SelectItem value="email"><T k="common.email" /></SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -503,7 +504,7 @@ export function Settings() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <MapPin className="w-5 h-5" />
-              GPS Location Settings
+              <T k="settings.gpsSettings" />
             </CardTitle>
             <CardDescription>Configure GPS tracking and alerts</CardDescription>
           </CardHeader>

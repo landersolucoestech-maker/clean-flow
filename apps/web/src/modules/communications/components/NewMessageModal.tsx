@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useState } from "react";
 import {
   Dialog,
@@ -171,7 +172,7 @@ export function NewMessageModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MessageSquare className="w-5 h-5" />
-            New Message
+            <T k="communications.newMessage" />
           </DialogTitle>
           <DialogDescription>
             Start a new conversation with a customer or team member
@@ -186,11 +187,11 @@ export function NewMessageModal({
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="customer" className="flex items-center gap-2">
                     <Users className="w-4 h-4" />
-                    Customers
+                    <T k="crm.tabs.customers" />
                   </TabsTrigger>
                   <TabsTrigger value="team" className="flex items-center gap-2">
                     <UserCircle className="w-4 h-4" />
-                    Team Members
+                    <T k="reports.teamMembers" />
                   </TabsTrigger>
                 </TabsList>
 
@@ -281,7 +282,7 @@ export function NewMessageModal({
                                 )}
                                 {!staff.is_active && (
                                   <Badge variant="secondary" className="text-xs">
-                                    Inactive
+                                    <T k="common.inactive" />
                                   </Badge>
                                 )}
                               </div>
@@ -343,7 +344,7 @@ export function NewMessageModal({
         {/* Actions */}
         <div className="flex justify-end gap-3 pt-4 border-t">
           <Button variant="outline" onClick={handleClose} disabled={isSending}>
-            Cancel
+            <T k="common.cancel" />
           </Button>
           {selectedRecipient && (
             <Button

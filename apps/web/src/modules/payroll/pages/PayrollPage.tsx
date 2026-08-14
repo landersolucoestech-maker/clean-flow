@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { lazy, Suspense, useState, useMemo, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { PageLayout } from "@/components/layout/PageLayout";
@@ -1257,11 +1258,11 @@ export function Payroll() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "Paid":
-        return <Badge className="bg-success/10 text-success hover:bg-success/15">Paid</Badge>;
+        return <Badge className="bg-success/10 text-success hover:bg-success/15"><T k="payroll.paid" /></Badge>;
       case "Pending":
-        return <Badge className="bg-warning/10 text-warning-foreground hover:bg-warning/15">Pending</Badge>;
+        return <Badge className="bg-warning/10 text-warning-foreground hover:bg-warning/15"><T k="payroll.pending" /></Badge>;
       case "Overdue":
-        return <Badge className="bg-destructive/10 text-destructive hover:bg-destructive/15">Overdue</Badge>;
+        return <Badge className="bg-destructive/10 text-destructive hover:bg-destructive/15"><T k="payroll.overdue" /></Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
@@ -1484,7 +1485,7 @@ export function Payroll() {
                         onClick={() => handleSort("employeeName")}
                       >
                         <div className="flex items-center">
-                          Team Member
+                          <T k="payroll.employee" />
                           <SortIcon field="employeeName" />
                         </div>
                       </TableHead>

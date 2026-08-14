@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useState, useRef } from "react";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { Button } from "@/components/ui/button";
@@ -317,7 +318,7 @@ export function Customers() {
           <Card className="overflow-hidden">
             <CardHeader className="border-b border-border px-4 py-3">
               <div className="flex flex-col gap-1">
-                <CardTitle className="text-sm font-semibold">Customers</CardTitle>
+                <CardTitle className="text-sm font-semibold"><T k="customers.title" /></CardTitle>
                 <p className="text-xs text-muted-foreground">Search, filter and manage the customer directory.</p>
               </div>
             </CardHeader>
@@ -331,11 +332,11 @@ export function Customers() {
                 <SelectValue placeholder="Search by" />
               </SelectTrigger>
               <SelectContent className="bg-popover border-border">
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="name">Name</SelectItem>
-                <SelectItem value="phone">Phone</SelectItem>
-                <SelectItem value="email">Email</SelectItem>
-                <SelectItem value="address">Address</SelectItem>
+                <SelectItem value="all"><T k="common.all" /></SelectItem>
+                <SelectItem value="name"><T k="common.name" /></SelectItem>
+                <SelectItem value="phone"><T k="common.phone" /></SelectItem>
+                <SelectItem value="email"><T k="common.email" /></SelectItem>
+                <SelectItem value="address"><T k="common.address" /></SelectItem>
               </SelectContent>
             </Select>
             <input type="file" ref={fileInputRef} onChange={handleImportExcel} accept=".xlsx,.csv" className="hidden" />
@@ -344,9 +345,9 @@ export function Customers() {
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent className="bg-popover border-border">
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
+                <SelectItem value="all"><T k="common.all" /></SelectItem>
+                <SelectItem value="active"><T k="common.active" /></SelectItem>
+                <SelectItem value="inactive"><T k="common.inactive" /></SelectItem>
               </SelectContent>
             </Select>
             <DropdownMenu>

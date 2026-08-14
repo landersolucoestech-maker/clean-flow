@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import {
   Dialog,
   DialogContent,
@@ -436,7 +437,7 @@ export function LeadDetailsModal({
                         <Building2 className="w-4 h-4 text-muted-foreground" />
                       )}
                       <div>
-                        <p className="text-xs text-muted-foreground">Property Type</p>
+                        <p className="text-xs text-muted-foreground"><T k="leads.form.propertyType" /></p>
                         <p className="font-medium capitalize">{estimate.propertyType}</p>
                       </div>
                     </div>
@@ -445,7 +446,7 @@ export function LeadDetailsModal({
                     <div className="flex items-center gap-2">
                       <Home className="w-4 h-4 text-muted-foreground" />
                       <div>
-                        <p className="text-xs text-muted-foreground">Residence Type</p>
+                        <p className="text-xs text-muted-foreground"><T k="leads.form.residenceType" /></p>
                         <p className="font-medium capitalize">{estimate.residenceType}</p>
                       </div>
                     </div>
@@ -454,7 +455,7 @@ export function LeadDetailsModal({
                     <div className="flex items-center gap-2">
                       <BedDouble className="w-4 h-4 text-muted-foreground" />
                       <div>
-                        <p className="text-xs text-muted-foreground">Bedrooms</p>
+                        <p className="text-xs text-muted-foreground"><T k="leads.form.bedrooms" /></p>
                         <p className="font-medium">{estimate.bedrooms}</p>
                       </div>
                     </div>
@@ -463,7 +464,7 @@ export function LeadDetailsModal({
                     <div className="flex items-center gap-2">
                       <Bath className="w-4 h-4 text-muted-foreground" />
                       <div>
-                        <p className="text-xs text-muted-foreground">Bathrooms</p>
+                        <p className="text-xs text-muted-foreground"><T k="leads.form.bathrooms" /></p>
                         <p className="font-medium">{estimate.bathrooms}</p>
                       </div>
                     </div>
@@ -472,7 +473,7 @@ export function LeadDetailsModal({
                     <div className="flex items-center gap-2">
                       <Ruler className="w-4 h-4 text-muted-foreground" />
                       <div>
-                        <p className="text-xs text-muted-foreground">Square Feet</p>
+                        <p className="text-xs text-muted-foreground"><T k="leads.form.squareFeet" /></p>
                         <p className="font-medium">{estimate.squareFeet.toLocaleString()} sqft</p>
                       </div>
                     </div>
@@ -481,8 +482,8 @@ export function LeadDetailsModal({
                     <div className="flex items-center gap-2">
                       <PawPrint className="w-4 h-4 text-muted-foreground" />
                       <div>
-                        <p className="text-xs text-muted-foreground">Has Pets</p>
-                        <p className="font-medium text-amber-600">Yes</p>
+                        <p className="text-xs text-muted-foreground"><T k="leads.form.hasPets" /></p>
+                        <p className="font-medium text-amber-600"><T k="common.yes" /></p>
                       </div>
                     </div>
                   )}
@@ -490,7 +491,7 @@ export function LeadDetailsModal({
                     <div className="flex items-center gap-2">
                       <Building2 className="w-4 h-4 text-muted-foreground" />
                       <div>
-                        <p className="text-xs text-muted-foreground">Business Name</p>
+                        <p className="text-xs text-muted-foreground"><T k="leads.form.businessName" /></p>
                         <p className="font-medium">{estimate.businessName}</p>
                       </div>
                     </div>
@@ -502,7 +503,7 @@ export function LeadDetailsModal({
                   <div className="p-4 bg-muted/30 rounded-lg">
                     <div className="flex items-center gap-2 mb-3">
                       <Sparkles className="w-4 h-4 text-primary" />
-                      <p className="text-sm font-medium">Add-on Services</p>
+                      <p className="text-sm font-medium"><T k="leads.form.addOnServices" /></p>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {estimate.addOnServices.map((service, idx) => (
@@ -517,7 +518,7 @@ export function LeadDetailsModal({
                 {/* Special Instructions */}
                 {estimate.specialInstructions && (
                   <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg">
-                    <p className="text-xs text-muted-foreground font-medium mb-1">Special Instructions</p>
+                    <p className="text-xs text-muted-foreground font-medium mb-1"><T k="leads.form.specialInstructions" /></p>
                     <p className="text-sm">{estimate.specialInstructions}</p>
                   </div>
                 )}

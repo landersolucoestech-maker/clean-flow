@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useMemo, useState } from "react";
 import { ContactRound, Eye, MoreHorizontal, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { PageLayout } from "@/components/layout/PageLayout";
@@ -110,7 +111,7 @@ export function Contacts() {
             <Card className="overflow-hidden">
             <div className="flex flex-col gap-3 border-b border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h2 className="text-base font-semibold text-foreground">Contacts</h2>
+                <h2 className="text-base font-semibold text-foreground"><T k="crm.tabs.contacts" /></h2>
                 <p className="mt-0.5 text-sm text-muted-foreground">Manage suppliers, partners, service providers and other business contacts.</p>
               </div>
             </div>
@@ -131,7 +132,7 @@ export function Contacts() {
                   <Select value={statusFilter} onValueChange={(value) => { setStatusFilter(value); setPage(1); }}>
                     <SelectTrigger><SelectValue placeholder="Status" /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Statuses</SelectItem>
+                      <SelectItem value="all"><T k="transactions.allStatuses" /></SelectItem>
                       {CONTACT_STATUSES.map((status) => <SelectItem key={status} value={status}>{status}</SelectItem>)}
                     </SelectContent>
                   </Select>
@@ -166,12 +167,12 @@ export function Contacts() {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Name</TableHead>
-                          <TableHead>Company</TableHead>
+                          <TableHead><T k="common.name" /></TableHead>
+                          <TableHead><T k="settings.company" /></TableHead>
                           <TableHead>Contact Type</TableHead>
-                          <TableHead>Contact</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead className="w-14"><span className="sr-only">Actions</span></TableHead>
+                          <TableHead><T k="common.contact" /></TableHead>
+                          <TableHead><T k="common.status" /></TableHead>
+                          <TableHead className="w-14"><span className="sr-only"><T k="common.actions" /></span></TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -195,9 +196,9 @@ export function Contacts() {
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label="Contact actions"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                  <DropdownMenuItem onClick={() => openDetails(contact)}><Eye className="mr-2 h-4 w-4" />View</DropdownMenuItem>
-                                  {mayEdit && <DropdownMenuItem onClick={() => openEdit(contact)}><Pencil className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>}
-                                  {mayDelete && <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeleteTarget(contact)}><Trash2 className="mr-2 h-4 w-4" />Delete</DropdownMenuItem>}
+                                  <DropdownMenuItem onClick={() => openDetails(contact)}><Eye className="mr-2 h-4 w-4" /><T k="common.view" /></DropdownMenuItem>
+                                  {mayEdit && <DropdownMenuItem onClick={() => openEdit(contact)}><Pencil className="mr-2 h-4 w-4" /><T k="common.edit" /></DropdownMenuItem>}
+                                  {mayDelete && <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeleteTarget(contact)}><Trash2 className="mr-2 h-4 w-4" /><T k="common.delete" /></DropdownMenuItem>}
                                 </DropdownMenuContent>
                               </DropdownMenu>
                             </TableCell>
@@ -214,9 +215,9 @@ export function Contacts() {
               <div className="flex flex-col gap-3 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
                 <span>Showing {(safePage - 1) * PAGE_SIZE + 1}-{Math.min(safePage * PAGE_SIZE, filteredContacts.length)} of {filteredContacts.length}</span>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" disabled={safePage <= 1} onClick={() => setPage((current) => Math.max(1, current - 1))}>Previous</Button>
+                  <Button variant="outline" size="sm" disabled={safePage <= 1} onClick={() => setPage((current) => Math.max(1, current - 1))}><T k="audit.previous" /></Button>
                   <span>Page {safePage} of {totalPages}</span>
-                  <Button variant="outline" size="sm" disabled={safePage >= totalPages} onClick={() => setPage((current) => Math.min(totalPages, current + 1))}>Next</Button>
+                  <Button variant="outline" size="sm" disabled={safePage >= totalPages} onClick={() => setPage((current) => Math.min(totalPages, current + 1))}><T k="audit.next" /></Button>
                 </div>
               </div>
             )}
@@ -236,7 +237,7 @@ export function Contacts() {
                 <AlertDialogDescription>This will remove {deleteTarget?.name} from Contacts. This action cannot be undone.</AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogCancel><T k="common.cancel" /></AlertDialogCancel>
                 <AlertDialogAction
                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   disabled={!mayDelete}
@@ -245,7 +246,7 @@ export function Contacts() {
                     setDeleteTarget(null);
                   }}
                 >
-                  Delete
+                  <T k="common.delete" />
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>

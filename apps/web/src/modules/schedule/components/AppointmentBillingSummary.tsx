@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { Send } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,7 +25,7 @@ export function AppointmentBillingSummary({ amount, onSendInvoice }: Appointment
             <span className="text-sm font-semibold text-foreground">{formattedAmount}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold text-foreground">Total</span>
+            <span className="text-sm font-semibold text-foreground"><T k="invoice.total" /></span>
             <span className="text-sm font-semibold text-foreground">{formattedAmount}</span>
           </div>
           <div className="pt-1">
@@ -34,14 +35,14 @@ export function AppointmentBillingSummary({ amount, onSendInvoice }: Appointment
                 <Send className="h-4 w-4" />
                 Send Invoice
               </Button>
-              <Badge className="border-transparent bg-secondary px-2.5 py-1 text-[10px] font-semibold text-secondary-foreground shadow-none">Sent</Badge>
+              <Badge className="border-transparent bg-secondary px-2.5 py-1 text-[10px] font-semibold text-secondary-foreground shadow-none"><T k="invoice.sent" /></Badge>
             </div>
           </div>
         </div>
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">Payment status</span>
-            <Badge className="border-transparent bg-secondary px-3 py-1 text-[10px] font-semibold text-secondary-foreground shadow-none">Pending</Badge>
+            <Badge className="border-transparent bg-secondary px-3 py-1 text-[10px] font-semibold text-secondary-foreground shadow-none"><T k="leads.pending" /></Badge>
           </div>
         </div>
       </div>

@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
@@ -73,14 +74,14 @@ export function CustomerDetailsModal({
               <div className="p-4 rounded-lg bg-muted/30 space-y-2">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Mail className="w-4 h-4" />
-                  <span className="text-xs">Email</span>
+                  <span className="text-xs"><T k="common.email" /></span>
                 </div>
                 <p className="text-sm font-medium">{customer.email || "-"}</p>
               </div>
               <div className="p-4 rounded-lg bg-muted/30 space-y-2">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Phone className="w-4 h-4" />
-                  <span className="text-xs">Phone 1</span>
+                  <span className="text-xs"><T k="estimate.phone1" /></span>
                 </div>
                 <p className="text-sm font-medium">{customer.phone || "-"}</p>
               </div>
@@ -88,7 +89,7 @@ export function CustomerDetailsModal({
                 <div className="p-4 rounded-lg bg-muted/30 space-y-2">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Phone className="w-4 h-4" />
-                    <span className="text-xs">Phone 2</span>
+                    <span className="text-xs"><T k="estimate.phone2" /></span>
                   </div>
                   <p className="text-sm font-medium">{customer.phone2}</p>
                 </div>
@@ -96,7 +97,7 @@ export function CustomerDetailsModal({
               <div className="p-4 rounded-lg bg-muted/30 space-y-2">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Calendar className="w-4 h-4" />
-                  <span className="text-xs">Customer Since</span>
+                  <span className="text-xs"><T k="modal.customerSince" /></span>
                 </div>
                 <p className="text-sm font-medium">{customer.customer_since || "-"}</p>
               </div>
@@ -107,21 +108,21 @@ export function CustomerDetailsModal({
               <div className="p-4 rounded-lg bg-muted/30 space-y-2">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Calendar className="w-4 h-4" />
-                  <span className="text-xs">Last Service</span>
+                  <span className="text-xs"><T k="customers.lastService" /></span>
                 </div>
                 <p className="text-sm font-medium">{formatCustomerDate(lastServiceDate)}</p>
               </div>
               <div className="p-4 rounded-lg bg-muted/30 space-y-2">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Briefcase className="w-4 h-4" />
-                  <span className="text-xs">Total Jobs</span>
+                  <span className="text-xs"><T k="customers.totalJobs" /></span>
                 </div>
                 <p className="text-sm font-medium">{customerJobs.length || customer.total_jobs || 0}</p>
               </div>
               <div className="p-4 rounded-lg bg-muted/30 space-y-2">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <DollarSign className="w-4 h-4" />
-                  <span className="text-xs">Revenue</span>
+                  <span className="text-xs"><T k="jobs.revenue" /></span>
                 </div>
                 <p className="text-sm font-medium text-success">${totalRevenue.toFixed(2)}</p>
               </div>
@@ -132,7 +133,7 @@ export function CustomerDetailsModal({
               <div className="p-4 rounded-lg bg-muted/30 space-y-2">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <CreditCard className="w-4 h-4" />
-                  <span className="text-xs">Payment Method</span>
+                  <span className="text-xs"><T k="modal.paymentMethod" /></span>
                 </div>
                 <p className="text-sm font-medium capitalize">{customer.payment_method || "-"}</p>
               </div>
@@ -150,7 +151,7 @@ export function CustomerDetailsModal({
               <div className="p-4 rounded-lg bg-muted/30 space-y-2">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Users className="w-4 h-4" />
-                  <span className="text-xs">Referred By</span>
+                  <span className="text-xs"><T k="leads.form.referredBy" /></span>
                 </div>
                 <p className="text-sm font-medium">{customer.additional_info}</p>
               </div>
@@ -180,7 +181,7 @@ export function CustomerDetailsModal({
                     <ChevronDown className={`h-4 w-4 transition-transform ${notesExpanded ? "" : "-rotate-90"}`} />
                   </Button>
                   <FileText className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm font-medium text-foreground">Notes</span>
+                  <span className="text-sm font-medium text-foreground"><T k="modal.notes" /></span>
                 </div>
                 {notesExpanded && (
                   <div className="ml-8">
@@ -284,7 +285,7 @@ export function CustomerDetailsModal({
                               {formatCustomerDate(rel.start_date)} — {rel.end_date ? formatCustomerDate(rel.end_date) : "Present"}
                             </p>
                             {!rel.end_date && (
-                              <Badge className="bg-success/10 text-success text-xs">Active</Badge>
+                              <Badge className="bg-success/10 text-success text-xs"><T k="common.active" /></Badge>
                             )}
                           </div>
                           {rel.end_reason && (
@@ -312,28 +313,28 @@ export function CustomerDetailsModal({
             <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/30">
               <Mail className="w-5 h-5 text-muted-foreground" />
               <div>
-                <p className="text-xs text-muted-foreground">Email</p>
+                <p className="text-xs text-muted-foreground"><T k="common.email" /></p>
                 <p className="text-sm font-medium">{customer.email}</p>
               </div>
             </div>
             <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/30">
               <Phone className="w-5 h-5 text-muted-foreground" />
               <div>
-                <p className="text-xs text-muted-foreground">Phone 1</p>
+                <p className="text-xs text-muted-foreground"><T k="estimate.phone1" /></p>
                 <p className="text-sm font-medium">{customer.phone}</p>
               </div>
             </div>
             {customer.phone2 && <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/30">
                 <Phone className="w-5 h-5 text-muted-foreground" />
                 <div>
-                  <p className="text-xs text-muted-foreground">Phone 2</p>
+                  <p className="text-xs text-muted-foreground"><T k="estimate.phone2" /></p>
                   <p className="text-sm font-medium">{customer.phone2}</p>
                 </div>
               </div>}
             {customer.customer_since && <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/30">
                 <Calendar className="w-5 h-5 text-muted-foreground" />
                 <div>
-                  <p className="text-xs text-muted-foreground">Customer Since</p>
+                  <p className="text-xs text-muted-foreground"><T k="modal.customerSince" /></p>
                   <p className="text-sm font-medium">{customer.customer_since}</p>
                 </div>
               </div>}
@@ -416,14 +417,14 @@ export function CustomerDetailsModal({
                     <div className="p-3 rounded-md bg-background/50">
                       <div className="flex items-center gap-2 mb-1">
                         <Clock className="w-3 h-3 text-muted-foreground" />
-                        <p className="text-xs text-muted-foreground">Frequency</p>
+                        <p className="text-xs text-muted-foreground"><T k="estimate.frequency" /></p>
                       </div>
                       <p className="text-sm font-medium">{frequencyLabels[addr.frequency] || addr.frequency || "Not set"}</p>
                     </div>
                     <div className="p-3 rounded-md bg-background/50">
                       <div className="flex items-center gap-2 mb-1">
                         <Calendar className="w-3 h-3 text-muted-foreground" />
-                        <p className="text-xs text-muted-foreground">Preferred Day</p>
+                        <p className="text-xs text-muted-foreground"><T k="modal.preferredDay" /></p>
                       </div>
                       <p className="text-sm font-medium">{dayLabels[addr.preferred_day] || addr.preferred_day || "Not set"}</p>
                     </div>
@@ -434,7 +435,7 @@ export function CustomerDetailsModal({
                     <div className="p-3 rounded-md bg-background/50">
                       <div className="flex items-center gap-2 mb-1">
                         <FileText className="w-3 h-3 text-muted-foreground" />
-                        <p className="text-xs text-muted-foreground">Notes</p>
+                        <p className="text-xs text-muted-foreground"><T k="modal.notes" /></p>
                       </div>
                       <p className="text-sm whitespace-pre-wrap">{addr.notes}</p>
                     </div>
@@ -445,7 +446,7 @@ export function CustomerDetailsModal({
                     <div className="p-3 rounded-md bg-background/50">
                       <div className="flex items-center gap-2 mb-1">
                         <FileText className="w-3 h-3 text-muted-foreground" />
-                        <p className="text-xs text-muted-foreground">Additional Notes</p>
+                        <p className="text-xs text-muted-foreground"><T k="modal.additionalNotes" /></p>
                       </div>
                       <p className="text-sm whitespace-pre-wrap">{addr.additional_notes}</p>
                     </div>
@@ -469,15 +470,15 @@ export function CustomerDetailsModal({
                     <p className="text-sm font-medium">{customer.address || "-"}</p>
                   </div>
                   <div className="p-3 rounded-md bg-background/50">
-                    <p className="text-xs text-muted-foreground mb-1">City</p>
+                    <p className="text-xs text-muted-foreground mb-1"><T k="modal.city" /></p>
                     <p className="text-sm font-medium">{customer.city || "-"}</p>
                   </div>
                   <div className="p-3 rounded-md bg-background/50">
-                    <p className="text-xs text-muted-foreground mb-1">State</p>
+                    <p className="text-xs text-muted-foreground mb-1"><T k="modal.state" /></p>
                     <p className="text-sm font-medium">{customer.state || "-"}</p>
                   </div>
                   <div className="p-3 rounded-md bg-background/50">
-                    <p className="text-xs text-muted-foreground mb-1">Postal Code</p>
+                    <p className="text-xs text-muted-foreground mb-1"><T k="modal.postalCode" /></p>
                     <p className="text-sm font-medium">{customer.zip_code || "-"}</p>
                   </div>
                 </div>
@@ -491,14 +492,14 @@ export function CustomerDetailsModal({
               <div className="p-4 rounded-lg bg-muted/30 space-y-2">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Calendar className="w-4 h-4" />
-                  <span className="text-xs">Last Service</span>
+                  <span className="text-xs"><T k="customers.lastService" /></span>
                 </div>
                 <p className="text-sm font-medium">{formatCustomerDate(lastServiceDate)}</p>
               </div>
               <div className="p-4 rounded-lg bg-muted/30 space-y-2">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Briefcase className="w-4 h-4" />
-                  <span className="text-xs">Total Jobs</span>
+                  <span className="text-xs"><T k="customers.totalJobs" /></span>
                 </div>
                 <p className="text-sm font-medium">{customerJobs.length}</p>
               </div>
@@ -553,7 +554,7 @@ export function CustomerDetailsModal({
                         <div className="flex items-start gap-2 p-2 rounded bg-muted/40">
                           <StickyNote className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <p className="text-xs font-medium text-muted-foreground">Notes</p>
+                            <p className="text-xs font-medium text-muted-foreground"><T k="modal.notes" /></p>
                             <p className="text-sm whitespace-pre-wrap break-words">{job.notes}</p>
                           </div>
                         </div>
@@ -562,7 +563,7 @@ export function CustomerDetailsModal({
                         <div className="flex items-start gap-2 p-2 rounded bg-muted/40">
                           <FileText className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <p className="text-xs font-medium text-muted-foreground">Additional Notes</p>
+                            <p className="text-xs font-medium text-muted-foreground"><T k="modal.additionalNotes" /></p>
                             <p className="text-sm whitespace-pre-wrap break-words">{job.additional_notes}</p>
                           </div>
                         </div>
@@ -600,11 +601,11 @@ export function CustomerDetailsModal({
                   <TableHeader>
                     <TableRow>
                       <TableHead>Invoice #</TableHead>
-                      <TableHead>Job ID</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Amount</TableHead>
-                      <TableHead>Due Date</TableHead>
-                      <TableHead>Status</TableHead>
+                      <TableHead><T k="jobs.jobId" /></TableHead>
+                      <TableHead><T k="common.date" /></TableHead>
+                      <TableHead><T k="jobs.amount" /></TableHead>
+                      <TableHead><T k="billing.dueDate" /></TableHead>
+                      <TableHead><T k="common.status" /></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -704,7 +705,7 @@ export function CustomerDetailsModal({
                     {/* Notes if any */}
                     {term.notes && (
                       <div className="p-4 rounded-lg bg-muted/20 border border-border">
-                        <h5 className="text-sm font-medium mb-2">Notes</h5>
+                        <h5 className="text-sm font-medium mb-2"><T k="modal.notes" /></h5>
                         <p className="text-xs text-muted-foreground leading-relaxed">
                           {term.notes}
                         </p>

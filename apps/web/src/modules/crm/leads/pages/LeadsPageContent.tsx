@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { PageLayout } from "@/components/layout/PageLayout";
@@ -669,7 +670,7 @@ export function Leads() {
             <div className="border-b border-border px-4 py-3">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h2 className="text-base font-semibold text-foreground">Leads</h2>
+                  <h2 className="text-base font-semibold text-foreground"><T k="leads.title" /></h2>
                   <p className="mt-0.5 text-sm text-muted-foreground">Manage the sales pipeline from first contact through conversion.</p>
                 </div>
               </div>
@@ -733,15 +734,15 @@ export function Leads() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Lead</TableHead>
+                      <TableHead><T k="leads.table.lead" /></TableHead>
                       <TableHead>Primary Contact</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Origin</TableHead>
-                      <TableHead>Status</TableHead>
+                      <TableHead><T k="leads.origin.email" /></TableHead>
+                      <TableHead><T k="leads.origin" /></TableHead>
+                      <TableHead><T k="common.status" /></TableHead>
                       <TableHead>Invoice Status</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Value</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead><T k="common.date" /></TableHead>
+                      <TableHead><T k="leads.table.value" /></TableHead>
+                      <TableHead className="text-right"><T k="leads.actions" /></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>

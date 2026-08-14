@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useState, useMemo } from "react";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { Button } from "@/components/ui/button";
@@ -431,11 +432,11 @@ export function Billing() {
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
                   <SelectContent className="bg-popover border-border">
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="sent">Sent</SelectItem>
+                    <SelectItem value="all"><T k="common.allStatus" /></SelectItem>
+                    <SelectItem value="sent"><T k="invoice.sent" /></SelectItem>
                     <SelectItem value="viewed">Viewed</SelectItem>
-                    <SelectItem value="paid">Paid</SelectItem>
-                    <SelectItem value="overdue">Overdue</SelectItem>
+                    <SelectItem value="paid"><T k="invoice.paid" /></SelectItem>
+                    <SelectItem value="overdue"><T k="payroll.overdue" /></SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -557,11 +558,11 @@ export function Billing() {
                               )}
                               <DropdownMenuItem onClick={() => handleEditInvoice(invoice, "edit")}>
                                 <Pencil className="w-4 h-4 mr-2" />
-                                Edit Invoice
+                                <T k="invoice.edit" />
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleEditInvoice(invoice, "view")}>
                                 <Eye className="w-4 h-4 mr-2" />
-                                View Details
+                                <T k="common.viewDetails" />
                               </DropdownMenuItem>
                               <DropdownMenuItem 
                                 onClick={() => deleteInvoice.mutate(invoice.id)}

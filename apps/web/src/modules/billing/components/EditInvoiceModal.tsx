@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useState, useEffect } from "react";
 import {
   Dialog,
@@ -438,7 +439,7 @@ export function EditInvoiceModal({ open, onOpenChange, invoice, mode = "edit" }:
           </div>
 
           <div className="space-y-2">
-            <Label>Job ID</Label>
+            <Label><T k="billing.jobId" /></Label>
             <Input
               value={formData.jobId ? formData.jobId.slice(0, 8) : ''}
               placeholder="JOB-001"

@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -84,7 +85,7 @@ export function AdminAuth() {
             <CardContent className="pt-4">
               <form onSubmit={handleLogin} className="space-y-5">
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-slate-300">Email Address</Label>
+                  <Label htmlFor="email" className="text-slate-300"><T k="leads.form.emailAddress" /></Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                     <Input

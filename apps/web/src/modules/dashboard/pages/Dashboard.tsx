@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
@@ -100,7 +101,7 @@ export function Dashboard() {
 
       <section className="space-y-3">
         <div>
-          <h2 className="text-sm font-semibold text-foreground">Operations</h2>
+          <h2 className="text-sm font-semibold text-foreground"><T k="sidebar.operations" /></h2>
           <p className="text-xs text-muted-foreground">Recent activity and upcoming work</p>
         </div>
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(340px,0.85fr)]">

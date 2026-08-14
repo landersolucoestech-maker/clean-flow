@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useState } from "react";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { Button } from "@/components/ui/button";
@@ -78,7 +79,7 @@ export function SyncLogs() {
       case "error":
         return <Badge variant="destructive">Error</Badge>;
       case "pending":
-        return <Badge className="bg-warning/10 text-warning border-warning/20">Pending</Badge>;
+        return <Badge className="bg-warning/10 text-warning border-warning/20"><T k="settings.pending" /></Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -321,11 +322,11 @@ export function SyncLogs() {
                     <SelectValue placeholder="Type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Types</SelectItem>
+                    <SelectItem value="all"><T k="transactions.allTypes" /></SelectItem>
                     <SelectItem value="invoice">Invoice</SelectItem>
-                    <SelectItem value="customer">Customer</SelectItem>
+                    <SelectItem value="customer"><T k="common.customer" /></SelectItem>
                     <SelectItem value="payment">Payment</SelectItem>
-                    <SelectItem value="payroll">Payroll</SelectItem>
+                    <SelectItem value="payroll"><T k="sidebar.payroll" /></SelectItem>
                   </SelectContent>
                 </Select>
 
@@ -335,10 +336,10 @@ export function SyncLogs() {
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="all"><T k="common.allStatus" /></SelectItem>
                     <SelectItem value="success">Success</SelectItem>
                     <SelectItem value="error">Error</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="pending"><T k="settings.pending" /></SelectItem>
                   </SelectContent>
                 </Select>
 
@@ -367,14 +368,14 @@ export function SyncLogs() {
                 <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="w-[180px]">Timestamp</TableHead>
-                        <TableHead className="w-[100px]">Type</TableHead>
-                        <TableHead className="w-[100px]">Action</TableHead>
-                        <TableHead className="w-[100px]">Status</TableHead>
+                        <TableHead className="w-[180px]"><T k="admin.logs.timestamp" /></TableHead>
+                        <TableHead className="w-[100px]"><T k="transactions.type" /></TableHead>
+                        <TableHead className="w-[100px]"><T k="admin.logs.action" /></TableHead>
+                        <TableHead className="w-[100px]"><T k="common.status" /></TableHead>
                         <TableHead>Message</TableHead>
                         <TableHead className="w-[100px]">Local ID</TableHead>
                         <TableHead className="w-[100px]">QB ID</TableHead>
-                        <TableHead className="w-[80px]">Actions</TableHead>
+                        <TableHead className="w-[80px]"><T k="common.actions" /></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>

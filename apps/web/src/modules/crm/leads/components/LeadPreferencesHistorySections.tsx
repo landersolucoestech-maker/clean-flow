@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import type { Dispatch, SetStateAction } from "react";
 import { Calendar, MessageSquare, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -44,7 +45,7 @@ export function LeadPreferencesHistorySections({
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Preferred Days</Label>
+              <Label><T k="leads.form.preferredDays" /></Label>
               <Select
                 value={formData.preferredDays.length > 0 ? formData.preferredDays[0] : "none"}
                 onValueChange={(value) => value === "none" ? setFormData({ ...formData, preferredDays: [] }) : togglePreferredDay(value)}
@@ -73,7 +74,7 @@ export function LeadPreferencesHistorySections({
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Preferred Time</Label>
+              <Label><T k="leads.form.preferredTime" /></Label>
               <Select
                 value={formData.preferredTime || "none"}
                 onValueChange={(value) => setFormData({ ...formData, preferredTime: value === "none" ? "" : value })}
@@ -117,7 +118,7 @@ export function LeadPreferencesHistorySections({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="validUntil">Valid Until</Label>
+                <Label htmlFor="validUntil"><T k="leads.validUntil" /></Label>
                 <Input id="validUntil" type="date" value={formData.validUntil} onChange={(event) => setFormData({ ...formData, validUntil: event.target.value })} />
               </div>
             </div>
@@ -174,7 +175,7 @@ export function LeadPreferencesHistorySections({
                 </div>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                   <div className="space-y-2">
-                    <Label>Type</Label>
+                    <Label><T k="transactions.type" /></Label>
                     <Select value={interaction.type} onValueChange={(value) => updateInteraction(interaction.id, "type", value)}>
                       <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
                       <SelectContent className="z-50 border-border bg-popover">
@@ -182,11 +183,11 @@ export function LeadPreferencesHistorySections({
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-2"><Label>Date</Label><Input type="date" value={interaction.date} onChange={(event) => updateInteraction(interaction.id, "date", event.target.value)} /></div>
-                  <div className="space-y-2"><Label>Time</Label><Input type="time" value={interaction.time} onChange={(event) => updateInteraction(interaction.id, "time", event.target.value)} /></div>
+                  <div className="space-y-2"><Label><T k="common.date" /></Label><Input type="date" value={interaction.date} onChange={(event) => updateInteraction(interaction.id, "date", event.target.value)} /></div>
+                  <div className="space-y-2"><Label><T k="common.time" /></Label><Input type="time" value={interaction.time} onChange={(event) => updateInteraction(interaction.id, "time", event.target.value)} /></div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Description</Label>
+                  <Label><T k="invoice.description" /></Label>
                   <Textarea value={interaction.description} onChange={(event) => updateInteraction(interaction.id, "description", event.target.value)} placeholder="Describe the interaction..." rows={2} />
                 </div>
               </div>

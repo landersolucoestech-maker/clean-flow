@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useState, useEffect } from "react";
 import {
   Dialog,
@@ -399,7 +400,7 @@ export function TransactionModal({
 
           {/* Status */}
           <div className="space-y-2">
-            <Label htmlFor="status">Status</Label>
+            <Label htmlFor="status"><T k="common.status" /></Label>
             <Select
               value={formData.status}
               onValueChange={(value) =>

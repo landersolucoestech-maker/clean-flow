@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useState } from "react";
 import { format } from "date-fns";
 import { AdminLayout } from "@/components/admin/AdminLayout";
@@ -194,7 +195,7 @@ export function AdminSupport() {
               </div>
               <div className="mt-4">
                 <p className="text-2xl font-bold text-foreground">{totalTickets}</p>
-                <p className="text-sm text-muted-foreground mt-1">Total</p>
+                <p className="text-sm text-muted-foreground mt-1"><T k="invoice.total" /></p>
                 <p className="text-xs text-muted-foreground/70">Todos os tickets</p>
               </div>
             </CardContent>
@@ -260,11 +261,11 @@ export function AdminSupport() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-background hover:bg-background">
-                    <TableHead className="text-muted-foreground font-medium">ID</TableHead>
+                    <TableHead className="text-muted-foreground font-medium"><T k="transactions.id" /></TableHead>
                     <TableHead className="text-muted-foreground font-medium">Título</TableHead>
                     <TableHead className="text-muted-foreground font-medium">Usuário</TableHead>
                     <TableHead className="text-muted-foreground font-medium">Organização</TableHead>
-                    <TableHead className="text-muted-foreground font-medium">Status</TableHead>
+                    <TableHead className="text-muted-foreground font-medium"><T k="admin.clients.status" /></TableHead>
                     <TableHead className="text-muted-foreground font-medium">Prioridade</TableHead>
                     <TableHead className="text-muted-foreground font-medium">Categoria</TableHead>
                     <TableHead className="text-muted-foreground font-medium">Criado em</TableHead>

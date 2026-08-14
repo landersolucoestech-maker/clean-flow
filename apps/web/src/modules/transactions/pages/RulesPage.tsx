@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useState, useMemo } from "react";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { PageHeader, KPICard, SearchInput, FilterSelect, ActionDropdown } from "@/components/shared";
@@ -245,7 +246,7 @@ export function Rules() {
                 <TableHead>Condição</TableHead>
                 <TableHead>Categoria</TableHead>
                 <TableHead>Tipo</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead><T k="common.status" /></TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -367,7 +368,7 @@ export function Rules() {
                   <p className="font-medium">{selectedRule.category}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Status</p>
+                  <p className="text-sm text-muted-foreground"><T k="common.status" /></p>
                   <p className="font-medium">{selectedRule.is_active ? "Ativa" : "Inativa"}</p>
                 </div>
                 <div>

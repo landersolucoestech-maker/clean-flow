@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -183,7 +184,7 @@ export function IntegrationsTab() {
                 <div className={`p-3 rounded-lg border ${hasAdsAccess() ? 'border-success/50 bg-success/5' : 'border-muted bg-muted/50'}`}>
                   <div className="flex items-center gap-2">
                     <Megaphone className={`w-4 h-4 ${hasAdsAccess() ? 'text-success' : 'text-muted-foreground'}`} />
-                    <span className="font-medium text-sm">Google Ads</span>
+                    <span className="font-medium text-sm"><T k="leads.origin.google_ads" /></span>
                     {hasAdsAccess() && <Check className="w-4 h-4 text-success ml-auto" />}
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">Importar leads de campanhas</p>
@@ -642,7 +643,7 @@ export function IntegrationsTab() {
             <div className="p-2 rounded-lg border border-success/30 bg-success/5">
               <div className="flex items-center gap-2">
                 <Code className="w-4 h-4 text-success" />
-                <span className="text-sm font-medium">Estimates</span>
+                <span className="text-sm font-medium"><T k="audit.estimates" /></span>
               </div>
             </div>
           </div>

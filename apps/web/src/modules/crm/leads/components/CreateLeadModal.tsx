@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCustomers } from "@/hooks/useCustomers";
@@ -284,7 +285,7 @@ export function CreateLeadModal({ open, onOpenChange }: CreateLeadModalProps) {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="primaryContactName" className="flex items-center gap-1">
-                  Primary Contact Name <span className="text-destructive">*</span>
+                  <T k="leads.form.primaryContactName" /> <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="primaryContactName"
@@ -309,7 +310,7 @@ export function CreateLeadModal({ open, onOpenChange }: CreateLeadModalProps) {
                 <Label htmlFor="businessName">
                   <div className="flex items-center gap-1">
                     <Building2 className="w-4 h-4" />
-                    Business Name
+                    <T k="leads.form.businessName" />
                     <span className="text-muted-foreground text-xs">(optional)</span>
                   </div>
                 </Label>
@@ -321,7 +322,7 @@ export function CreateLeadModal({ open, onOpenChange }: CreateLeadModalProps) {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email"><T k="leads.origin.email" /></Label>
                 <Input
                   id="email"
                   type="email"
@@ -343,7 +344,7 @@ export function CreateLeadModal({ open, onOpenChange }: CreateLeadModalProps) {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone</Label>
+                <Label htmlFor="phone"><T k="leads.phone" /></Label>
                 <Input
                   id="phone"
                   value={formData.phone}
@@ -370,7 +371,7 @@ export function CreateLeadModal({ open, onOpenChange }: CreateLeadModalProps) {
               <Label>
                 <div className="flex items-center gap-1">
                   <Tag className="w-4 h-4" />
-                  Tags
+                  <T k="leads.form.tags" />
                 </div>
               </Label>
               <div className="space-y-2">
@@ -414,7 +415,7 @@ export function CreateLeadModal({ open, onOpenChange }: CreateLeadModalProps) {
                     }}
                   />
                   <Button type="button" variant="outline" size="sm" onClick={() => addTag(newTag)} disabled={!newTag.trim()}>
-                    Add
+                    <T k="common.add" />
                   </Button>
                 </div>
               </div>
@@ -560,7 +561,7 @@ export function CreateLeadModal({ open, onOpenChange }: CreateLeadModalProps) {
 
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label>Service Type</Label>
+                <Label><T k="leads.form.serviceType" /></Label>
                 <Select
                   value={formData.serviceType || "none"}
                   onValueChange={(value) => setFormData({ ...formData, serviceType: value === "none" ? "" : value })}
@@ -579,7 +580,7 @@ export function CreateLeadModal({ open, onOpenChange }: CreateLeadModalProps) {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Property Type</Label>
+                <Label><T k="leads.form.propertyType" /></Label>
                 <Select
                   value={formData.propertyType || "none"}
                   onValueChange={(value) => setFormData({ ...formData, propertyType: value === "none" ? "" : value })}
@@ -620,7 +621,7 @@ export function CreateLeadModal({ open, onOpenChange }: CreateLeadModalProps) {
 
             <div className="grid grid-cols-4 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="squareFeet">Square Feet</Label>
+                <Label htmlFor="squareFeet"><T k="leads.form.squareFeet" /></Label>
                 <Input
                   id="squareFeet"
                   type="number"
@@ -630,7 +631,7 @@ export function CreateLeadModal({ open, onOpenChange }: CreateLeadModalProps) {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="bedrooms">Bedrooms</Label>
+                <Label htmlFor="bedrooms"><T k="leads.form.bedrooms" /></Label>
                 <Input
                   id="bedrooms"
                   type="number"
@@ -640,7 +641,7 @@ export function CreateLeadModal({ open, onOpenChange }: CreateLeadModalProps) {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="bathrooms">Bathrooms</Label>
+                <Label htmlFor="bathrooms"><T k="leads.form.bathrooms" /></Label>
                 <Input
                   id="bathrooms"
                   type="number"
@@ -650,7 +651,7 @@ export function CreateLeadModal({ open, onOpenChange }: CreateLeadModalProps) {
                 />
               </div>
               <div className="space-y-2">
-                <Label>Frequency</Label>
+                <Label><T k="leads.form.frequency" /></Label>
                 <Select
                   value={formData.frequency || "none"}
                   onValueChange={(value) => setFormData({ ...formData, frequency: value === "none" ? "" : value })}
@@ -673,7 +674,7 @@ export function CreateLeadModal({ open, onOpenChange }: CreateLeadModalProps) {
             {/* Has Pets */}
             <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg border border-border/50">
               <PawPrint className="w-5 h-5 text-muted-foreground" />
-              <Label htmlFor="hasPets" className="flex-1 cursor-pointer">Has Pets</Label>
+              <Label htmlFor="hasPets" className="flex-1 cursor-pointer"><T k="leads.form.hasPets" /></Label>
               <Switch
                 id="hasPets"
                 checked={formData.hasPets}
@@ -723,12 +724,12 @@ export function CreateLeadModal({ open, onOpenChange }: CreateLeadModalProps) {
                           {isExpanded ? (
                             <>
                               <ChevronUp className="w-3 h-3" />
-                              Hide details
+                              <T k="estimate.hideDetails" />
                             </>
                           ) : (
                             <>
                               <ChevronDown className="w-3 h-3" />
-                              View details
+                              <T k="estimate.viewDetails" />
                             </>
                           )}
                         </button>
@@ -792,12 +793,12 @@ export function CreateLeadModal({ open, onOpenChange }: CreateLeadModalProps) {
                           {isExpanded ? (
                             <>
                               <ChevronUp className="w-3 h-3" />
-                              Hide details
+                              <T k="estimate.hideDetails" />
                             </>
                           ) : (
                             <>
                               <ChevronDown className="w-3 h-3" />
-                              View details
+                              <T k="estimate.viewDetails" />
                             </>
                           )}
                         </button>
@@ -828,7 +829,7 @@ export function CreateLeadModal({ open, onOpenChange }: CreateLeadModalProps) {
               </h3>
               <Button variant="outline" size="sm" onClick={addAddress}>
                 <Plus className="w-4 h-4 mr-1" />
-                Add Address
+                <T k="leads.form.addAddress" />
               </Button>
             </div>
 
@@ -888,7 +889,7 @@ export function CreateLeadModal({ open, onOpenChange }: CreateLeadModalProps) {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-xs">City</Label>
+                      <Label className="text-xs"><T k="modal.city" /></Label>
                       <Input
                         value={addr.city}
                         onChange={(e) => updateAddress(addr.id, "city", e.target.value)}
@@ -898,7 +899,7 @@ export function CreateLeadModal({ open, onOpenChange }: CreateLeadModalProps) {
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div className="space-y-2">
-                        <Label className="text-xs">State</Label>
+                        <Label className="text-xs"><T k="modal.state" /></Label>
                         <Input
                           value={addr.state}
                           onChange={(e) => updateAddress(addr.id, "state", e.target.value)}
@@ -947,7 +948,7 @@ export function CreateLeadModal({ open, onOpenChange }: CreateLeadModalProps) {
 
         <DialogFooter className="gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            <T k="leads.form.cancel" />
           </Button>
           <Button onClick={handleCreateLead} disabled={isSaving}>
             {isSaving ? "Saving..." : "Create Lead"}

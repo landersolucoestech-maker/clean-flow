@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { FormEvent, useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -92,7 +93,7 @@ export function ContactFormDialog({ open, onOpenChange, contact, onSubmit }: Con
               <Input id="contact-name" value={form.name} onChange={(event) => setField("name", event.target.value)} autoFocus />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="contact-company">Company</Label>
+              <Label htmlFor="contact-company"><T k="settings.company" /></Label>
               <Input id="contact-company" value={form.company} onChange={(event) => setField("company", event.target.value)} />
             </div>
             <div className="space-y-2">
@@ -105,7 +106,7 @@ export function ContactFormDialog({ open, onOpenChange, contact, onSubmit }: Con
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Status</Label>
+              <Label><T k="common.status" /></Label>
               <Select value={form.status} onValueChange={(value) => setField("status", value as ContactStatus)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -114,15 +115,15 @@ export function ContactFormDialog({ open, onOpenChange, contact, onSubmit }: Con
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="contact-email">Email</Label>
+              <Label htmlFor="contact-email"><T k="common.email" /></Label>
               <Input id="contact-email" type="email" value={form.email} onChange={(event) => setField("email", event.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="contact-phone">Phone</Label>
+              <Label htmlFor="contact-phone"><T k="common.phone" /></Label>
               <Input id="contact-phone" value={form.phone} onChange={(event) => setField("phone", event.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="contact-website">Website</Label>
+              <Label htmlFor="contact-website"><T k="source.website" /></Label>
               <Input id="contact-website" value={form.website} onChange={(event) => setField("website", event.target.value)} placeholder="https://" />
             </div>
             <div className="space-y-2">
@@ -132,17 +133,17 @@ export function ContactFormDialog({ open, onOpenChange, contact, onSubmit }: Con
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="contact-address">Address</Label>
+            <Label htmlFor="contact-address"><T k="common.address" /></Label>
             <Input id="contact-address" value={form.address} onChange={(event) => setField("address", event.target.value)} />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="contact-notes">Notes</Label>
+            <Label htmlFor="contact-notes"><T k="modal.notes" /></Label>
             <Textarea id="contact-notes" rows={4} value={form.notes} onChange={(event) => setField("notes", event.target.value)} />
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}><T k="common.cancel" /></Button>
             <Button type="submit" disabled={isSaving}>
               {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {contact ? "Save Changes" : "Create Contact"}

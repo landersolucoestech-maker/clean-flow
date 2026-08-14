@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useState } from "react";
 import {
   Dialog,
@@ -144,7 +145,7 @@ export function FilterModal({
           <div className="space-y-3">
             <Label className="flex items-center gap-2 text-base font-semibold">
               <Calendar className="w-4 h-4" />
-              Status
+              <T k="common.status" />
             </Label>
             <div className="grid grid-cols-2 gap-2">
               {statuses.map((status) => (
@@ -171,7 +172,7 @@ export function FilterModal({
             Clear All
           </Button>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            <T k="common.cancel" />
           </Button>
           <Button onClick={handleApply}>Apply Filters</Button>
         </DialogFooter>

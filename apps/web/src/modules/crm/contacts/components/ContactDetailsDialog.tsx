@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { Building2, Globe, Mail, MapPin, Phone, UserRound } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -49,7 +50,7 @@ export function ContactDetailsDialog({ open, onOpenChange, contact, onEdit, canE
 
           {contact.notes && (
             <div className="rounded-xl border bg-muted/20 p-3">
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Notes</p>
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground"><T k="modal.notes" /></p>
               <p className="mt-1 whitespace-pre-wrap text-sm text-foreground">{contact.notes}</p>
             </div>
           )}
@@ -61,7 +62,7 @@ export function ContactDetailsDialog({ open, onOpenChange, contact, onEdit, canE
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}><T k="common.close" /></Button>
           {canEdit && <Button onClick={() => onEdit(contact)}>Edit Contact</Button>}
         </DialogFooter>
       </DialogContent>

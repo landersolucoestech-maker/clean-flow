@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -99,16 +100,16 @@ export function JobDetailsModal({
           <div className="p-4 rounded-lg bg-muted/30 space-y-3">
             <h4 className="text-sm font-medium text-foreground flex items-center gap-2">
               <User className="w-4 h-4" />
-              Customer Information
+              <T k="estimate.customerInfo" />
             </h4>
             <div>
-              <p className="text-xs text-muted-foreground">Customer Name</p>
+              <p className="text-xs text-muted-foreground"><T k="modal.customerName" /></p>
               <p className="text-sm font-medium">{job.customer}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground flex items-center gap-1">
                 <MapPin className="w-3 h-3" />
-                Address
+                <T k="common.address" />
               </p>
               <p className="text-sm font-medium">{job.address}</p>
             </div>
@@ -119,28 +120,28 @@ export function JobDetailsModal({
             <div className="p-4 rounded-lg bg-muted/30 space-y-2">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Calendar className="w-4 h-4" />
-                <span className="text-xs">Date</span>
+                <span className="text-xs"><T k="common.date" /></span>
               </div>
               <p className="text-sm font-medium">{job.date}</p>
             </div>
             <div className="p-4 rounded-lg bg-muted/30 space-y-2">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Clock className="w-4 h-4" />
-                <span className="text-xs">Time</span>
+                <span className="text-xs"><T k="common.time" /></span>
               </div>
               <p className="text-sm font-medium">{job.time}</p>
             </div>
             <div className="p-4 rounded-lg bg-muted/30 space-y-2">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Clock className="w-4 h-4" />
-                <span className="text-xs">Duration</span>
+                <span className="text-xs"><T k="jobs.duration" /></span>
               </div>
               <p className="text-sm font-medium">{job.duration}</p>
             </div>
             <div className="p-4 rounded-lg bg-muted/30 space-y-2">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <DollarSign className="w-4 h-4" />
-                <span className="text-xs">Amount</span>
+                <span className="text-xs"><T k="jobs.amount" /></span>
               </div>
               <p className="text-sm font-medium">{job.amount}</p>
             </div>
@@ -150,7 +151,7 @@ export function JobDetailsModal({
           <div className="p-4 rounded-lg bg-muted/30 space-y-2">
             <div className="flex items-center gap-2 text-muted-foreground">
               <FileText className="w-4 h-4" />
-              <span className="text-xs">Service Type</span>
+              <span className="text-xs"><T k="modal.serviceType" /></span>
             </div>
             <p className="text-sm font-medium">{job.service}</p>
           </div>
@@ -159,7 +160,7 @@ export function JobDetailsModal({
           <div className="p-4 rounded-lg bg-muted/30 space-y-2">
             <div className="flex items-center gap-2 text-muted-foreground">
               <Briefcase className="w-4 h-4" />
-              <span className="text-xs">Status</span>
+              <span className="text-xs"><T k="common.status" /></span>
             </div>
             <Badge variant={getStatusVariant(job.status)}>
               {job.status.replace('-', ' ')}
@@ -181,7 +182,7 @@ export function JobDetailsModal({
                 </div>
                 <div>
                   <p className="text-sm font-medium">{job.staff1}</p>
-                  <p className="text-xs text-muted-foreground">Staff Member 1</p>
+                  <p className="text-xs text-muted-foreground"><T k="modal.staffMember1" /></p>
                 </div>
               </div>
               {job.staff2 && (
@@ -193,7 +194,7 @@ export function JobDetailsModal({
                   </div>
                   <div>
                     <p className="text-sm font-medium">{job.staff2}</p>
-                    <p className="text-xs text-muted-foreground">Staff Member 2</p>
+                    <p className="text-xs text-muted-foreground"><T k="modal.staffMember2" /></p>
                   </div>
                 </div>
               )}
@@ -205,7 +206,7 @@ export function JobDetailsModal({
             <div className="p-4 rounded-lg bg-muted/30 space-y-2">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <StickyNote className="w-4 h-4" />
-                <span className="text-xs">Notes</span>
+                <span className="text-xs"><T k="modal.notes" /></span>
               </div>
               <p className="text-sm">{job.notes}</p>
             </div>
@@ -216,7 +217,7 @@ export function JobDetailsModal({
             <div className="p-4 rounded-lg bg-muted/30 space-y-3">
               <h4 className="text-sm font-medium text-foreground flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 text-warning" />
-                Additional Notes
+                <T k="modal.additionalNotes" />
               </h4>
               <div className="space-y-2">
                 {job.additionalNotes.map((note, index) => (

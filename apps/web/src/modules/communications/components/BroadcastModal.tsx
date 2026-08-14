@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useRef, useState } from "react";
 import {
   Dialog,
@@ -201,8 +202,8 @@ export function BroadcastModal({ open, onOpenChange, customers }: BroadcastModal
 
         <Tabs value={tab} onValueChange={(value) => setTab(value as RecipientTab)}>
           <TabsList className="grid grid-cols-2 w-full">
-            <TabsTrigger value="customers"><Users className="mr-2 h-4 w-4" />Customers</TabsTrigger>
-            <TabsTrigger value="team"><UserCircle className="mr-2 h-4 w-4" />Team</TabsTrigger>
+            <TabsTrigger value="customers"><Users className="mr-2 h-4 w-4" /><T k="crm.tabs.customers" /></TabsTrigger>
+            <TabsTrigger value="team"><UserCircle className="mr-2 h-4 w-4" /><T k="settings.team" /></TabsTrigger>
           </TabsList>
         </Tabs>
 
@@ -261,7 +262,7 @@ export function BroadcastModal({ open, onOpenChange, customers }: BroadcastModal
         </div>
 
         <div className="flex justify-end gap-2 pt-3 border-t">
-          <Button variant="outline" onClick={() => void close()} disabled={sending || uploading}>Cancel</Button>
+          <Button variant="outline" onClick={() => void close()} disabled={sending || uploading}><T k="common.cancel" /></Button>
           <Button onClick={() => void send()} disabled={sending || uploading}>
             {sending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
             Send ({selectedCustomers.size + selectedStaff.size})

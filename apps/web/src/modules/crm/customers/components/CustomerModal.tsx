@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useState, useEffect } from "react";
 import {
   Dialog,
@@ -665,7 +666,7 @@ export function CustomerModal({
                       <SelectItem value="caregiver">Caregiver</SelectItem>
                       <SelectItem value="property_manager">Property Manager</SelectItem>
                       <SelectItem value="accountant">Accountant</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
+                      <SelectItem value="other"><T k="leads.origin.other" /></SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -696,7 +697,7 @@ export function CustomerModal({
                 <div className="grid gap-2">
                   <Label htmlFor="billingContactPhone" className="flex items-center gap-2">
                     <Phone className="w-4 h-4" />
-                    Phone 1
+                    <T k="estimate.phone1" />
                   </Label>
                   <Input
                     id="billingContactPhone"
@@ -710,7 +711,7 @@ export function CustomerModal({
                 <div className="grid gap-2">
                   <Label htmlFor="billingContactPhone2" className="flex items-center gap-2">
                     <Phone className="w-4 h-4" />
-                    Phone 2
+                    <T k="estimate.phone2" />
                   </Label>
                   <Input
                     id="billingContactPhone2"

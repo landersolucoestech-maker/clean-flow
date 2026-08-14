@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -181,7 +182,7 @@ export function AutomationsTab() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Zap className="w-5 h-5" />
-            Automations
+            <T k="settings.automations" />
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -201,7 +202,7 @@ export function AutomationsTab() {
             <div>
               <CardTitle className="flex items-center gap-2">
                 <Zap className="w-5 h-5" />
-                Automations
+                <T k="settings.automations" />
               </CardTitle>
               <CardDescription>
                 Configure automated messages for job status changes and reminders.
@@ -283,7 +284,7 @@ export function AutomationsTab() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Category</Label>
+                      <Label><T k="support.category" /></Label>
                       <Select 
                         value={getFieldValue(automation, "category")} 
                         onValueChange={(v) => handleEditField(automation.id, "category", v)}
@@ -447,7 +448,7 @@ export function AutomationsTab() {
                 />
               </div>
               <div className="space-y-2">
-                <Label>Category</Label>
+                <Label><T k="support.category" /></Label>
                 <Select 
                   value={newAutomation.category} 
                   onValueChange={(v) => setNewAutomation(prev => ({ ...prev, category: v }))}
@@ -570,7 +571,7 @@ export function AutomationsTab() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAddModal(false)}>
-              Cancel
+              <T k="common.cancel" />
             </Button>
             <Button onClick={handleCreateAutomation} disabled={createAutomation.isPending}>
               {createAutomation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
@@ -590,7 +591,7 @@ export function AutomationsTab() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel><T k="common.cancel" /></AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleDeleteAutomation}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"

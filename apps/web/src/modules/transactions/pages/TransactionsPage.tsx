@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -323,7 +324,7 @@ export function Transactions() {
         <Card className="border-border/80 shadow-sm">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-muted-foreground">Total Revenue</span>
+              <span className="text-sm text-muted-foreground"><T k="transactions.totalRevenue" /></span>
               <DollarSign className="w-4 h-4 text-muted-foreground" />
             </div>
             <p className="text-2xl font-bold tracking-tight text-success">{formatCurrency(kpis.receitaMensal)}</p>
@@ -338,7 +339,7 @@ export function Transactions() {
         <Card className="border-border/80 shadow-sm">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-muted-foreground">Total Expenses</span>
+              <span className="text-sm text-muted-foreground"><T k="transactions.totalExpenses" /></span>
               <Receipt className="w-4 h-4 text-muted-foreground" />
             </div>
             <p className="text-2xl font-bold tracking-tight text-destructive">{formatCurrency(kpis.despesasMensais)}</p>
@@ -436,7 +437,7 @@ export function Transactions() {
           </PopoverContent>
         </Popover>
         
-        <span className="text-sm text-muted-foreground">to</span>
+        <span className="text-sm text-muted-foreground"><T k="settings.to" /></span>
         
         <Popover open={endDateOpen} onOpenChange={setEndDateOpen}>
           <PopoverTrigger asChild>
@@ -501,25 +502,25 @@ export function Transactions() {
             />
             
             <div className="flex-1 min-w-0">
-              <span className="text-sm font-medium text-muted-foreground">Name</span>
+              <span className="text-sm font-medium text-muted-foreground"><T k="common.name" /></span>
             </div>
             <div className="w-[100px] text-center">
-              <span className="text-sm font-medium text-muted-foreground">Date</span>
+              <span className="text-sm font-medium text-muted-foreground"><T k="common.date" /></span>
             </div>
             <div className="w-[100px] text-center">
-              <span className="text-sm font-medium text-muted-foreground">Type</span>
+              <span className="text-sm font-medium text-muted-foreground"><T k="transactions.type" /></span>
             </div>
             <div className="w-[120px] text-center">
-              <span className="text-sm font-medium text-muted-foreground">Category</span>
+              <span className="text-sm font-medium text-muted-foreground"><T k="transactions.category" /></span>
             </div>
             <div className="w-[100px] text-center">
-              <span className="text-sm font-medium text-muted-foreground">Status</span>
+              <span className="text-sm font-medium text-muted-foreground"><T k="common.status" /></span>
             </div>
             <div className="w-[120px] text-right">
-              <span className="text-sm font-medium text-muted-foreground">Value</span>
+              <span className="text-sm font-medium text-muted-foreground"><T k="transactions.value" /></span>
             </div>
             <div className="w-[40px] text-center">
-              <span className="text-sm font-medium text-muted-foreground">Actions</span>
+              <span className="text-sm font-medium text-muted-foreground"><T k="common.actions" /></span>
             </div>
           </div>
 

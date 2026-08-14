@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -689,7 +690,7 @@ export function AnalyticsTab() {
           />
         </div>
 
-        <h3 className="text-md font-medium text-muted-foreground mb-3">Payroll</h3>
+        <h3 className="text-md font-medium text-muted-foreground mb-3"><T k="reports.payroll" /></h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <MetricCard
             icon={<Wallet className="w-5 h-5 text-primary" />}

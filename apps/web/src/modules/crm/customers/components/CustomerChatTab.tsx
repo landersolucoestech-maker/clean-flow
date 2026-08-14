@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,7 +69,7 @@ export function CustomerChatTab() {
               <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
                 <MessageSquare className="w-6 h-6 text-muted-foreground" />
               </div>
-              <p className="text-sm text-muted-foreground">No messages yet</p>
+              <p className="text-sm text-muted-foreground"><T k="support.no_messages" /></p>
             </div>
           )}
         </div>

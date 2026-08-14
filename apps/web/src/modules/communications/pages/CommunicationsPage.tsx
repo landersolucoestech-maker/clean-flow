@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useMemo, useRef, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { enUS, es, ptBR } from "date-fns/locale";
@@ -202,8 +203,8 @@ export function Communications() {
         <aside className="flex min-h-0 flex-col border-r border-border/80">
           <div className="space-y-3 border-b border-border/80 p-3.5">
             <div className="flex rounded-md bg-muted p-1">
-              <button type="button" onClick={() => setAudience("customers")} className={`flex-1 rounded-sm px-3 py-2 text-xs font-medium ${audience === "customers" ? "bg-card text-foreground" : "text-muted-foreground"}`}><Users className="mr-1.5 inline h-3.5 w-3.5" />Customers</button>
-              <button type="button" onClick={() => setAudience("team")} className={`flex-1 rounded-sm px-3 py-2 text-xs font-medium ${audience === "team" ? "bg-card text-foreground" : "text-muted-foreground"}`}><UserCircle className="mr-1.5 inline h-3.5 w-3.5" />Team</button>
+              <button type="button" onClick={() => setAudience("customers")} className={`flex-1 rounded-sm px-3 py-2 text-xs font-medium ${audience === "customers" ? "bg-card text-foreground" : "text-muted-foreground"}`}><Users className="mr-1.5 inline h-3.5 w-3.5" /><T k="crm.tabs.customers" /></button>
+              <button type="button" onClick={() => setAudience("team")} className={`flex-1 rounded-sm px-3 py-2 text-xs font-medium ${audience === "team" ? "bg-card text-foreground" : "text-muted-foreground"}`}><UserCircle className="mr-1.5 inline h-3.5 w-3.5" /><T k="settings.team" /></button>
             </div>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -245,7 +246,7 @@ export function Communications() {
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center justify-between gap-2"><p className="truncate text-sm font-semibold text-foreground">{conversationName(conversation)}</p>{conversation.last_message_at && <span className="shrink-0 text-[10px] text-muted-foreground">{formatDistanceToNow(new Date(conversation.last_message_at), { addSuffix: true, locale: dateLocale })}</span>}</div>
                           <p className="mt-1 truncate text-xs text-muted-foreground">{conversation.last_message || "No messages yet"}</p>
-                          <div className="mt-2 flex items-center gap-1.5"><Badge variant="outline" className="gap-1 text-[10px]"><Smartphone className="h-2.5 w-2.5" />SMS</Badge>{conversation.unread && <Badge className="text-[10px]">New</Badge>}{conversation.favorite && <Star className="h-3 w-3 fill-warning text-warning" />}</div>
+                          <div className="mt-2 flex items-center gap-1.5"><Badge variant="outline" className="gap-1 text-[10px]"><Smartphone className="h-2.5 w-2.5" />SMS</Badge>{conversation.unread && <Badge className="text-[10px]"><T k="communications.new" /></Badge>}{conversation.favorite && <Star className="h-3 w-3 fill-warning text-warning" />}</div>
                         </div>
                       </div>
                     </button>
@@ -266,7 +267,7 @@ export function Communications() {
 
               <ScrollArea className="min-h-0 flex-1 bg-muted/10">
                 <div className="mx-auto flex w-full max-w-4xl flex-col gap-3 p-4 sm:p-6">
-                  {messagesLoading ? <div className="flex h-40 items-center justify-center"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div> : messages.length === 0 ? <div className="flex h-48 flex-col items-center justify-center text-center"><MessageSquare className="mb-3 h-8 w-8 text-muted-foreground/50" /><p className="text-sm font-medium">No messages yet</p><p className="mt-1 text-xs text-muted-foreground">Send the first message to start this conversation.</p></div> : messages.map((message) => {
+                  {messagesLoading ? <div className="flex h-40 items-center justify-center"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div> : messages.length === 0 ? <div className="flex h-48 flex-col items-center justify-center text-center"><MessageSquare className="mb-3 h-8 w-8 text-muted-foreground/50" /><p className="text-sm font-medium"><T k="support.no_messages" /></p><p className="mt-1 text-xs text-muted-foreground">Send the first message to start this conversation.</p></div> : messages.map((message) => {
                     const outgoing = message.sender_type !== "customer" && message.sender_type !== "external";
                     return <div key={message.id} className={`flex ${outgoing ? "justify-end" : "justify-start"}`}><div className={`max-w-[82%] rounded-lg px-4 py-2.5 text-sm ${outgoing ? "rounded-br-md bg-primary text-primary-foreground" : "rounded-bl-md border border-border bg-card text-foreground"}`}><p className="whitespace-pre-wrap leading-5">{message.content}</p>{message.attachment_url && <a href={message.attachment_url} target="_blank" rel="noreferrer" className="mt-2 block text-xs underline">Open attachment</a>}<p className={`mt-1 text-[10px] ${outgoing ? "text-primary-foreground/70" : "text-muted-foreground"}`}>{new Date(message.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p></div></div>;
                   })}
@@ -279,13 +280,13 @@ export function Communications() {
               </div>
             </>
           ) : (
-            <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-6 text-center"><div className="mb-4 rounded-lg bg-primary/10 p-4 text-primary"><Inbox className="h-8 w-8" /></div><h2 className="text-lg font-semibold text-foreground">Select a conversation</h2><p className="mt-1 max-w-sm text-sm leading-6 text-muted-foreground">Choose a customer or team conversation from the unified inbox, or start a new message.</p><Button className="mt-5" onClick={() => setNewMessageOpen(true)}><Plus className="mr-2 h-4 w-4" />New message</Button></div>
+            <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-6 text-center"><div className="mb-4 rounded-lg bg-primary/10 p-4 text-primary"><Inbox className="h-8 w-8" /></div><h2 className="text-lg font-semibold text-foreground"><T k="communications.selectConversation" /></h2><p className="mt-1 max-w-sm text-sm leading-6 text-muted-foreground">Choose a customer or team conversation from the unified inbox, or start a new message.</p><Button className="mt-5" onClick={() => setNewMessageOpen(true)}><Plus className="mr-2 h-4 w-4" />New message</Button></div>
           )}
         </main>
 
         <aside className="hidden min-h-0 border-l border-border/80 bg-muted/10 2xl:flex 2xl:flex-col">
           <div className="border-b border-border/80 p-4"><p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Contact context</p></div>
-          {selected ? <div className="space-y-5 p-4"><div className="flex items-center gap-3"><Avatar className="h-11 w-11"><AvatarFallback>{initials(conversationName(selected))}</AvatarFallback></Avatar><div className="min-w-0"><p className="truncate text-sm font-semibold">{conversationName(selected)}</p><p className="truncate text-xs text-muted-foreground">{audience === "customers" ? "Customer" : "Team member"}</p></div></div><div className="space-y-3 rounded-md border border-border bg-card p-3"><div><p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Channel</p><p className="mt-1 flex items-center gap-2 text-sm"><Smartphone className="h-3.5 w-3.5" />SMS</p></div><div><p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Contact</p><p className="mt-1 break-words text-sm">{conversationContact(selected)}</p></div><div><p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Status</p><p className="mt-1 text-sm">{selected.unread ? "Unread" : "Read"}</p></div></div><p className="text-xs leading-5 text-muted-foreground">This contextual column is ready to receive CRM details, assignment, tags and future channel metadata as integrations are enabled.</p></div> : <div className="flex flex-1 items-center justify-center p-5 text-center text-xs text-muted-foreground">Contact details appear here when a conversation is selected.</div>}
+          {selected ? <div className="space-y-5 p-4"><div className="flex items-center gap-3"><Avatar className="h-11 w-11"><AvatarFallback>{initials(conversationName(selected))}</AvatarFallback></Avatar><div className="min-w-0"><p className="truncate text-sm font-semibold">{conversationName(selected)}</p><p className="truncate text-xs text-muted-foreground">{audience === "customers" ? "Customer" : "Team member"}</p></div></div><div className="space-y-3 rounded-md border border-border bg-card p-3"><div><p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Channel</p><p className="mt-1 flex items-center gap-2 text-sm"><Smartphone className="h-3.5 w-3.5" />SMS</p></div><div><p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground"><T k="common.contact" /></p><p className="mt-1 break-words text-sm">{conversationContact(selected)}</p></div><div><p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground"><T k="common.status" /></p><p className="mt-1 text-sm">{selected.unread ? "Unread" : "Read"}</p></div></div><p className="text-xs leading-5 text-muted-foreground">This contextual column is ready to receive CRM details, assignment, tags and future channel metadata as integrations are enabled.</p></div> : <div className="flex flex-1 items-center justify-center p-5 text-center text-xs text-muted-foreground">Contact details appear here when a conversation is selected.</div>}
         </aside>
       </section>
 

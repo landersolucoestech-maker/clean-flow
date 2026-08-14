@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useEffect, useState } from "react";
 import {
   Dialog,
@@ -90,7 +91,7 @@ function TeamSelector({ value, onChange }: { value: string; onChange: (value: st
 
   return (
     <div className="space-y-2">
-      <Label>Team</Label>
+      <Label><T k="settings.team" /></Label>
       <Select value={value || "none"} onValueChange={(v) => onChange(v === "none" ? "" : v)}>
         <SelectTrigger>
           <SelectValue placeholder="Select team" />
@@ -323,8 +324,8 @@ export function TeamUserModal({
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+                  <AlertDialogCancel><T k="common.cancel" /></AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete}><T k="common.delete" /></AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
@@ -332,7 +333,7 @@ export function TeamUserModal({
 
           <div className="flex gap-2 ml-auto">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              <T k="common.cancel" />
             </Button>
             <Button type="submit" form="team-user-form" disabled={isPending}>
               {isPending ? "Saving..." : mode === "create" ? "Add Member" : "Save Changes"}

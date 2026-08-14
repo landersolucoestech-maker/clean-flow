@@ -1,3 +1,4 @@
+import { T } from "@/shared/components/i18n/T";
 import { useState, useEffect, useCallback } from "react";
 import {
   Dialog,
@@ -377,7 +378,7 @@ export function InvoiceModal({ open, onOpenChange, appointment, depositAmount, i
           {/* Invoice Header Info */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <Label className="text-muted-foreground text-xs">Invoice Number</Label>
+              <Label className="text-muted-foreground text-xs"><T k="invoice.invoiceNumber" /></Label>
               <Input
                 value={invoiceNumber}
                 readOnly
@@ -388,7 +389,7 @@ export function InvoiceModal({ open, onOpenChange, appointment, depositAmount, i
               <p className="text-xs text-muted-foreground">(auto-generated)</p>
             </div>
             <div className="space-y-1">
-              <Label className="text-muted-foreground text-xs">Payment Terms</Label>
+              <Label className="text-muted-foreground text-xs"><T k="invoice.paymentTerms" /></Label>
               <Select value={paymentTerms} onValueChange={(v) => setPaymentTerms(v as PaymentTerms)}>
                 <SelectTrigger className="h-9">
                   <SelectValue />
@@ -404,7 +405,7 @@ export function InvoiceModal({ open, onOpenChange, appointment, depositAmount, i
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <Label className="text-muted-foreground text-xs">Issue Date</Label>
+              <Label className="text-muted-foreground text-xs"><T k="billing.issueDate" /></Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -415,7 +416,7 @@ export function InvoiceModal({ open, onOpenChange, appointment, depositAmount, i
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {invoiceDate ? format(invoiceDate, "PPP") : <span>Pick a date</span>}
+                    {invoiceDate ? format(invoiceDate, "PPP") : <span><T k="common.pickDate" /></span>}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -430,7 +431,7 @@ export function InvoiceModal({ open, onOpenChange, appointment, depositAmount, i
               </Popover>
             </div>
             <div className="space-y-1">
-              <Label className="text-muted-foreground text-xs">Due Date</Label>
+              <Label className="text-muted-foreground text-xs"><T k="billing.dueDate" /></Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -441,7 +442,7 @@ export function InvoiceModal({ open, onOpenChange, appointment, depositAmount, i
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dueDate ? format(dueDate, "PPP") : <span>Pick a date</span>}
+                    {dueDate ? format(dueDate, "PPP") : <span><T k="common.pickDate" /></span>}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -487,7 +488,7 @@ export function InvoiceModal({ open, onOpenChange, appointment, depositAmount, i
 
           {/* Line Items */}
           <div className="space-y-3">
-            <Label className="text-muted-foreground text-xs">Line Items</Label>
+            <Label className="text-muted-foreground text-xs"><T k="invoice.lineItems" /></Label>
             
             <div className="space-y-2">
               {items.map((item) => (
@@ -538,7 +539,7 @@ export function InvoiceModal({ open, onOpenChange, appointment, depositAmount, i
                 />
                 <Button variant="outline" onClick={handleAddItem}>
                   <Plus className="w-4 h-4 mr-1" />
-                  Add
+                  <T k="common.add" />
                 </Button>
               </div>
             </div>
@@ -549,12 +550,12 @@ export function InvoiceModal({ open, onOpenChange, appointment, depositAmount, i
           {/* Totals */}
           <div className="space-y-3 text-sm">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Subtotal</span>
+              <span className="text-muted-foreground"><T k="invoice.subtotal" /></span>
               <span>${subtotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
-                <span className="text-muted-foreground">Tax</span>
+                <span className="text-muted-foreground"><T k="invoice.tax" /></span>
                 <div className="flex items-center gap-1">
                   <Input
                     type="number"
@@ -572,7 +573,7 @@ export function InvoiceModal({ open, onOpenChange, appointment, depositAmount, i
             </div>
             <Separator />
             <div className="flex justify-between text-lg font-bold">
-              <span>Total</span>
+              <span><T k="invoice.total" /></span>
               <span className="text-primary">${total.toFixed(2)}</span>
             </div>
           </div>
@@ -589,7 +590,7 @@ export function InvoiceModal({ open, onOpenChange, appointment, depositAmount, i
           </div>
           <div className="flex gap-2 flex-1 justify-end">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              <T k="common.cancel" />
             </Button>
             <Button 
               onClick={handleSendInvoice}
