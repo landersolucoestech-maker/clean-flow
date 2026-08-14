@@ -1,5 +1,6 @@
 name: Frontend Audit Fixes
 
+# Retry lead form state extraction with stable effect dependencies.
 on:
   push:
     branches: [dev]
