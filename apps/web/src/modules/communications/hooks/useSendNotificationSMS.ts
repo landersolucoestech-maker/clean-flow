@@ -2,10 +2,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-export type NotificationType = 
-  | "invoice_sent" 
-  | "invoice_reminder" 
-  | "review_request" 
+export type NotificationType =
+  | "invoice_sent"
+  | "invoice_reminder"
+  | "review_request"
   | "payment_confirmation"
   | "appointment_reminder"
   | "estimate_sent"
@@ -20,13 +20,10 @@ export interface SendNotificationParams {
   showToast?: boolean;
 }
 
-// Helper to format phone number for display
 function formatPhoneForDisplay(phone: string): string {
-  const digits = phone.replace(/\D/g, '');
-  if (digits.length === 10) {
-    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
-  }
-  if (digits.length === 11 && digits.startsWith('1')) {
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length === 10) return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+  if (digits.length === 11 && digits.startsWith("1")) {
     return `+1 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`;
   }
   return phone;
@@ -44,94 +41,56 @@ export function useSendNotificationSMS() {
       notificationType,
       showToast = true,
     }: SendNotificationParams) => {
-      // 1. Get or create conversation for this customer
-      let conversationId: string;
+      if (!customerPhone.trim()) throw new Error(`No phone number available for ${customerName}`);
 
-      const { data: existingConversation } = await supabase
+      let conversationId: string;
+      const { data: existingConversation, error: lookupError } = await supabase
         .from("conversations")
         .select("id")
         .eq("customer_id", customerId)
+        .is("staff_id", null)
         .maybeSingle();
+      if (lookupError) throw lookupError;
 
       if (existingConversation) {
         conversationId = existingConversation.id;
       } else {
-        // Create new conversation
-        const { data: newConversation, error: convError } = await supabase
+        const { data: newConversation, error: conversationError } = await supabase
           .from("conversations")
           .insert({ customer_id: customerId })
-          .select()
+          .select("id")
           .single();
-
-        if (convError) throw convError;
+        if (conversationError || !newConversation) {
+          throw conversationError || new Error("Unable to create customer conversation");
+        }
         conversationId = newConversation.id;
       }
 
-      // 2. Save message to database
-      const { data: savedMessage, error: msgError } = await supabase
-        .from("messages")
-        .insert({
+      const { data: result, error: deliveryError } = await supabase.functions.invoke("send-conversation-message", {
+        body: {
           conversation_id: conversationId,
           content: message,
-          sender_type: "user",
-          read: true,
-        })
-        .select()
-        .single();
-
-      if (msgError) throw msgError;
-
-      // 3. Update conversation last message
-      await supabase
-        .from("conversations")
-        .update({
-          last_message: message.length > 100 ? message.slice(0, 100) + "..." : message,
-          last_message_at: new Date().toISOString(),
-          unread: false,
-        })
-        .eq("id", conversationId);
-
-      // 4. Send SMS via RingCentral
-      let smsSent = false;
-      try {
-        // Get company_id
-        const { data: companySettings } = await supabase
-          .from("company_settings")
-          .select("id")
-          .limit(1)
-          .single();
-
-        if (companySettings?.id) {
-          const response = await supabase.functions.invoke("ringcentral-send-message", {
-            body: {
-              company_id: companySettings.id,
-              to_phone: customerPhone,
-              message: message,
-            },
-          });
-
-          if (response.error) {
-            console.error("RingCentral send error:", response.error);
-          } else {
-            smsSent = true;
-          }
-        }
-      } catch (rcError) {
-        console.error("Failed to send SMS via RingCentral:", rcError);
+        },
+      });
+      if (deliveryError || !result?.success) {
+        throw deliveryError || new Error(result?.error || "SMS delivery failed");
       }
 
       return {
-        messageId: savedMessage.id,
+        messageId: String(result.message?.id || ""),
         conversationId,
-        smsSent,
+        smsSent: true,
+        provider: typeof result.provider === "string" ? result.provider : "sms",
         customerName,
+        customerPhone: formatPhoneForDisplay(customerPhone),
         notificationType,
+        showToast,
       };
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
       queryClient.invalidateQueries({ queryKey: ["messages", data.conversationId] });
-      
+
       if (variables.showToast) {
         const typeLabels: Record<NotificationType, string> = {
           invoice_sent: "Invoice",
@@ -142,23 +101,17 @@ export function useSendNotificationSMS() {
           estimate_sent: "Estimate",
           custom: "Mensagem",
         };
-
         const label = typeLabels[data.notificationType] || "Mensagem";
-        if (data.smsSent) {
-          toast.success(`${label} enviado para ${data.customerName}!`);
-        } else {
-          toast.info(`${label} salvo (SMS não enviado - verifique RingCentral)`);
-        }
+        toast.success(`${label} enviado para ${data.customerName} via ${data.provider === "dialpad" ? "Dialpad" : data.provider === "ringcentral" ? "RingCentral" : "SMS"}!`);
       }
     },
     onError: (error) => {
       console.error("Error sending notification SMS:", error);
-      toast.error("Erro ao enviar notificação");
+      toast.error(error instanceof Error ? error.message : "Erro ao enviar notificação");
     },
   });
 }
 
-// Pre-built message templates
 export function getNotificationMessage(
   type: NotificationType,
   params: {
@@ -173,7 +126,7 @@ export function getNotificationMessage(
     appointmentDate?: string;
     appointmentTime?: string;
     estimateNumber?: string;
-  }
+  },
 ): string {
   const {
     customerName = "Cliente",
@@ -193,15 +146,9 @@ export function getNotificationMessage(
     style: "currency",
     currency: "USD",
   });
-
-  // Build review links text
   const reviewLinks: string[] = [];
-  if (googleReviewUrl) {
-    reviewLinks.push(`🌟Google Review: ${googleReviewUrl}`);
-  }
-  if (nextdoorReviewUrl) {
-    reviewLinks.push(`🌟Nextdoor Review: ${nextdoorReviewUrl}`);
-  }
+  if (googleReviewUrl) reviewLinks.push(`🌟Google Review: ${googleReviewUrl}`);
+  if (nextdoorReviewUrl) reviewLinks.push(`🌟Nextdoor Review: ${nextdoorReviewUrl}`);
   const reviewLinksText = reviewLinks.length > 0
     ? reviewLinks.join("\n\n")
     : "It really helps our small business. Thank you!";
@@ -209,23 +156,17 @@ export function getNotificationMessage(
   switch (type) {
     case "invoice_sent":
       return `Hi ${customerName}! Your invoice ${invoiceNumber} for ${formattedAmount} has been sent. Due date: ${dueDate}. Thank you for your business! - ${companyName}`;
-    
     case "invoice_reminder":
       return `Hi ${customerName}, this is a friendly reminder that invoice ${invoiceNumber} for ${formattedAmount} is due on ${dueDate}. Please let us know if you have any questions. - ${companyName}`;
-    
     case "review_request":
       return `Hi ${customerName}! Thank you for choosing ${companyName}. We'd love to hear your feedback! Could you take a moment to leave us a review?\n\n${reviewLinksText}\n\n- ${companyName}`;
-    
     case "payment_confirmation":
       return `Hi ${customerName}! We've received your payment of ${formattedAmount} for invoice ${invoiceNumber}. Thank you! - ${companyName}`;
-    
     case "appointment_reminder":
       return `Hi ${customerName}! This is a reminder of your appointment on ${appointmentDate} at ${appointmentTime}. See you soon! - ${companyName}`;
-    
     case "estimate_sent":
       return `Hi ${customerName}! Your estimate ${estimateNumber} has been sent. Please review and let us know if you have any questions. - ${companyName}`;
-    
     default:
-      return "";
+      return paymentLink ? paymentLink : "";
   }
 }
