@@ -1,9 +1,10 @@
 import { useState } from "react";
+import DOMPurify from "dompurify";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Bot, Sparkles, RefreshCw, Loader2, AlertCircle } from "lucide-react";
+import { Bot, Sparkles, RefreshCw, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface BusinessMetrics {
@@ -123,15 +124,16 @@ export function AIConsultantCard({ metrics }: AIConsultantCardProps) {
   };
 
   const formatMarkdown = (text: string) => {
-    // Simple markdown formatting
-    return text
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    const formatted = text
+      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+      .replace(/\*(.*?)\*/g, "<em>$1</em>")
       .replace(/^### (.*$)/gm, '<h3 class="text-lg font-semibold mt-4 mb-2">$1</h3>')
       .replace(/^## (.*$)/gm, '<h2 class="text-xl font-bold mt-4 mb-2">$1</h2>')
       .replace(/^# (.*$)/gm, '<h1 class="text-2xl font-bold mt-4 mb-2">$1</h1>')
       .replace(/^- (.*$)/gm, '<li class="ml-4">$1</li>')
-      .replace(/\n/g, '<br/>');
+      .replace(/\n/g, "<br/>");
+
+    return DOMPurify.sanitize(formatted);
   };
 
   return (
@@ -195,7 +197,7 @@ export function AIConsultantCard({ metrics }: AIConsultantCardProps) {
 
         {(isLoading || analysis) && (
           <ScrollArea className="h-[400px] pr-4">
-            <div 
+            <div
               className="prose prose-sm dark:prose-invert max-w-none"
               dangerouslySetInnerHTML={{ __html: formatMarkdown(analysis) }}
             />
