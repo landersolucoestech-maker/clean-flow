@@ -1,6 +1,5 @@
 import { useMemo } from "react";
-import { Header } from "@/components/layout/Header";
-import { Sidebar } from "@/components/layout/Sidebar";
+import { PageLayout } from "@/components/layout/PageLayout";
 import { Button } from "@/components/ui/button";
 import { AnalyticsTab } from "@/components/reports/AnalyticsTab";
 import {
@@ -236,8 +235,8 @@ export function Reports() {
         type: "Agenda",
         records: jobs.length,
         icon: Calendar,
-        iconColor: "text-orange-500",
-        iconBg: "bg-orange-500/10",
+        iconColor: "text-warning",
+        iconBg: "bg-warning/10",
       },
       {
         id: "customers",
@@ -246,8 +245,8 @@ export function Reports() {
         type: "Clientes",
         records: customers.length,
         icon: Users,
-        iconColor: "text-blue-500",
-        iconBg: "bg-blue-500/10",
+        iconColor: "text-primary",
+        iconBg: "bg-primary-light",
       },
       {
         id: "transactions",
@@ -256,8 +255,8 @@ export function Reports() {
         type: "Financeiro",
         records: transactions.length,
         icon: Wallet,
-        iconColor: "text-green-500",
-        iconBg: "bg-green-500/10",
+        iconColor: "text-success",
+        iconBg: "bg-success/10",
       },
       {
         id: "invoices",
@@ -266,8 +265,8 @@ export function Reports() {
         type: "Faturamento",
         records: invoices.length,
         icon: Receipt,
-        iconColor: "text-purple-500",
-        iconBg: "bg-purple-500/10",
+        iconColor: "text-primary-dark",
+        iconBg: "bg-primary-light",
       },
       {
         id: "leads",
@@ -276,8 +275,8 @@ export function Reports() {
         type: "Vendas",
         records: leads.length,
         icon: FileText,
-        iconColor: "text-cyan-500",
-        iconBg: "bg-cyan-500/10",
+        iconColor: "text-info",
+        iconBg: "bg-info/10",
       },
       {
         id: "payroll",
@@ -286,8 +285,8 @@ export function Reports() {
         type: "Payroll",
         records: payrollRecords.length,
         icon: DollarSign,
-        iconColor: "text-yellow-500",
-        iconBg: "bg-yellow-500/10",
+        iconColor: "text-warning",
+        iconBg: "bg-warning/10",
       },
       {
         id: "team",
@@ -296,31 +295,26 @@ export function Reports() {
         type: "Equipe",
         records: staff.length,
         icon: UserPlus,
-        iconColor: "text-indigo-500",
-        iconBg: "bg-indigo-500/10",
+        iconColor: "text-secondary-foreground",
+        iconBg: "bg-secondary-light",
       },
     ];
   }, [jobs, customers, invoices, leads, transactions, payrollRecords, staff, t]);
 
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar />
-
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
-
-        <main className="flex-1 overflow-y-auto p-6 space-y-6 pl-[10px] pb-0 pr-[10px] pt-px mx-[8px] py-0 my-[4px]">
+    <PageLayout>
+      <div className="space-y-6">
           {/* Page Header */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">{t("reports.title")}</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{t("reports.title")}</h1>
               <p className="text-muted-foreground">
                 {t("reports.subtitle")}
               </p>
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button className="bg-primary hover:bg-primary/90" disabled={isLoading}>
+                <Button disabled={isLoading}>
                   {isLoading ? (
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   ) : (
@@ -330,7 +324,7 @@ export function Reports() {
                   <ChevronDown className="w-4 h-4 ml-2" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 bg-background">
+              <DropdownMenuContent align="end" className="w-56">
                 {reportsData
                   .filter((report) => report.records > 0)
                   .map((report) => (
@@ -350,8 +344,7 @@ export function Reports() {
           {/* Analytics Content */}
           <AnalyticsTab />
 
-        </main>
       </div>
-    </div>
+    </PageLayout>
   );
 }
