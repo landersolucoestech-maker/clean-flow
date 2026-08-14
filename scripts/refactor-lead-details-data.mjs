@@ -20,6 +20,7 @@ const roomEnd = source.indexOf(roomEndMarker, roomStart);
 if (roomStart < 0 || roomEnd < 0) throw new Error("Room services block not found");
 source = source.slice(0, roomStart) + source.slice(roomEnd + roomEndMarker.length + 1);
 source = source.replaceAll("ROOM_SERVICES", "LEAD_ROOM_SERVICES");
+source = source.replaceAll("LEAD_LEAD_ROOM_SERVICES", "LEAD_ROOM_SERVICES");
 
 const depositStart = source.indexOf("  // Generate 50% deposit invoice automatically");
 const approveStart = source.indexOf("  const handleApprove = async () => {", depositStart);
