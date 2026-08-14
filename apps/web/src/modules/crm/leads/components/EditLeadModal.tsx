@@ -103,24 +103,6 @@ interface EditLeadModalProps {
   onSave: (updatedEstimate: Lead) => void;
 }
 
-interface AddressEntry {
-  id: string;
-  name: string;
-  address: string;
-  city: string;
-  state: string;
-  postalCode: string;
-  notes: string;
-}
-
-interface InteractionEntry {
-  id: string;
-  type: string;
-  description: string;
-  date: string;
-  time: string;
-}
-
 // Import centralized enums
 import {
   SERVICE_TYPES as SERVICE_TYPE_VALUES,
@@ -148,18 +130,8 @@ import {
   INTERACTION_TYPES,
   DEFAULT_TAGS,
 } from "../constants/leadFormOptions";
-
-const formatCurrency = (value: string): string => {
-  const numericValue = value.replace(/[^0-9.]/g, "");
-  const number = parseFloat(numericValue);
-  if (isNaN(number)) return "";
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(number);
-};
+import type { LeadAddressEntry, LeadInteractionEntry } from "../types/leadForm";
+import { formatLeadCurrency } from "../utils/leadForm";
 
 export function EditLeadModal({ open, onOpenChange, estimate, onSave }: EditLeadModalProps) {
   const queryClient = useQueryClient();
@@ -200,7 +172,7 @@ export function EditLeadModal({ open, onOpenChange, estimate, onSave }: EditLead
     specialInstructions: "",
   });
 
-  const [addresses, setAddresses] = useState<AddressEntry[]>([
+  const [addresses, setAddresses] = useState<LeadAddressEntry[]>([
     {
       id: "1",
       name: "",
@@ -212,7 +184,7 @@ export function EditLeadModal({ open, onOpenChange, estimate, onSave }: EditLead
     },
   ]);
 
-  const [interactions, setInteractions] = useState<InteractionEntry[]>([]);
+  const [interactions, setInteractions] = useState<LeadInteractionEntry[]>([]);
   const [expandedAreas, setExpandedAreas] = useState<Record<string, boolean>>({});
   const [expandedAddOns, setExpandedAddOns] = useState<Record<string, boolean>>({});
 
@@ -255,7 +227,7 @@ export function EditLeadModal({ open, onOpenChange, estimate, onSave }: EditLead
         preferredDays: estimate.preferredDays || [],
         preferredTime: estimate.preferredTime || "",
         visitDate: estimate.visitDate || "",
-        agreedAmount: amountValue ? formatCurrency(amountValue) : "",
+        agreedAmount: amountValue ? formatLeadCurrency(amountValue) : "",
         validUntil: estimate.expiryDate || "",
         notes: estimate.notes || "",
         additionalNotes: estimate.additionalNotes || "",
@@ -325,7 +297,7 @@ export function EditLeadModal({ open, onOpenChange, estimate, onSave }: EditLead
     }
   };
 
-  const updateAddress = (id: string, field: keyof AddressEntry, value: string) => {
+  const updateAddress = (id: string, field: keyof LeadAddressEntry, value: string) => {
     setAddresses(
       addresses.map((addr) =>
         addr.id === id ? { ...addr, [field]: value } : addr
@@ -351,7 +323,7 @@ export function EditLeadModal({ open, onOpenChange, estimate, onSave }: EditLead
     setInteractions(interactions.filter((i) => i.id !== id));
   };
 
-  const updateInteraction = (id: string, field: keyof InteractionEntry, value: string) => {
+  const updateInteraction = (id: string, field: keyof LeadInteractionEntry, value: string) => {
     setInteractions(
       interactions.map((i) => (i.id === id ? { ...i, [field]: value } : i))
     );
@@ -403,7 +375,7 @@ export function EditLeadModal({ open, onOpenChange, estimate, onSave }: EditLead
   };
 
   const handleAmountBlur = (value: string) => {
-    const formatted = formatCurrency(value);
+    const formatted = formatLeadCurrency(value);
     setFormData((prev) => ({ ...prev, agreedAmount: formatted }));
   };
 
@@ -492,7 +464,7 @@ export function EditLeadModal({ open, onOpenChange, estimate, onSave }: EditLead
         phone: formData.phone || undefined,
         address: fullAddress,
         service: SERVICE_TYPE_OPTIONS.find(s => s.value === formData.serviceType)?.label || estimate.service,
-        amount: formatCurrency(total.toString()),
+        amount: formatLeadCurrency(total.toString()),
         expiryDate: formData.validUntil,
         status: formData.stage,
         origin: ORIGIN_OPTIONS.find(o => o.value === formData.leadSource)?.label || formData.leadSource,

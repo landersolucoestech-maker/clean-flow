@@ -35,24 +35,6 @@ interface CreateLeadModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-interface AddressEntry {
-  id: string;
-  name: string;
-  address: string;
-  city: string;
-  state: string;
-  postalCode: string;
-  notes: string;
-}
-
-interface Interaction {
-  id: string;
-  type: string;
-  description: string;
-  date: string;
-  time: string;
-}
-
 // Import centralized enums
 import {
   SERVICE_TYPES as SERVICE_TYPE_VALUES,
@@ -81,18 +63,8 @@ import {
   DEFAULT_TAGS,
 } from "../constants/leadFormOptions";
 import { leadFormSchema } from "../schemas/leadFormSchema";
-
-const formatCurrency = (value: string): string => {
-  const numericValue = value.replace(/[^0-9.]/g, "");
-  const number = parseFloat(numericValue);
-  if (isNaN(number)) return "";
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(number);
-};
+import type { LeadAddressEntry, LeadInteractionEntry } from "../types/leadForm";
+import { formatLeadCurrency } from "../utils/leadForm";
 
 export function CreateLeadModal({ open, onOpenChange }: CreateLeadModalProps) {
   const queryClient = useQueryClient();
@@ -142,7 +114,7 @@ export function CreateLeadModal({ open, onOpenChange }: CreateLeadModalProps) {
     specialInstructions: "",
   });
 
-  const [addresses, setAddresses] = useState<AddressEntry[]>([
+  const [addresses, setAddresses] = useState<LeadAddressEntry[]>([
     {
       id: "1",
       name: "",
@@ -154,7 +126,7 @@ export function CreateLeadModal({ open, onOpenChange }: CreateLeadModalProps) {
     },
   ]);
 
-  const [interactions, setInteractions] = useState<Interaction[]>([]);
+  const [interactions, setInteractions] = useState<LeadInteractionEntry[]>([]);
   const [expandedAreas, setExpandedAreas] = useState<Record<string, boolean>>({});
   const [expandedAddOns, setExpandedAddOns] = useState<Record<string, boolean>>({});
 
@@ -225,7 +197,7 @@ export function CreateLeadModal({ open, onOpenChange }: CreateLeadModalProps) {
     }
   };
 
-  const updateAddress = (id: string, field: keyof AddressEntry, value: string) => {
+  const updateAddress = (id: string, field: keyof LeadAddressEntry, value: string) => {
     setAddresses(
       addresses.map((addr) =>
         addr.id === id ? { ...addr, [field]: value } : addr
@@ -251,7 +223,7 @@ export function CreateLeadModal({ open, onOpenChange }: CreateLeadModalProps) {
     setInteractions(interactions.filter((i) => i.id !== id));
   };
 
-  const updateInteraction = (id: string, field: keyof Interaction, value: string) => {
+  const updateInteraction = (id: string, field: keyof LeadInteractionEntry, value: string) => {
     setInteractions(
       interactions.map((i) => (i.id === id ? { ...i, [field]: value } : i))
     );
@@ -303,7 +275,7 @@ export function CreateLeadModal({ open, onOpenChange }: CreateLeadModalProps) {
   };
 
   const handleAmountBlur = (value: string) => {
-    const formatted = formatCurrency(value);
+    const formatted = formatLeadCurrency(value);
     setFormData((prev) => ({ ...prev, agreedAmount: formatted }));
   };
 
@@ -1362,21 +1334,21 @@ export function CreateLeadModal({ open, onOpenChange }: CreateLeadModalProps) {
             </div>
           </div>
 
-          {/* 9. Interaction History */}
+          {/* 9. LeadInteractionEntry History */}
           <div className="space-y-4">
             <div className="flex items-center justify-between border-b pb-2">
               <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                9. Interaction History
+                9. LeadInteractionEntry History
               </h3>
               <Button variant="outline" size="sm" onClick={addInteraction}>
                 <Plus className="w-4 h-4 mr-1" />
-                Add Interaction
+                Add LeadInteractionEntry
               </Button>
             </div>
 
             {interactions.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-4 bg-muted/30 rounded-lg">
-                No interactions recorded. Click "Add Interaction" to log a contact.
+                No interactions recorded. Click "Add LeadInteractionEntry" to log a contact.
               </p>
             ) : (
               <div className="space-y-4">
@@ -1385,7 +1357,7 @@ export function CreateLeadModal({ open, onOpenChange }: CreateLeadModalProps) {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 text-sm font-medium">
                         <MessageSquare className="w-4 h-4 text-primary" />
-                        Interaction {index + 1}
+                        LeadInteractionEntry {index + 1}
                       </div>
                       <Button
                         variant="ghost"
