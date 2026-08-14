@@ -10,7 +10,7 @@ const importAnchor = 'import { ReviewRequestPreviewModal } from "./ReviewRequest
 if (!source.includes(importAnchor)) throw new Error("Appointment details import anchor missing");
 source = source.replace(
   importAnchor,
-  `${importAnchor}\nimport { AppointmentBillingSummary } from "./AppointmentBillingSummary";\nimport { AppointmentManualTimeEditor } from "./AppointmentManualTimeEditor";\nimport { AppointmentNotesSections } from "./AppointmentNotesSections";\nimport { Dot, InfoCell, TeamWithMembers, getAppointmentStatusConfig } from "./AppointmentDetailsPrimitives";\nimport type { AppointmentDetailsAppointment, JobNote } from "../types/appointmentDetails";`,
+  `${importAnchor}\nimport { AppointmentBillingSummary } from "./AppointmentBillingSummary";\nimport { AppointmentManualTimeEditor } from "./AppointmentManualTimeEditor";\nimport { AppointmentNotesSections } from "./AppointmentNotesSections";\nimport { Dot, InfoCell, TeamWithMembers } from "./AppointmentDetailsPrimitives";\nimport { getAppointmentStatusConfig } from "../utils/appointmentStatus";\nimport type { AppointmentDetailsAppointment, JobNote } from "../types/appointmentDetails";`,
 );
 
 const definitionsStart = source.indexOf("type Appointment = {");
