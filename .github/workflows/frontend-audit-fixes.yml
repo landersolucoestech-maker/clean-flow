@@ -1,5 +1,6 @@
 name: Frontend Audit Fixes
 
+# Retry Settings section extraction after Fast Refresh cleanup.
 on:
   push:
     branches: [dev]
