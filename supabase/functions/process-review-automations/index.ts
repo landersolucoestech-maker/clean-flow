@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
           const message = `Hi ${customer.name}! Thank you for choosing ${companyName}. We'd love to hear your feedback! Could you take a moment to leave us a review?\n\n${links}\n\n- ${companyName}`;
 
           const { data: existing, error: lookupError } = await supabase.from("conversations").select("id")
-            .eq("company_id", settings.id).eq("customer_id", customer.id).maybeSingle();
+            .eq("company_id", settings.id).eq("customer_id", customer.id).is("staff_id", null).maybeSingle();
           if (lookupError) throw lookupError;
           let conversationId = existing?.id;
           if (!conversationId) {
@@ -70,24 +70,52 @@ Deno.serve(async (req) => {
             conversationId = created.data.id;
           }
 
-          const messageInsert = await supabase.from("messages").insert({ conversation_id: conversationId, content: message, sender_type: "user", read: true });
-          if (messageInsert.error) throw messageInsert.error;
-          const conversationUpdate = await supabase.from("conversations").update({
-            last_message: message.length > 100 ? `${message.slice(0, 100)}...` : message,
-            last_message_at: new Date().toISOString(), unread: false,
-          }).eq("id", conversationId).eq("company_id", settings.id);
-          if (conversationUpdate.error) throw conversationUpdate.error;
+          const messageInsert = await supabase.from("messages").insert({
+            conversation_id: conversationId,
+            content: message,
+            sender_type: "user",
+            read: true,
+            delivery_status: "pending",
+            delivery_attempts: 1,
+            last_delivery_attempt_at: new Date().toISOString(),
+          }).select("id").single();
+          if (messageInsert.error || !messageInsert.data) throw messageInsert.error || new Error("Failed to create outbound message");
 
-          const send = await fetch(`${supabaseUrl}/functions/v1/ringcentral-send-message`, {
+          const send = await fetch(`${supabaseUrl}/functions/v1/send-sms-message`, {
             method: "POST",
             headers: { "Content-Type": "application/json", "Authorization": `Bearer ${serviceKey}` },
             body: JSON.stringify({ company_id: settings.id, to_phone: customer.phone, message }),
           });
-          const smsSent = send.ok;
-          await send.body?.cancel();
+          const sendPayload = await send.json().catch(() => ({}));
+          const provider = sendPayload?.provider === "dialpad" ? "dialpad" : sendPayload?.provider === "ringcentral" ? "ringcentral" : null;
+          const providerMessageId = sendPayload?.message_id != null ? String(sendPayload.message_id) : null;
+          const smsSent = send.ok && sendPayload?.success === true && provider !== null;
+
+          const deliveryUpdate: Record<string, unknown> = smsSent
+            ? {
+                delivery_status: "sent",
+                delivery_error: null,
+                provider,
+                provider_message_id: providerMessageId,
+              }
+            : {
+                delivery_status: "failed",
+                delivery_error: typeof sendPayload?.error === "string" ? sendPayload.error.slice(0, 500) : `SMS gateway HTTP ${send.status}`,
+              };
+          if (provider === "ringcentral" && providerMessageId) deliveryUpdate.ringcentral_message_id = providerMessageId;
+          await supabase.from("messages").update(deliveryUpdate).eq("id", messageInsert.data.id);
+
+          if (smsSent) {
+            const conversationUpdate = await supabase.from("conversations").update({
+              last_message: message.length > 100 ? `${message.slice(0, 100)}...` : message,
+              last_message_at: new Date().toISOString(), unread: false,
+            }).eq("id", conversationId).eq("company_id", settings.id);
+            if (conversationUpdate.error) console.warn("Review SMS sent but conversation preview update failed", conversationUpdate.error);
+          }
+
           const log = await supabase.from("review_request_logs").insert({ job_id: job.id, customer_id: customer.id, message, sms_sent: smsSent });
           if (log.error) throw log.error;
-          if (smsSent) processed++; else { failed++; errors.push(`${settings.id}/${job.id}: SMS delivery failed`); }
+          if (smsSent) processed++; else { failed++; errors.push(`${settings.id}/${job.id}: ${typeof sendPayload?.error === "string" ? sendPayload.error : "SMS delivery failed"}`); }
         } catch (error) {
           failed++;
           errors.push(`${settings.id}/${job.id}: ${error instanceof Error ? error.message : String(error)}`);
