@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { ContactRound, Repeat, UserCheck, UserPlus, Users, UserX } from "lucide-react";
 import { PageLayoutTopContentProvider } from "@/components/layout/PageLayoutTopContent";
 import { useCustomers } from "@/hooks/useCustomers";
-import { useLeads, LEAD_STATUSES } from "../leads/hooks/useLeads";
+import { useLeads } from "../leads/hooks/useLeads";
 import { useContacts } from "../contacts/hooks/useContacts";
 import { CrmTabs } from "./CrmTabs";
 
@@ -16,32 +16,22 @@ type Metric = {
   value: number;
   helper: string;
   tone: string;
-  icon?: typeof Users;
-  dot?: string;
+  icon: typeof Users;
 };
 
 function MetricStrip({ metrics }: { metrics: Metric[] }) {
   return (
     <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 2xl:grid-cols-5">
       {metrics.map((metric) => (
-        <div
-          key={metric.label}
-          className="flex min-h-[88px] items-center justify-between rounded-lg border border-border/70 bg-card px-4 py-3 shadow-sm"
-        >
+        <div key={metric.label} className="flex min-h-[82px] items-center justify-between rounded-lg border border-border bg-card px-4 py-3">
           <div className="min-w-0">
-            <p className="truncate text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-              {metric.label}
-            </p>
-            <p className="mt-1 text-2xl font-semibold leading-none tracking-tight text-foreground">{metric.value}</p>
-            <p className="mt-1 truncate text-xs text-muted-foreground">{metric.helper}</p>
+            <p className="truncate text-xs font-medium text-muted-foreground">{metric.label}</p>
+            <p className="mt-1 text-xl font-semibold leading-none tracking-tight text-foreground">{metric.value}</p>
+            <p className="mt-1 truncate text-[11px] text-muted-foreground">{metric.helper}</p>
           </div>
-          {metric.icon ? (
-            <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${metric.tone}`}>
-              <metric.icon className="h-4 w-4" />
-            </div>
-          ) : (
-            <span className={`h-2.5 w-2.5 shrink-0 rounded-full ring-4 ring-background ${metric.dot ?? "bg-muted-foreground"}`} />
-          )}
+          <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md ${metric.tone}`}>
+            <metric.icon className="h-4 w-4" />
+          </div>
         </div>
       ))}
     </div>
@@ -60,18 +50,24 @@ function CrmWorkspaceHeader() {
   let metrics: Metric[];
 
   if (isLeads) {
-    metrics = LEAD_STATUSES.map((status) => ({
-      label: status.label,
-      value: leads.filter((lead) => lead.status === status.value).length,
-      helper: "pipeline status",
-      tone: "",
-      dot: status.color,
-    }));
+    const count = (statuses: string[]) => leads.filter((lead) => statuses.includes(lead.status)).length;
+    const inProgress = count(["qualification", "visit_scheduled", "estimate_completed", "negotiation"]);
+    const followUp = count(["cold_followup", "warm_followup", "reactivation"]);
+    const converted = count(["active_customer"]);
+    const lost = count(["disqualified"]);
+
+    metrics = [
+      { label: "Total Leads", value: leads.length, helper: `${lost} lost / disqualified`, icon: Users, tone: "bg-muted text-foreground" },
+      { label: "New Leads", value: count(["new_lead"]), helper: "awaiting qualification", icon: UserPlus, tone: "bg-primary/10 text-primary" },
+      { label: "In Progress", value: inProgress, helper: "active sales pipeline", icon: Repeat, tone: "bg-warning/10 text-warning" },
+      { label: "Follow-up", value: followUp, helper: "nurture and reactivation", icon: Repeat, tone: "bg-secondary-light text-foreground" },
+      { label: "Converted", value: converted, helper: "active customers", icon: UserCheck, tone: "bg-success/10 text-success" },
+    ];
   } else if (isContacts) {
     const active = contacts.filter((contact) => contact.status === "Active").length;
     metrics = [
-      { label: "Total Contacts", value: contacts.length, helper: "registered", icon: ContactRound, tone: "bg-secondary-light text-foreground" },
-      { label: "Active Contacts", value: active, helper: "currently active", icon: UserCheck, tone: "bg-primary-light text-primary" },
+      { label: "Total Contacts", value: contacts.length, helper: "registered", icon: ContactRound, tone: "bg-muted text-foreground" },
+      { label: "Active Contacts", value: active, helper: "currently active", icon: UserCheck, tone: "bg-primary/10 text-primary" },
       { label: "Suppliers", value: contacts.filter((contact) => contact.contactType === "Supplier").length, helper: "business contacts", icon: Users, tone: "bg-success/10 text-success" },
       { label: "Partners", value: contacts.filter((contact) => contact.contactType === "Partner").length, helper: "business contacts", icon: Users, tone: "bg-warning/10 text-warning" },
       { label: "Service Providers", value: contacts.filter((contact) => contact.contactType === "Service Provider").length, helper: "business contacts", icon: Users, tone: "bg-secondary-light text-foreground" },
@@ -85,15 +81,15 @@ function CrmWorkspaceHeader() {
     const newCustomersThisMonth = customers.filter((customer) => customer.customer_since && new Date(customer.customer_since) >= startOfMonth).length;
     metrics = [
       { label: "New Customers", value: newCustomersThisMonth, helper: "this month", icon: UserPlus, tone: "bg-success/10 text-success" },
-      { label: "Active Customers", value: activeCount, helper: "currently active", icon: UserCheck, tone: "bg-primary-light text-primary" },
+      { label: "Active Customers", value: activeCount, helper: "currently active", icon: UserCheck, tone: "bg-primary/10 text-primary" },
       { label: "Inactive Customers", value: inactiveCount, helper: "currently inactive", icon: UserX, tone: "bg-destructive/10 text-destructive" },
-      { label: "Total Customers", value: customers.length, helper: "registered", icon: Users, tone: "bg-secondary-light text-foreground" },
+      { label: "Total Customers", value: customers.length, helper: "registered", icon: Users, tone: "bg-muted text-foreground" },
       { label: "Recurring Customers", value: recurringCount, helper: "active recurring", icon: Repeat, tone: "bg-warning/10 text-warning" },
     ];
   }
 
   return (
-    <section className="space-y-4">
+    <section className="space-y-3">
       <MetricStrip metrics={metrics} />
       <CrmTabs />
     </section>
