@@ -1,17 +1,13 @@
 name: Frontend Payroll Data Refactor
 
-# One-shot frontend-only refactor runner. Retired after a successful commit.
 on:
-  push:
-    branches: [dev]
-    paths:
-      - ".github/workflows/frontend-payroll-data-refactor.yml"
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  refactor:
+  validate:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -24,17 +20,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: node scripts/refactor-payroll-data.mjs
       - run: node scripts/frontend-audit.mjs
       - run: npx eslint apps/web/src packages --max-warnings=0
       - run: npm run typecheck
       - run: npx vitest run apps/web/src
       - run: npm run build
-      - name: Commit payroll data access refactor
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/web/src/modules/payroll/PayrollPage.tsx apps/web/src/modules/payroll/services apps/web/src/modules/payroll/utils
-          git diff --cached --quiet && exit 0
-          git commit -m "refactor(frontend): isolate payroll data access"
-          git push origin HEAD:dev
