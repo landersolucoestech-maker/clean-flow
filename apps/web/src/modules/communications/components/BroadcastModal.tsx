@@ -14,11 +14,16 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Paperclip, Search, Send, Users, UserCircle, X, Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useStaff } from "@/hooks/useStaff";
 import { useCompanySettings } from "@/hooks/useCompanySettings";
 import type { Customer } from "@/hooks/useCustomers";
 import { toast } from "sonner";
+import {
+  removeBroadcastAttachments,
+  sendCustomerBroadcast,
+  sendTeamBroadcastMessage,
+  uploadBroadcastAttachment,
+} from "../services/broadcastService";
 
 interface BroadcastModalProps {
   open: boolean;
@@ -67,9 +72,11 @@ export function BroadcastModal({ open, onOpenChange, customers }: BroadcastModal
 
   const cleanupAttachments = async (items: UploadedAttachment[]) => {
     if (!items.length) return;
-    const paths = items.map((item) => item.path);
-    const { error } = await supabase.storage.from("broadcast-attachments").remove(paths);
-    if (error) console.error("Unable to clean broadcast attachments", error);
+    try {
+      await removeBroadcastAttachments(items.map((item) => item.path));
+    } catch {
+      // Cleanup is best-effort; previews still need to be released locally.
+    }
     items.forEach((item) => { if (item.preview) URL.revokeObjectURL(item.preview); });
   };
 
@@ -107,24 +114,17 @@ export function BroadcastModal({ open, onOpenChange, customers }: BroadcastModal
           toast.error(`${file.name} exceeds the 10 MB limit`);
           continue;
         }
-        const path = `${company.id}/broadcasts/${crypto.randomUUID()}_${sanitizeFileName(file.name)}`;
-        const { error } = await supabase.storage.from("broadcast-attachments").upload(path, file, {
-          cacheControl: "3600",
-          upsert: false,
-        });
-        if (error) throw error;
-        const { data } = supabase.storage.from("broadcast-attachments").getPublicUrl(path);
+        const result = await uploadBroadcastAttachment(company.id, file, sanitizeFileName(file.name));
         uploaded.push({
           file,
-          path,
-          url: data.publicUrl,
+          path: result.path,
+          url: result.url,
           preview: file.type.startsWith("image/") ? URL.createObjectURL(file) : undefined,
         });
       }
       setAttachments((current) => [...current, ...uploaded]);
-    } catch (error) {
+    } catch {
       await cleanupAttachments(uploaded);
-      console.error("Broadcast attachment upload failed", error);
       toast.error("Failed to upload attachment");
     } finally {
       setUploading(false);
@@ -134,8 +134,9 @@ export function BroadcastModal({ open, onOpenChange, customers }: BroadcastModal
   const removeAttachment = async (path: string) => {
     const target = attachments.find((item) => item.path === path);
     if (!target) return;
-    const { error } = await supabase.storage.from("broadcast-attachments").remove([path]);
-    if (error) {
+    try {
+      await removeBroadcastAttachments([path]);
+    } catch {
       toast.error("Failed to remove attachment");
       return;
     }
@@ -163,48 +164,19 @@ export function BroadcastModal({ open, onOpenChange, customers }: BroadcastModal
 
       if (selectedCustomers.size) {
         const selected = customers.filter((customer) => selectedCustomers.has(customer.id));
-        const { data: broadcast, error: broadcastError } = await supabase
-          .from("broadcast_messages" as never)
-          .insert({
-            company_id: company.id,
-            message: message.trim(),
-            status: "sending",
-            total_recipients: selected.length,
-            customer_filter: { ids: selected.map((customer) => customer.id) },
-            attachment_urls: attachmentUrls,
-          } as never)
-          .select()
-          .single();
-        if (broadcastError || !broadcast) throw broadcastError || new Error("Unable to create broadcast");
-        const broadcastId = (broadcast as { id: string }).id;
-
-        const recipients = selected.map((customer) => ({
-          broadcast_id: broadcastId,
-          customer_id: customer.id,
-          phone: customer.phone || customer.phone2,
-          status: "pending",
-        }));
-        const { error: recipientError } = await supabase.from("broadcast_recipients" as never).insert(recipients as never);
-        if (recipientError) throw recipientError;
-
-        const { data: result, error: sendError } = await supabase.functions.invoke("send-broadcast", {
-          body: { broadcast_id: broadcastId },
-        });
-        if (sendError) throw sendError;
-        sent += Number(result?.sent_count || 0);
-        failed += Number(result?.failed_count || 0);
+        const result = await sendCustomerBroadcast(company.id, message.trim(), attachmentUrls, selected);
+        sent += result.sent;
+        failed += result.failed;
       }
 
       for (const member of availableStaff.filter((item) => selectedStaff.has(item.id))) {
-        const { data: result, error } = await supabase.functions.invoke("send-sms-message", {
-          body: {
-            company_id: company.id,
-            to_phone: member.phone,
-            message: message.trim(),
-            attachment_url: attachmentUrls[0] || undefined,
-          },
-        });
-        if (error || !result?.success) failed++; else sent++;
+        const success = await sendTeamBroadcastMessage(
+          company.id,
+          member.phone!,
+          message.trim(),
+          attachmentUrls[0] || undefined,
+        );
+        if (success) sent++; else failed++;
       }
 
       attachments.forEach((item) => { if (item.preview) URL.revokeObjectURL(item.preview); });
@@ -212,8 +184,7 @@ export function BroadcastModal({ open, onOpenChange, customers }: BroadcastModal
       onOpenChange(false);
       if (failed) toast.warning(`Broadcast completed: ${sent} sent, ${failed} failed`);
       else toast.success(`Broadcast sent to ${sent} recipients`);
-    } catch (error) {
-      console.error("Broadcast send failed", error);
+    } catch {
       toast.error("Failed to send broadcast");
     } finally {
       setSending(false);
