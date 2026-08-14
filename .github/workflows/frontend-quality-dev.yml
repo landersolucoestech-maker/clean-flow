@@ -6,6 +6,7 @@ on:
     paths:
       - "apps/web/**"
       - "packages/**"
+      - "scripts/frontend-audit.mjs"
       - "package.json"
       - "package-lock.json"
       - "tsconfig*.json"
@@ -55,6 +56,9 @@ jobs:
             echo "$obsolete_refs"
             exit 1
           fi
+
+      - name: Audit frontend structure and mock boundaries
+        run: node scripts/frontend-audit.mjs
 
       - name: Lint frontend
         run: npx eslint apps/web/src packages
