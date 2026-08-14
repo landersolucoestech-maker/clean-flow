@@ -80,7 +80,7 @@ async function sendSms(
   phone: string,
   message: string,
 ): Promise<boolean> {
-  const response = await fetch(`${supabaseUrl}/functions/v1/ringcentral-send-message`, {
+  const response = await fetch(`${supabaseUrl}/functions/v1/send-sms-message`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -88,8 +88,8 @@ async function sendSms(
     },
     body: JSON.stringify({ company_id: companyId, to_phone: phone, message }),
   });
-  await response.body?.cancel();
-  return response.ok;
+  const payload = await response.json().catch(() => ({}));
+  return response.ok && payload?.success === true;
 }
 
 Deno.serve(async (req) => {
