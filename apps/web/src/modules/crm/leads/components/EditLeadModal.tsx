@@ -131,6 +131,7 @@ import {
   DEFAULT_TAGS,
 } from "../constants/leadFormOptions";
 import type { LeadAddressEntry, LeadInteractionEntry } from "../types/leadForm";
+import { useLeadFormState } from "../hooks/useLeadFormState";
 import { formatLeadCurrency } from "../utils/leadForm";
 
 export function EditLeadModal({ open, onOpenChange, estimate, onSave }: EditLeadModalProps) {
@@ -141,52 +142,18 @@ export function EditLeadModal({ open, onOpenChange, estimate, onSave }: EditLead
   const [newTag, setNewTag] = useState("");
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
-  const [formData, setFormData] = useState({
-    primaryContactName: "",
-    businessName: "",
-    email: "",
-    phone: "",
-    tags: [] as string[],
-    leadSource: "",
-    referralType: "existing" as "existing" | "manual",
-    referralCustomerId: "",
-    referralName: "",
-    stage: "new_lead",
-    serviceType: "",
-    propertyType: "",
-    residenceType: "",
-    squareFeet: "",
-    bedrooms: "",
-    bathrooms: "",
-    frequency: "",
-    hasPets: false,
-    serviceAreas: [] as string[],
-    addOnServices: [] as string[],
-    preferredDays: [] as string[],
-    preferredTime: "",
-    visitDate: "",
-    agreedAmount: "",
-    validUntil: "",
-    notes: "",
-    additionalNotes: "",
-    specialInstructions: "",
-  });
-
-  const [addresses, setAddresses] = useState<LeadAddressEntry[]>([
-    {
-      id: "1",
-      name: "",
-      address: "",
-      city: "",
-      state: "",
-      postalCode: "",
-      notes: "",
-    },
-  ]);
-
-  const [interactions, setInteractions] = useState<LeadInteractionEntry[]>([]);
-  const [expandedAreas, setExpandedAreas] = useState<Record<string, boolean>>({});
-  const [expandedAddOns, setExpandedAddOns] = useState<Record<string, boolean>>({});
+  const {
+    formData,
+    setFormData,
+    addresses,
+    setAddresses,
+    interactions,
+    setInteractions,
+    expandedAreas,
+    setExpandedAreas,
+    expandedAddOns,
+    setExpandedAddOns,
+  } = useLeadFormState();
 
   // Load estimate data when modal opens
   useEffect(() => {
@@ -274,7 +241,7 @@ export function EditLeadModal({ open, onOpenChange, estimate, onSave }: EditLead
         setInteractions([]);
       }
     }
-  }, [estimate, open]);
+  }, [estimate, open, setAddresses, setFormData, setInteractions]);
 
   const addAddress = () => {
     setAddresses([

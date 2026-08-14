@@ -62,6 +62,7 @@ import {
 } from "../constants/leadFormOptions";
 import { leadFormSchema } from "../schemas/leadFormSchema";
 import type { LeadAddressEntry, LeadInteractionEntry } from "../types/leadForm";
+import { useLeadFormState } from "../hooks/useLeadFormState";
 import { formatLeadCurrency } from "../utils/leadForm";
 import { createLeadWithRelations } from "../services/leadCreationService";
 
@@ -73,105 +74,22 @@ export function CreateLeadModal({ open, onOpenChange }: CreateLeadModalProps) {
   const [newTag, setNewTag] = useState("");
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
-  const [formData, setFormData] = useState({
-    // 1. Lead Identification
-    primaryContactName: "",
-    businessName: "",
-    email: "",
-    phone: "",
-    tags: [] as string[],
-    // 2. Lead Origin
-    leadSource: "",
-    referralType: "existing" as "existing" | "manual",
-    referralCustomerId: "",
-    referralName: "",
-    // 3. Status
-    stage: "new_lead",
-    // 4. Service Information
-    serviceType: "",
-    propertyType: "",
-    residenceType: "",
-    squareFeet: "",
-    bedrooms: "",
-    bathrooms: "",
-    frequency: "",
-    hasPets: false,
-    // 5. Service Areas
-    serviceAreas: [] as string[],
-    // 6. Add-On Services
-    addOnServices: [] as string[],
-    // 8. Preferences
-    preferredDays: [] as string[],
-    preferredTime: "",
-    // 9. Visit & Estimate
-    visitDate: "",
-    agreedAmount: "",
-    validUntil: "",
-    // 10. Notes
-    notes: "",
-    additionalNotes: "",
-    specialInstructions: "",
-  });
-
-  const [addresses, setAddresses] = useState<LeadAddressEntry[]>([
-    {
-      id: "1",
-      name: "",
-      address: "",
-      city: "",
-      state: "",
-      postalCode: "",
-      notes: "",
-    },
-  ]);
-
-  const [interactions, setInteractions] = useState<LeadInteractionEntry[]>([]);
-  const [expandedAreas, setExpandedAreas] = useState<Record<string, boolean>>({});
-  const [expandedAddOns, setExpandedAddOns] = useState<Record<string, boolean>>({});
+  const {
+    formData,
+    setFormData,
+    addresses,
+    setAddresses,
+    interactions,
+    setInteractions,
+    expandedAreas,
+    setExpandedAreas,
+    expandedAddOns,
+    setExpandedAddOns,
+    resetLeadFormState,
+  } = useLeadFormState();
 
   const resetForm = () => {
-    setFormData({
-      primaryContactName: "",
-      businessName: "",
-      email: "",
-      phone: "",
-      tags: [],
-      leadSource: "",
-      referralType: "existing",
-      referralCustomerId: "",
-      referralName: "",
-      stage: "new_lead",
-      serviceType: "",
-      propertyType: "",
-      residenceType: "",
-      squareFeet: "",
-      bedrooms: "",
-      bathrooms: "",
-      frequency: "",
-      hasPets: false,
-      serviceAreas: [],
-      addOnServices: [],
-      preferredDays: [],
-      preferredTime: "",
-      visitDate: "",
-      agreedAmount: "",
-      validUntil: "",
-      notes: "",
-      additionalNotes: "",
-      specialInstructions: "",
-    });
-    setAddresses([
-      {
-        id: "1",
-        name: "",
-        address: "",
-        city: "",
-        state: "",
-        postalCode: "",
-        notes: "",
-      },
-    ]);
-    setInteractions([]);
+    resetLeadFormState();
     setNewTag("");
   };
 
