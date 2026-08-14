@@ -14,6 +14,9 @@ import { TeamUserModal } from "@/components/settings/TeamUserModal";
 import { AutomationsTab } from "@/components/settings/AutomationsTab";
 import { IntegrationsTab } from "@/components/settings/IntegrationsTab";
 import { AuditTab } from "@/components/settings/AuditTab";
+import { NotificationSettingsSection } from "./components/NotificationSettingsSection";
+import { TeamSettingsSection } from "./components/TeamSettingsSection";
+import { SecuritySettingsSection } from "./components/SecuritySettingsSection";
 import { useLanguage } from "@/contexts/useLanguage";
 import { useStaff, useCurrentStaff, Staff } from "@/hooks/useStaff";
 import { useCompanySettings, useUpdateCompanySettings, BusinessHours } from "@/hooks/useCompanySettings";
@@ -54,15 +57,6 @@ const SETTINGS_TABS: SettingsTab[] = ["profile", "company", "notifications", "te
 function isSettingsTab(value: string | null): value is SettingsTab {
   return value !== null && SETTINGS_TABS.includes(value as SettingsTab);
 }
-
-const STAFF_ROLE_OPTIONS = [
-  { value: "admin", label: "Admin" },
-  { value: "cleaner", label: "Cleaner" },
-  { value: "driver", label: "Driver" },
-  { value: "cleaning_manager", label: "Cleaning Manager Team" },
-  { value: "office_manager", label: "Office Manager" },
-  { value: "virtual_assistant", label: "Virtual Assistant" },
-] as const;
 
 export function Settings() {
   const { t } = useLanguage();
@@ -772,412 +766,6 @@ export function Settings() {
     </div>
   );
 
-  const renderNotificationSettings = () => (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Bell className="w-5 h-5" />
-            {t("settings.notifications")}
-          </CardTitle>
-          <CardDescription>{t("settings.configureNotifications")}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between p-3 border border-border rounded-lg">
-            <div>
-              <h4 className="font-medium">{t("settings.jobUpdates")}</h4>
-              <p className="text-sm text-muted-foreground">{t("settings.whenJobStatusChanges")}</p>
-            </div>
-            <Switch checked={jobUpdatesEmail} onCheckedChange={setJobUpdatesEmail} />
-          </div>
-
-          <div className="flex items-center justify-between p-3 border border-border rounded-lg">
-            <div>
-              <h4 className="font-medium">{t("settings.jobReminders")}</h4>
-              <p className="text-sm text-muted-foreground">{t("settings.whenJobIsComing")}</p>
-            </div>
-            <Switch checked={jobRemindersSms} onCheckedChange={setJobRemindersSms} />
-          </div>
-
-          <div className="flex items-center justify-between p-3 border border-border rounded-lg">
-            <div>
-              <h4 className="font-medium">{t("settings.paymentReceived")}</h4>
-              <p className="text-sm text-muted-foreground">{t("settings.whenSomeonePays")}</p>
-            </div>
-            <Switch checked={paymentNotificationsEmail} onCheckedChange={setPaymentNotificationsEmail} />
-          </div>
-
-          <div className="flex items-center justify-between p-3 border border-border rounded-lg">
-            <div>
-              <h4 className="font-medium">{t("settings.paymentFailed")}</h4>
-              <p className="text-sm text-muted-foreground">{t("settings.whenPaymentFails")}</p>
-            </div>
-            <Switch checked={paymentAlertsSms} onCheckedChange={setPaymentAlertsSms} />
-          </div>
-
-          <div className="flex items-center justify-between p-3 border border-border rounded-lg">
-            <div>
-              <h4 className="font-medium">{t("settings.feedbackAlerts")}</h4>
-              <p className="text-sm text-muted-foreground">{t("settings.whenClientLeavesReview")}</p>
-            </div>
-            <Switch checked={customerFeedbackSms} onCheckedChange={setCustomerFeedbackSms} />
-          </div>
-
-          <div className="flex items-center justify-between p-3 border border-border rounded-lg">
-            <div>
-              <h4 className="font-medium">{t("settings.systemAlerts")}</h4>
-              <p className="text-sm text-muted-foreground">{t("settings.errorsDisconnections")}</p>
-            </div>
-            <Switch checked={systemAlertsSms} onCheckedChange={setSystemAlertsSms} />
-          </div>
-
-          <div className="flex items-center justify-between p-3 border border-border rounded-lg">
-            <div>
-              <h4 className="font-medium">{t("settings.weeklyReports")}</h4>
-              <p className="text-sm text-muted-foreground">{t("settings.everyMonday")}</p>
-            </div>
-            <Switch checked={weeklyReportsEmail} onCheckedChange={setWeeklyReportsEmail} />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Button onClick={handleSaveNotifications} variant="hero">
-        {t("settings.saveChanges")}
-      </Button>
-    </div>
-  );
-
-  const renderTeamSettings = () => (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="w-5 h-5" />
-            {t("settings.manageTeamTitle")}
-          </CardTitle>
-          <CardDescription>{t("settings.userAccessManagement")}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap">
-            <div className="min-w-0 flex-1">
-              <Input 
-                placeholder={t("settings.searchByName")}
-                value={teamSearchQuery}
-                onChange={(e) => setTeamSearchQuery(e.target.value)}
-              />
-            </div>
-            <Select value={newMemberRole} onValueChange={setNewMemberRole}>
-              <SelectTrigger className="w-full lg:w-44">
-                <SelectValue placeholder={t("settings.selectRole")} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t("common.all")}</SelectItem>
-                {STAFF_ROLE_OPTIONS.map((role) => (
-                  <SelectItem key={role.value} value={role.value}>
-                    {role.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {canManageTeam && (
-              <Button onClick={handleOpenCreateUser} variant="hero">
-                <Plus className="w-4 h-4 mr-2" />
-                {t("settings.addTeamMember")}
-              </Button>
-            )}
-          </div>
-
-          <Separator />
-
-          {isLoadingStaff ? (
-            <div className="text-center py-8 text-muted-foreground">{t("settings.loadingStaff")}</div>
-          ) : (
-            <div className="space-y-3 max-h-[500px] overflow-y-auto">
-              {staffMembers
-                .filter((staff) => {
-                  // Filter by name search
-                  const matchesSearch = !teamSearchQuery || 
-                    staff.name.toLowerCase().includes(teamSearchQuery.toLowerCase());
-                  
-                  // Filter by role
-                  if (newMemberRole === "all") return matchesSearch;
-                  
-                  const staffRole = staff.staff_roles?.role || (staff.is_driver ? "driver" : "cleaner");
-                  
-                  const matchesRole = staffRole === newMemberRole;
-                  
-                  return matchesSearch && matchesRole;
-                })
-                .map((staff) => (
-                <div key={staff.id} className="flex flex-col gap-4 rounded-xl border border-border/80 bg-card p-4 transition-colors hover:bg-accent/30 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex min-w-0 items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary-light flex items-center justify-center">
-                      <span className="text-primary font-medium">
-                        {staff.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
-                      </span>
-                    </div>
-                    <div>
-                      <h4 className="font-medium">{staff.name}</h4>
-                      <p className="text-sm text-muted-foreground">{staff.email || t("settings.noEmail")}</p>
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2 sm:justify-end">
-                    {staff.payment_method && (
-                      <Badge variant="outline" className="border-success/30 bg-success/10 text-success capitalize">
-                        {staff.payment_method === "quickbooks" ? "QuickBooks" : staff.payment_method}
-                      </Badge>
-                    )}
-                    {(() => {
-                      const role = staff.staff_roles?.role || (staff.is_driver ? "driver" : "cleaner");
-                      const showTeam = role === "driver" || role === "cleaner";
-                      
-                      if (!showTeam) return null;
-                      
-                      return staff.team ? (
-                        <Badge variant="outline" className="border-primary/30 bg-primary-light text-primary-dark">
-                          Team {staff.team}
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline" className="border-warning/30 bg-warning/10 text-warning-foreground">
-                          <AlertTriangle className="w-3 h-3 mr-1" />
-                          Sem Team
-                        </Badge>
-                      );
-                    })()}
-                    {(() => {
-                      const role = staff.staff_roles?.role || (staff.is_driver ? "driver" : "cleaner");
-                      const label =
-                        role === "admin" ? "Admin" :
-                        role === "driver" ? "Driver" :
-                        role === "cleaning_manager" ? "Cleaning Manager Team" :
-                        role === "cleaner" ? "Cleaner" :
-                        role === "office_manager" ? "Office Manager" :
-                        role === "virtual_assistant" ? "Virtual Assistant" :
-                        role;
-
-                      return (
-                        <Badge variant={role === "driver" ? "default" : "secondary"}>
-                          {label}
-                        </Badge>
-                      );
-                    })()}
-                    <Badge variant={staff.is_active ? "default" : "outline"}>
-                      {staff.is_active ? t("common.active") : t("common.inactive")}
-                    </Badge>
-                    {canManageTeam && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedStaff(staff);
-                          setTeamUserModalMode("edit");
-                          setTeamUserModalOpen(true);
-                        }}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              ))}
-              {staffMembers.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  {t("settings.noStaffFound")}
-                </div>
-              )}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Shield className="w-5 h-5" />
-            {t("settings.rolesPermissions")}
-          </CardTitle>
-          <CardDescription>
-            Access is enforced by the supported operational roles below.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-wrap gap-2">
-          {STAFF_ROLE_OPTIONS.map((role) => (
-            <Badge key={role.value} variant="secondary">{role.label}</Badge>
-          ))}
-        </CardContent>
-      </Card>
-    </div>
-  );
-
-  const renderSecuritySettings = () => (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Key className="w-5 h-5" />
-            {t("settings.changePassword")}
-          </CardTitle>
-          <CardDescription>{t("settings.updateAccountPassword")}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>{t("settings.currentPassword")}</Label>
-            <div className="relative max-w-md">
-              <Input 
-                type={showCurrentPassword ? "text" : "password"}
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                placeholder={t("settings.enterCurrentPassword")}
-              />
-              <Button
-                variant="ghost"
-                size="sm"
-                className="absolute right-2 top-1/2 -translate-y-1/2"
-                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-              >
-                {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </Button>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label>{t("settings.newPassword")}</Label>
-            <div className="relative max-w-md">
-              <Input 
-                type={showNewPassword ? "text" : "password"}
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder={t("settings.enterNewPassword")}
-              />
-              <Button
-                variant="ghost"
-                size="sm"
-                className="absolute right-2 top-1/2 -translate-y-1/2"
-                onClick={() => setShowNewPassword(!showNewPassword)}
-              >
-                {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </Button>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label>{t("settings.confirmPassword")}</Label>
-            <div className="relative max-w-md">
-              <Input 
-                type={showConfirmPassword ? "text" : "password"}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder={t("settings.confirmNewPassword")}
-              />
-              <Button
-                variant="ghost"
-                size="sm"
-                className="absolute right-2 top-1/2 -translate-y-1/2"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              >
-                {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </Button>
-            </div>
-          </div>
-
-          <Button onClick={handleChangePassword} variant="hero">
-            {t("settings.changePassword")}
-          </Button>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Shield className="w-5 h-5" />
-            {t("settings.twoFactor")}
-          </CardTitle>
-          <CardDescription>{t("settings.addExtraSecurity")}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between p-4 border border-border rounded-lg">
-            <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-lg ${twoFactorEnabled ? "bg-success/10" : "bg-muted"}`}>
-                <Lock className={`w-5 h-5 ${twoFactorEnabled ? "text-success" : "text-muted-foreground"}`} />
-              </div>
-              <div>
-                <h4 className="font-medium">{t("settings.enable2FA")}</h4>
-                <p className="text-sm text-muted-foreground">
-                  {twoFactorEnabled ? t("settings.accountProtected") : t("settings.protectWith2FA")}
-                </p>
-              </div>
-            </div>
-            <Switch checked={twoFactorEnabled} disabled aria-label="Two-factor authentication is managed in Supabase" />
-          </div>
-
-          {twoFactorEnabled && (
-            <div className="space-y-2 max-w-md">
-              <Label>{t("settings.authMethod")}</Label>
-              <Select value={twoFactorMethod} onValueChange={setTwoFactorMethod} disabled>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="sms">SMS</SelectItem>
-                  <SelectItem value="app">{t("settings.authenticatorApp")}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <AlertTriangle className="w-5 h-5" />
-            {t("settings.securityPolicies")}
-          </CardTitle>
-          <CardDescription>These account-wide policies are managed in Supabase Auth settings.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>{t("settings.sessionTimeoutMinutes")}</Label>
-              <Select value={sessionTimeout} onValueChange={setSessionTimeout} disabled>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="15">15 {t("settings.minutes")}</SelectItem>
-                  <SelectItem value="30">30 {t("settings.minutes")}</SelectItem>
-                  <SelectItem value="60">1 {t("settings.hour")}</SelectItem>
-                  <SelectItem value="120">2 {t("settings.hours")}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>{t("settings.minPasswordLength")}</Label>
-              <Select value={passwordMinLength} onValueChange={setPasswordMinLength} disabled>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="6">6 {t("settings.characters")}</SelectItem>
-                  <SelectItem value="8">8 {t("settings.characters")}</SelectItem>
-                  <SelectItem value="10">10 {t("settings.characters")}</SelectItem>
-                  <SelectItem value="12">12 {t("settings.characters")}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between p-3 border border-border rounded-lg">
-            <div>
-              <h4 className="font-medium">{t("settings.requireSpecialChars")}</h4>
-              <p className="text-sm text-muted-foreground">{t("settings.passwordsMustInclude")}</p>
-            </div>
-            <Switch checked={requireSpecialChars} disabled />
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
 
 
   const renderContent = () => {
@@ -1187,11 +775,72 @@ export function Settings() {
       case "company":
         return renderCompanySettings();
       case "notifications":
-        return renderNotificationSettings();
+        return (
+          <NotificationSettingsSection
+            t={t}
+            jobUpdatesEmail={jobUpdatesEmail}
+            setJobUpdatesEmail={setJobUpdatesEmail}
+            jobRemindersSms={jobRemindersSms}
+            setJobRemindersSms={setJobRemindersSms}
+            paymentNotificationsEmail={paymentNotificationsEmail}
+            setPaymentNotificationsEmail={setPaymentNotificationsEmail}
+            paymentAlertsSms={paymentAlertsSms}
+            setPaymentAlertsSms={setPaymentAlertsSms}
+            customerFeedbackSms={customerFeedbackSms}
+            setCustomerFeedbackSms={setCustomerFeedbackSms}
+            systemAlertsSms={systemAlertsSms}
+            setSystemAlertsSms={setSystemAlertsSms}
+            weeklyReportsEmail={weeklyReportsEmail}
+            setWeeklyReportsEmail={setWeeklyReportsEmail}
+            onSave={handleSaveNotifications}
+          />
+        );
       case "team":
-        return renderTeamSettings();
+        return (
+          <TeamSettingsSection
+            t={t}
+            staffMembers={staffMembers}
+            isLoadingStaff={isLoadingStaff}
+            teamSearchQuery={teamSearchQuery}
+            setTeamSearchQuery={setTeamSearchQuery}
+            newMemberRole={newMemberRole}
+            setNewMemberRole={setNewMemberRole}
+            canManageTeam={canManageTeam}
+            onCreateUser={handleOpenCreateUser}
+            onEditStaff={(staff) => {
+              setSelectedStaff(staff);
+              setTeamUserModalMode("edit");
+              setTeamUserModalOpen(true);
+            }}
+          />
+        );
       case "security":
-        return renderSecuritySettings();
+        return (
+          <SecuritySettingsSection
+            t={t}
+            showCurrentPassword={showCurrentPassword}
+            setShowCurrentPassword={setShowCurrentPassword}
+            showNewPassword={showNewPassword}
+            setShowNewPassword={setShowNewPassword}
+            showConfirmPassword={showConfirmPassword}
+            setShowConfirmPassword={setShowConfirmPassword}
+            currentPassword={currentPassword}
+            setCurrentPassword={setCurrentPassword}
+            newPassword={newPassword}
+            setNewPassword={setNewPassword}
+            confirmPassword={confirmPassword}
+            setConfirmPassword={setConfirmPassword}
+            onChangePassword={handleChangePassword}
+            twoFactorEnabled={twoFactorEnabled}
+            twoFactorMethod={twoFactorMethod}
+            setTwoFactorMethod={setTwoFactorMethod}
+            sessionTimeout={sessionTimeout}
+            setSessionTimeout={setSessionTimeout}
+            passwordMinLength={passwordMinLength}
+            setPasswordMinLength={setPasswordMinLength}
+            requireSpecialChars={requireSpecialChars}
+          />
+        );
       case "automations":
         return <AutomationsTab />;
       case "integrations":
