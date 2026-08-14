@@ -1,6 +1,5 @@
 name: Frontend Audit Fixes
 
-# Retry Settings section extraction after Fast Refresh cleanup.
 on:
   push:
     branches: [dev]
@@ -24,17 +23,17 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: node scripts/refactor-settings-sections.mjs
+      - run: node scripts/refactor-settings-profile-nav.mjs
       - run: node scripts/frontend-audit.mjs
       - run: npx eslint apps/web/src packages --max-warnings=0
       - run: npm run typecheck
       - run: npx vitest run apps/web/src
       - run: npm run build
-      - name: Commit settings sections extraction
+      - name: Commit settings profile navigation extraction
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/web/src/modules/settings/SettingsPage.tsx apps/web/src/modules/settings/components/NotificationSettingsSection.tsx apps/web/src/modules/settings/components/TeamSettingsSection.tsx apps/web/src/modules/settings/components/SecuritySettingsSection.tsx
+          git add apps/web/src/modules/settings/SettingsPage.tsx apps/web/src/modules/settings/components/ProfileSettingsSection.tsx apps/web/src/modules/settings/components/SettingsTabsNavigation.tsx
           git diff --cached --quiet && exit 0
-          git commit -m "refactor(frontend): extract settings sections"
+          git commit -m "refactor(frontend): extract settings profile navigation"
           git push origin HEAD:dev
