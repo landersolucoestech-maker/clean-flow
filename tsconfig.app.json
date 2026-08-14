@@ -38,7 +38,7 @@
       "@/components/support/*": ["./apps/web/src/modules/support/components/*"],
       "@/components/transactions/*": ["./apps/web/src/modules/transactions/components/*"],
       "@/hooks/use-toast": ["./apps/web/src/shared/hooks/use-toast.ts"],
-      "@/hooks/*": ["./apps/web/src/modules/auth/hooks/*","./apps/web/src/modules/admin/hooks/*","./apps/web/src/modules/crm/customers/hooks/*","./apps/web/src/modules/crm/leads/hooks/*","./apps/web/src/modules/customers/hooks/*","./apps/web/src/modules/leads/hooks/*","./apps/web/src/modules/jobs/hooks/*","./apps/web/src/modules/communications/hooks/*","./apps/web/src/modules/billing/hooks/*","./apps/web/src/modules/transactions/hooks/*","./apps/web/src/modules/payroll/hooks/*","./apps/web/src/modules/settings/hooks/*","./apps/web/src/modules/support/hooks/*","./apps/web/src/shared/hooks/*"],
+      "@/hooks/*": ["./apps/web/src/modules/auth/hooks/*","./apps/web/src/modules/admin/hooks/*","./apps/web/src/modules/crm/customers/hooks/*","./apps/web/src/modules/crm/leads/hooks/*","./apps/web/src/modules/jobs/hooks/*","./apps/web/src/modules/communications/hooks/*","./apps/web/src/modules/billing/hooks/*","./apps/web/src/modules/transactions/hooks/*","./apps/web/src/modules/payroll/hooks/*","./apps/web/src/modules/settings/hooks/*","./apps/web/src/modules/support/hooks/*","./apps/web/src/shared/hooks/*"],
       "@/contexts/*": ["./apps/web/src/app/providers/*"],
       "@/integrations/*": ["./apps/web/src/app/infrastructure/*"],
       "@/lib/serviceEnums": ["./packages/contracts/serviceEnums.ts"],
