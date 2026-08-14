@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { supabase } from "@/integrations/supabase/client";
+import { updatePassword } from "./services/authService";
 import { getErrorMessage } from "@/lib/errors";
 
 export function SetPassword() {
@@ -28,8 +28,7 @@ export function SetPassword() {
 
     setIsSubmitting(true);
     try {
-      const { error } = await supabase.auth.updateUser({ password });
-      if (error) throw error;
+      await updatePassword(password);
       toast.success("Password configured successfully.");
       navigate("/", { replace: true });
     } catch (error: unknown) {
