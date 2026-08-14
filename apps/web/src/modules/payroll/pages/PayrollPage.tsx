@@ -1304,41 +1304,43 @@ export function Payroll() {
   // Employees for calculate modal
   // employeesForModal is defined at the top of the component
 
-  return <PageLayout>
+  return <PageLayout
+      headerActions={
+        <>
+          <Button size="sm" variant="outline" onClick={() => setRulesModalOpen(true)} className="gap-2">
+            <Settings className="h-4 w-4" />
+            {t("payroll.payrollRules")}
+          </Button>
+          <Button size="sm" onClick={handleOpenCalculateModal} className="gap-2">
+            <Calculator className="h-4 w-4" />
+            {t("payroll.calculatePayroll")}
+          </Button>
+          <Button size="sm" variant="outline" onClick={handleDownloadExcel} className="gap-2">
+            <Download className="h-4 w-4" />
+            {t("payroll.downloadExcel")}
+          </Button>
+          <Button
+            size="sm"
+            onClick={handleBulkSendPDFViaSMS}
+            className="gap-2"
+            disabled={selectedRows.length === 0 || isSendingBulkSMS}
+          >
+            {isSendingBulkSMS ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Sending {bulkSMSProgress.sent}/{bulkSMSProgress.total}
+              </>
+            ) : (
+              <>
+                <Send className="h-4 w-4" />
+                Send PDFs ({selectedRows.length})
+              </>
+            )}
+          </Button>
+        </>
+      }
+    >
       <div className="space-y-4">
-          {/* Payroll actions */}
-          <div className="flex flex-wrap justify-end gap-2">
-              <Button variant="outline" onClick={() => setRulesModalOpen(true)} className="gap-2">
-                <Settings className="w-4 h-4" />
-                {t("payroll.payrollRules")}
-              </Button>
-              <Button onClick={handleOpenCalculateModal} className="gap-2">
-                <Calculator className="w-4 h-4" />
-                {t("payroll.calculatePayroll")}
-              </Button>
-              <Button variant="outline" onClick={handleDownloadExcel} className="gap-2">
-                <Download className="w-4 h-4" />
-                {t("payroll.downloadExcel")}
-              </Button>
-              <Button 
-                onClick={handleBulkSendPDFViaSMS} 
-                variant="default"
-                className="gap-2"
-                disabled={selectedRows.length === 0 || isSendingBulkSMS}
-              >
-                {isSendingBulkSMS ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Sending {bulkSMSProgress.sent}/{bulkSMSProgress.total}
-                  </>
-                ) : (
-                  <>
-                    <Send className="w-4 h-4" />
-                    Send PDFs ({selectedRows.length})
-                  </>
-                )}
-              </Button>
-          </div>
 
           {/* Filter Card */}
           <Card>
