@@ -54,17 +54,16 @@ import { useNotificationSound } from "@/hooks/useNotificationSound";
 import { uploadMessageAttachment } from "./services/messageAttachmentService";
 import { getConversationPreviewText, getFileNameFromAttachmentUrl, parseMessageContentForAttachments } from "./utils/messageContent";
 import type { AttachmentRef } from "./utils/messageContent";
+import { buildCustomerStatusById, filterCustomerConversations, filterTeamConversations } from "./utils/conversationFilters";
+import type { ConversationFilter, CustomerStatusFilter, TeamStatusFilter } from "./utils/conversationFilters";
 type RecipientTab = "customers" | "team";
 
-type FilterType = "all" | "unread" | "favorites";
-type CustomerStatusFilter = "all" | "active" | "inactive";
-type TeamFilter = "all" | "active" | "inactive";
 
 export function Communications() {
   const { t, language } = useLanguage();
   const dateLocale = language === "pt" ? ptBR : language === "es" ? es : enUS;
   const [conversationSearch, setConversationSearch] = useState("");
-  const [activeFilter, setActiveFilter] = useState<FilterType>("all");
+  const [activeFilter, setActiveFilter] = useState<ConversationFilter>("all");
   const [customerStatusFilter, setCustomerStatusFilter] = useState<CustomerStatusFilter>("all");
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [messageText, setMessageText] = useState("");
@@ -75,8 +74,8 @@ export function Communications() {
   const [isUploading, setIsUploading] = useState(false);
   const [recipientTab, setRecipientTab] = useState<RecipientTab>("customers");
   const [teamSearch, setTeamSearch] = useState("");
-  const [teamFilter, setTeamFilter] = useState<TeamFilter>("all");
-  const [teamActiveFilter, setTeamActiveFilter] = useState<FilterType>("all");
+  const [teamFilter, setTeamFilter] = useState<TeamStatusFilter>("all");
+  const [teamActiveFilter, setTeamActiveFilter] = useState<ConversationFilter>("all");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { playNotificationSound } = useNotificationSound();
@@ -92,48 +91,21 @@ export function Communications() {
   const createConversationMutation = useCreateConversation();
   const { syncMessages, isSyncing } = useRingCentralSync();
 
-  // Create staff status map for filtering
-  const staffStatusMap = new Map(
-    staff.map((s) => [s.id, { is_active: s.is_active, is_driver: s.is_driver }])
+  const filteredTeamConversations = filterTeamConversations(
+    teamConversations,
+    staff,
+    teamSearch,
+    teamFilter,
+    teamActiveFilter,
   );
-
-  // Filter team conversations
-  const filteredTeamConversations = teamConversations.filter((conv) => {
-    const staffName = conv.staff?.name || '';
-    const matchesSearch = staffName.toLowerCase().includes(teamSearch.toLowerCase());
-    
-    // Filter by staff status
-    const staffStatus = staffStatusMap.get(conv.staff_id || '');
-    const matchesTeamFilter =
-      teamFilter === "all" ||
-      (teamFilter === "active" && staffStatus?.is_active) ||
-      (teamFilter === "inactive" && !staffStatus?.is_active);
-
-    if (teamActiveFilter === "unread") return matchesSearch && matchesTeamFilter && conv.unread;
-    if (teamActiveFilter === "favorites") return matchesSearch && matchesTeamFilter && conv.favorite;
-    return matchesSearch && matchesTeamFilter;
-  });
-
-  // Create a map of customer status by customer_id
-  const customerStatusMap = new Map(
-    customers.map((c) => [c.id, c.status?.toLowerCase() || "unknown"])
+  const customerStatusById = buildCustomerStatusById(customers);
+  const filteredConversations = filterCustomerConversations(
+    conversations,
+    customers,
+    conversationSearch,
+    customerStatusFilter,
+    activeFilter,
   );
-
-  const filteredConversations = conversations.filter((conv) => {
-    const customerName = conv.customer?.name || '';
-    const matchesSearch = customerName.toLowerCase().includes(conversationSearch.toLowerCase());
-    
-    // Filter by customer status
-    const customerStatus = customerStatusMap.get(conv.customer_id) || "unknown";
-    const matchesCustomerStatus =
-      customerStatusFilter === "all" ||
-      (customerStatusFilter === "active" && customerStatus === "active") ||
-      (customerStatusFilter === "inactive" && customerStatus === "inactive");
-
-    if (activeFilter === "unread") return matchesSearch && matchesCustomerStatus && conv.unread;
-    if (activeFilter === "favorites") return matchesSearch && matchesCustomerStatus && conv.favorite;
-    return matchesSearch && matchesCustomerStatus;
-  });
 
   // Find selected conversation in either customer or team conversations
   const selectedConversationData = 
@@ -405,7 +377,7 @@ export function Communications() {
                               )}
                               {/* Customer Status Badge */}
                               {(() => {
-                                const status = customerStatusMap.get(conv.customer_id);
+                                const status = customerStatusById.get(conv.customer_id);
                                 return status ? (
                                   <Badge
                                     variant={status === "active" ? "secondary" : "outline"}
@@ -441,7 +413,7 @@ export function Communications() {
                       <Filter className="w-4 h-4 text-muted-foreground" />
                       <Select
                         value={teamFilter}
-                        onValueChange={(value) => setTeamFilter(value as TeamFilter)}
+                        onValueChange={(value) => setTeamFilter(value as TeamStatusFilter)}
                       >
                         <SelectTrigger className="h-8 text-xs flex-1">
                           <SelectValue placeholder="Team Filter" />
