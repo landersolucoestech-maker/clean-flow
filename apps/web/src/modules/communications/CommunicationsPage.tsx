@@ -1,6 +1,5 @@
 import { useState, useRef } from "react";
-import { Header } from "@/components/layout/Header";
-import { Sidebar } from "@/components/layout/Sidebar";
+import { PageLayout } from "@/components/layout/PageLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -334,15 +333,9 @@ export function Communications() {
   };
 
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar />
-      
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
-        
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
-          {/* Chat Layout */}
-          <div className="flex min-h-[680px] flex-col gap-4 lg:h-[calc(100vh-128px)] lg:min-h-0 lg:flex-row">
+    <PageLayout fullHeight contentClassName="gap-4">
+      {/* Chat Layout */}
+      <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row">
             {/* Conversations Sidebar */}
             <div className="flex w-full flex-col overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm lg:w-80 lg:shrink-0">
               {/* Header */}
@@ -898,8 +891,6 @@ export function Communications() {
                 </div>
               </div>
             </div>
-          </div>
-        </main>
       </div>
       {/* Broadcast Modal */}
       <BroadcastModal
@@ -914,6 +905,6 @@ export function Communications() {
         customers={customers}
         onConversationCreated={(id) => setSelectedConversation(id)}
       />
-    </div>
+    </PageLayout>
   );
 }

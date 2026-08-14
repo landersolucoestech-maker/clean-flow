@@ -1,6 +1,5 @@
 import { useState, useRef, useMemo } from "react";
-import { Header } from "@/components/layout/Header";
-import { Sidebar } from "@/components/layout/Sidebar";
+import { PageLayout } from "@/components/layout/PageLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CalendarGrid } from "@/components/calendar/CalendarGrid";
@@ -399,14 +398,8 @@ export function Schedule() {
   };
 
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar />
-
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
-
-        <main className="flex flex-1 flex-col overflow-hidden px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
-          {/* Page Header */}
+    <PageLayout fullHeight contentClassName="gap-4">
+      {/* Page Header */}
           <div className="mb-4 flex shrink-0 flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{t("schedule.title")}</h1>
@@ -494,9 +487,6 @@ export function Schedule() {
               />
             </CardContent>
           </Card>
-        </main>
-      </div>
-
       {/* Modals */}
       {/* Get fresh appointment data from the appointments array */}
       {(() => {
@@ -583,6 +573,6 @@ export function Schedule() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </PageLayout>
   );
 }
