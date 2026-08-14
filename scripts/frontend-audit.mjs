@@ -26,6 +26,10 @@ function lineMatches(file, regex) {
   });
 }
 
+function isStaticDataCatalog(relative) {
+  return relative.startsWith("apps/web/src/app/i18n/") || relative.endsWith("/app/infrastructure/supabase/types.ts");
+}
+
 const files = walk(ROOT);
 const sourceFiles = files.filter((file) => !file.includes(`${path.sep}mocks${path.sep}`));
 const findings = {
@@ -37,7 +41,8 @@ const findings = {
   timersOrRandom: [],
   directStorage: [],
   legacyFiles: [],
-  largeFiles: [],
+  largeLogicFiles: [],
+  staticDataCatalogs: [],
   duplicatedShell: [],
   iconButtonsWithoutAccessibleName: [],
 };
@@ -59,7 +64,7 @@ for (const file of sourceFiles) {
     findings.legacyFiles.push({ file: relative });
   }
   if (lines >= 800) {
-    findings.largeFiles.push({ file: relative, lines });
+    (isStaticDataCatalog(relative) ? findings.staticDataCatalogs : findings.largeLogicFiles).push({ file: relative, lines });
   }
   if (relative !== "apps/web/src/app/layout/PageLayout.tsx" && /<Sidebar\b|<Header\b/.test(source)) {
     findings.duplicatedShell.push({ file: relative });
