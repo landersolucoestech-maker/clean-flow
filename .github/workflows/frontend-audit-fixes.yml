@@ -1,5 +1,6 @@
 name: Frontend Audit Fixes
 
+# Retry communications parsing extraction after preserving AttachmentRef import.
 on:
   push:
     branches: [dev]
