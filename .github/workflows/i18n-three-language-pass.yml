@@ -12,7 +12,7 @@ permissions:
 jobs:
   i18n:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 50
     steps:
       - uses: actions/checkout@v4
         with:
@@ -22,20 +22,23 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - name: Apply existing catalog translations
+      - name: Apply visible-text i18n passes
         run: |
           python scripts/i18n_three_language_pass.py
           python scripts/i18n_fill_parity.py
           python scripts/i18n_replace_catalog_literals.py
-      - name: Translate residual static interface literals
-        run: |
           python scripts/i18n_translate_unmatched.py
           python scripts/i18n_replace_catalog_literals.py
-      - name: Extended presentation audit
+      - name: Audit extended presentation strings
         run: python scripts/i18n_extended_audit.py
+      - name: Translate and apply attributes, toasts and locales
+        run: |
+          python scripts/i18n_translate_extended.py
+          python scripts/i18n_apply_extended.py
+          python scripts/i18n_extended_audit.py
       - name: Install dependencies
         run: npm ci
-      - name: Validate translation key parity and literal coverage
+      - name: Validate full trilanguage coverage
         run: |
           python - <<'PY'
           from pathlib import Path
@@ -51,12 +54,15 @@ jobs:
               if missing:
                   print(lang, 'missing', len(missing), 'keys')
                   sys.exit(1)
-          residual = Path('i18n-unmatched-literals.txt').read_text().strip()
-          if residual:
-              print('Untranslated visible literals remain:')
-              print(residual[:12000])
+          if Path('i18n-unmatched-literals.txt').read_text().strip():
+              print('Visible untranslated literals remain')
               sys.exit(1)
-          print('PASS:', len(all_keys), 'keys in en/pt/es; visible literal residual = 0')
+          extended = Path('i18n-extended-audit.txt').read_text().strip()
+          if extended:
+              print('Extended untranslated presentation strings remain:')
+              print(extended[:16000])
+              sys.exit(1)
+          print('PASS:', len(all_keys), 'keys in en/pt/es; visible, attributes, toasts and hardcoded locales = 0')
           PY
       - name: Lint
         run: npx eslint apps/web/src packages --max-warnings=0
@@ -71,6 +77,6 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/web/src i18n-visible-literals.txt i18n-unmatched-literals.txt i18n-generated-literal-keys.json i18n-extended-audit.txt
-          git commit -m "refactor(i18n): complete trilanguage visible interface" || true
+          git add apps/web/src i18n-visible-literals.txt i18n-unmatched-literals.txt i18n-generated-literal-keys.json i18n-generated-presentation-keys.json i18n-extended-audit.txt
+          git commit -m "refactor(i18n): complete end-to-end trilanguage interface" || true
           git push origin HEAD:dev
