@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { User, LogOut, Settings, UserCircle, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -16,7 +17,11 @@ import { useCurrentStaff } from "@/hooks/useStaff";
 import { signOut } from "@/modules/auth/services/authService";
 import { useNavigate } from "react-router-dom";
 
-export function Header() {
+interface HeaderProps {
+  actions?: ReactNode;
+}
+
+export function Header({ actions }: HeaderProps) {
   const { t } = useLanguage();
   const { data: companySettings } = useCompanySettings();
   const { data: currentStaff } = useCurrentStaff();
@@ -28,7 +33,7 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border/80 bg-card/95 px-4 backdrop-blur sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-30 flex min-h-16 items-center justify-between gap-3 border-b border-border/80 bg-card/95 px-4 py-2 backdrop-blur sm:px-6 lg:px-8">
       <div className="flex min-w-0 items-center gap-3">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-light text-primary-dark">
           <Building2 className="h-4 w-4" />
@@ -41,7 +46,8 @@ export function Header() {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 sm:gap-3">
+      <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+        {actions && <div className="hidden min-w-0 items-center gap-2 md:flex">{actions}</div>}
         <LanguageSwitcher />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
