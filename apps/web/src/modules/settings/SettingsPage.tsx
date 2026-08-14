@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { Header } from "@/components/layout/Header";
-import { Sidebar } from "@/components/layout/Sidebar";
+import { PageLayout } from "@/components/layout/PageLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -743,7 +742,7 @@ export function Settings() {
 
             <div className="space-y-2">
               <Label className="flex items-center gap-2 text-sm">
-                <DollarSign className="w-4 h-4 text-blue-500" />
+                <DollarSign className="w-4 h-4 text-primary" />
                 Venmo Payment Key
               </Label>
               <Input 
@@ -761,7 +760,7 @@ export function Settings() {
 
             <div className="p-3 bg-muted/50 rounded-lg border border-border">
               <h4 className="font-medium text-xs flex items-center gap-2 mb-1">
-                <Zap className="w-3 h-3 text-amber-500" />
+                <Zap className="w-3 h-3 text-warning" />
                 How it works
               </h4>
               <ul className="text-xs text-muted-foreground space-y-0.5">
@@ -868,8 +867,8 @@ export function Settings() {
           <CardDescription>{t("settings.userAccessManagement")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex gap-4 flex-wrap">
-            <div className="flex-1 min-w-[200px]">
+          <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap">
+            <div className="min-w-0 flex-1">
               <Input 
                 placeholder={t("settings.searchByName")}
                 value={teamSearchQuery}
@@ -877,7 +876,7 @@ export function Settings() {
               />
             </div>
             <Select value={newMemberRole} onValueChange={setNewMemberRole}>
-              <SelectTrigger className="w-44">
+              <SelectTrigger className="w-full lg:w-44">
                 <SelectValue placeholder={t("settings.selectRole")} />
               </SelectTrigger>
               <SelectContent>
@@ -919,9 +918,9 @@ export function Settings() {
                   return matchesSearch && matchesRole;
                 })
                 .map((staff) => (
-                <div key={staff.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <div key={staff.id} className="flex flex-col gap-4 rounded-xl border border-border/80 bg-card p-4 transition-colors hover:bg-accent/30 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary-light flex items-center justify-center">
                       <span className="text-primary font-medium">
                         {staff.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
                       </span>
@@ -931,9 +930,9 @@ export function Settings() {
                       <p className="text-sm text-muted-foreground">{staff.email || t("settings.noEmail")}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-2 sm:justify-end">
                     {staff.payment_method && (
-                      <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 capitalize">
+                      <Badge variant="outline" className="border-success/30 bg-success/10 text-success capitalize">
                         {staff.payment_method === "quickbooks" ? "QuickBooks" : staff.payment_method}
                       </Badge>
                     )}
@@ -944,11 +943,11 @@ export function Settings() {
                       if (!showTeam) return null;
                       
                       return staff.team ? (
-                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                        <Badge variant="outline" className="border-primary/30 bg-primary-light text-primary-dark">
                           Team {staff.team}
                         </Badge>
                       ) : (
-                        <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                        <Badge variant="outline" className="border-warning/30 bg-warning/10 text-warning-foreground">
                           <AlertTriangle className="w-3 h-3 mr-1" />
                           Sem Team
                         </Badge>
@@ -1214,20 +1213,16 @@ export function Settings() {
   };
 
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-6 space-y-6">
+    <PageLayout>
           <div className="space-y-6">
             {/* Header */}
             <div>
-              <h1 className="text-3xl font-bold text-foreground">{t("settings.title")}</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{t("settings.title")}</h1>
               <p className="text-muted-foreground">{t("settings.description")}</p>
             </div>
 
             {/* Horizontal Tabs */}
-            <div className="flex items-center gap-2 border-b border-border pb-4 overflow-x-auto">
+            <div className="flex items-center gap-2 overflow-x-auto border-b border-border/80 pb-4">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;
@@ -1238,10 +1233,10 @@ export function Settings() {
                       setActiveTab(tab.id);
                       setSearchParams({ tab: tab.id }, { replace: true });
                     }}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
+                    className={`flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
                       isActive
-                        ? "bg-foreground text-background"
-                        : "bg-muted text-muted-foreground hover:bg-muted/80"
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "bg-muted/70 text-muted-foreground hover:bg-accent hover:text-foreground"
                     }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -1256,8 +1251,6 @@ export function Settings() {
               {renderContent()}
             </div>
           </div>
-        </main>
-      </div>
 
       <TeamUserModal
         open={teamUserModalOpen}
@@ -1269,6 +1262,6 @@ export function Settings() {
         staff={selectedStaff}
         canDelete={selectedStaff?.id !== currentStaff?.id}
       />
-    </div>
+    </PageLayout>
   );
 }
