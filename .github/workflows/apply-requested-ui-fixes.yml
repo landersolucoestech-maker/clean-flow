@@ -47,3 +47,5 @@ jobs:
                   .github/workflows/apply-requested-ui-fixes.yml
           git commit -m "refactor web page actions and layout tools"
           git push origin HEAD:dev
+
+# Trigger marker: requested UI correction pass
