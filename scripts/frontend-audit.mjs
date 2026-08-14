@@ -48,7 +48,7 @@ function findBusinessRecordArrays(file, source) {
   const results = [];
 
   function visit(node) {
-    if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && ts.isArrayLiteralExpression(node.initializer)) {
+    if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.initializer && ts.isArrayLiteralExpression(node.initializer)) {
       const objects = node.initializer.elements.filter(ts.isObjectLiteralExpression);
       if (objects.length >= 2 && objects.length === node.initializer.elements.length) {
         const qualifying = objects.filter((object) => {
