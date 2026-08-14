@@ -23,52 +23,133 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Add accessible names to icon buttons
+      - name: Centralize Leads form configuration and validation
         run: |
           node <<'NODE'
           const fs = require('node:fs');
+          const path = require('node:path');
+          const ts = require('typescript');
 
-          const replacements = [
-            ['apps/web/src/app/layout/LanguageSwitcher.tsx', '<Button variant="ghost" size="icon" className="relative">', '<Button variant="ghost" size="icon" className="relative" aria-label="Change language">'],
-            ['apps/web/src/app/layout/Sidebar.tsx', '<Button variant="ghost" size="icon" onClick={() => setIsCollapsed(!isCollapsed)} className="ml-auto rounded-xl text-muted-foreground">', '<Button variant="ghost" size="icon" onClick={() => setIsCollapsed(!isCollapsed)} className="ml-auto rounded-xl text-muted-foreground" aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}>'],
-            ['apps/web/src/modules/admin/pages/AdminSupport.tsx', '<Button variant="ghost" size="icon" className="text-muted-foreground/70 hover:text-muted-foreground">', '<Button variant="ghost" size="icon" className="text-muted-foreground/70 hover:text-muted-foreground" aria-label="Ticket actions">'],
-            ['apps/web/src/modules/billing/BillingPage.tsx', '<Button variant="ghost" size="icon" className="h-8 w-8">', '<Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Invoice actions">'],
-            ['apps/web/src/modules/communications/CommunicationsPage.tsx', '<Button variant="ghost" size="icon">\n                        <Menu', '<Button variant="ghost" size="icon" aria-label="Conversation actions">\n                        <Menu'],
-            ['apps/web/src/modules/crm/contacts/ContactsPage.tsx', '<DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreHorizontal', '<DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label="Contact actions"><MoreHorizontal'],
-            ['apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx', '<Button onClick={handleSendMessage} size="icon">', '<Button onClick={handleSendMessage} size="icon" aria-label="Send message">'],
-            ['apps/web/src/modules/crm/customers/pages/CustomersPageContent.tsx', '<Button variant="ghost" size="icon">\n                                <MoreHorizontal', '<Button variant="ghost" size="icon" aria-label="Customer actions">\n                                <MoreHorizontal'],
-            ['apps/web/src/modules/crm/customers/pages/CustomersPageContent.tsx', '<Button variant="ghost" size="icon" className="h-8 w-8">\n                                <MoreHorizontal', '<Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Customer actions">\n                                <MoreHorizontal'],
-            ['apps/web/src/modules/crm/leads/pages/LeadsPageContent.tsx', '<Button variant="ghost" size="icon">\n', '<Button variant="ghost" size="icon" aria-label="Lead actions">\n'],
-            ['apps/web/src/modules/payroll/PayrollPage.tsx', '<Button onClick={handleFilter} size="icon">', '<Button onClick={handleFilter} size="icon" aria-label="Apply payroll filter">'],
-            ['apps/web/src/modules/payroll/PayrollPage.tsx', '<Button onClick={handleClearFilter} size="icon" variant="outline">', '<Button onClick={handleClearFilter} size="icon" variant="outline" aria-label="Clear payroll filter">'],
-            ['apps/web/src/modules/payroll/PayrollPage.tsx', '<Button variant="ghost" size="icon" className="h-8 w-8">', '<Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Payroll actions">'],
-            ['apps/web/src/modules/schedule/calendar/CalendarGrid.tsx', '<Button variant="outline" size="icon" onClick={() => navigateWeek("prev")}>', '<Button variant="outline" size="icon" onClick={() => navigateWeek("prev")} aria-label="Previous week">'],
-            ['apps/web/src/modules/schedule/calendar/CalendarGrid.tsx', '<Button variant="outline" size="icon" onClick={() => navigateWeek("next")}>', '<Button variant="outline" size="icon" onClick={() => navigateWeek("next")} aria-label="Next week">'],
-            ['apps/web/src/modules/schedule/components/InvoiceModal.tsx', '<Button variant="outline" size="icon" onClick={handlePrint}>', '<Button variant="outline" size="icon" onClick={handlePrint} aria-label="Print invoice">'],
-            ['apps/web/src/modules/schedule/components/InvoiceModal.tsx', '<Button variant="outline" size="icon" onClick={handleDownload}>', '<Button variant="outline" size="icon" onClick={handleDownload} aria-label="Download invoice">'],
-            ['apps/web/src/modules/settings/components/DialpadIntegrationPanel.tsx', '<Button variant="outline" size="icon" className="h-9 w-9 shrink-0" onClick={copyRedirectUri}>', '<Button variant="outline" size="icon" className="h-9 w-9 shrink-0" onClick={copyRedirectUri} aria-label="Copy Dialpad redirect URI">'],
-            ['apps/web/src/modules/settings/components/TeamUserModal.tsx', '<Button type="button" variant="destructive" size="icon" disabled={isPending}>', '<Button type="button" variant="destructive" size="icon" disabled={isPending} aria-label="Delete team member">'],
-            ['apps/web/src/shared/components/ActionDropdown.tsx', '<Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg text-muted-foreground hover:text-foreground">', '<Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg text-muted-foreground hover:text-foreground" aria-label="Actions">'],
-            ['apps/web/src/shared/components/PageHeader.tsx', '<Button variant="outline" size="icon" onClick={() => navigate(backTo)} className="mt-0.5 shrink-0">', '<Button variant="outline" size="icon" onClick={() => navigate(backTo)} className="mt-0.5 shrink-0" aria-label="Go back">'],
+          const createPath = 'apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx';
+          const editPath = 'apps/web/src/modules/crm/leads/components/EditLeadModal.tsx';
+          const constantsPath = 'apps/web/src/modules/crm/leads/constants/leadFormOptions.ts';
+          const schemaPath = 'apps/web/src/modules/crm/leads/schemas/leadFormSchema.ts';
+          const constantNames = [
+            'ORIGIN_OPTIONS',
+            'PIPELINE_STAGES',
+            'PROPERTY_TYPES',
+            'RESIDENCE_TYPES',
+            'SERVICE_AREAS',
+            'ADD_ON_SERVICES',
+            'PREFERRED_DAYS',
+            'PREFERRED_TIMES',
+            'INTERACTION_TYPES',
+            'DEFAULT_TAGS',
           ];
 
-          for (const [file, from, to] of replacements) {
-            let source = fs.readFileSync(file, 'utf8');
-            if (!source.includes(from)) throw new Error(`Accessibility anchor not found: ${file} :: ${from}`);
-            source = source.replace(from, to);
-            fs.writeFileSync(file, source);
+          function parse(file, source) {
+            return ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
           }
+
+          function findVarStatement(sf, name) {
+            for (const statement of sf.statements) {
+              if (!ts.isVariableStatement(statement)) continue;
+              for (const declaration of statement.declarationList.declarations) {
+                if (ts.isIdentifier(declaration.name) && declaration.name.text === name) {
+                  return { statement, declaration };
+                }
+              }
+            }
+            throw new Error(`Variable ${name} not found in ${sf.fileName}`);
+          }
+
+          function normalizedInitializer(sf, name) {
+            const { declaration } = findVarStatement(sf, name);
+            if (!declaration.initializer) throw new Error(`${name} has no initializer`);
+            return declaration.initializer.getText(sf).replace(/\s+/g, '');
+          }
+
+          function removeRanges(source, ranges) {
+            const sorted = [...ranges].sort((a, b) => b.start - a.start);
+            let next = source;
+            for (const { start, end } of sorted) next = next.slice(0, start) + next.slice(end);
+            return next;
+          }
+
+          function insertAfterImports(file, source, importText) {
+            const sf = parse(file, source);
+            const imports = sf.statements.filter(ts.isImportDeclaration);
+            if (!imports.length) return `${importText}\n${source}`;
+            const last = imports[imports.length - 1];
+            return source.slice(0, last.end) + `\n${importText}` + source.slice(last.end);
+          }
+
+          let create = fs.readFileSync(createPath, 'utf8');
+          let edit = fs.readFileSync(editPath, 'utf8');
+          const createSf = parse(createPath, create);
+          const editSf = parse(editPath, edit);
+
+          for (const name of constantNames) {
+            const a = normalizedInitializer(createSf, name);
+            const b = normalizedInitializer(editSf, name);
+            if (a !== b) throw new Error(`Create/Edit ${name} definitions differ; refusing automatic extraction`);
+          }
+
+          const constants = constantNames.map((name) => {
+            const { statement } = findVarStatement(createSf, name);
+            return statement.getText(createSf).replace(/^const\s+/, 'export const ');
+          }).join('\n\n');
+          fs.mkdirSync(path.dirname(constantsPath), { recursive: true });
+          fs.writeFileSync(constantsPath, `${constants}\n`);
+
+          const createRemoval = constantNames.map((name) => {
+            const { statement } = findVarStatement(createSf, name);
+            return { start: statement.getFullStart(), end: statement.end };
+          });
+          const editRemoval = constantNames.map((name) => {
+            const { statement } = findVarStatement(editSf, name);
+            return { start: statement.getFullStart(), end: statement.end };
+          });
+
+          const schema = findVarStatement(createSf, 'leadFormSchema');
+          if (!schema.declaration.initializer) throw new Error('leadFormSchema initializer missing');
+          const schemaInitializer = schema.declaration.initializer.getText(createSf);
+          fs.mkdirSync(path.dirname(schemaPath), { recursive: true });
+          fs.writeFileSync(schemaPath, `import { z } from "zod";\n\nexport const leadFormSchema = ${schemaInitializer};\n`);
+          createRemoval.push({ start: schema.statement.getFullStart(), end: schema.statement.end });
+
+          const zImport = createSf.statements.find((statement) =>
+            ts.isImportDeclaration(statement) && statement.moduleSpecifier.getText(createSf) === '"zod"'
+          );
+          if (!zImport) throw new Error('zod import not found in CreateLeadModal');
+          createRemoval.push({ start: zImport.getFullStart(), end: zImport.end });
+
+          create = removeRanges(create, createRemoval);
+          edit = removeRanges(edit, editRemoval);
+
+          const constantsImport = `import {\n  ${constantNames.join(',\n  ')},\n} from "../constants/leadFormOptions";`;
+          create = insertAfterImports(createPath, create, `${constantsImport}\nimport { leadFormSchema } from "../schemas/leadFormSchema";`);
+          edit = insertAfterImports(editPath, edit, constantsImport);
+
+          for (const name of constantNames) {
+            if ((create.match(new RegExp(`const\\s+${name}\\b`, 'g')) || []).length) throw new Error(`${name} still declared in CreateLeadModal`);
+            if ((edit.match(new RegExp(`const\\s+${name}\\b`, 'g')) || []).length) throw new Error(`${name} still declared in EditLeadModal`);
+          }
+          if (/const\s+leadFormSchema\b/.test(create)) throw new Error('leadFormSchema still declared in CreateLeadModal');
+
+          fs.writeFileSync(createPath, create);
+          fs.writeFileSync(editPath, edit);
           NODE
       - run: node scripts/frontend-audit.mjs
       - run: npx eslint apps/web/src packages --max-warnings=0
       - run: npm run typecheck
       - run: npx vitest run apps/web/src
       - run: npm run build
-      - name: Commit accessibility fixes
+      - name: Commit Leads domain extraction
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/web/src
+          git add apps/web/src/modules/crm/leads
           git diff --cached --quiet && exit 0
-          git commit -m "fix(frontend): label icon-only controls"
+          git commit -m "refactor(frontend): centralize lead form domain configuration"
           git push origin HEAD:dev
