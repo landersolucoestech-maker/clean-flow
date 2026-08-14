@@ -9,9 +9,10 @@ interface ContactDetailsDialogProps {
   onOpenChange: (open: boolean) => void;
   contact: Contact | null;
   onEdit: (contact: Contact) => void;
+  canEdit?: boolean;
 }
 
-export function ContactDetailsDialog({ open, onOpenChange, contact, onEdit }: ContactDetailsDialogProps) {
+export function ContactDetailsDialog({ open, onOpenChange, contact, onEdit, canEdit = false }: ContactDetailsDialogProps) {
   if (!contact) return null;
 
   const rows = [
@@ -61,7 +62,7 @@ export function ContactDetailsDialog({ open, onOpenChange, contact, onEdit }: Co
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
-          <Button onClick={() => onEdit(contact)}>Edit Contact</Button>
+          {canEdit && <Button onClick={() => onEdit(contact)}>Edit Contact</Button>}
         </DialogFooter>
       </DialogContent>
     </Dialog>
