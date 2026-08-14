@@ -1,0 +1,12 @@
+import fs from "node:fs";
+const path = "apps/web/src/modules/settings/SettingsPage.tsx";
+let text = fs.readFileSync(path, "utf8");
+const anchor = 'import { SettingsTabsNavigation } from "./components/SettingsTabsNavigation";';
+if (!text.includes(anchor)) throw new Error("missing settings import anchor");
+text = text.replace(anchor, `${anchor}\nimport { BusinessHoursSettingsSection } from "./components/BusinessHoursSettingsSection";`);
+const from = text.indexOf("      {/* Business Hours */}");
+const to = text.indexOf("      {/* Grid: Review Links, GPS Settings, Payment Settings */}", from);
+if (from === -1 || to === -1) throw new Error("missing business hours section");
+const component = `      <BusinessHoursSettingsSection t={t} businessHours={businessHours} onUpdate={handleUpdateBusinessHours} />\n\n`;
+text = text.slice(0, from) + component + text.slice(to);
+fs.writeFileSync(path, text);
