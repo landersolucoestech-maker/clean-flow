@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { ContactRound, Eye, MoreHorizontal, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { PageLayout } from "@/components/layout/PageLayout";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -36,13 +35,8 @@ export function Contacts() {
   const filteredContacts = useMemo(() => {
     const normalized = search.trim().toLowerCase();
     return contacts.filter((contact) => {
-      const matchesSearch = !normalized || [
-        contact.name,
-        contact.company,
-        contact.email,
-        contact.phone,
-        contact.jobTitle,
-      ].some((value) => value.toLowerCase().includes(normalized));
+      const matchesSearch = !normalized || [contact.name, contact.company, contact.email, contact.phone, contact.jobTitle]
+        .some((value) => value.toLowerCase().includes(normalized));
       const matchesType = typeFilter === "all" || contact.contactType === typeFilter;
       const matchesStatus = statusFilter === "all" || contact.status === statusFilter;
       return matchesSearch && matchesType && matchesStatus;
@@ -124,10 +118,12 @@ export function Contacts() {
         </Card>
 
         {error && (
-          <Alert variant="destructive">
-            <AlertTitle>Unable to load contacts</AlertTitle>
-            <AlertDescription>{error.message}</AlertDescription>
-          </Alert>
+          <Card className="border-destructive/40 bg-destructive/5">
+            <CardContent className="p-4">
+              <p className="font-medium text-destructive">Unable to load contacts</p>
+              <p className="mt-1 text-sm text-muted-foreground">{error.message}</p>
+            </CardContent>
+          </Card>
         )}
 
         <Card>
