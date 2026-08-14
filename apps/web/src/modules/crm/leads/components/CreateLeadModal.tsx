@@ -1,1 +1,1693 @@
-export * from "../../../leads/components/CreateLeadModal";
+import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { generateLeadNumber } from "@/hooks/useLeads";
+import { useCustomers } from "@/hooks/useCustomers";
+import { z } from "zod";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Plus, Trash2, MessageSquare, Calendar, User, Tag, X, Building2, PawPrint, ChevronDown, ChevronUp, MapPin, AlertCircle } from "lucide-react";
+import { AddressAutocompleteInput } from "@/components/customers/AddressAutocompleteInput";
+import { AddressSuggestion } from "@/hooks/useAddressAutocomplete";
+import { toast } from "sonner";
+import { useLanguage } from "@/contexts/useLanguage";
+
+// Validation schema for lead form
+const leadFormSchema = z.object({
+  primaryContactName: z.string().min(1, "leads.validation.nameRequired").max(100, "leads.validation.nameTooLong"),
+  email: z.string().email("leads.validation.invalidEmail").max(255).optional().or(z.literal("")),
+  phone: z.string().max(20).optional().or(z.literal("")),
+  leadSource: z.string().min(1, "leads.validation.originRequired"),
+  serviceType: z.string().min(1, "leads.validation.serviceRequired"),
+  stage: z.string().min(1, "leads.validation.stageRequired"),
+});
+
+interface CreateLeadModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+interface AddressEntry {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  notes: string;
+}
+
+interface Interaction {
+  id: string;
+  type: string;
+  description: string;
+  date: string;
+  time: string;
+}
+
+// Origin options
+const ORIGIN_OPTIONS = [
+  { value: "google_ads", label: "Google Ads" },
+  { value: "google_local_services", label: "Google Local Services" },
+  { value: "website", label: "Website" },
+  { value: "phone", label: "Phone" },
+  { value: "email", label: "Email" },
+  { value: "sms", label: "SMS" },
+  { value: "referral", label: "Referral" },
+];
+
+// Pipeline stages
+const PIPELINE_STAGES = [
+  { value: "new_lead", label: "New Lead" },
+  { value: "qualification", label: "Qualification" },
+  { value: "visit_scheduled", label: "Visit Scheduled" },
+  { value: "estimate_completed", label: "Estimate Completed" },
+  { value: "negotiation", label: "Negotiation" },
+  { value: "active_customer", label: "Active Customer" },
+  { value: "cold_follow_up", label: "Cold Follow-Up" },
+  { value: "warm_follow_up", label: "Warm Follow-Up" },
+  { value: "reactivation", label: "Reactivation" },
+  { value: "disqualified", label: "Disqualified / Lost" },
+];
+
+// Import centralized enums
+import {
+  SERVICE_TYPES as SERVICE_TYPE_VALUES,
+  FREQUENCY_OPTIONS as FREQUENCY_VALUES,
+  SERVICE_TYPE_OPTIONS,
+  FREQUENCY_OPTIONS_UI,
+  getAllowedFrequencies,
+  getAllowedServiceTypes,
+  isFrequencyLocked,
+  getAutoFrequencyForService,
+  normalizeServiceType,
+  normalizeFrequency,
+  type ServiceType,
+  type FrequencyType,
+} from "@/lib/serviceEnums";
+
+const PROPERTY_TYPES = [
+  { value: "house", label: "House" },
+  { value: "apartment", label: "Apartment" },
+  { value: "office", label: "Office" },
+  { value: "condo", label: "Condo" },
+  { value: "luxury_home", label: "Luxury Home" },
+  { value: "commercial", label: "Commercial" },
+  { value: "other", label: "Other" },
+];
+
+const RESIDENCE_TYPES = [
+  { value: "ranch", label: "Ranch" },
+  { value: "two_story", label: "Two-story" },
+  { value: "condo", label: "Condo" },
+  { value: "townhouse", label: "Townhouse" },
+  { value: "split_level", label: "Split Level" },
+  { value: "multi_story", label: "Multi-story" },
+  { value: "other", label: "Other" },
+];
+
+// FREQUENCY_OPTIONS is now imported from serviceEnums
+
+const SERVICE_AREAS = [
+  { 
+    value: "kitchen", 
+    label: "Kitchen",
+    items: [
+      "Clean major appliance exteriors (interior upon request)",
+      "Dust window sills",
+      "Clean table and chairs",
+      "Clean microwave - interior & exterior",
+      "Clean/disinfect/polish sinks & faucets",
+      "Clean and disinfect counters & backsplash",
+      "Clean floors (vacuum, sweep, mop)",
+      "Wipe doors, handles & light switches",
+      "Wipe outside cabinets & drawers",
+      "Remove cobwebs",
+      "Empty trash and replace liner",
+      "Dust baseboards",
+    ]
+  },
+  { 
+    value: "bathroom", 
+    label: "Bathroom",
+    items: [
+      "Clean tub shower door and inside of the shower",
+      "Clean and polish countertop, sinks, and faucets",
+      "Clean mirrors",
+      "Dust window sills",
+      "Clean and disinfect towel bars",
+      "Dust picture frames",
+      "Fold and hang towels neatly",
+      "Empty trash and replace liner",
+      "Remove cobwebs",
+      "Clean & sanitize toilets in/out",
+      "Wipe doors, handles & light switches",
+      "Clean floors (vacuum, sweep, mop)",
+      "Clean exterior of vanities",
+      "Dust baseboards",
+    ]
+  },
+  { 
+    value: "bedroom", 
+    label: "Bedroom",
+    items: [
+      "Clean floors (vacuum, sweep, mop)",
+      "Dust baseboards",
+      "Dust furniture within reach (top, front & underneath)",
+      "Clean mirrors and glass surfaces",
+      "Dust window sills",
+      "Remove cobwebs",
+      "Dust lamps and lamp shades",
+      "Dust picture frames",
+      "Wipe doors, handles & light switches",
+      "Dust light fixtures, ceiling fans, and vents",
+      "Empty trash and replace liner",
+    ]
+  },
+  { 
+    value: "living_dining", 
+    label: "Living / Dining",
+    items: [
+      "Vacuum/dust upholstered furniture",
+      "Dust lamps and lamp shades",
+      "Dust furniture within reach (top, front & underneath)",
+      "Dust picture frames",
+      "Dust windowsills",
+      "Clean counters & backsplash",
+      "Clean mirrors and glass surfaces",
+      "Empty trash and replace liner",
+      "Clean floors (vacuum, sweep, mop)",
+      "Remove cobwebs",
+      "Wipe doors & light switches",
+      "Dust baseboards",
+    ]
+  },
+  { 
+    value: "laundry_room", 
+    label: "Laundry Room",
+    items: [
+      "Dust windowsill",
+      "Wipe tops of washer and dryer",
+      "Empty trash and replace liner",
+      "Clean floors (vacuum, sweep, mop)",
+      "Remove cobwebs",
+      "Wipe doors, handles & light switches",
+      "Wipe outside cabinets and drawers",
+      "Dust baseboards",
+    ]
+  },
+];
+
+const ADD_ON_SERVICES = [
+  { 
+    value: "inside_refrigerator", 
+    label: "Inside Refrigerator",
+    items: [
+      "Remove all contents and shelves",
+      "Clean interior walls and surfaces",
+      "Clean and sanitize shelves and drawers",
+      "Wipe door seals and handles",
+      "Reorganize contents",
+    ]
+  },
+  { 
+    value: "inside_oven", 
+    label: "Inside Oven",
+    items: [
+      "Remove racks and trays",
+      "Apply oven cleaner",
+      "Scrub interior surfaces",
+      "Clean racks separately",
+      "Wipe door glass inside and out",
+    ]
+  },
+  { 
+    value: "inside_cabinets", 
+    label: "Inside Cabinets",
+    items: [
+      "Empty cabinet contents",
+      "Wipe shelves and interior surfaces",
+      "Clean cabinet doors inside",
+      "Organize items back neatly",
+      "Check for expired items (upon request)",
+    ]
+  },
+  { 
+    value: "garage", 
+    label: "Garage",
+    items: [
+      "Sweep and mop floors",
+      "Remove cobwebs from walls and ceiling",
+      "Wipe down workbenches",
+      "Organize storage areas",
+      "Clean garage door tracks",
+    ]
+  },
+  { 
+    value: "others", 
+    label: "Others (by request)",
+    items: [
+      "Custom cleaning requests",
+      "Special surfaces or materials",
+      "Additional rooms or areas",
+      "Pet-related cleaning",
+      "Post-event cleanup",
+    ]
+  },
+];
+
+const PREFERRED_DAYS = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+];
+
+const PREFERRED_TIMES = [
+  { value: "morning", label: "Morning (8am-12pm)" },
+  { value: "afternoon", label: "Afternoon (12pm-5pm)" },
+  { value: "flexible", label: "Flexible" },
+];
+
+const INTERACTION_TYPES = [
+  { value: "call", label: "Phone Call" },
+  { value: "sms", label: "SMS" },
+  { value: "email", label: "Email" },
+  { value: "whatsapp", label: "WhatsApp" },
+  { value: "visit", label: "In-Person Visit" },
+  { value: "estimate", label: "Estimate Visit" },
+  { value: "follow_up", label: "Follow-up" },
+  { value: "other", label: "Other" },
+];
+
+const DEFAULT_TAGS = [
+  "VIP",
+  "Recurring",
+  "Priority",
+  "New Customer",
+  "Referred",
+  "Corporate",
+  "Residential",
+];
+
+const formatCurrency = (value: string): string => {
+  const numericValue = value.replace(/[^0-9.]/g, "");
+  const number = parseFloat(numericValue);
+  if (isNaN(number)) return "";
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(number);
+};
+
+export function CreateLeadModal({ open, onOpenChange }: CreateLeadModalProps) {
+  const queryClient = useQueryClient();
+  const { data: customers = [] } = useCustomers();
+  const { t } = useLanguage();
+  const [isSaving, setIsSaving] = useState(false);
+  const [newTag, setNewTag] = useState("");
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+
+  const [formData, setFormData] = useState({
+    // 1. Lead Identification
+    primaryContactName: "",
+    businessName: "",
+    email: "",
+    phone: "",
+    tags: [] as string[],
+    // 2. Lead Origin
+    leadSource: "",
+    referralType: "existing" as "existing" | "manual",
+    referralCustomerId: "",
+    referralName: "",
+    // 3. Status
+    stage: "new_lead",
+    // 4. Service Information
+    serviceType: "",
+    propertyType: "",
+    residenceType: "",
+    squareFeet: "",
+    bedrooms: "",
+    bathrooms: "",
+    frequency: "",
+    hasPets: false,
+    // 5. Service Areas
+    serviceAreas: [] as string[],
+    // 6. Add-On Services
+    addOnServices: [] as string[],
+    // 8. Preferences
+    preferredDays: [] as string[],
+    preferredTime: "",
+    // 9. Visit & Estimate
+    visitDate: "",
+    agreedAmount: "",
+    validUntil: "",
+    // 10. Notes
+    notes: "",
+    additionalNotes: "",
+    specialInstructions: "",
+  });
+
+  const [addresses, setAddresses] = useState<AddressEntry[]>([
+    {
+      id: "1",
+      name: "",
+      address: "",
+      city: "",
+      state: "",
+      postalCode: "",
+      notes: "",
+    },
+  ]);
+
+  const [interactions, setInteractions] = useState<Interaction[]>([]);
+  const [expandedAreas, setExpandedAreas] = useState<Record<string, boolean>>({});
+  const [expandedAddOns, setExpandedAddOns] = useState<Record<string, boolean>>({});
+
+  const resetForm = () => {
+    setFormData({
+      primaryContactName: "",
+      businessName: "",
+      email: "",
+      phone: "",
+      tags: [],
+      leadSource: "",
+      referralType: "existing",
+      referralCustomerId: "",
+      referralName: "",
+      stage: "new_lead",
+      serviceType: "",
+      propertyType: "",
+      residenceType: "",
+      squareFeet: "",
+      bedrooms: "",
+      bathrooms: "",
+      frequency: "",
+      hasPets: false,
+      serviceAreas: [],
+      addOnServices: [],
+      preferredDays: [],
+      preferredTime: "",
+      visitDate: "",
+      agreedAmount: "",
+      validUntil: "",
+      notes: "",
+      additionalNotes: "",
+      specialInstructions: "",
+    });
+    setAddresses([
+      {
+        id: "1",
+        name: "",
+        address: "",
+        city: "",
+        state: "",
+        postalCode: "",
+        notes: "",
+      },
+    ]);
+    setInteractions([]);
+    setNewTag("");
+  };
+
+  const addAddress = () => {
+    setAddresses([
+      ...addresses,
+      {
+        id: Date.now().toString(),
+        name: "",
+        address: "",
+        city: "",
+        state: "",
+        postalCode: "",
+        notes: "",
+      },
+    ]);
+  };
+
+  const removeAddress = (id: string) => {
+    if (addresses.length > 1) {
+      setAddresses(addresses.filter((addr) => addr.id !== id));
+    }
+  };
+
+  const updateAddress = (id: string, field: keyof AddressEntry, value: string) => {
+    setAddresses(
+      addresses.map((addr) =>
+        addr.id === id ? { ...addr, [field]: value } : addr
+      )
+    );
+  };
+
+  const addInteraction = () => {
+    const now = new Date();
+    setInteractions([
+      ...interactions,
+      {
+        id: Date.now().toString(),
+        type: "call",
+        description: "",
+        date: now.toISOString().split("T")[0],
+        time: now.toTimeString().slice(0, 5),
+      },
+    ]);
+  };
+
+  const removeInteraction = (id: string) => {
+    setInteractions(interactions.filter((i) => i.id !== id));
+  };
+
+  const updateInteraction = (id: string, field: keyof Interaction, value: string) => {
+    setInteractions(
+      interactions.map((i) => (i.id === id ? { ...i, [field]: value } : i))
+    );
+  };
+
+  const togglePreferredDay = (day: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      preferredDays: prev.preferredDays.includes(day)
+        ? prev.preferredDays.filter((d) => d !== day)
+        : [...prev.preferredDays, day],
+    }));
+  };
+
+  const toggleServiceArea = (area: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      serviceAreas: prev.serviceAreas.includes(area)
+        ? prev.serviceAreas.filter((a) => a !== area)
+        : [...prev.serviceAreas, area],
+    }));
+  };
+
+  const toggleAddOn = (addon: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      addOnServices: prev.addOnServices.includes(addon)
+        ? prev.addOnServices.filter((a) => a !== addon)
+        : [...prev.addOnServices, addon],
+    }));
+  };
+
+  const addTag = (tag: string) => {
+    const trimmedTag = tag.trim();
+    if (trimmedTag && !formData.tags.includes(trimmedTag)) {
+      setFormData((prev) => ({
+        ...prev,
+        tags: [...prev.tags, trimmedTag],
+      }));
+    }
+    setNewTag("");
+  };
+
+  const removeTag = (tag: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      tags: prev.tags.filter((t) => t !== tag),
+    }));
+  };
+
+  const handleAmountBlur = (value: string) => {
+    const formatted = formatCurrency(value);
+    setFormData((prev) => ({ ...prev, agreedAmount: formatted }));
+  };
+
+  // Check if integration lead needs visit date
+  const isIntegrationLead = ["google_ads", "google_local_services", "website", "phone", "email", "sms"].includes(formData.leadSource);
+
+  const validateForm = (): boolean => {
+    const errors: Record<string, string> = {};
+    
+    // Required field validations
+    if (!formData.primaryContactName.trim()) {
+      errors.primaryContactName = t("leads.validation.nameRequired");
+    } else if (formData.primaryContactName.length > 100) {
+      errors.primaryContactName = t("leads.validation.nameTooLong");
+    }
+    
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.email = t("leads.validation.invalidEmail");
+    }
+    
+    if (!formData.leadSource) {
+      errors.leadSource = t("leads.validation.originRequired");
+    }
+    
+    if (!formData.serviceType) {
+      errors.serviceType = t("leads.validation.serviceRequired");
+    }
+    
+    const nonEmptyAddresses = addresses.filter((addr) => addr.address.trim());
+    if (nonEmptyAddresses.length === 0) {
+      errors.address = t("leads.validation.addressRequired");
+    }
+    
+    // Validate visit date for integration leads
+    if (isIntegrationLead && !formData.visitDate) {
+      errors.visitDate = t("leads.validation.visitDateRequired");
+    }
+    
+    // Validate phone format if provided
+    if (formData.phone && formData.phone.replace(/\D/g, "").length < 10) {
+      errors.phone = t("leads.validation.invalidPhone");
+    }
+    
+    setValidationErrors(errors);
+    
+    if (Object.keys(errors).length > 0) {
+      toast.error(t("leads.validation.fixErrors"));
+      return false;
+    }
+    
+    return true;
+  };
+
+  const handleCreateLead = async () => {
+    if (isSaving) return;
+
+    if (!validateForm()) return;
+
+    const customerName = formData.primaryContactName.trim();
+    const nonEmptyAddresses = addresses.filter((addr) => addr.address.trim());
+
+    const parseMoney = (value: string): number => {
+      const n = parseFloat(String(value || "").replace(/[^0-9.]/g, ""));
+      return Number.isFinite(n) ? n : 0;
+    };
+
+    setIsSaving(true);
+    try {
+      const primaryAddress = nonEmptyAddresses[0];
+      const email = formData.email.trim() || null;
+      const phone = formData.phone.trim() || null;
+      const origin = formData.leadSource || null;
+
+      // Resolve or create customer
+      let customerId: string | null = null;
+
+      if (email) {
+        const { data, error } = await supabase
+          .from("customers")
+          .select("id")
+          .eq("email", email)
+          .limit(1);
+        if (error) throw error;
+        customerId = data?.[0]?.id ?? null;
+      }
+
+      if (!customerId) {
+        const { data, error } = await supabase
+          .from("customers")
+          .select("id")
+          .ilike("name", customerName)
+          .limit(1);
+        if (error) throw error;
+        customerId = data?.[0]?.id ?? null;
+      }
+
+      if (!customerId) {
+        const fullAddress = primaryAddress
+          ? `${primaryAddress.address}${primaryAddress.city ? `, ${primaryAddress.city}` : ""}${primaryAddress.state ? `, ${primaryAddress.state}` : ""} ${primaryAddress.postalCode || ""}`.trim()
+          : "";
+        const { data: newCustomer, error: createCustomerError } = await supabase
+          .from("customers")
+          .insert({
+            name: customerName,
+            email,
+            phone,
+            address: fullAddress || null,
+            city: primaryAddress.city || null,
+            state: primaryAddress.state || null,
+            zip_code: primaryAddress.postalCode || null,
+            source: origin,
+            status: "lead",
+            additional_info: formData.businessName ? `Business: ${formData.businessName}` : null,
+          })
+          .select("id")
+          .single();
+
+        if (createCustomerError) throw createCustomerError;
+        customerId = newCustomer.id;
+      }
+
+      const leadNumber = await generateLeadNumber();
+      const total = parseMoney(formData.agreedAmount);
+      const title = formData.serviceType 
+        ? SERVICE_TYPE_OPTIONS.find(s => s.value === formData.serviceType)?.label || "New Lead"
+        : "New Lead";
+
+      // Persist service areas as stable IDs (e.g. "kitchen") to keep UI in sync
+      const serviceAreasToSave =
+        formData.serviceAreas.length > 0 ? formData.serviceAreas : null;
+
+      const fullAddress = primaryAddress
+        ? `${primaryAddress.address}${primaryAddress.city ? `, ${primaryAddress.city}` : ""}${primaryAddress.state ? `, ${primaryAddress.state}` : ""} ${primaryAddress.postalCode || ""}`.trim()
+        : "";
+
+      // Create lead with all fields stored directly in the database
+      const { data: leadData, error: leadError } = await supabase
+        .from("leads")
+        .insert({
+          customer_id: customerId,
+          estimate_number: leadNumber,
+          title,
+          description: formData.businessName || null,
+          status: formData.stage,
+          subtotal: total,
+          tax_rate: 0,
+          tax_amount: 0,
+          total,
+          valid_until: formData.validUntil || null,
+          notes: formData.notes || null,
+          email,
+          phone,
+          origin,
+          has_job: false,
+          address: fullAddress || null,
+          preferred_days: formData.preferredDays.length > 0 ? formData.preferredDays : null,
+          preferred_time: formData.preferredTime || null,
+          frequency: formData.frequency || null,
+          service_type: formData.serviceType || null,
+          service_areas: serviceAreasToSave,
+          referral_customer_id: formData.leadSource === "referral" && formData.referralType === "existing" ? formData.referralCustomerId || null : null,
+          referral_name: formData.leadSource === "referral" && formData.referralType === "manual" ? formData.referralName || null : null,
+          visit_date: formData.visitDate || null,
+          agreed_amount: total,
+          // New property fields stored directly in the database
+          property_type: formData.propertyType || null,
+          residence_type: formData.residenceType || null,
+          square_feet: formData.squareFeet ? parseInt(formData.squareFeet) : null,
+          bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : null,
+          bathrooms: formData.bathrooms ? parseFloat(formData.bathrooms) : null,
+          has_pets: formData.hasPets,
+          add_on_services: formData.addOnServices.length > 0 ? formData.addOnServices : null,
+          business_name: formData.businessName || null,
+          tags: formData.tags.length > 0 ? formData.tags : null,
+          additional_notes: formData.additionalNotes || null,
+          special_instructions: formData.specialInstructions || null,
+        })
+        .select()
+        .single();
+
+      if (leadError) throw leadError;
+
+      // Create lead addresses with name field
+      if (nonEmptyAddresses.length > 0) {
+          const addressesToInsert = nonEmptyAddresses.map((addr) => ({
+            lead_id: leadData.id,
+            name: addr.name || "Home",
+            address: `${addr.address}${addr.city ? `, ${addr.city}` : ""}${addr.state ? `, ${addr.state}` : ""} ${addr.postalCode || ""}`.trim(),
+            street: addr.address || null,
+            city: addr.city || null,
+            state: addr.state || null,
+            postal_code: addr.postalCode || null,
+            notes: addr.notes || null,
+          }));
+
+        const { error: addrError } = await supabase
+          .from("lead_addresses")
+          .insert(addressesToInsert);
+
+        if (addrError) {
+          console.warn("Could not save lead addresses:", addrError);
+        }
+      }
+
+      // Create lead interactions
+      if (interactions.length > 0) {
+        const interactionsToInsert = interactions.map((int) => ({
+          lead_id: leadData.id,
+          interaction_type: int.type,
+          description: int.description || null,
+          interaction_date: `${int.date}T${int.time}:00`,
+          created_by: null,
+        }));
+
+        const { error: intError } = await supabase
+          .from("lead_interactions")
+          .insert(interactionsToInsert);
+
+        if (intError) {
+          console.warn("Could not save lead interactions:", intError);
+        }
+      }
+
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["leads"] }),
+        queryClient.invalidateQueries({ queryKey: ["customers"] }),
+      ]);
+
+      toast.success("Lead created successfully!");
+      onOpenChange(false);
+      resetForm();
+    } catch (error) {
+      console.error("Error creating lead:", error);
+      toast.error("Error saving lead");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-semibold">Create New Lead</DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-6 py-4">
+          {/* 1. Lead Identification */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide border-b pb-2">
+              1. Lead Identification
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="primaryContactName" className="flex items-center gap-1">
+                  Primary Contact Name <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="primaryContactName"
+                  value={formData.primaryContactName}
+                  onChange={(e) => {
+                    setFormData({ ...formData, primaryContactName: e.target.value });
+                    if (validationErrors.primaryContactName) {
+                      setValidationErrors(prev => ({ ...prev, primaryContactName: "" }));
+                    }
+                  }}
+                  placeholder="Enter contact name"
+                  className={validationErrors.primaryContactName ? "border-destructive" : ""}
+                />
+                {validationErrors.primaryContactName && (
+                  <p className="text-xs text-destructive flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />
+                    {validationErrors.primaryContactName}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="businessName">
+                  <div className="flex items-center gap-1">
+                    <Building2 className="w-4 h-4" />
+                    Business Name
+                    <span className="text-muted-foreground text-xs">(optional)</span>
+                  </div>
+                </Label>
+                <Input
+                  id="businessName"
+                  value={formData.businessName}
+                  onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
+                  placeholder="Company or business name"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => {
+                    setFormData({ ...formData, email: e.target.value });
+                    if (validationErrors.email) {
+                      setValidationErrors(prev => ({ ...prev, email: "" }));
+                    }
+                  }}
+                  placeholder="customer@email.com"
+                  className={validationErrors.email ? "border-destructive" : ""}
+                />
+                {validationErrors.email && (
+                  <p className="text-xs text-destructive flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />
+                    {validationErrors.email}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone</Label>
+                <Input
+                  id="phone"
+                  value={formData.phone}
+                  onChange={(e) => {
+                    setFormData({ ...formData, phone: e.target.value });
+                    if (validationErrors.phone) {
+                      setValidationErrors(prev => ({ ...prev, phone: "" }));
+                    }
+                  }}
+                  placeholder="(555) 123-4567"
+                  className={validationErrors.phone ? "border-destructive" : ""}
+                />
+                {validationErrors.phone && (
+                  <p className="text-xs text-destructive flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />
+                    {validationErrors.phone}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Tags */}
+            <div className="space-y-2">
+              <Label>
+                <div className="flex items-center gap-1">
+                  <Tag className="w-4 h-4" />
+                  Tags
+                </div>
+              </Label>
+              <div className="space-y-2">
+                <div className="flex flex-wrap gap-2 p-3 bg-muted/30 rounded-lg border border-border/50 min-h-[44px]">
+                  {formData.tags.length > 0 ? (
+                    formData.tags.map((tag) => (
+                      <Badge key={tag} variant="secondary" className="gap-1">
+                        {tag}
+                        <button type="button" onClick={() => removeTag(tag)} className="hover:text-destructive">
+                          <X className="w-3 h-3" />
+                        </button>
+                      </Badge>
+                    ))
+                  ) : (
+                    <span className="text-sm text-muted-foreground">No tags selected</span>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {DEFAULT_TAGS.filter((tag) => !formData.tags.includes(tag)).map((tag) => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => addTag(tag)}
+                      className="px-2 py-1 text-xs rounded border border-dashed border-border hover:border-primary/50 hover:bg-muted/50 transition-colors"
+                    >
+                      + {tag}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <Input
+                    value={newTag}
+                    onChange={(e) => setNewTag(e.target.value)}
+                    placeholder="Add custom tag..."
+                    className="flex-1"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        addTag(newTag);
+                      }
+                    }}
+                  />
+                  <Button type="button" variant="outline" size="sm" onClick={() => addTag(newTag)} disabled={!newTag.trim()}>
+                    Add
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 2. Lead Origin */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide border-b pb-2">
+              2. Lead Origin
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="leadSource" className="flex items-center gap-1">
+                  Lead Source <span className="text-destructive">*</span>
+                </Label>
+                <Select
+                  value={formData.leadSource || "none"}
+                  onValueChange={(value) => {
+                    setFormData({
+                      ...formData,
+                      leadSource: value === "none" ? "" : value,
+                      referralCustomerId: "",
+                      referralName: "",
+                    });
+                    if (validationErrors.leadSource) {
+                      setValidationErrors(prev => ({ ...prev, leadSource: "" }));
+                    }
+                  }}
+                >
+                  <SelectTrigger id="leadSource" className={validationErrors.leadSource ? "border-destructive" : ""}>
+                    <SelectValue placeholder="Select source" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover border-border z-50">
+                    <SelectItem value="none">Select source...</SelectItem>
+                    {ORIGIN_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {validationErrors.leadSource && (
+                  <p className="text-xs text-destructive flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />
+                    {validationErrors.leadSource}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="stage">Lead Status</Label>
+                <Select
+                  value={formData.stage}
+                  onValueChange={(value) => setFormData({ ...formData, stage: value })}
+                >
+                  <SelectTrigger id="stage">
+                    <SelectValue placeholder="Select stage" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover border-border z-50">
+                    {PIPELINE_STAGES.map((stage) => (
+                      <SelectItem key={stage.value} value={stage.value}>
+                        {stage.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Referral Fields */}
+            {formData.leadSource === "referral" && (
+              <div className="space-y-4 p-4 bg-muted/30 rounded-lg border border-border/50">
+                <div className="flex items-center gap-4">
+                  <Label className="text-sm font-medium">Referral Source:</Label>
+                  <div className="flex items-center gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="referralType"
+                        checked={formData.referralType === "existing"}
+                        onChange={() => setFormData({ ...formData, referralType: "existing", referralName: "" })}
+                        className="w-4 h-4"
+                      />
+                      <span className="text-sm">Existing Customer</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="referralType"
+                        checked={formData.referralType === "manual"}
+                        onChange={() => setFormData({ ...formData, referralType: "manual", referralCustomerId: "" })}
+                        className="w-4 h-4"
+                      />
+                      <span className="text-sm">Manual Entry</span>
+                    </label>
+                  </div>
+                </div>
+
+                {formData.referralType === "existing" ? (
+                  <div className="space-y-2">
+                    <Label>Referring Customer</Label>
+                    <Select
+                      value={formData.referralCustomerId || "none"}
+                      onValueChange={(value) => setFormData({ ...formData, referralCustomerId: value === "none" ? "" : value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a customer" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-popover border-border z-50 max-h-60">
+                        <SelectItem value="none">Select a customer...</SelectItem>
+                        {customers.map((customer) => (
+                          <SelectItem key={customer.id} value={customer.id}>
+                            <div className="flex items-center gap-2">
+                              <User className="w-4 h-4 text-muted-foreground" />
+                              {customer.name}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Label htmlFor="referralName">Referrer Name</Label>
+                    <Input
+                      id="referralName"
+                      value={formData.referralName}
+                      onChange={(e) => setFormData({ ...formData, referralName: e.target.value })}
+                      placeholder="Enter referrer name"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+
+          {/* 3. Service Information */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide border-b pb-2">
+              3. Service Information
+            </h3>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label>Service Type</Label>
+                <Select
+                  value={formData.serviceType || "none"}
+                  onValueChange={(value) => setFormData({ ...formData, serviceType: value === "none" ? "" : value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover border-border z-50">
+                    <SelectItem value="none">Select type...</SelectItem>
+                    {SERVICE_TYPE_OPTIONS.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Property Type</Label>
+                <Select
+                  value={formData.propertyType || "none"}
+                  onValueChange={(value) => setFormData({ ...formData, propertyType: value === "none" ? "" : value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select property" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover border-border z-50">
+                    <SelectItem value="none">Select property...</SelectItem>
+                    {PROPERTY_TYPES.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Floors / Type of Residence</Label>
+                <Select
+                  value={formData.residenceType || "none"}
+                  onValueChange={(value) => setFormData({ ...formData, residenceType: value === "none" ? "" : value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover border-border z-50">
+                    <SelectItem value="none">Select type...</SelectItem>
+                    {RESIDENCE_TYPES.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="squareFeet">Square Feet</Label>
+                <Input
+                  id="squareFeet"
+                  type="number"
+                  value={formData.squareFeet}
+                  onChange={(e) => setFormData({ ...formData, squareFeet: e.target.value })}
+                  placeholder="e.g., 2000"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="bedrooms">Bedrooms</Label>
+                <Input
+                  id="bedrooms"
+                  type="number"
+                  value={formData.bedrooms}
+                  onChange={(e) => setFormData({ ...formData, bedrooms: e.target.value })}
+                  placeholder="e.g., 3"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="bathrooms">Bathrooms</Label>
+                <Input
+                  id="bathrooms"
+                  type="number"
+                  value={formData.bathrooms}
+                  onChange={(e) => setFormData({ ...formData, bathrooms: e.target.value })}
+                  placeholder="e.g., 2"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Frequency</Label>
+                <Select
+                  value={formData.frequency || "none"}
+                  onValueChange={(value) => setFormData({ ...formData, frequency: value === "none" ? "" : value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select frequency" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover border-border z-50">
+                    <SelectItem value="none">Select frequency...</SelectItem>
+                    {FREQUENCY_OPTIONS_UI.map((freq) => (
+                      <SelectItem key={freq.value} value={freq.value}>
+                        {freq.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Has Pets */}
+            <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg border border-border/50">
+              <PawPrint className="w-5 h-5 text-muted-foreground" />
+              <Label htmlFor="hasPets" className="flex-1 cursor-pointer">Has Pets</Label>
+              <Switch
+                id="hasPets"
+                checked={formData.hasPets}
+                onCheckedChange={(checked) => setFormData({ ...formData, hasPets: checked })}
+              />
+            </div>
+          </div>
+
+          {/* 4. Service Areas */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide border-b pb-2">
+              4. Service Areas
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {SERVICE_AREAS.map((area) => {
+                const isChecked = formData.serviceAreas.includes(area.value);
+                const isExpanded = expandedAreas[area.value] || false;
+
+                return (
+                  <div
+                    key={area.value}
+                    className={`rounded-lg border p-3 transition-all ${
+                      isChecked
+                        ? "bg-primary/10 border-primary"
+                        : "bg-muted/30 border-border hover:border-primary/50"
+                    }`}
+                  >
+                    <div className="flex items-start gap-2">
+                      <Checkbox
+                        id={`area-${area.value}`}
+                        checked={isChecked}
+                        onCheckedChange={() => toggleServiceArea(area.value)}
+                        className="mt-0.5"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <label
+                          htmlFor={`area-${area.value}`}
+                          className="text-sm font-semibold cursor-pointer block"
+                        >
+                          {area.label}
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => setExpandedAreas(prev => ({ ...prev, [area.value]: !prev[area.value] }))}
+                          className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1 mt-1"
+                        >
+                          {isExpanded ? (
+                            <>
+                              <ChevronUp className="w-3 h-3" />
+                              Hide details
+                            </>
+                          ) : (
+                            <>
+                              <ChevronDown className="w-3 h-3" />
+                              View details
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+
+                    {isExpanded && (
+                      <ul className="mt-3 space-y-1 text-xs text-muted-foreground border-t border-border/50 pt-2">
+                        {area.items.map((item, idx) => (
+                          <li key={idx} className="flex items-start gap-1.5">
+                            <span className="text-primary mt-0.5">•</span>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 5. Add-On Services */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide border-b pb-2">
+              5. Add-On Services
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {ADD_ON_SERVICES.map((addon) => {
+                const isChecked = formData.addOnServices.includes(addon.value);
+                const isExpanded = expandedAddOns[addon.value] || false;
+
+                return (
+                  <div
+                    key={addon.value}
+                    className={`rounded-lg border p-3 transition-all ${
+                      isChecked
+                        ? "bg-accent/50 border-accent-foreground/30"
+                        : "bg-muted/30 border-border hover:border-primary/50"
+                    }`}
+                  >
+                    <div className="flex items-start gap-2">
+                      <Checkbox
+                        id={`addon-${addon.value}`}
+                        checked={isChecked}
+                        onCheckedChange={() => toggleAddOn(addon.value)}
+                        className="mt-0.5"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <label
+                          htmlFor={`addon-${addon.value}`}
+                          className="text-sm font-semibold cursor-pointer block"
+                        >
+                          {addon.label}
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => setExpandedAddOns(prev => ({ ...prev, [addon.value]: !prev[addon.value] }))}
+                          className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1 mt-1"
+                        >
+                          {isExpanded ? (
+                            <>
+                              <ChevronUp className="w-3 h-3" />
+                              Hide details
+                            </>
+                          ) : (
+                            <>
+                              <ChevronDown className="w-3 h-3" />
+                              View details
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+
+                    {isExpanded && (
+                      <ul className="mt-3 space-y-1 text-xs text-muted-foreground border-t border-border/50 pt-2">
+                        {addon.items.map((item, idx) => (
+                          <li key={idx} className="flex items-start gap-1.5">
+                            <span className="text-accent-foreground mt-0.5">•</span>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 6. Addresses */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between border-b pb-2">
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                6. Addresses
+              </h3>
+              <Button variant="outline" size="sm" onClick={addAddress}>
+                <Plus className="w-4 h-4 mr-1" />
+                Add Address
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              {addresses.map((addr, index) => (
+                <div key={addr.id} className="p-4 bg-muted/30 rounded-lg border border-border/50 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-sm font-medium">
+                      <MapPin className="w-4 h-4 text-primary" />
+                      Address {index + 1}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeAddress(addr.id)}
+                      disabled={addresses.length === 1}
+                      className="text-destructive hover:text-destructive h-8 w-8"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                    <div className="space-y-2">
+                      <Label className="text-xs">Location Name</Label>
+                      <Input
+                        value={addr.name}
+                        onChange={(e) => updateAddress(addr.id, "name", e.target.value)}
+                        placeholder="e.g., Home"
+                        className="h-9"
+                      />
+                    </div>
+                    <div className="space-y-2 sm:col-span-2 lg:col-span-2">
+                      <Label className="text-xs">Street Address</Label>
+                      <AddressAutocompleteInput
+                        value={addr.address}
+                        onChange={(value) => updateAddress(addr.id, "address", value)}
+                        onSelect={(suggestion: AddressSuggestion) => {
+                          const streetAddress = suggestion.housenumber
+                            ? `${suggestion.housenumber} ${suggestion.street}`
+                            : suggestion.street;
+                          // Update all fields at once to avoid state batching issues
+                          setAddresses(prev => prev.map(a => 
+                            a.id === addr.id 
+                              ? { 
+                                  ...a, 
+                                  address: streetAddress,
+                                  city: suggestion.city || "",
+                                  state: suggestion.state || "",
+                                  postalCode: suggestion.postcode || ""
+                                } 
+                              : a
+                          ));
+                        }}
+                        placeholder="Start typing..."
+                        className="h-9"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs">City</Label>
+                      <Input
+                        value={addr.city}
+                        onChange={(e) => updateAddress(addr.id, "city", e.target.value)}
+                        placeholder="City"
+                        className="h-9"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-2">
+                        <Label className="text-xs">State</Label>
+                        <Input
+                          value={addr.state}
+                          onChange={(e) => updateAddress(addr.id, "state", e.target.value)}
+                          placeholder="ST"
+                          className="h-9"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-xs">ZIP</Label>
+                        <Input
+                          value={addr.postalCode}
+                          onChange={(e) => updateAddress(addr.id, "postalCode", e.target.value)}
+                          placeholder="12345"
+                          className="h-9"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Address Notes</Label>
+                    <Input
+                      value={addr.notes}
+                      onChange={(e) => updateAddress(addr.id, "notes", e.target.value)}
+                      placeholder="Gate code, parking instructions, etc."
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 7. Customer Preferences & Visit/Estimate */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide border-b pb-2">
+              7. Customer Preferences & Visit/Estimate
+            </h3>
+
+            <div className="grid grid-cols-2 gap-6">
+              {/* Left Column - Customer Preferences */}
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Preferred Days</Label>
+                  <Select
+                    value={formData.preferredDays.length > 0 ? formData.preferredDays[0] : "none"}
+                    onValueChange={(value) => {
+                      if (value === "none") {
+                        setFormData({ ...formData, preferredDays: [] });
+                      } else {
+                        togglePreferredDay(value);
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select days">
+                        {formData.preferredDays.length > 0 
+                          ? formData.preferredDays.join(", ") 
+                          : "Select days..."}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent className="bg-popover border-border z-50">
+                      {PREFERRED_DAYS.map((day) => (
+                        <div
+                          key={day}
+                          className="flex items-center gap-2 px-2 py-1.5 cursor-pointer hover:bg-accent rounded-sm"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            togglePreferredDay(day);
+                          }}
+                        >
+                          <Checkbox
+                            checked={formData.preferredDays.includes(day)}
+                            onCheckedChange={() => togglePreferredDay(day)}
+                          />
+                          <span className="text-sm">{day}</span>
+                        </div>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Preferred Time</Label>
+                  <Select
+                    value={formData.preferredTime || "none"}
+                    onValueChange={(value) => setFormData({ ...formData, preferredTime: value === "none" ? "" : value })}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select time" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-popover border-border z-50">
+                      <SelectItem value="none">Select time...</SelectItem>
+                      {PREFERRED_TIMES.map((time) => (
+                        <SelectItem key={time.value} value={time.value}>
+                          {time.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Right Column - Visit & Estimate */}
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="visitDate">
+                    Visit Date
+                    {isIntegrationLead && <span className="text-destructive ml-1">*</span>}
+                  </Label>
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="visitDate"
+                      type="date"
+                      value={formData.visitDate}
+                      onChange={(e) => setFormData({ ...formData, visitDate: e.target.value })}
+                      className="pl-10"
+                    />
+                  </div>
+                  {isIntegrationLead && !formData.visitDate && (
+                    <p className="text-xs text-destructive">Required for integration leads</p>
+                  )}
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="agreedAmount">Agreed Amount</Label>
+                    <Input
+                      id="agreedAmount"
+                      value={formData.agreedAmount}
+                      onChange={(e) => setFormData({ ...formData, agreedAmount: e.target.value })}
+                      onBlur={(e) => handleAmountBlur(e.target.value)}
+                      placeholder="$0.00"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="validUntil">Valid Until</Label>
+                    <Input
+                      id="validUntil"
+                      type="date"
+                      value={formData.validUntil}
+                      onChange={(e) => setFormData({ ...formData, validUntil: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 8. Notes */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide border-b pb-2">
+              8. Notes
+            </h3>
+            <div className="grid grid-cols-1 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="notes">Notes</Label>
+                <Textarea
+                  id="notes"
+                  value={formData.notes}
+                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  placeholder="General notes..."
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="additionalNotes">Additional Notes</Label>
+                <Textarea
+                  id="additionalNotes"
+                  value={formData.additionalNotes}
+                  onChange={(e) => setFormData({ ...formData, additionalNotes: e.target.value })}
+                  placeholder="Additional notes..."
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="specialInstructions">Special Instructions</Label>
+                <Textarea
+                  id="specialInstructions"
+                  value={formData.specialInstructions}
+                  onChange={(e) => setFormData({ ...formData, specialInstructions: e.target.value })}
+                  placeholder="Special instructions for this lead..."
+                  rows={3}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* 9. Interaction History */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between border-b pb-2">
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                9. Interaction History
+              </h3>
+              <Button variant="outline" size="sm" onClick={addInteraction}>
+                <Plus className="w-4 h-4 mr-1" />
+                Add Interaction
+              </Button>
+            </div>
+
+            {interactions.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4 bg-muted/30 rounded-lg">
+                No interactions recorded. Click "Add Interaction" to log a contact.
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {interactions.map((interaction, index) => (
+                  <div key={interaction.id} className="p-4 bg-muted/30 rounded-lg border border-border/50 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-sm font-medium">
+                        <MessageSquare className="w-4 h-4 text-primary" />
+                        Interaction {index + 1}
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeInteraction(interaction.id)}
+                        className="text-destructive hover:text-destructive h-8 w-8"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <Label>Type</Label>
+                        <Select
+                          value={interaction.type}
+                          onValueChange={(value) => updateInteraction(interaction.id, "type", value)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select type" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-popover border-border z-50">
+                            {INTERACTION_TYPES.map((type) => (
+                              <SelectItem key={type.value} value={type.value}>
+                                {type.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Date</Label>
+                        <Input
+                          type="date"
+                          value={interaction.date}
+                          onChange={(e) => updateInteraction(interaction.id, "date", e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Time</Label>
+                        <Input
+                          type="time"
+                          value={interaction.time}
+                          onChange={(e) => updateInteraction(interaction.id, "time", e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Description</Label>
+                      <Textarea
+                        value={interaction.description}
+                        onChange={(e) => updateInteraction(interaction.id, "description", e.target.value)}
+                        placeholder="Describe the interaction..."
+                        rows={2}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <DialogFooter className="gap-2">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button onClick={handleCreateLead} disabled={isSaving}>
+            {isSaving ? "Saving..." : "Create Lead"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
