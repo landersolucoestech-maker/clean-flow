@@ -23,75 +23,63 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Consolidate Jobs frontend hooks
+      - name: Migrate full-height pages to PageLayout
         run: |
           node <<'NODE'
           const fs = require('node:fs');
-          const path = require('node:path');
 
-          const hooksDir = 'apps/web/src/modules/jobs/hooks';
-          const legacyPath = `${hooksDir}/useJobsLegacy.ts`;
-          const criticalPath = `${hooksDir}/useJobsCritical.ts`;
-          const maintenancePath = `${hooksDir}/useJobMaintenance.ts`;
-          const corePath = `${hooksDir}/useJobCore.ts`;
-          const barrelPath = `${hooksDir}/useJobs.ts`;
-
-          function walk(dir) {
-            return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
-              const full = path.join(dir, entry.name);
-              return entry.isDirectory() ? walk(full) : [full];
-            });
+          function replaceOnce(source, from, to, label) {
+            if (!source.includes(from)) throw new Error(`Missing ${label} anchor`);
+            return source.replace(from, to);
           }
 
-          const unexpectedRefs = walk('apps/web/src')
-            .filter((file) => /\.(ts|tsx)$/.test(file))
-            .filter((file) => ![legacyPath, criticalPath, barrelPath].includes(file))
-            .filter((file) => {
-              const source = fs.readFileSync(file, 'utf8');
-              return source.includes('useJobsLegacy') || source.includes('useJobsCritical');
-            });
-          if (unexpectedRefs.length) throw new Error(`Unexpected direct legacy job hook references: ${unexpectedRefs.join(', ')}`);
+          const schedulePath = 'apps/web/src/modules/schedule/SchedulePage.tsx';
+          let schedule = fs.readFileSync(schedulePath, 'utf8');
+          schedule = replaceOnce(schedule,
+            'import { Header } from "@/components/layout/Header";\nimport { Sidebar } from "@/components/layout/Sidebar";',
+            'import { PageLayout } from "@/components/layout/PageLayout";',
+            'Schedule layout imports');
+          schedule = replaceOnce(schedule,
+            '  return (\n    <div className="flex h-screen bg-background">\n      <Sidebar />\n\n      <div className="flex-1 flex flex-col overflow-hidden">\n        <Header />\n\n        <main className="flex flex-1 flex-col overflow-hidden px-4 py-5 sm:px-6 lg:px-8 lg:py-7">\n          {/* Page Header */}',
+            '  return (\n    <PageLayout fullHeight contentClassName="gap-4">\n      {/* Page Header */}',
+            'Schedule shell start');
+          schedule = replaceOnce(schedule,
+            '        </main>\n      </div>\n\n      {/* Modals */}',
+            '      {/* Modals */}',
+            'Schedule shell end');
+          const scheduleEnd = '\n    </div>\n  );\n}';
+          if (!schedule.endsWith(scheduleEnd)) throw new Error('Unexpected Schedule component ending');
+          schedule = schedule.slice(0, -scheduleEnd.length) + '\n    </PageLayout>\n  );\n}';
+          fs.writeFileSync(schedulePath, schedule);
 
-          let legacy = fs.readFileSync(legacyPath, 'utf8');
-          const typeStart = legacy.indexOf('export interface Job {');
-          const helperStart = legacy.indexOf('// Helper to get frequency in days from service type');
-          const updateStart = legacy.indexOf('// Update a job');
-          const deleteStart = legacy.indexOf('// Delete a job');
-          const fieldsStart = legacy.indexOf('// Update specific job fields');
-          if ([typeStart, helperStart, updateStart, deleteStart, fieldsStart].some((index) => index < 0)) {
-            throw new Error('Jobs legacy cleanup anchors changed');
-          }
-
-          legacy = legacy.slice(0, typeStart)
-            + 'import type { Job, JobFormData } from "../types/job";\n\n'
-            + legacy.slice(updateStart, deleteStart)
-            + legacy.slice(fieldsStart);
-          legacy = legacy.replace(
-            'import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";',
-            'import { useMutation, useQueryClient } from "@tanstack/react-query";'
-          );
-          if (/export function use(Jobs|JobsByCustomer|CreateJob|DeleteJob)\b/.test(legacy)) {
-            throw new Error('Duplicate CRUD exports still remain in maintenance hook');
-          }
-          fs.writeFileSync(maintenancePath, legacy);
-          fs.unlinkSync(legacyPath);
-
-          let core = fs.readFileSync(criticalPath, 'utf8');
-          core = core.replace('import type { Job, JobFormData } from "./useJobsLegacy";', 'import type { Job, JobFormData } from "../types/job";');
-          fs.writeFileSync(corePath, core);
-          fs.unlinkSync(criticalPath);
-
-          fs.writeFileSync(barrelPath, `export type { Job, JobFormData } from "../types/job";\nexport type { ImportedJobRow, JobFieldsUpdate } from "./useJobMaintenance";\n\nexport {\n  useImportJobs,\n  useUpdateJob,\n  useUpdateJobFields,\n} from "./useJobMaintenance";\n\nexport {\n  useJobs,\n  useJobsByCustomer,\n  useCreateJob,\n  useDeleteJob,\n} from "./useJobCore";\n`);
+          const communicationsPath = 'apps/web/src/modules/communications/CommunicationsPage.tsx';
+          let communications = fs.readFileSync(communicationsPath, 'utf8');
+          communications = replaceOnce(communications,
+            'import { Header } from "@/components/layout/Header";\nimport { Sidebar } from "@/components/layout/Sidebar";',
+            'import { PageLayout } from "@/components/layout/PageLayout";',
+            'Communications layout imports');
+          communications = replaceOnce(communications,
+            '  return (\n    <div className="flex h-screen bg-background">\n      <Sidebar />\n      \n      <div className="flex-1 flex flex-col overflow-hidden">\n        <Header />\n        \n        <main className="flex-1 overflow-y-auto p-4 sm:p-6">\n          {/* Chat Layout */}\n          <div className="flex min-h-[680px] flex-col gap-4 lg:h-[calc(100vh-128px)] lg:min-h-0 lg:flex-row">',
+            '  return (\n    <PageLayout fullHeight contentClassName="gap-4">\n      {/* Chat Layout */}\n      <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row">',
+            'Communications shell start');
+          communications = replaceOnce(communications,
+            '          </div>\n        </main>\n      </div>\n      {/* Broadcast Modal */}',
+            '      </div>\n      {/* Broadcast Modal */}',
+            'Communications shell end');
+          const communicationsEnd = '\n    </div>\n  );\n}';
+          if (!communications.endsWith(communicationsEnd)) throw new Error('Unexpected Communications component ending');
+          communications = communications.slice(0, -communicationsEnd.length) + '\n    </PageLayout>\n  );\n}';
+          fs.writeFileSync(communicationsPath, communications);
           NODE
       - run: npx eslint apps/web/src packages --max-warnings=0
       - run: npm run typecheck
       - run: npx vitest run apps/web/src
       - run: npm run build
-      - name: Commit Jobs consolidation
+      - name: Commit canonical shell migration
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A apps/web/src/modules/jobs
+          git add apps/web/src/modules/schedule/SchedulePage.tsx apps/web/src/modules/communications/CommunicationsPage.tsx
           git diff --cached --quiet && exit 0
-          git commit -m "refactor(frontend): remove duplicate legacy jobs CRUD"
+          git commit -m "refactor(frontend): use canonical full-height page layout"
           git push origin HEAD:dev
