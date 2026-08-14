@@ -10,6 +10,16 @@ def write(path: str, text: str) -> None:
     Path(path).write_text(text)
 
 
+def insert_catalog_lines(text: str, lines: list[str]) -> str:
+    if not lines:
+        return text
+    marker = "} as const;"
+    idx = text.rfind(marker)
+    if idx < 0:
+        raise RuntimeError("translation catalog closing marker not found")
+    return text[:idx] + "\n" + "\n".join(lines) + "\n" + text[idx:]
+
+
 # Provider: validated language, safe English fallback, document lang sync.
 p = "apps/web/src/app/providers/LanguageContext.tsx"
 s = read(p)
@@ -137,9 +147,7 @@ for lang, items in catalog_keys.items():
             escaped = value.replace('\\', '\\\\').replace('"', '\\"')
             lines.append(f'    "{key}": "{escaped}",')
     if lines:
-        idx = s.rfind("};")
-        s = s[:idx] + "\n" + "\n".join(lines) + "\n" + s[idx:]
-        write(p, s)
+        write(p, insert_catalog_lines(s, lines))
 
 # Audit visible literals for the next pass.
 roots = [Path('apps/web/src/app/layout'), Path('apps/web/src/modules')]
