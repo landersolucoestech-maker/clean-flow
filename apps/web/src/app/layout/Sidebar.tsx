@@ -88,7 +88,7 @@ export function Sidebar({ className }: SidebarProps) {
                 <span className="text-base font-bold tracking-tight text-foreground">CLEAN </span>
                 <span className="text-base font-bold tracking-tight text-primary">FLOW</span>
               </div>
-              <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Operations</p>
+              <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">{t("sidebar.operations")}</p>
             </div>
           </div>
         )}
@@ -139,7 +139,7 @@ export function Sidebar({ className }: SidebarProps) {
         {!isCollapsed && (
           <div className="rounded-lg bg-surface-muted px-3 py-2">
             <p className="text-xs font-semibold text-foreground">Clean Flow</p>
-            <p className="mt-0.5 text-[10px] text-muted-foreground">Clean spaces. Better flow.</p>
+            <p className="mt-0.5 text-[10px] text-muted-foreground">{t("sidebar.tagline")}</p>
           </div>
         )}
       </div>

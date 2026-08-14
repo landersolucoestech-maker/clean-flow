@@ -7,11 +7,12 @@ export type { Language } from "./language-context";
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>(() => {
     const saved = localStorage.getItem("app-language");
-    return (saved as Language) || "en";
+    return saved === "en" || saved === "pt" || saved === "es" ? saved : "en";
   });
 
   useEffect(() => {
     localStorage.setItem("app-language", language);
+    document.documentElement.lang = language === "pt" ? "pt-BR" : language === "es" ? "es" : "en";
   }, [language]);
 
   const setLanguage = (lang: Language) => {
@@ -19,7 +20,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   };
 
   const t = (key: string): string => {
-    return translations[language][key] || key;
+    return translations[language][key] ?? translations.en[key] ?? key;
   };
 
   return (

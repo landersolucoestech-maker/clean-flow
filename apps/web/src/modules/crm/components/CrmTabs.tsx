@@ -1,13 +1,15 @@
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/useLanguage";
 
 const tabs = [
-  { label: "Customers", href: "/crm", end: true },
-  { label: "Leads", href: "/crm/leads", end: false },
-  { label: "Contacts", href: "/crm/contacts", end: false },
+  { labelKey: "crm.tabs.customers", href: "/crm", end: true },
+  { labelKey: "crm.tabs.leads", href: "/crm/leads", end: false },
+  { labelKey: "crm.tabs.contacts", href: "/crm/contacts", end: false },
 ] as const;
 
 export function CrmTabs() {
+  const { t } = useLanguage();
   return (
     <nav className="flex w-full items-center gap-1 border-b border-border/70" aria-label="CRM navigation">
       {tabs.map((tab) => (
@@ -22,7 +24,7 @@ export function CrmTabs() {
             )
           }
         >
-          {tab.label}
+          {t(tab.labelKey)}
         </NavLink>
       ))}
     </nav>

@@ -36,16 +36,16 @@ interface HeaderProps {
 }
 
 const pageMeta = [
-  { match: (path: string) => path === "/", title: "Dashboard", description: "Business overview and daily operations.", icon: Building2 },
-  { match: (path: string) => path.startsWith("/schedule"), title: "Schedule", description: "Jobs, appointments and team availability.", icon: CalendarDays },
-  { match: (path: string) => path.startsWith("/crm"), title: "CRM", description: "Customers, leads and business contacts.", icon: UsersRound },
-  { match: (path: string) => path.startsWith("/transactions"), title: "Transactions", description: "Cash flow, income and expenses.", icon: ArrowRightLeft },
-  { match: (path: string) => path.startsWith("/invoices"), title: "Invoices", description: "Billing, payments and financial records.", icon: CreditCard },
-  { match: (path: string) => path.startsWith("/payroll"), title: "Payroll", description: "Team compensation and payroll periods.", icon: WalletCards },
-  { match: (path: string) => path.startsWith("/communications"), title: "Communications", description: "Unified customer conversations and channels.", icon: MessageSquareText },
-  { match: (path: string) => path.startsWith("/reports"), title: "Reports", description: "Operational and financial performance.", icon: BarChart3 },
-  { match: (path: string) => path.startsWith("/settings") || path.startsWith("/integrations"), title: "Settings", description: "Company preferences, integrations and access.", icon: SlidersHorizontal },
-  { match: (path: string) => path.startsWith("/support"), title: "Help & Support", description: "Support resources and assistance.", icon: CircleHelp },
+  { match: (path: string) => path === "/", titleKey: "page.dashboard.title", descriptionKey: "page.dashboard.description", icon: Building2 },
+  { match: (path: string) => path.startsWith("/schedule"), titleKey: "page.schedule.title", descriptionKey: "page.schedule.description", icon: CalendarDays },
+  { match: (path: string) => path.startsWith("/crm"), titleKey: "page.crm.title", descriptionKey: "page.crm.description", icon: UsersRound },
+  { match: (path: string) => path.startsWith("/transactions"), titleKey: "page.transactions.title", descriptionKey: "page.transactions.description", icon: ArrowRightLeft },
+  { match: (path: string) => path.startsWith("/invoices"), titleKey: "page.invoices.title", descriptionKey: "page.invoices.description", icon: CreditCard },
+  { match: (path: string) => path.startsWith("/payroll"), titleKey: "page.payroll.title", descriptionKey: "page.payroll.description", icon: WalletCards },
+  { match: (path: string) => path.startsWith("/communications"), titleKey: "page.communications.title", descriptionKey: "page.communications.description", icon: MessageSquareText },
+  { match: (path: string) => path.startsWith("/reports"), titleKey: "page.reports.title", descriptionKey: "page.reports.description", icon: BarChart3 },
+  { match: (path: string) => path.startsWith("/settings") || path.startsWith("/integrations"), titleKey: "page.settings.title", descriptionKey: "page.settings.description", icon: SlidersHorizontal },
+  { match: (path: string) => path.startsWith("/support"), titleKey: "page.support.title", descriptionKey: "page.support.description", icon: CircleHelp },
 ] as const;
 
 export function Header({ actions }: HeaderProps) {
@@ -53,12 +53,10 @@ export function Header({ actions }: HeaderProps) {
   const { data: currentStaff } = useCurrentStaff();
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const meta = pageMeta.find((item) => item.match(pathname)) ?? {
-    title: "Clean Flow",
-    description: "Operations workspace.",
-    icon: Building2,
-  };
-  const HeaderIcon = meta.icon;
+  const meta = pageMeta.find((item) => item.match(pathname));
+  const HeaderIcon = meta?.icon ?? Building2;
+  const pageTitle = meta ? t(meta.titleKey) : "Clean Flow";
+  const pageDescription = meta ? t(meta.descriptionKey) : t("page.default.description");
 
   const handleLogout = async () => {
     await signOut();
@@ -72,8 +70,8 @@ export function Header({ actions }: HeaderProps) {
           <HeaderIcon className="h-4 w-4" />
         </div>
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold leading-tight text-foreground">{meta.title}</p>
-          <p className="hidden truncate text-[11px] leading-tight text-muted-foreground sm:block">{meta.description}</p>
+          <p className="truncate text-sm font-semibold leading-tight text-foreground">{pageTitle}</p>
+          <p className="hidden truncate text-[11px] leading-tight text-muted-foreground sm:block">{pageDescription}</p>
         </div>
       </div>
 

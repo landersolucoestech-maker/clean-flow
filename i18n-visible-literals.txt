@@ -1,0 +1,837 @@
+apps/web/src/app/layout/Sidebar.tsx: CLEAN
+apps/web/src/app/layout/Sidebar.tsx: FLOW
+apps/web/src/modules/crm/customers/pages/CustomersPageContent.tsx: Customers
+apps/web/src/modules/crm/customers/pages/CustomersPageContent.tsx: Search, filter and manage the customer directory.
+apps/web/src/modules/crm/customers/pages/CustomersPageContent.tsx: All
+apps/web/src/modules/crm/customers/pages/CustomersPageContent.tsx: Name
+apps/web/src/modules/crm/customers/pages/CustomersPageContent.tsx: Phone
+apps/web/src/modules/crm/customers/pages/CustomersPageContent.tsx: Email
+apps/web/src/modules/crm/customers/pages/CustomersPageContent.tsx: Address
+apps/web/src/modules/crm/customers/pages/CustomersPageContent.tsx: All
+apps/web/src/modules/crm/customers/pages/CustomersPageContent.tsx: Active
+apps/web/src/modules/crm/customers/pages/CustomersPageContent.tsx: Inactive
+apps/web/src/modules/crm/customers/components/CustomerModal.tsx: Inactive Since
+apps/web/src/modules/crm/customers/components/CustomerModal.tsx: Reason for Inactivity
+apps/web/src/modules/crm/customers/components/CustomerModal.tsx: Contact Name
+apps/web/src/modules/crm/customers/components/CustomerModal.tsx: Relationship
+apps/web/src/modules/crm/customers/components/CustomerModal.tsx: Self (Same as customer)
+apps/web/src/modules/crm/customers/components/CustomerModal.tsx: Spouse
+apps/web/src/modules/crm/customers/components/CustomerModal.tsx: Daughter
+apps/web/src/modules/crm/customers/components/CustomerModal.tsx: Son
+apps/web/src/modules/crm/customers/components/CustomerModal.tsx: Parent
+apps/web/src/modules/crm/customers/components/CustomerModal.tsx: Sibling
+apps/web/src/modules/crm/customers/components/CustomerModal.tsx: Caregiver
+apps/web/src/modules/crm/customers/components/CustomerModal.tsx: Property Manager
+apps/web/src/modules/crm/customers/components/CustomerModal.tsx: Accountant
+apps/web/src/modules/crm/customers/components/CustomerModal.tsx: Other
+apps/web/src/modules/crm/customers/components/CustomerModal.tsx: Billing Email
+apps/web/src/modules/crm/customers/components/CustomerModal.tsx: Invoices will be sent to this email
+apps/web/src/modules/crm/customers/components/CustomerModal.tsx: Phone 1
+apps/web/src/modules/crm/customers/components/CustomerModal.tsx: Phone 2
+apps/web/src/modules/crm/customers/components/CustomerModal.tsx: Billing Notes
+apps/web/src/modules/crm/customers/components/CustomerDetailsChrome.tsx: Overview
+apps/web/src/modules/crm/customers/components/CustomerDetailsChrome.tsx: Timeline
+apps/web/src/modules/crm/customers/components/CustomerDetailsChrome.tsx: Contact
+apps/web/src/modules/crm/customers/components/CustomerDetailsChrome.tsx: Addresses
+apps/web/src/modules/crm/customers/components/CustomerDetailsChrome.tsx: Jobs
+apps/web/src/modules/crm/customers/components/CustomerDetailsChrome.tsx: Invoices
+apps/web/src/modules/crm/customers/components/CustomerDetailsChrome.tsx: Chat
+apps/web/src/modules/crm/customers/components/CustomerDetailsChrome.tsx: Contract
+apps/web/src/modules/crm/customers/components/CustomerChatTab.tsx: No messages yet
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Email
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Phone 1
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Phone 2
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Customer Since
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Last Service
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Total Jobs
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Revenue
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Payment Method
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Source
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Referred By
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Primary Address
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Notes
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Additional Info
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Relationship History
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Customer Inactive
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Inactive Since
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Reason
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: No relationship history found
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: History will appear when customer status changes
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Active
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Reason:
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Notes:
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Email
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Phone 1
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Phone 2
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Customer Since
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Service Location
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Full Address
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Frequency
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Preferred Day
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Notes
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Additional Notes
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Primary Address
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Service Location
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Full Address
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: City
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: State
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Postal Code
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Last Service
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Total Jobs
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: No jobs found for this customer
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Notes
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Additional Notes
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Feedback
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: No invoices found for this customer
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Job ID
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Date
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Amount
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Due Date
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Status
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: No Terms Signed
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Signed
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Signed By
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Signed On
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Notes
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Customer Signature
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: View Full Document
+apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx: Download PDF
+apps/web/src/modules/crm/contacts/pages/ContactsPage.tsx: Create Contact
+apps/web/src/modules/crm/contacts/pages/ContactsPage.tsx: Contacts access restricted
+apps/web/src/modules/crm/contacts/pages/ContactsPage.tsx: Your current role does not have permission to view CRM contacts.
+apps/web/src/modules/crm/contacts/pages/ContactsPage.tsx: Contacts
+apps/web/src/modules/crm/contacts/pages/ContactsPage.tsx: Manage suppliers, partners, service providers and other business contacts.
+apps/web/src/modules/crm/contacts/pages/ContactsPage.tsx: All Contact Types
+apps/web/src/modules/crm/contacts/pages/ContactsPage.tsx: All Statuses
+apps/web/src/modules/crm/contacts/pages/ContactsPage.tsx: Unable to load contacts
+apps/web/src/modules/crm/contacts/pages/ContactsPage.tsx: No contacts found
+apps/web/src/modules/crm/contacts/pages/ContactsPage.tsx: Create Contact
+apps/web/src/modules/crm/contacts/pages/ContactsPage.tsx: Name
+apps/web/src/modules/crm/contacts/pages/ContactsPage.tsx: Company
+apps/web/src/modules/crm/contacts/pages/ContactsPage.tsx: Contact Type
+apps/web/src/modules/crm/contacts/pages/ContactsPage.tsx: Contact
+apps/web/src/modules/crm/contacts/pages/ContactsPage.tsx: Status
+apps/web/src/modules/crm/contacts/pages/ContactsPage.tsx: Actions
+apps/web/src/modules/crm/contacts/pages/ContactsPage.tsx: View
+apps/web/src/modules/crm/contacts/pages/ContactsPage.tsx: Edit
+apps/web/src/modules/crm/contacts/pages/ContactsPage.tsx: Delete
+apps/web/src/modules/crm/contacts/pages/ContactsPage.tsx: Previous
+apps/web/src/modules/crm/contacts/pages/ContactsPage.tsx: Next
+apps/web/src/modules/crm/contacts/pages/ContactsPage.tsx: Delete contact?
+apps/web/src/modules/crm/contacts/pages/ContactsPage.tsx: Cancel
+apps/web/src/modules/crm/contacts/pages/ContactsPage.tsx: Delete
+apps/web/src/modules/crm/contacts/components/ContactFormDialog.tsx: Manage a supplier, partner, service provider or other corporate contact.
+apps/web/src/modules/crm/contacts/components/ContactFormDialog.tsx: Company
+apps/web/src/modules/crm/contacts/components/ContactFormDialog.tsx: Contact Type
+apps/web/src/modules/crm/contacts/components/ContactFormDialog.tsx: Status
+apps/web/src/modules/crm/contacts/components/ContactFormDialog.tsx: Email
+apps/web/src/modules/crm/contacts/components/ContactFormDialog.tsx: Phone
+apps/web/src/modules/crm/contacts/components/ContactFormDialog.tsx: Website
+apps/web/src/modules/crm/contacts/components/ContactFormDialog.tsx: Job Title / Role
+apps/web/src/modules/crm/contacts/components/ContactFormDialog.tsx: Address
+apps/web/src/modules/crm/contacts/components/ContactFormDialog.tsx: Notes
+apps/web/src/modules/crm/contacts/components/ContactFormDialog.tsx: Cancel
+apps/web/src/modules/crm/contacts/components/ContactDetailsDialog.tsx: Corporate contact details
+apps/web/src/modules/crm/contacts/components/ContactDetailsDialog.tsx: Notes
+apps/web/src/modules/crm/contacts/components/ContactDetailsDialog.tsx: Close
+apps/web/src/modules/crm/contacts/components/ContactDetailsDialog.tsx: Edit Contact
+apps/web/src/modules/crm/leads/pages/LeadsPageContent.tsx: Leads
+apps/web/src/modules/crm/leads/pages/LeadsPageContent.tsx: Manage the sales pipeline from first contact through conversion.
+apps/web/src/modules/crm/leads/pages/LeadsPageContent.tsx: Lead
+apps/web/src/modules/crm/leads/pages/LeadsPageContent.tsx: Primary Contact
+apps/web/src/modules/crm/leads/pages/LeadsPageContent.tsx: Email
+apps/web/src/modules/crm/leads/pages/LeadsPageContent.tsx: Origin
+apps/web/src/modules/crm/leads/pages/LeadsPageContent.tsx: Status
+apps/web/src/modules/crm/leads/pages/LeadsPageContent.tsx: Invoice Status
+apps/web/src/modules/crm/leads/pages/LeadsPageContent.tsx: Date
+apps/web/src/modules/crm/leads/pages/LeadsPageContent.tsx: Value
+apps/web/src/modules/crm/leads/pages/LeadsPageContent.tsx: Actions
+apps/web/src/modules/crm/leads/pages/LeadsPageContent.tsx: Deposit Paid
+apps/web/src/modules/crm/leads/pages/LeadsPageContent.tsx: Deposit Pending
+apps/web/src/modules/crm/leads/pages/LeadsPageContent.tsx: Aprovar
+apps/web/src/modules/crm/leads/pages/LeadsPageContent.tsx: Marcar como Perdido
+apps/web/src/modules/crm/leads/pages/LeadsPageContent.tsx: Excluir
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: Create New Lead
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: Primary Contact Name
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: Business Name
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: Email
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: Phone
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: Tags
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: No tags selected
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: Add
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: Lead Source
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: Select source...
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: Lead Status
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: Referral Source:
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: Existing Customer
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: Manual Entry
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: Referring Customer
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: Select a customer...
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: Referrer Name
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: Service Type
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: Select type...
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: Property Type
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: Select property...
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: Floors / Type of Residence
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: Select type...
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: Square Feet
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: Bedrooms
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: Bathrooms
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: Frequency
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: Select frequency...
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: Has Pets
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: Hide details
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: View details
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: Hide details
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: View details
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: Add Address
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: Location Name
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: Street Address
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: City
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: State
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: ZIP
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: Address Notes
+apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx: Cancel
+apps/web/src/modules/crm/leads/components/LeadPreferencesHistorySections.tsx: Preferred Days
+apps/web/src/modules/crm/leads/components/LeadPreferencesHistorySections.tsx: Preferred Time
+apps/web/src/modules/crm/leads/components/LeadPreferencesHistorySections.tsx: Select time...
+apps/web/src/modules/crm/leads/components/LeadPreferencesHistorySections.tsx: Required for integration leads
+apps/web/src/modules/crm/leads/components/LeadPreferencesHistorySections.tsx: Agreed Amount
+apps/web/src/modules/crm/leads/components/LeadPreferencesHistorySections.tsx: Valid Until
+apps/web/src/modules/crm/leads/components/LeadPreferencesHistorySections.tsx: Type
+apps/web/src/modules/crm/leads/components/LeadPreferencesHistorySections.tsx: Date
+apps/web/src/modules/crm/leads/components/LeadPreferencesHistorySections.tsx: Time
+apps/web/src/modules/crm/leads/components/LeadPreferencesHistorySections.tsx: Description
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: Primary Contact Name
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: Business Name
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: Email
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: Phone
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: Tags
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: No tags selected
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: Add
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: Lead Source
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: Select source...
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: Lead Status
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: Referral Source:
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: Existing Customer
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: Manual Entry
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: Referring Customer
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: Select a customer...
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: Referrer Name
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: Service Type
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: Select type...
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: Property Type
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: Select property...
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: Floors / Type of Residence
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: Select type...
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: Square Feet
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: Bedrooms
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: Bathrooms
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: Frequency
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: Select frequency...
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: Has Pets
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: Hide details
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: View details
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: Hide details
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: View details
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: Add Address
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: Location Name
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: Street Address
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: City
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: State
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: ZIP
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: Address Notes
+apps/web/src/modules/crm/leads/components/EditLeadModal.tsx: Cancel
+apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx: Preencha os campos obrigatórios:
+apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx: Estimate aprovado com sucesso!
+apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx: Property Information
+apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx: Property Type
+apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx: Residence Type
+apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx: Bedrooms
+apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx: Bathrooms
+apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx: Square Feet
+apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx: Has Pets
+apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx: Yes
+apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx: Business Name
+apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx: Add-on Services
+apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx: Special Instructions
+apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx: Indicado por
+apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx: Data da Visita
+apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx: Valor Total
+apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx: v) && (
+apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx: Nenhum endereço cadastrado
+apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx: Add Interaction
+apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx: Nova Interação
+apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx: Data
+apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx: Hora
+apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx: Descrição
+apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx: Cancelar
+apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx: Aprovar Estimate
+apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx: Ao aprovar este estimate, as seguintes ações serão executadas:
+apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx: Campos de preferências serão liberados para edição
+apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx: Aguardando Pagamento
+apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx: Pagamento Confirmado!
+apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx: O depósito foi recebido. Você pode criar o Job agora.
+apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx: Criar Job
+apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx: Aprovando...
+apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx: Approve Estimate
+apps/web/src/modules/billing/pages/BillingPage.tsx: Sync QuickBooks
+apps/web/src/modules/billing/pages/BillingPage.tsx: Clear Filter
+apps/web/src/modules/billing/pages/BillingPage.tsx: All Status
+apps/web/src/modules/billing/pages/BillingPage.tsx: Sent
+apps/web/src/modules/billing/pages/BillingPage.tsx: Viewed
+apps/web/src/modules/billing/pages/BillingPage.tsx: Paid
+apps/web/src/modules/billing/pages/BillingPage.tsx: Overdue
+apps/web/src/modules/billing/pages/BillingPage.tsx: QB Sync
+apps/web/src/modules/billing/pages/BillingPage.tsx: Auto
+apps/web/src/modules/billing/pages/BillingPage.tsx: Manual
+apps/web/src/modules/billing/pages/BillingPage.tsx: Marcar como Pago
+apps/web/src/modules/billing/pages/BillingPage.tsx: Enviar Lembrete
+apps/web/src/modules/billing/pages/BillingPage.tsx: Edit Invoice
+apps/web/src/modules/billing/pages/BillingPage.tsx: View Details
+apps/web/src/modules/billing/pages/BillingPage.tsx: Delete Invoice
+apps/web/src/modules/billing/components/CreateInvoiceModal.tsx: No completed jobs
+apps/web/src/modules/billing/components/CreateInvoiceModal.tsx: Invoice Number:
+apps/web/src/modules/billing/components/EditInvoiceModal.tsx: Job ID
+apps/web/src/modules/transactions/pages/RulesPage.tsx: Receita
+apps/web/src/modules/transactions/pages/RulesPage.tsx: Despesa
+apps/web/src/modules/transactions/pages/RulesPage.tsx: Nova Regra
+apps/web/src/modules/transactions/pages/RulesPage.tsx: Nome
+apps/web/src/modules/transactions/pages/RulesPage.tsx: Condição
+apps/web/src/modules/transactions/pages/RulesPage.tsx: Categoria
+apps/web/src/modules/transactions/pages/RulesPage.tsx: Tipo
+apps/web/src/modules/transactions/pages/RulesPage.tsx: Status
+apps/web/src/modules/transactions/pages/RulesPage.tsx: Ações
+apps/web/src/modules/transactions/pages/RulesPage.tsx: Nenhuma regra encontrada
+apps/web/src/modules/transactions/pages/RulesPage.tsx: Nova Regra
+apps/web/src/modules/transactions/pages/RulesPage.tsx: Nome da Regra
+apps/web/src/modules/transactions/pages/RulesPage.tsx: Condição
+apps/web/src/modules/transactions/pages/RulesPage.tsx: Tipo
+apps/web/src/modules/transactions/pages/RulesPage.tsx: Receita
+apps/web/src/modules/transactions/pages/RulesPage.tsx: Despesa
+apps/web/src/modules/transactions/pages/RulesPage.tsx: Categoria
+apps/web/src/modules/transactions/pages/RulesPage.tsx: Cancelar
+apps/web/src/modules/transactions/pages/RulesPage.tsx: Detalhes da Regra
+apps/web/src/modules/transactions/pages/RulesPage.tsx: Nome
+apps/web/src/modules/transactions/pages/RulesPage.tsx: Tipo
+apps/web/src/modules/transactions/pages/RulesPage.tsx: Condição
+apps/web/src/modules/transactions/pages/RulesPage.tsx: Categoria
+apps/web/src/modules/transactions/pages/RulesPage.tsx: Status
+apps/web/src/modules/transactions/pages/RulesPage.tsx: Criada em
+apps/web/src/modules/transactions/pages/RulesPage.tsx: Fechar
+apps/web/src/modules/transactions/pages/RulesPage.tsx: Editar Regra
+apps/web/src/modules/transactions/pages/RulesPage.tsx: Nome da Regra
+apps/web/src/modules/transactions/pages/RulesPage.tsx: Condição
+apps/web/src/modules/transactions/pages/RulesPage.tsx: Tipo
+apps/web/src/modules/transactions/pages/RulesPage.tsx: Receita
+apps/web/src/modules/transactions/pages/RulesPage.tsx: Despesa
+apps/web/src/modules/transactions/pages/RulesPage.tsx: Categoria
+apps/web/src/modules/transactions/pages/RulesPage.tsx: Cancelar
+apps/web/src/modules/transactions/pages/TransactionsPage.tsx: Regras
+apps/web/src/modules/transactions/pages/TransactionsPage.tsx: Nova Transação
+apps/web/src/modules/transactions/pages/TransactionsPage.tsx: Total Revenue
+apps/web/src/modules/transactions/pages/TransactionsPage.tsx: paid revenue
+apps/web/src/modules/transactions/pages/TransactionsPage.tsx: Total Expenses
+apps/web/src/modules/transactions/pages/TransactionsPage.tsx: paid expenses
+apps/web/src/modules/transactions/pages/TransactionsPage.tsx: Profit
+apps/web/src/modules/transactions/pages/TransactionsPage.tsx: To Be Received
+apps/web/src/modules/transactions/pages/TransactionsPage.tsx: pending revenue
+apps/web/src/modules/transactions/pages/TransactionsPage.tsx: To Be Paid
+apps/web/src/modules/transactions/pages/TransactionsPage.tsx: pending expenses
+apps/web/src/modules/transactions/pages/TransactionsPage.tsx: Exportar dados
+apps/web/src/modules/transactions/pages/TransactionsPage.tsx: Name
+apps/web/src/modules/transactions/pages/TransactionsPage.tsx: Date
+apps/web/src/modules/transactions/pages/TransactionsPage.tsx: Type
+apps/web/src/modules/transactions/pages/TransactionsPage.tsx: Category
+apps/web/src/modules/transactions/pages/TransactionsPage.tsx: Status
+apps/web/src/modules/transactions/pages/TransactionsPage.tsx: Value
+apps/web/src/modules/transactions/pages/TransactionsPage.tsx: Actions
+apps/web/src/modules/transactions/components/TransactionModal.tsx: Receita
+apps/web/src/modules/transactions/components/TransactionModal.tsx: Despesa
+apps/web/src/modules/transactions/components/TransactionModal.tsx: Tipo de Serviço
+apps/web/src/modules/transactions/components/TransactionModal.tsx: Status
+apps/web/src/modules/transactions/components/TransactionModal.tsx: Cancelar
+apps/web/src/modules/auth/pages/SetupPage.tsx: Configuração inicial
+apps/web/src/modules/auth/pages/SetupPage.tsx: Crie a empresa e vincule sua conta como o primeiro administrador.
+apps/web/src/modules/auth/pages/SetupPage.tsx: Nome da empresa
+apps/web/src/modules/auth/pages/SetupPage.tsx: Seu nome
+apps/web/src/modules/auth/pages/SetPasswordPage.tsx: Set your password
+apps/web/src/modules/auth/pages/SetPasswordPage.tsx: Finish activating your Clean Flow team account.
+apps/web/src/modules/auth/pages/SetPasswordPage.tsx: New password
+apps/web/src/modules/auth/pages/SetPasswordPage.tsx: Confirm password
+apps/web/src/modules/auth/pages/AuthPage.tsx: Manage your cleaning business with ease
+apps/web/src/modules/auth/pages/AuthPage.tsx: Streamline scheduling, billing, and customer management all in one powerful platform.
+apps/web/src/modules/auth/pages/AuthPage.tsx: Welcome
+apps/web/src/modules/auth/pages/AuthPage.tsx: Sign in with an owner account or a team invitation
+apps/web/src/modules/auth/pages/AuthPage.tsx: Email
+apps/web/src/modules/auth/pages/AuthPage.tsx: Password
+apps/web/src/modules/auth/pages/AuthPage.tsx: Forgot your password?
+apps/web/src/modules/auth/pages/AuthPage.tsx: Or continue with
+apps/web/src/modules/auth/pages/AuthPage.tsx: Continue with Google
+apps/web/src/modules/auth/pages/AuthPage.tsx: New team members receive an invitation from an administrator.
+apps/web/src/modules/auth/pages/AuthPage.tsx: Sign in here
+apps/web/src/modules/communications/pages/RingCentralCallbackPage.tsx: Esta janela fechará automaticamente...
+apps/web/src/modules/communications/pages/RingCentralCallbackPage.tsx: Você pode fechar esta janela e tentar novamente.
+apps/web/src/modules/communications/pages/DialpadCallbackPage.tsx: Esta janela fechará automaticamente...
+apps/web/src/modules/communications/pages/DialpadCallbackPage.tsx: Você pode fechar esta janela e tentar novamente.
+apps/web/src/modules/communications/pages/CommunicationsPage.tsx: Sync
+apps/web/src/modules/communications/pages/CommunicationsPage.tsx: Broadcast
+apps/web/src/modules/communications/pages/CommunicationsPage.tsx: New message
+apps/web/src/modules/communications/pages/CommunicationsPage.tsx: Channels
+apps/web/src/modules/communications/pages/CommunicationsPage.tsx: Ready
+apps/web/src/modules/communications/pages/CommunicationsPage.tsx: SMS is connected today. Social channels are represented by the same inbox contract and can be activated without rebuilding this screen.
+apps/web/src/modules/communications/pages/CommunicationsPage.tsx: Customers
+apps/web/src/modules/communications/pages/CommunicationsPage.tsx: Team
+apps/web/src/modules/communications/pages/CommunicationsPage.tsx: No conversations here
+apps/web/src/modules/communications/pages/CommunicationsPage.tsx: New
+apps/web/src/modules/communications/pages/CommunicationsPage.tsx: No messages yet
+apps/web/src/modules/communications/pages/CommunicationsPage.tsx: Send the first message to start this conversation.
+apps/web/src/modules/communications/pages/CommunicationsPage.tsx: Open attachment
+apps/web/src/modules/communications/pages/CommunicationsPage.tsx: Select a conversation
+apps/web/src/modules/communications/pages/CommunicationsPage.tsx: Choose a customer or team conversation from the unified inbox, or start a new message.
+apps/web/src/modules/communications/pages/CommunicationsPage.tsx: New message
+apps/web/src/modules/communications/pages/CommunicationsPage.tsx: Contact context
+apps/web/src/modules/communications/pages/CommunicationsPage.tsx: Channel
+apps/web/src/modules/communications/pages/CommunicationsPage.tsx: Contact
+apps/web/src/modules/communications/pages/CommunicationsPage.tsx: Status
+apps/web/src/modules/communications/pages/CommunicationsPage.tsx: This contextual column is ready to receive CRM details, assignment, tags and future channel metadata as integrations are enabled.
+apps/web/src/modules/communications/pages/CommunicationsPage.tsx: Contact details appear here when a conversation is selected.
+apps/web/src/modules/communications/components/BroadcastModal.tsx: Broadcast Communication
+apps/web/src/modules/communications/components/BroadcastModal.tsx: Send one message to selected customers or team members.
+apps/web/src/modules/communications/components/BroadcastModal.tsx: Customers
+apps/web/src/modules/communications/components/BroadcastModal.tsx: Team
+apps/web/src/modules/communications/components/BroadcastModal.tsx: Maximum 10 MB per file
+apps/web/src/modules/communications/components/BroadcastModal.tsx: Cancel
+apps/web/src/modules/communications/components/NewMessageModal.tsx: New Message
+apps/web/src/modules/communications/components/NewMessageModal.tsx: Start a new conversation with a customer or team member
+apps/web/src/modules/communications/components/NewMessageModal.tsx: Customers
+apps/web/src/modules/communications/components/NewMessageModal.tsx: Team Members
+apps/web/src/modules/communications/components/NewMessageModal.tsx: No customers with phone numbers found
+apps/web/src/modules/communications/components/NewMessageModal.tsx: No team members with phone numbers found
+apps/web/src/modules/communications/components/NewMessageModal.tsx: Inactive
+apps/web/src/modules/communications/components/NewMessageModal.tsx: Change
+apps/web/src/modules/communications/components/NewMessageModal.tsx: Message
+apps/web/src/modules/communications/components/NewMessageModal.tsx: Cancel
+apps/web/src/modules/communications/components/NewMessageModal.tsx: Sending...
+apps/web/src/modules/communications/components/NewMessageModal.tsx: Send Message
+apps/web/src/modules/reports/components/AnalyticsTab.tsx: Percentil
+apps/web/src/modules/reports/components/AnalyticsTab.tsx: Média do mercado:
+apps/web/src/modules/reports/components/AnalyticsTab.tsx: Top performers:
+apps/web/src/modules/reports/components/AnalyticsTab.tsx: Overall Business Performance Score
+apps/web/src/modules/reports/components/AnalyticsTab.tsx: Compared to similar service-based companies in your market.
+apps/web/src/modules/reports/components/AnalyticsTab.tsx: Crescimento de customers
+apps/web/src/modules/reports/components/AnalyticsTab.tsx: Eficiência operacional
+apps/web/src/modules/reports/components/AnalyticsTab.tsx: Rentabilidade
+apps/web/src/modules/reports/components/AnalyticsTab.tsx: Custos
+apps/web/src/modules/reports/components/AnalyticsTab.tsx: Relatórios Financeiros
+apps/web/src/modules/reports/components/AnalyticsTab.tsx: Receita
+apps/web/src/modules/reports/components/AnalyticsTab.tsx: Despesas
+apps/web/src/modules/reports/components/AnalyticsTab.tsx: Lucro
+apps/web/src/modules/reports/components/AnalyticsTab.tsx: Relatório de Jobs (Operacional)
+apps/web/src/modules/reports/components/AnalyticsTab.tsx: Relatório de Agendamentos
+apps/web/src/modules/reports/components/AnalyticsTab.tsx: Relatório de Clientes
+apps/web/src/modules/reports/components/AnalyticsTab.tsx: Relatório de Equipe (Payroll & Performance)
+apps/web/src/modules/reports/components/AnalyticsTab.tsx: Equipe
+apps/web/src/modules/reports/components/AnalyticsTab.tsx: Payroll
+apps/web/src/modules/reports/components/AnalyticsTab.tsx: Performance
+apps/web/src/modules/reports/components/AnalyticsTab.tsx: Relatório de Comunicações
+apps/web/src/modules/reports/components/AIConsultantCard.tsx: Consultor IA de Performance
+apps/web/src/modules/reports/components/AIConsultantCard.tsx: AI Powered
+apps/web/src/modules/reports/components/AIConsultantCard.tsx: Análise inteligente do seu negócio com diagnósticos e recomendações
+apps/web/src/modules/reports/components/AIConsultantCard.tsx: Analisando...
+apps/web/src/modules/reports/components/AIConsultantCard.tsx: Reanalisar
+apps/web/src/modules/reports/components/AIConsultantCard.tsx: Analisar Negócio
+apps/web/src/modules/reports/components/AIConsultantCard.tsx: Pronto para analisar seu negócio
+apps/web/src/modules/reports/components/AIConsultantCard.tsx: Gerando análise...
+apps/web/src/modules/settings/pages/SyncLogsPage.tsx: Success
+apps/web/src/modules/settings/pages/SyncLogsPage.tsx: Error
+apps/web/src/modules/settings/pages/SyncLogsPage.tsx: Pending
+apps/web/src/modules/settings/pages/SyncLogsPage.tsx: Sync Logs
+apps/web/src/modules/settings/pages/SyncLogsPage.tsx: Monitor QuickBooks synchronization activity and troubleshoot issues
+apps/web/src/modules/settings/pages/SyncLogsPage.tsx: Not Connected
+apps/web/src/modules/settings/pages/SyncLogsPage.tsx: Connecting...
+apps/web/src/modules/settings/pages/SyncLogsPage.tsx: Total Syncs
+apps/web/src/modules/settings/pages/SyncLogsPage.tsx: Successful
+apps/web/src/modules/settings/pages/SyncLogsPage.tsx: Errors
+apps/web/src/modules/settings/pages/SyncLogsPage.tsx: Last Sync
+apps/web/src/modules/settings/pages/SyncLogsPage.tsx: Sync History
+apps/web/src/modules/settings/pages/SyncLogsPage.tsx: Export CSV
+apps/web/src/modules/settings/pages/SyncLogsPage.tsx: Clear Logs
+apps/web/src/modules/settings/pages/SyncLogsPage.tsx: All Types
+apps/web/src/modules/settings/pages/SyncLogsPage.tsx: Invoice
+apps/web/src/modules/settings/pages/SyncLogsPage.tsx: Customer
+apps/web/src/modules/settings/pages/SyncLogsPage.tsx: Payment
+apps/web/src/modules/settings/pages/SyncLogsPage.tsx: Payroll
+apps/web/src/modules/settings/pages/SyncLogsPage.tsx: All Status
+apps/web/src/modules/settings/pages/SyncLogsPage.tsx: Success
+apps/web/src/modules/settings/pages/SyncLogsPage.tsx: Error
+apps/web/src/modules/settings/pages/SyncLogsPage.tsx: Pending
+apps/web/src/modules/settings/pages/SyncLogsPage.tsx: No sync logs found
+apps/web/src/modules/settings/pages/SyncLogsPage.tsx: Timestamp
+apps/web/src/modules/settings/pages/SyncLogsPage.tsx: Type
+apps/web/src/modules/settings/pages/SyncLogsPage.tsx: Action
+apps/web/src/modules/settings/pages/SyncLogsPage.tsx: Status
+apps/web/src/modules/settings/pages/SyncLogsPage.tsx: Message
+apps/web/src/modules/settings/pages/SyncLogsPage.tsx: Local ID
+apps/web/src/modules/settings/pages/SyncLogsPage.tsx: QB ID
+apps/web/src/modules/settings/pages/SyncLogsPage.tsx: Actions
+apps/web/src/modules/settings/pages/SyncLogsPage.tsx: Retry sync operation
+apps/web/src/modules/settings/pages/SettingsPage.tsx: Eastern Time (ET)
+apps/web/src/modules/settings/pages/SettingsPage.tsx: Central Time (CT)
+apps/web/src/modules/settings/pages/SettingsPage.tsx: Mountain Time (MT)
+apps/web/src/modules/settings/pages/SettingsPage.tsx: Pacific Time (PT)
+apps/web/src/modules/settings/pages/SettingsPage.tsx: Brasília Time (BRT)
+apps/web/src/modules/settings/pages/SettingsPage.tsx: USD - Dollar
+apps/web/src/modules/settings/pages/SettingsPage.tsx: EUR - Euro
+apps/web/src/modules/settings/pages/SettingsPage.tsx: GBP - Pound
+apps/web/src/modules/settings/pages/SettingsPage.tsx: BRL - Real
+apps/web/src/modules/settings/pages/SettingsPage.tsx: English
+apps/web/src/modules/settings/pages/SettingsPage.tsx: Português
+apps/web/src/modules/settings/pages/SettingsPage.tsx: Español
+apps/web/src/modules/settings/pages/SettingsPage.tsx: Review Links
+apps/web/src/modules/settings/pages/SettingsPage.tsx: Configure review links for customer requests
+apps/web/src/modules/settings/pages/SettingsPage.tsx: Google Review URL
+apps/web/src/modules/settings/pages/SettingsPage.tsx: Nextdoor Review URL
+apps/web/src/modules/settings/pages/SettingsPage.tsx: Auto Review Settings
+apps/web/src/modules/settings/pages/SettingsPage.tsx: Delay Type
+apps/web/src/modules/settings/pages/SettingsPage.tsx: Hours
+apps/web/src/modules/settings/pages/SettingsPage.tsx: Minutes
+apps/web/src/modules/settings/pages/SettingsPage.tsx: Message To
+apps/web/src/modules/settings/pages/SettingsPage.tsx: Text Phone 1
+apps/web/src/modules/settings/pages/SettingsPage.tsx: Text Phone 2
+apps/web/src/modules/settings/pages/SettingsPage.tsx: Email
+apps/web/src/modules/settings/pages/SettingsPage.tsx: GPS Location Settings
+apps/web/src/modules/settings/pages/SettingsPage.tsx: Configure GPS tracking and alerts
+apps/web/src/modules/settings/pages/SettingsPage.tsx: meters
+apps/web/src/modules/settings/pages/SettingsPage.tsx: Payment Settings
+apps/web/src/modules/settings/pages/SettingsPage.tsx: Configure payment receiving methods
+apps/web/src/modules/settings/pages/SettingsPage.tsx: Zelle Payment Key
+apps/web/src/modules/settings/pages/SettingsPage.tsx: Zelle registered email or phone number
+apps/web/src/modules/settings/pages/SettingsPage.tsx: Venmo Payment Key
+apps/web/src/modules/settings/pages/SettingsPage.tsx: Venmo username or link
+apps/web/src/modules/settings/pages/SettingsPage.tsx: How it works
+apps/web/src/modules/settings/pages/GoogleCallbackPage.tsx: Esta janela fechará automaticamente...
+apps/web/src/modules/settings/pages/GoogleCallbackPage.tsx: Você pode fechar esta janela e tentar novamente.
+apps/web/src/modules/settings/components/TeamSettingsSection.tsx: Sem Team
+apps/web/src/modules/settings/components/TeamSettingsSection.tsx: Access is enforced by the supported operational roles below.
+apps/web/src/modules/settings/components/ProfileSettingsSection.tsx: Login email changes are managed by an administrator.
+apps/web/src/modules/settings/components/SecuritySettingsSection.tsx: These account-wide policies are managed in Supabase Auth settings.
+apps/web/src/modules/settings/components/DialpadIntegrationPanel.tsx: Conectado
+apps/web/src/modules/settings/components/DialpadIntegrationPanel.tsx: Conecte o Dialpad para enviar e receber SMS/MMS pelo Communications com OAuth, refresh de token e eventos de entrega.
+apps/web/src/modules/settings/components/DialpadIntegrationPanel.tsx: SMS/MMS ativo
+apps/web/src/modules/settings/components/DialpadIntegrationPanel.tsx: Redirect URI para cadastrar no app OAuth do Dialpad
+apps/web/src/modules/settings/components/DialpadIntegrationPanel.tsx: Copiar
+apps/web/src/modules/settings/components/DialpadIntegrationPanel.tsx: Provedor de SMS
+apps/web/src/modules/settings/components/DialpadIntegrationPanel.tsx: Escolha qual integração o Communications deve usar. Automático preserva RingCentral como prioridade e usa Dialpad quando necessário.
+apps/web/src/modules/settings/components/DialpadIntegrationPanel.tsx: Automático
+apps/web/src/modules/settings/components/IntegrationsTab.tsx: Carregando integrações...
+apps/web/src/modules/settings/components/TeamUserModal.tsx: Team
+apps/web/src/modules/settings/components/TeamUserModal.tsx: Sem team definido
+apps/web/src/modules/settings/components/TeamUserModal.tsx: Fill in the team member information below
+apps/web/src/modules/settings/components/TeamUserModal.tsx: Phone Number
+apps/web/src/modules/settings/components/TeamUserModal.tsx: An invitation email will let this team member set a private password.
+apps/web/src/modules/settings/components/TeamUserModal.tsx: Zelle
+apps/web/src/modules/settings/components/TeamUserModal.tsx: Check
+apps/web/src/modules/settings/components/TeamUserModal.tsx: Cash
+apps/web/src/modules/settings/components/TeamUserModal.tsx: This will be used to send payments via Zelle.
+apps/web/src/modules/settings/components/TeamUserModal.tsx: QuickBooks Vendor/Employee ID
+apps/web/src/modules/settings/components/TeamUserModal.tsx: This employee will be linked to QuickBooks for payment processing. Leave blank to auto-create.
+apps/web/src/modules/settings/components/TeamUserModal.tsx: Delete Team Member
+apps/web/src/modules/settings/components/TeamUserModal.tsx: Are you sure you want to delete this team member? This action cannot be undone.
+apps/web/src/modules/settings/components/TeamUserModal.tsx: Cancel
+apps/web/src/modules/settings/components/TeamUserModal.tsx: Delete
+apps/web/src/modules/settings/components/TeamUserModal.tsx: Cancel
+apps/web/src/modules/settings/components/AutomationsTab.tsx: Automations
+apps/web/src/modules/settings/components/AutomationsTab.tsx: Automations
+apps/web/src/modules/settings/components/AutomationsTab.tsx: Configure automated messages for job status changes and reminders.
+apps/web/src/modules/settings/components/AutomationsTab.tsx: Add Automation
+apps/web/src/modules/settings/components/AutomationsTab.tsx: Label
+apps/web/src/modules/settings/components/AutomationsTab.tsx: Category
+apps/web/src/modules/settings/components/AutomationsTab.tsx: Trigger
+apps/web/src/modules/settings/components/AutomationsTab.tsx: Delay Type
+apps/web/src/modules/settings/components/AutomationsTab.tsx: Hours
+apps/web/src/modules/settings/components/AutomationsTab.tsx: Days
+apps/web/src/modules/settings/components/AutomationsTab.tsx: Send At Time
+apps/web/src/modules/settings/components/AutomationsTab.tsx: Condition
+apps/web/src/modules/settings/components/AutomationsTab.tsx: Message To
+apps/web/src/modules/settings/components/AutomationsTab.tsx: Message
+apps/web/src/modules/settings/components/AutomationsTab.tsx: Add New Automation
+apps/web/src/modules/settings/components/AutomationsTab.tsx: Category
+apps/web/src/modules/settings/components/AutomationsTab.tsx: Message To
+apps/web/src/modules/settings/components/AutomationsTab.tsx: Delay Type
+apps/web/src/modules/settings/components/AutomationsTab.tsx: Hours
+apps/web/src/modules/settings/components/AutomationsTab.tsx: Days
+apps/web/src/modules/settings/components/AutomationsTab.tsx: Send At Time
+apps/web/src/modules/settings/components/AutomationsTab.tsx: Condition
+apps/web/src/modules/settings/components/AutomationsTab.tsx: Cancel
+apps/web/src/modules/settings/components/AutomationsTab.tsx: Delete Automation
+apps/web/src/modules/settings/components/AutomationsTab.tsx: Are you sure you want to delete this automation? This action cannot be undone.
+apps/web/src/modules/settings/components/AutomationsTab.tsx: Cancel
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Conectado
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Conecte sua conta Google para sincronizar Calendar e, futuramente, integrar Ads e Local Services.
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Google Calendar
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Sincronização automática ativa
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Google Ads
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Importar leads de campanhas
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Local Services
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Leads do Google Garantido
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Calendário para Jobs
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Escolha qual calendário receberá os agendamentos
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Principal
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Calendário para Leads
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Escolha um calendário separado para agendamentos de leads
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Desativado
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Principal
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Carregando calendários...
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Conta Vinculada
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Desconectar
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: O login abre em uma nova aba (o Google bloqueia OAuth dentro do preview). Depois de autorizar, você volta automaticamente ao app.
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Conectado
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Conecte sua conta QuickBooks para sincronizar automaticamente clientes, invoices, pagamentos e folha de pagamento.
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Empresa conectada:
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Sincronização Ativa
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Desconectar
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Conectado
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Conecte sua conta RingCentral para enviar e receber SMS com seus clientes diretamente pelo sistema.
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Número SMS:
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: SMS Ativo
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Desconectar
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Redirect URI deste ambiente (copie e cadastre no RingCentral):
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Copiar
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Client ID em uso no sistema:
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Scope solicitado:
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Website Lead Capture
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Ativo
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Capture leads automaticamente do seu site. Use o webhook abaixo nos formulários do seu website.
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Webhook URL
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Copiar
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Auto Lead Creation
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Customer Matching
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Resend Email
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Conectado
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Envio de emails transacionais para invoices, lembretes, review requests e mais.
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Invoice Emails
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Reminders
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Review Requests
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Estimates
+apps/web/src/modules/settings/components/IntegrationsTabContent.tsx: Email Configurado
+apps/web/src/modules/schedule/calendar/CalendarGrid.tsx: TEAMS
+apps/web/src/modules/schedule/calendar/CalendarGrid.tsx: SERVICE STATUS
+apps/web/src/modules/schedule/pages/SchedulePage.tsx: This action cannot be undone. This will permanently delete the selected jobs.
+apps/web/src/modules/schedule/pages/SchedulePage.tsx: Cancel
+apps/web/src/modules/schedule/pages/SchedulePage.tsx: Deleting...
+apps/web/src/modules/schedule/components/FilterModal.tsx: Filter Appointments
+apps/web/src/modules/schedule/components/FilterModal.tsx: Staff Members
+apps/web/src/modules/schedule/components/FilterModal.tsx: Loading staff...
+apps/web/src/modules/schedule/components/FilterModal.tsx: No staff members found
+apps/web/src/modules/schedule/components/FilterModal.tsx: Services
+apps/web/src/modules/schedule/components/FilterModal.tsx: Status
+apps/web/src/modules/schedule/components/FilterModal.tsx: Clear All
+apps/web/src/modules/schedule/components/FilterModal.tsx: Cancel
+apps/web/src/modules/schedule/components/FilterModal.tsx: Apply Filters
+apps/web/src/modules/schedule/components/AppointmentModal.tsx: Gerar agendamentos recorrentes automaticamente (próximo mês)
+apps/web/src/modules/schedule/components/ReviewRequestPreviewModal.tsx: Preview Review Request
+apps/web/src/modules/schedule/components/ReviewRequestPreviewModal.tsx: Select which review links to include and customize the message
+apps/web/src/modules/schedule/components/ReviewRequestPreviewModal.tsx: Include Review Links
+apps/web/src/modules/schedule/components/ReviewRequestPreviewModal.tsx: Google Review
+apps/web/src/modules/schedule/components/ReviewRequestPreviewModal.tsx: Nextdoor Review
+apps/web/src/modules/schedule/components/ReviewRequestPreviewModal.tsx: Message
+apps/web/src/modules/schedule/components/ReviewRequestPreviewModal.tsx: Message Preview
+apps/web/src/modules/schedule/components/ReviewRequestPreviewModal.tsx: No message
+apps/web/src/modules/schedule/components/ReviewRequestPreviewModal.tsx: Cancel
+apps/web/src/modules/schedule/components/AppointmentDetailsPrimitives.tsx: Loading...
+apps/web/src/modules/schedule/components/AppointmentDetailsPrimitives.tsx: No members assigned
+apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx: Team Assigned
+apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx: No team assigned
+apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx: Request Review
+apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx: Edit
+apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx: Close
+apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx: Add Job Note
+apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx: Cancel
+apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx: Add Note
+apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx: Add Additional Note
+apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx: Cancel
+apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx: Add Note
+apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx: Add Feedback
+apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx: Cancel
+apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx: Add Feedback
+apps/web/src/modules/schedule/components/AppointmentBillingSummary.tsx: Cleaning Rate
+apps/web/src/modules/schedule/components/AppointmentBillingSummary.tsx: Total
+apps/web/src/modules/schedule/components/AppointmentBillingSummary.tsx: Invoice status
+apps/web/src/modules/schedule/components/AppointmentBillingSummary.tsx: Send Invoice
+apps/web/src/modules/schedule/components/AppointmentBillingSummary.tsx: Sent
+apps/web/src/modules/schedule/components/AppointmentBillingSummary.tsx: Payment status
+apps/web/src/modules/schedule/components/AppointmentBillingSummary.tsx: Pending
+apps/web/src/modules/schedule/components/AppointmentManualTimeEditor.tsx: Manual Time Editing
+apps/web/src/modules/schedule/components/InvoiceModal.tsx: Create and send an invoice for the completed job.
+apps/web/src/modules/schedule/components/InvoiceModal.tsx: Invoice Number
+apps/web/src/modules/schedule/components/InvoiceModal.tsx: Payment Terms
+apps/web/src/modules/schedule/components/InvoiceModal.tsx: Issue Date
+apps/web/src/modules/schedule/components/InvoiceModal.tsx: Pick a date
+apps/web/src/modules/schedule/components/InvoiceModal.tsx: Due Date
+apps/web/src/modules/schedule/components/InvoiceModal.tsx: Pick a date
+apps/web/src/modules/schedule/components/InvoiceModal.tsx: Bill To
+apps/web/src/modules/schedule/components/InvoiceModal.tsx: Line Items
+apps/web/src/modules/schedule/components/InvoiceModal.tsx: Add
+apps/web/src/modules/schedule/components/InvoiceModal.tsx: Subtotal
+apps/web/src/modules/schedule/components/InvoiceModal.tsx: Tax
+apps/web/src/modules/schedule/components/InvoiceModal.tsx: Total
+apps/web/src/modules/schedule/components/InvoiceModal.tsx: Cancel
+apps/web/src/modules/schedule/components/JobStatusTracker.tsx: No status records found
+apps/web/src/modules/schedule/components/JobStatusTracker.tsx: Could not load map
+apps/web/src/modules/schedule/components/JobStatusTracker.tsx: No map available
+apps/web/src/modules/schedule/components/JobStatusTracker.tsx: Open trajectory in Google Maps
+apps/web/src/modules/schedule/components/JobStatusTracker.tsx: GPS Tracking
+apps/web/src/modules/schedule/components/JobStatusTracker.tsx: History
+apps/web/src/modules/schedule/components/JobStatusTracker.tsx: GPS Map
+apps/web/src/modules/schedule/components/JobStatusTracker.tsx: Shows the position captured at the time of status marking.
+apps/web/src/modules/schedule/components/JobStatusTracker.tsx: Your profile can only mark steps.
+apps/web/src/modules/schedule/components/JobStatusTracker.tsx: Link this login email to an active staff member to update status.
+apps/web/src/modules/admin/pages/AdminDashboard.tsx: Dashboard administrativo
+apps/web/src/modules/admin/pages/AdminDashboard.tsx: Contagens operacionais atuais do sistema
+apps/web/src/modules/admin/pages/AdminDashboard.tsx: Métricas de receita, assinatura e conversão não são exibidas porque o projeto ainda não possui um provedor de pagamentos configurado.
+apps/web/src/modules/admin/pages/AdminAuth.tsx: Back to User Login
+apps/web/src/modules/admin/pages/AdminAuth.tsx: Admin Portal
+apps/web/src/modules/admin/pages/AdminAuth.tsx: Platform Administration Access
+apps/web/src/modules/admin/pages/AdminAuth.tsx: Secure Login
+apps/web/src/modules/admin/pages/AdminAuth.tsx: Enter your administrator credentials
+apps/web/src/modules/admin/pages/AdminAuth.tsx: Email Address
+apps/web/src/modules/admin/pages/AdminAuth.tsx: Password
+apps/web/src/modules/admin/pages/AdminAuth.tsx: Access Admin Panel
+apps/web/src/modules/admin/pages/AdminAuth.tsx: Secure platform authentication
+apps/web/src/modules/admin/pages/AdminAuth.tsx: Only authorized platform administrators can access this area.
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Aberto
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Em Andamento
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Resolvido
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Aguardando
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Fechado
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Alta
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Média
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Baixa
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Tickets de Suporte
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Gerencie todas as solicitações de suporte dos usuários
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Tickets Abertos
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Aguardando atendimento
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Em Andamento
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Sendo atendidos
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Resolvidos
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Finalizados
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Total
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Todos os tickets
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Lista de Tickets
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Visualize e gerencie todos os tickets de suporte
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Todos os Status
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Aberto
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Em Andamento
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Resolvido
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Fechado
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Todas Prioridades
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Alta
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Média
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Baixa
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Carregando...
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Nenhum ticket encontrado
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Título
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Usuário
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Organização
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Status
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Prioridade
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Categoria
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Criado em
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Ações
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Ver detalhes
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Marcar em andamento
+apps/web/src/modules/admin/pages/AdminSupport.tsx: Marcar resolvido
+apps/web/src/modules/admin/pages/AdminLogs.tsx: Logs e Auditoria
+apps/web/src/modules/admin/pages/AdminLogs.tsx: Monitore atividades e erros do sistema
+apps/web/src/modules/admin/pages/AdminLogs.tsx: Auditoria
+apps/web/src/modules/admin/pages/AdminLogs.tsx: Erros
+apps/web/src/modules/admin/pages/AdminLogs.tsx: Log de Auditoria
+apps/web/src/modules/admin/pages/AdminLogs.tsx: Todos os tipos
+apps/web/src/modules/admin/pages/AdminLogs.tsx: Carregando...
+apps/web/src/modules/admin/pages/AdminLogs.tsx: Nenhum log encontrado
+apps/web/src/modules/admin/pages/AdminLogs.tsx: Data/Hora
+apps/web/src/modules/admin/pages/AdminLogs.tsx: Ação
+apps/web/src/modules/admin/pages/AdminLogs.tsx: Tipo
+apps/web/src/modules/admin/pages/AdminLogs.tsx: Alvo
+apps/web/src/modules/admin/pages/AdminLogs.tsx: Detalhes
+apps/web/src/modules/admin/pages/AdminLogs.tsx: Nenhum erro registrado
+apps/web/src/modules/admin/pages/AdminClients.tsx: Cadastrado
+apps/web/src/modules/admin/pages/AdminClients.tsx: Gerenciamento de Clientes
+apps/web/src/modules/admin/pages/AdminClients.tsx: Consulte as empresas cadastradas no sistema
+apps/web/src/modules/admin/pages/AdminClients.tsx: Exportar
+apps/web/src/modules/admin/pages/AdminClients.tsx: Lista de Clientes
+apps/web/src/modules/admin/pages/AdminClients.tsx: Carregando...
+apps/web/src/modules/admin/pages/AdminClients.tsx: Nenhum cliente encontrado
+apps/web/src/modules/admin/pages/AdminClients.tsx: Empresa
+apps/web/src/modules/admin/pages/AdminClients.tsx: Moeda
+apps/web/src/modules/admin/pages/AdminClients.tsx: Status
+apps/web/src/modules/admin/pages/AdminClients.tsx: Cadastro
+apps/web/src/modules/admin/components/AdminSidebar.tsx: Portal Admin
+apps/web/src/modules/admin/components/AdminSidebar.tsx: Administrador
+apps/web/src/modules/jobs/components/JobDetailsModal.tsx: Customer Information
+apps/web/src/modules/jobs/components/JobDetailsModal.tsx: Customer Name
+apps/web/src/modules/jobs/components/JobDetailsModal.tsx: Address
+apps/web/src/modules/jobs/components/JobDetailsModal.tsx: Date
+apps/web/src/modules/jobs/components/JobDetailsModal.tsx: Time
+apps/web/src/modules/jobs/components/JobDetailsModal.tsx: Duration
+apps/web/src/modules/jobs/components/JobDetailsModal.tsx: Amount
+apps/web/src/modules/jobs/components/JobDetailsModal.tsx: Service Type
+apps/web/src/modules/jobs/components/JobDetailsModal.tsx: Status
+apps/web/src/modules/jobs/components/JobDetailsModal.tsx: Assigned Staff
+apps/web/src/modules/jobs/components/JobDetailsModal.tsx: Staff Member 1
+apps/web/src/modules/jobs/components/JobDetailsModal.tsx: Staff Member 2
+apps/web/src/modules/jobs/components/JobDetailsModal.tsx: Notes
+apps/web/src/modules/jobs/components/JobDetailsModal.tsx: Additional Notes
+apps/web/src/modules/jobs/components/JobDetailsModal.tsx: Editar
+apps/web/src/modules/jobs/components/JobDetailsModal.tsx: Excluir
+apps/web/src/modules/payroll/pages/PayrollPage.tsx: Paid
+apps/web/src/modules/payroll/pages/PayrollPage.tsx: Pending
+apps/web/src/modules/payroll/pages/PayrollPage.tsx: Overdue
+apps/web/src/modules/payroll/pages/PayrollPage.tsx: Team Member
+apps/web/src/modules/payroll/pages/PayrollPage.tsx: Valor por Serviço
+apps/web/src/modules/payroll/pages/PayrollPage.tsx: Qtd Jobs
+apps/web/src/modules/payroll/pages/PayrollPage.tsx: Bônus
+apps/web/src/modules/payroll/pages/PayrollPage.tsx: Valor Total
+apps/web/src/modules/payroll/pages/PayrollPage.tsx: Preview PDF
+apps/web/src/modules/payroll/pages/PayrollPage.tsx: Download PDF
+apps/web/src/modules/payroll/components/PayrollRulesModal.tsx: Regras de Pagamento e Bônus
+apps/web/src/modules/payroll/components/PayrollRulesModal.tsx: Configure as regras por funcionário
+apps/web/src/modules/payroll/components/PayrollRulesModal.tsx: Funcionários
+apps/web/src/modules/payroll/components/PayrollRulesModal.tsx: Fórmula de Cálculo:
+apps/web/src/modules/payroll/components/PayrollRulesModal.tsx: Pagamento Total
+apps/web/src/modules/payroll/components/PayrollRulesModal.tsx: Selecione um funcionário para configurar as regras
+apps/web/src/modules/payroll/components/CalculatePayrollModal.tsx: Modo fechamento antecipado
+apps/web/src/modules/payroll/components/CalculatePayrollModal.tsx: Carregando dados...
+apps/web/src/modules/payroll/components/CalculatePayrollModal.tsx: Team Member
+apps/web/src/modules/payroll/components/CalculatePayrollModal.tsx: Jobs
+apps/web/src/modules/payroll/components/CalculatePayrollModal.tsx: Valor Jobs
+apps/web/src/modules/payroll/components/CalculatePayrollModal.tsx: Bônus
+apps/web/src/modules/payroll/components/CalculatePayrollModal.tsx: Valor Final
+apps/web/src/modules/payroll/components/CalculatePayrollModal.tsx: Adicionar
+apps/web/src/modules/payroll/components/CalculatePayrollModal.tsx: Cancelar
+apps/web/src/modules/payroll/components/CalculatePayrollModal.tsx: Bônus
+apps/web/src/modules/payroll/components/CalculatePayrollModal.tsx: Valor Base
+apps/web/src/modules/payroll/components/CalculatePayrollModal.tsx: Valor Extra
+apps/web/src/modules/payroll/components/CalculatePayrollModal.tsx: Bônus Semanal
+apps/web/src/modules/payroll/components/CalculatePayrollModal.tsx: Bônus Mensal
+apps/web/src/modules/payroll/components/CalculatePayrollModal.tsx: Bônus Performance
+apps/web/src/modules/payroll/components/CalculatePayrollModal.tsx: Bônus Natal
+apps/web/src/modules/payroll/components/CalculatePayrollModal.tsx: Total Payroll:
+apps/web/src/modules/payroll/components/CalculatePayrollModal.tsx: Cancelar
+apps/web/src/modules/payroll/components/CalculatePayrollModal.tsx: Download Excel
+apps/web/src/modules/payroll/components/CalculatePayrollModal.tsx: Confirmar Payroll
+apps/web/src/modules/payroll/components/PayrollPDFPreviewModal.tsx: Prévia do PDF gerado
+apps/web/src/modules/payroll/components/PayrollPDFPreviewModal.tsx: Gerando PDF...
+apps/web/src/modules/payroll/components/PayrollPDFPreviewModal.tsx: Erro ao carregar PDF
+apps/web/src/modules/payroll/components/PayrollPDFPreviewModal.tsx: Nenhum PDF disponível
+apps/web/src/modules/payroll/components/PayrollPDFPreviewModal.tsx: Fechar
+apps/web/src/modules/payroll/components/PayrollPDFPreviewModal.tsx: Download
+apps/web/src/modules/payroll/components/PayrollPDFPreviewModal.tsx: Enviando...
+apps/web/src/modules/payroll/components/PayrollPDFPreviewModal.tsx: Enviar via SMS
+apps/web/src/modules/dashboard/pages/Dashboard.tsx: Overview
+apps/web/src/modules/dashboard/pages/Dashboard.tsx: Operational snapshot for your cleaning business
+apps/web/src/modules/dashboard/pages/Dashboard.tsx: Business snapshot
+apps/web/src/modules/dashboard/pages/Dashboard.tsx: Key indicators at a glance
+apps/web/src/modules/dashboard/pages/Dashboard.tsx: Operations
+apps/web/src/modules/dashboard/pages/Dashboard.tsx: Recent activity and upcoming work

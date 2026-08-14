@@ -15,14 +15,14 @@ const languages: { code: Language; label: string; flag: string }[] = [
 ];
 
 export function LanguageSwitcher() {
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
 
   const currentLanguage = languages.find((l) => l.code === language);
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative" aria-label="Change language">
+        <Button variant="ghost" size="icon" className="relative" aria-label={t("language.change")}>
           <Globe className="w-5 h-5" />
         </Button>
       </DropdownMenuTrigger>
