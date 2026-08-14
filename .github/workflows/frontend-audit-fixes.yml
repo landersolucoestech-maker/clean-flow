@@ -1,6 +1,6 @@
 name: Frontend Audit Fixes
 
-# Retry after isolating non-component appointment status config.
+# Retry after preserving the remaining IconBubble dependency.
 on:
   push:
     branches: [dev]
