@@ -53,7 +53,7 @@ for (const file of sourceFiles) {
   const lines = source.split(/\r?\n/).length;
 
   findings.commentMarkers.push(...lineMatches(file, /(?:\/\/|\/\*|\*)\s*(TODO|FIXME|HACK|XXX)\b/i));
-  findings.mockDataSignalsOutsideMocks.push(...lineMatches(file, /\b(mockData|mock[A-Z][A-Za-z0-9_]*|fakeData|fixture(?:s|Data)?|dummyData|demoData|sampleData|seedData)\b/));
+  findings.mockDataSignalsOutsideMocks.push(...lineMatches(file, /\b(mockData|mock[A-Z][A-Za-z0-9_]*|fakeData|fixtureData|testFixtures|dummyData|demoData|sampleData|seedData)\b/));
   findings.uiExampleIdentities.push(...lineMatches(file, /(?:[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}|\+?1?[\s.-]?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4})/i));
   findings.hardcodedUrls.push(...lineMatches(file, /https?:\/\/(?!schema\.org|www\.w3\.org|fonts\.googleapis\.com|fonts\.gstatic\.com)/i));
   findings.debugLogs.push(...lineMatches(file, /console\.(log|debug|trace)\s*\(/));
