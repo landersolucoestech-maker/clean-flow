@@ -60,12 +60,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Enable GitHub Pages for Actions if needed
+      - name: Confirm GitHub Pages is enabled
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          gh api "repos/${GITHUB_REPOSITORY}/pages" >/dev/null 2>&1 || \
-            gh api --method POST "repos/${GITHUB_REPOSITORY}/pages" -f build_type=workflow
+        run: gh api "repos/${GITHUB_REPOSITORY}/pages" >/dev/null
 
       - name: Deploy to GitHub Pages
         id: deployment
