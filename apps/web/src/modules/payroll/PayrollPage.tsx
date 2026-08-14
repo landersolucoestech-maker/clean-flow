@@ -35,6 +35,7 @@ import { formatCurrency } from "@/lib/currency";
 import { getErrorMessage } from "@/lib/errors";
 import type { PayrollListRow, PayrollRecord, PayrollSortDirection, PayrollSortField } from "./types/payrollView";
 import { buildPayrollListRows, isCompletedJobStatus, isUuid, normalizePayrollName, sortPayrollRecords } from "./utils/payrollView";
+import { buildStaffBaseValueMap, buildStaffPaymentMethodMap, mapPayrollRecords } from "./utils/payrollData";
 import { fetchExistingPayrollRecordKeys, fetchPayrollRecordsForPeriod, sendPayrollStatementSms, updatePayrollRecordValues } from "./services/payrollDataService";
 
 const PayrollPDFPreviewModal = lazy(() =>
@@ -85,60 +86,17 @@ export function Payroll() {
   const updatePayrollStatus = useUpdatePayrollStatus();
   const deletePayrollRecords = useDeletePayrollRecords();
 
-  // Map staff_id -> base_value from payroll rules
-  const staffBaseValueMap = useMemo(() => {
-    const map = new Map<string, number>();
-    payrollRules.forEach((rule) => {
-      map.set(rule.staff_id, rule.base_value);
-    });
-    return map;
-  }, [payrollRules]);
+  const staffBaseValueMap = useMemo(() => buildStaffBaseValueMap(payrollRules), [payrollRules]);
 
-  // Map staff_id -> payment_method from staff list
-  const staffPaymentMethodMap = useMemo(() => {
-    const map = new Map<string, string>();
-    staffList.forEach((staff) => {
-      if (staff.payment_method) {
-        map.set(staff.id, staff.payment_method);
-      }
-    });
-    return map;
-  }, [staffList]);
+  const staffPaymentMethodMap = useMemo(
+    () => buildStaffPaymentMethodMap(staffList),
+    [staffList],
+  );
 
-  // Transform DB records to local format - USE REAL VALUES FROM DATABASE
-  const payrollData: PayrollRecord[] = useMemo(() => {
-    return dbPayrollRecords.map((record) => {
-      const match = record.notes?.match(/^Job\s+([a-f0-9]+)/i);
-      const jobIdShort = match ? match[1].toLowerCase() : null;
-
-      const staffId = record.staff_id ?? null;
-      
-      // USE the actual base_value stored in the record, not from payroll_rules
-      // This is the real value that was recorded when the payroll was generated
-      const unitValue = Number(record.base_value) || 0;
-      
-      // Get payment method from staff, fallback to record's payment_type
-      const paymentMethod = staffId 
-        ? (staffPaymentMethodMap.get(staffId) || record.payment_type)
-        : record.payment_type;
-
-      return {
-        id: record.id,
-        periodStartISO: record.period_start,
-        periodEndISO: record.period_end,
-        period: `${format(new Date(record.period_start), "MM/dd/yyyy")} - ${format(new Date(record.period_end), "MM/dd/yyyy")}`,
-        employeeName: record.employee_name,
-        staffId,
-        cleaningType: record.cleaning_type || "General Cleaning",
-        client: record.client || "N/A",
-        baseValue: unitValue,
-        bonus: Number(record.bonus) || 0,
-        paymentType: paymentMethod as PayrollRecord["paymentType"],
-        status: record.status,
-        jobIdShort,
-      };
-    });
-  }, [dbPayrollRecords, staffPaymentMethodMap]);
+  const payrollData: PayrollRecord[] = useMemo(
+    () => mapPayrollRecords(dbPayrollRecords, staffPaymentMethodMap),
+    [dbPayrollRecords, staffPaymentMethodMap],
+  );
 
   // Filtered data state - now shows all data by default, filters are optional
   const [localFilteredData, setLocalFilteredData] = useState<PayrollRecord[] | null>(null);
