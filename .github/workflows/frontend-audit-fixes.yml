@@ -1,6 +1,6 @@
 name: Frontend Audit Fixes
 
-# One-shot CustomerDetails chat extraction runner.
+# One-shot Communications filter extraction runner.
 on:
   push:
     branches: [dev]
@@ -24,17 +24,17 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: node scripts/refactor-customer-chat.mjs
+      - run: node scripts/refactor-communications-filters.mjs
       - run: node scripts/frontend-audit.mjs
       - run: npx eslint apps/web/src packages --max-warnings=0
       - run: npm run typecheck
       - run: npx vitest run apps/web/src
       - run: npm run build
-      - name: Commit CustomerDetails chat extraction
+      - name: Commit Communications filter extraction
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx apps/web/src/modules/crm/customers/components/CustomerChatTab.tsx
+          git add apps/web/src/modules/communications/CommunicationsPage.tsx apps/web/src/modules/communications/utils/conversationFilters.ts
           git diff --cached --quiet && exit 0
-          git commit -m "refactor(frontend): extract customer chat tab"
+          git commit -m "refactor(frontend): extract communications filters"
           git push origin HEAD:dev
