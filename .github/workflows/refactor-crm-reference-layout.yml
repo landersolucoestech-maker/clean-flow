@@ -1,0 +1,48 @@
+name: Refactor CRM Reference Layout
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - ".github/workflows/refactor-crm-reference-layout.yml"
+      - ".github/scripts/refactor_crm_reference_layout.py"
+
+permissions:
+  contents: write
+
+jobs:
+  refactor-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Apply CRM refactor
+        run: python3 .github/scripts/refactor_crm_reference_layout.py
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint -- --max-warnings=0
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Tests
+        run: npx vitest run apps/web/src
+      - name: Build
+        run: npm run build
+      - name: Commit validated CRM refactor
+        run: |
+          rm .github/scripts/refactor_crm_reference_layout.py
+          rm .github/workflows/refactor-crm-reference-layout.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/web/src/modules/crm/customers/pages/CustomersPageContent.tsx \
+                  .github/scripts/refactor_crm_reference_layout.py \
+                  .github/workflows/refactor-crm-reference-layout.yml
+          git commit -m "refactor crm to reference layout"
+          git pull --rebase origin dev
+          git push origin HEAD:dev
