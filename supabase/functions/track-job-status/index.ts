@@ -120,7 +120,7 @@ async function sendGpsAlert(
   phone: string,
   message: string,
 ): Promise<void> {
-  const response = await fetch(`${supabaseUrl}/functions/v1/ringcentral-send-message`, {
+  const response = await fetch(`${supabaseUrl}/functions/v1/send-sms-message`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${serviceRoleKey}` },
     body: JSON.stringify({ company_id: companyId, to_phone: phone, message }),

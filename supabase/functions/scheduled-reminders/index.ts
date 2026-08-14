@@ -137,7 +137,7 @@ async function sendSms(
   message: string,
 ): Promise<{ ok: boolean; providerId?: string; error?: string }> {
   try {
-    const response = await fetch(`${supabaseUrl}/functions/v1/ringcentral-send-message`, {
+    const response = await fetch(`${supabaseUrl}/functions/v1/send-sms-message`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
