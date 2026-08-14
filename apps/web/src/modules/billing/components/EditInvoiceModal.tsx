@@ -602,7 +602,7 @@ export function EditInvoiceModal({ open, onOpenChange, invoice, mode = "edit" }:
           {/* Invoice Dates Grid */}
           <div className="space-y-3">
             <Label className="text-base font-semibold">{t("invoice.timeline")}</Label>
-            <div className="grid grid-cols-5 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
               <div className="space-y-1">
                 <Label className="text-xs text-muted-foreground">{t("invoice.created")}</Label>
                 <DatePickerString

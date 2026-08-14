@@ -1355,7 +1355,7 @@ export function CreateLeadModal({ open, onOpenChange }: CreateLeadModalProps) {
                     </Button>
                   </div>
 
-                  <div className="grid grid-cols-5 gap-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
                     <div className="space-y-2">
                       <Label className="text-xs">Location Name</Label>
                       <Input
@@ -1365,7 +1365,7 @@ export function CreateLeadModal({ open, onOpenChange }: CreateLeadModalProps) {
                         className="h-9"
                       />
                     </div>
-                    <div className="space-y-2 col-span-2">
+                    <div className="space-y-2 sm:col-span-2 lg:col-span-2">
                       <Label className="text-xs">Street Address</Label>
                       <AddressAutocompleteInput
                         value={addr.address}
