@@ -23,63 +23,52 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Split i18n catalog from provider
+      - name: Add accessible names to icon buttons
         run: |
           node <<'NODE'
           const fs = require('node:fs');
 
-          const providerPath = 'apps/web/src/app/providers/LanguageContext.tsx';
-          let source = fs.readFileSync(providerPath, 'utf8');
-          const declarationStart = source.indexOf('const translations: Record<Language, Record<string, string>> = {\n');
-          const providerStart = source.indexOf('\nexport function LanguageProvider');
-          if (declarationStart < 0 || providerStart < 0) throw new Error('Language catalog anchors changed');
+          const replacements = [
+            ['apps/web/src/app/layout/LanguageSwitcher.tsx', '<Button variant="ghost" size="icon" className="relative">', '<Button variant="ghost" size="icon" className="relative" aria-label="Change language">'],
+            ['apps/web/src/app/layout/Sidebar.tsx', '<Button variant="ghost" size="icon" onClick={() => setIsCollapsed(!isCollapsed)} className="ml-auto rounded-xl text-muted-foreground">', '<Button variant="ghost" size="icon" onClick={() => setIsCollapsed(!isCollapsed)} className="ml-auto rounded-xl text-muted-foreground" aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}>'],
+            ['apps/web/src/modules/admin/pages/AdminSupport.tsx', '<Button variant="ghost" size="icon" className="text-muted-foreground/70 hover:text-muted-foreground">', '<Button variant="ghost" size="icon" className="text-muted-foreground/70 hover:text-muted-foreground" aria-label="Ticket actions">'],
+            ['apps/web/src/modules/billing/BillingPage.tsx', '<Button variant="ghost" size="icon" className="h-8 w-8">', '<Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Invoice actions">'],
+            ['apps/web/src/modules/communications/CommunicationsPage.tsx', '<Button variant="ghost" size="icon">\n                        <Menu', '<Button variant="ghost" size="icon" aria-label="Conversation actions">\n                        <Menu'],
+            ['apps/web/src/modules/crm/contacts/ContactsPage.tsx', '<DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreHorizontal', '<DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label="Contact actions"><MoreHorizontal'],
+            ['apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx', '<Button onClick={handleSendMessage} size="icon">', '<Button onClick={handleSendMessage} size="icon" aria-label="Send message">'],
+            ['apps/web/src/modules/crm/customers/pages/CustomersPageContent.tsx', '<Button variant="ghost" size="icon">\n                                <MoreHorizontal', '<Button variant="ghost" size="icon" aria-label="Customer actions">\n                                <MoreHorizontal'],
+            ['apps/web/src/modules/crm/customers/pages/CustomersPageContent.tsx', '<Button variant="ghost" size="icon" className="h-8 w-8">\n                                <MoreHorizontal', '<Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Customer actions">\n                                <MoreHorizontal'],
+            ['apps/web/src/modules/crm/leads/pages/LeadsPageContent.tsx', '<Button variant="ghost" size="icon">\n', '<Button variant="ghost" size="icon" aria-label="Lead actions">\n'],
+            ['apps/web/src/modules/payroll/PayrollPage.tsx', '<Button onClick={handleFilter} size="icon">', '<Button onClick={handleFilter} size="icon" aria-label="Apply payroll filter">'],
+            ['apps/web/src/modules/payroll/PayrollPage.tsx', '<Button onClick={handleClearFilter} size="icon" variant="outline">', '<Button onClick={handleClearFilter} size="icon" variant="outline" aria-label="Clear payroll filter">'],
+            ['apps/web/src/modules/payroll/PayrollPage.tsx', '<Button variant="ghost" size="icon" className="h-8 w-8">', '<Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Payroll actions">'],
+            ['apps/web/src/modules/schedule/calendar/CalendarGrid.tsx', '<Button variant="outline" size="icon" onClick={() => navigateWeek("prev")}>', '<Button variant="outline" size="icon" onClick={() => navigateWeek("prev")} aria-label="Previous week">'],
+            ['apps/web/src/modules/schedule/calendar/CalendarGrid.tsx', '<Button variant="outline" size="icon" onClick={() => navigateWeek("next")}>', '<Button variant="outline" size="icon" onClick={() => navigateWeek("next")} aria-label="Next week">'],
+            ['apps/web/src/modules/schedule/components/InvoiceModal.tsx', '<Button variant="outline" size="icon" onClick={handlePrint}>', '<Button variant="outline" size="icon" onClick={handlePrint} aria-label="Print invoice">'],
+            ['apps/web/src/modules/schedule/components/InvoiceModal.tsx', '<Button variant="outline" size="icon" onClick={handleDownload}>', '<Button variant="outline" size="icon" onClick={handleDownload} aria-label="Download invoice">'],
+            ['apps/web/src/modules/settings/components/DialpadIntegrationPanel.tsx', '<Button variant="outline" size="icon" className="h-9 w-9 shrink-0" onClick={copyRedirectUri}>', '<Button variant="outline" size="icon" className="h-9 w-9 shrink-0" onClick={copyRedirectUri} aria-label="Copy Dialpad redirect URI">'],
+            ['apps/web/src/modules/settings/components/TeamUserModal.tsx', '<Button type="button" variant="destructive" size="icon" disabled={isPending}>', '<Button type="button" variant="destructive" size="icon" disabled={isPending} aria-label="Delete team member">'],
+            ['apps/web/src/shared/components/ActionDropdown.tsx', '<Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg text-muted-foreground hover:text-foreground">', '<Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg text-muted-foreground hover:text-foreground" aria-label="Actions">'],
+            ['apps/web/src/shared/components/PageHeader.tsx', '<Button variant="outline" size="icon" onClick={() => navigate(backTo)} className="mt-0.5 shrink-0">', '<Button variant="outline" size="icon" onClick={() => navigate(backTo)} className="mt-0.5 shrink-0" aria-label="Go back">'],
+          ];
 
-          const block = source.slice(declarationStart, providerStart);
-          const enMarker = '  en: {\n';
-          const ptMarker = '  pt: {\n';
-          const esMarker = '  es: {\n';
-          const enStart = block.indexOf(enMarker);
-          const ptStart = block.indexOf(ptMarker);
-          const esStart = block.indexOf(esMarker);
-          const endMarker = '  },\n};\n';
-          const endStart = block.lastIndexOf(endMarker);
-          if (enStart < 0 || ptStart < 0 || esStart < 0 || endStart < 0 || !(enStart < ptStart && ptStart < esStart && esStart < endStart)) {
-            throw new Error('Translation locale boundaries changed');
+          for (const [file, from, to] of replacements) {
+            let source = fs.readFileSync(file, 'utf8');
+            if (!source.includes(from)) throw new Error(`Accessibility anchor not found: ${file} :: ${from}`);
+            source = source.replace(from, to);
+            fs.writeFileSync(file, source);
           }
-
-          function stripLocaleTerminator(text) {
-            if (!text.endsWith('  },\n')) throw new Error('Unexpected locale terminator');
-            return text.slice(0, -5);
-          }
-
-          const enBody = stripLocaleTerminator(block.slice(enStart + enMarker.length, ptStart));
-          const ptBody = stripLocaleTerminator(block.slice(ptStart + ptMarker.length, esStart));
-          const esBody = block.slice(esStart + esMarker.length, endStart);
-
-          fs.mkdirSync('apps/web/src/app/i18n', { recursive: true });
-          fs.writeFileSync('apps/web/src/app/i18n/en.ts', `export const en = {\n${enBody}} as const;\n`);
-          fs.writeFileSync('apps/web/src/app/i18n/pt.ts', `export const pt = {\n${ptBody}} as const;\n`);
-          fs.writeFileSync('apps/web/src/app/i18n/es.ts', `export const es = {\n${esBody}} as const;\n`);
-          fs.writeFileSync('apps/web/src/app/i18n/translations.ts', `import type { Language } from "../providers/language-context";\nimport { en } from "./en";\nimport { pt } from "./pt";\nimport { es } from "./es";\n\nexport const translations: Record<Language, Record<string, string>> = { en, pt, es };\n`);
-
-          const providerPrefix = source.slice(0, declarationStart);
-          const providerTail = source.slice(providerStart + 1);
-          const nextSource = providerPrefix.replace(
-            'import { LanguageContext, type Language } from "./language-context";\n',
-            'import { LanguageContext, type Language } from "./language-context";\nimport { translations } from "../i18n/translations";\n'
-          ) + providerTail;
-          if (nextSource.includes('const translations:')) throw new Error('Provider still contains translation catalog');
-          fs.writeFileSync(providerPath, nextSource);
           NODE
+      - run: node scripts/frontend-audit.mjs
       - run: npx eslint apps/web/src packages --max-warnings=0
       - run: npm run typecheck
       - run: npx vitest run apps/web/src
       - run: npm run build
-      - name: Commit i18n split
+      - name: Commit accessibility fixes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/web/src/app/providers/LanguageContext.tsx apps/web/src/app/i18n
+          git add apps/web/src
           git diff --cached --quiet && exit 0
-          git commit -m "refactor(frontend): separate i18n data from language provider"
+          git commit -m "fix(frontend): label icon-only controls"
           git push origin HEAD:dev
