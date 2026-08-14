@@ -7,9 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { useDialpad, type SmsProviderPreference } from "@/hooks/useDialpad";
-import { useRingCentral } from "@/hooks/useRingCentral";
 import { toast } from "sonner";
+import { useDialpad, type SmsProviderPreference } from "../../communications/hooks/useDialpad";
+import { useRingCentral } from "../../communications/hooks/useRingCentral";
 
 export function DialpadIntegrationPanel() {
   const [copied, setCopied] = useState(false);
