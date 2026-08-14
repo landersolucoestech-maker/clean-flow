@@ -15,6 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/useLanguage";
 import { readSpreadsheetFile } from "@/lib/spreadsheet";
+import { CrmTabs } from "../../components/CrmTabs";
 
 export function Customers() {
   const { t } = useLanguage();
@@ -334,24 +335,20 @@ export function Customers() {
           {t("customers.addCustomer")}
         </Button>
       }
-      contentClassName="space-y-7"
+      contentClassName="gap-5"
     >
-      <div className="space-y-6">
-          {/* Page Header */}
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{t("customers.title")}</h1>
-              <p className="text-muted-foreground">
-                {t("customers.subtitle")}
-              </p>
-            </div>
-            <div className="md:hidden">
+      <div className="space-y-5">
+          {/* CRM Page Header */}
+          <section className="flex flex-col gap-1 border-b border-border/70 pb-4">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">CRM</h1>
+            <p className="text-sm text-muted-foreground">Manage customers, leads and contacts from one unified workspace.</p>
+            <div className="mt-3 md:hidden">
               <Button variant="hero" onClick={() => setIsCustomerModalOpen(true)}>
                 <Plus className="mr-2 h-4 w-4" />
                 {t("customers.addCustomer")}
               </Button>
             </div>
-          </div>
+          </section>
 
           {/* Customer Modal - Create */}
           <CustomerModal open={isCustomerModalOpen} onOpenChange={setIsCustomerModalOpen} mode="create" />
@@ -363,13 +360,13 @@ export function Customers() {
           <CustomerDetailsModal open={isDetailsModalOpen} onOpenChange={setIsDetailsModalOpen} customer={selectedCustomer} />
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
-            <Card>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+            <Card className="rounded-md border-border/80 shadow-sm">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs font-medium text-muted-foreground">{t("customers.newCustomers")}</p>
-                    <p className="text-2xl font-bold text-foreground">{newCustomersThisMonth}</p>
+                    <p className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{newCustomersThisMonth}</p>
                     <p className="text-xs text-success">+{newCustomersThisWeek} {t("common.thisWeek")}</p>
                   </div>
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-success/10">
@@ -379,12 +376,12 @@ export function Customers() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="rounded-md border-border/80 shadow-sm">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs font-medium text-muted-foreground">{t("customers.activeCustomers")}</p>
-                    <p className="text-2xl font-bold text-foreground">{activeCount}</p>
+                    <p className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{activeCount}</p>
                     <p className="text-xs text-success">{activePercentage}% {t("common.ofTotal")}</p>
                   </div>
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-light">
@@ -394,12 +391,12 @@ export function Customers() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="rounded-md border-border/80 shadow-sm">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs font-medium text-muted-foreground">{t("customers.inactiveCustomers")}</p>
-                    <p className="text-2xl font-bold text-foreground">{inactiveCount}</p>
+                    <p className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{inactiveCount}</p>
                     <p className="text-xs text-muted-foreground">{inactivePercentage}% {t("common.ofTotal")}</p>
                   </div>
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10">
@@ -409,12 +406,12 @@ export function Customers() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="rounded-md border-border/80 shadow-sm">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs font-medium text-muted-foreground">{t("customers.totalCustomers")}</p>
-                    <p className="text-2xl font-bold text-foreground">{totalCount}</p>
+                    <p className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{totalCount}</p>
                     <p className="text-xs text-muted-foreground">{t("common.registered")}</p>
                   </div>
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary-light">
@@ -424,12 +421,12 @@ export function Customers() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="rounded-md border-border/80 shadow-sm">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs font-medium text-muted-foreground">{t("customers.recurringCustomers")}</p>
-                    <p className="text-2xl font-bold text-foreground">{recurringCount}</p>
+                    <p className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{recurringCount}</p>
                     <p className="text-xs text-success">{recurringPercentage}% {t("common.ofActive")}</p>
                   </div>
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-warning/10">
@@ -440,8 +437,17 @@ export function Customers() {
             </Card>
           </div>
 
-          {/* Search and Filter Bar */}
-          <div className="flex flex-col gap-3 rounded-2xl border border-border/80 bg-card p-4 shadow-sm lg:flex-row lg:items-center">
+          <CrmTabs />
+
+          {/* Customer workspace */}
+          <Card className="overflow-hidden rounded-md border-border/80 shadow-sm">
+            <CardHeader className="border-b border-border/70 px-5 py-4">
+              <div className="flex flex-col gap-1">
+                <CardTitle className="text-base">{t("customers.title")}</CardTitle>
+                <p className="text-sm text-muted-foreground">Search, filter and manage the customer directory.</p>
+              </div>
+            </CardHeader>
+            <div className="flex flex-col gap-3 border-b border-border/70 bg-muted/10 p-4 lg:flex-row lg:items-center">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input placeholder={searchField === "all" ? "Search by name, phone, email or address..." : searchField === "name" ? "Search by name..." : searchField === "phone" ? "Search by phone..." : searchField === "email" ? "Search by email..." : "Search by address..."} value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10" />
@@ -486,12 +492,10 @@ export function Customers() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          </div>
+            </div>
 
-          {/* Customer Directory */}
-          <Card className="border-border/80 shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between gap-3 pb-4">
-              <CardTitle>{t("customers.contactList")}</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between gap-3 border-b border-border/60 px-5 py-3">
+              <CardTitle className="text-sm font-semibold">{t("customers.contactList")}</CardTitle>
               {selectedIds.size > 0 && (
                 <Button
                   variant="destructive"
@@ -508,7 +512,7 @@ export function Customers() {
                 </Button>
               )}
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-0">
               {viewMode === "table" ? (/* Customer Table */
             <Table>
                   <TableHeader>
