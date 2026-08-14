@@ -66,7 +66,7 @@ export function Header({ actions }: HeaderProps) {
   };
 
   return (
-    <header className="sticky top-0 z-30 flex min-h-14 items-center justify-between gap-3 border-b border-border bg-card/95 px-4 py-2 backdrop-blur sm:px-5 lg:px-6">
+    <header className="sticky top-0 z-30 flex min-h-14 items-center gap-3 border-b border-border bg-card/95 px-4 py-2 backdrop-blur sm:px-5 lg:px-6">
       <div className="flex min-w-0 items-center gap-2.5">
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
           <HeaderIcon className="h-4 w-4" />
@@ -77,41 +77,51 @@ export function Header({ actions }: HeaderProps) {
         </div>
       </div>
 
-      <div className="flex min-w-0 items-center gap-2">
-        {actions && <div className="flex min-w-0 items-center gap-2">{actions}</div>}
-        <LanguageSwitcher />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-9 gap-2 px-1.5 sm:px-2.5">
-              <Avatar className="h-7 w-7">
-                <AvatarFallback className="bg-primary/10 text-primary"><User className="h-4 w-4" /></AvatarFallback>
-              </Avatar>
-              <div className="hidden max-w-36 text-left lg:block">
-                <p className="truncate text-xs font-medium leading-tight text-foreground">{currentStaff?.name || t("header.profile")}</p>
-                <p className="truncate text-[10px] leading-tight text-muted-foreground">{currentStaff?.email || ""}</p>
-              </div>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-60 rounded-md border border-border bg-popover p-1.5 shadow-md" align="end">
-            <DropdownMenuLabel className="font-normal">
-              <div className="flex flex-col space-y-1 px-1 py-1">
-                <p className="text-sm font-semibold text-foreground">{currentStaff?.name || t("header.profile")}</p>
-                <p className="text-xs text-muted-foreground">{currentStaff?.email || ""}</p>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="cursor-pointer rounded-sm" onSelect={() => navigate("/settings?tab=profile")}>
-              <UserCircle className="mr-2 h-4 w-4" /><span>{t("header.profile")}</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer rounded-sm" onSelect={() => navigate("/settings?tab=company")}>
-              <Settings className="mr-2 h-4 w-4" /><span>{t("header.settings")}</span>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="cursor-pointer rounded-sm text-destructive focus:text-destructive" onSelect={() => void handleLogout()}>
-              <LogOut className="mr-2 h-4 w-4" /><span>{t("header.logout")}</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+      <div className="ml-auto flex min-w-0 items-center gap-2">
+        {actions && (
+          <div className="order-1 flex min-w-0 items-center gap-2 whitespace-nowrap">
+            {actions}
+          </div>
+        )}
+
+        <div className="order-2 shrink-0">
+          <LanguageSwitcher />
+        </div>
+
+        <div className="order-3 shrink-0">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-9 gap-2 px-1.5 sm:px-2.5">
+                <Avatar className="h-7 w-7">
+                  <AvatarFallback className="bg-primary/10 text-primary"><User className="h-4 w-4" /></AvatarFallback>
+                </Avatar>
+                <div className="hidden max-w-36 text-left lg:block">
+                  <p className="truncate text-xs font-medium leading-tight text-foreground">{currentStaff?.name || t("header.profile")}</p>
+                  <p className="truncate text-[10px] leading-tight text-muted-foreground">{currentStaff?.email || ""}</p>
+                </div>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-60 rounded-md border border-border bg-popover p-1.5 shadow-md" align="end">
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col space-y-1 px-1 py-1">
+                  <p className="text-sm font-semibold text-foreground">{currentStaff?.name || t("header.profile")}</p>
+                  <p className="text-xs text-muted-foreground">{currentStaff?.email || ""}</p>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="cursor-pointer rounded-sm" onSelect={() => navigate("/settings?tab=profile")}>
+                <UserCircle className="mr-2 h-4 w-4" /><span>{t("header.profile")}</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer rounded-sm" onSelect={() => navigate("/settings?tab=company")}>
+                <Settings className="mr-2 h-4 w-4" /><span>{t("header.settings")}</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="cursor-pointer rounded-sm text-destructive focus:text-destructive" onSelect={() => void handleLogout()}>
+                <LogOut className="mr-2 h-4 w-4" /><span>{t("header.logout")}</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     </header>
   );
