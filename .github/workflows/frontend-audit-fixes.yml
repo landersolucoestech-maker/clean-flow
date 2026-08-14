@@ -1,6 +1,6 @@
 name: Frontend Audit Fixes
 
-# Retry CalculatePayrollModal decomposition after removing the obsolete hook dependency.
+# One-shot AppointmentModal contract extraction runner.
 on:
   push:
     branches: [dev]
@@ -24,17 +24,17 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: node scripts/refactor-calculate-payroll.mjs
+      - run: node scripts/refactor-appointment-modal-types.mjs
       - run: node scripts/frontend-audit.mjs
       - run: npx eslint apps/web/src packages --max-warnings=0
       - run: npm run typecheck
       - run: npx vitest run apps/web/src
       - run: npm run build
-      - name: Commit CalculatePayrollModal decomposition
+      - name: Commit AppointmentModal contract extraction
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/web/src/modules/payroll/components/CalculatePayrollModal.tsx apps/web/src/modules/payroll/utils/payrollAssignment.ts
+          git add apps/web/src/modules/schedule/components/AppointmentModal.tsx apps/web/src/modules/schedule/types/appointmentModal.ts
           git diff --cached --quiet && exit 0
-          git commit -m "refactor(frontend): extract payroll assignment helpers"
+          git commit -m "refactor(frontend): extract appointment modal contracts"
           git push origin HEAD:dev
