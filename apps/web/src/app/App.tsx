@@ -3,18 +3,19 @@ import { Toaster } from "../shared/components/ui/toaster";
 import { Toaster as Sonner } from "../shared/components/ui/sonner";
 import { TooltipProvider } from "../shared/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "./providers/LanguageContext";
 import { QuickBooksSyncProvider } from "../modules/billing/providers/QuickBooksSyncProvider";
 import { AuthenticatedRoute, PlatformAdminRoute } from "../modules/auth/RouteGuards";
 
 const HomePage = lazy(() => import("./HomePage"));
 const Auth = lazy(() => import("../modules/auth/AuthPage").then(({ Auth }) => ({ default: Auth })));
-const Customers = lazy(() => import("../modules/customers/CustomersPage").then(({ Customers }) => ({ default: Customers })));
+const Customers = lazy(() => import("../modules/crm/customers/CustomersPage").then(({ Customers }) => ({ default: Customers })));
+const Leads = lazy(() => import("../modules/crm/leads/LeadsPage").then(({ Leads }) => ({ default: Leads })));
+const Contacts = lazy(() => import("../modules/crm/contacts/ContactsPage").then(({ Contacts }) => ({ default: Contacts })));
 const Schedule = lazy(() => import("../modules/schedule/SchedulePage").then(({ Schedule }) => ({ default: Schedule })));
 const Billing = lazy(() => import("../modules/billing/BillingPage").then(({ Billing }) => ({ default: Billing })));
 const Transactions = lazy(() => import("../modules/transactions/TransactionsPage").then(({ Transactions }) => ({ default: Transactions })));
-const Leads = lazy(() => import("../modules/leads/LeadsPage").then(({ Leads }) => ({ default: Leads })));
 const Communications = lazy(() => import("../modules/communications/CommunicationsPage").then(({ Communications }) => ({ default: Communications })));
 const Rules = lazy(() => import("../modules/transactions/RulesPage").then(({ Rules }) => ({ default: Rules })));
 const Reports = lazy(() => import("../modules/reports/ReportsPage").then(({ Reports }) => ({ default: Reports })));
@@ -53,7 +54,14 @@ const App = () => (
                 <Route path="/setup" element={<AuthenticatedRoute allowUnconfigured><Setup /></AuthenticatedRoute>} />
                 <Route path="/set-password" element={<AuthenticatedRoute><SetPassword /></AuthenticatedRoute>} />
                 <Route path="/schedule" element={<AuthenticatedRoute><Schedule /></AuthenticatedRoute>} />
-                <Route path="/customers" element={<AuthenticatedRoute allowedRoles={OPERATIONAL_ROLES}><Customers /></AuthenticatedRoute>} />
+
+                <Route path="/crm" element={<AuthenticatedRoute allowedRoles={OPERATIONAL_ROLES}><Navigate to="/crm/customers" replace /></AuthenticatedRoute>} />
+                <Route path="/crm/customers" element={<AuthenticatedRoute allowedRoles={OPERATIONAL_ROLES}><Customers /></AuthenticatedRoute>} />
+                <Route path="/crm/leads" element={<AuthenticatedRoute allowedRoles={OPERATIONAL_ROLES}><Leads /></AuthenticatedRoute>} />
+                <Route path="/crm/contacts" element={<AuthenticatedRoute allowedRoles={OPERATIONAL_ROLES}><Contacts /></AuthenticatedRoute>} />
+                <Route path="/customers" element={<AuthenticatedRoute allowedRoles={OPERATIONAL_ROLES}><Navigate to="/crm/customers" replace /></AuthenticatedRoute>} />
+                <Route path="/leads" element={<AuthenticatedRoute allowedRoles={OPERATIONAL_ROLES}><Navigate to="/crm/leads" replace /></AuthenticatedRoute>} />
+
                 <Route path="/invoices" element={<AuthenticatedRoute allowedRoles={FINANCE_ROLES}><Billing /></AuthenticatedRoute>} />
                 <Route path="/transactions" element={<AuthenticatedRoute allowedRoles={FINANCE_ROLES}><Transactions /></AuthenticatedRoute>} />
                 <Route path="/rules" element={<AuthenticatedRoute allowedRoles={FINANCE_ROLES}><Rules /></AuthenticatedRoute>} />
@@ -68,7 +76,6 @@ const App = () => (
                 <Route path="/admin/auth" element={<AdminAuth />} />
                 <Route path="/admin/logs" element={<PlatformAdminRoute><AdminLogs /></PlatformAdminRoute>} />
                 <Route path="/admin/support" element={<PlatformAdminRoute><AdminSupport /></PlatformAdminRoute>} />
-                <Route path="/leads" element={<AuthenticatedRoute allowedRoles={OPERATIONAL_ROLES}><Leads /></AuthenticatedRoute>} />
                 <Route path="/sync-logs" element={<AuthenticatedRoute allowedRoles={FINANCE_ROLES}><SyncLogs /></AuthenticatedRoute>} />
                 <Route path="/integrations/ringcentral/callback" element={<RingCentralCallback />} />
                 <Route path="/integrations/dialpad/callback" element={<DialpadCallback />} />
