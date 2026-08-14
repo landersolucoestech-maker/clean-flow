@@ -23,49 +23,75 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Apply deterministic frontend fixes
+      - name: Consolidate Jobs frontend hooks
         run: |
           node <<'NODE'
           const fs = require('node:fs');
+          const path = require('node:path');
 
-          const integrationsPath = 'apps/web/src/modules/settings/components/IntegrationsTabContent.tsx';
-          let integrations = fs.readFileSync(integrationsPath, 'utf8');
-          const hardcoded = 'https://uszeseqzmqsqjbstffgy.supabase.co/functions/v1/website-lead-capture';
-          if (!integrations.includes(hardcoded)) throw new Error('Expected hardcoded webhook URL not found');
-          if (!integrations.includes('import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";')) throw new Error('Integration import anchor not found');
-          integrations = integrations.replace(
-            'import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";',
-            'import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";\nimport { SUPABASE_URL } from "@/integrations/supabase/client";'
-          );
-          integrations = integrations.replace(
-            'export function IntegrationsTab() {\n  const [copiedId, setCopiedId] = useState<string | null>(null);',
-            'export function IntegrationsTab() {\n  const websiteLeadCaptureUrl = `${SUPABASE_URL}/functions/v1/website-lead-capture`;\n  const [copiedId, setCopiedId] = useState<string | null>(null);'
-          );
-          integrations = integrations.replace(`value="${hardcoded}"`, 'value={websiteLeadCaptureUrl}');
-          integrations = integrations.replace(`"${hardcoded}",\n                          "website_webhook"`, 'websiteLeadCaptureUrl,\n                          "website_webhook"');
-          if (integrations.includes(hardcoded)) throw new Error('Hardcoded webhook URL still present');
-          fs.writeFileSync(integrationsPath, integrations);
+          const hooksDir = 'apps/web/src/modules/jobs/hooks';
+          const legacyPath = `${hooksDir}/useJobsLegacy.ts`;
+          const criticalPath = `${hooksDir}/useJobsCritical.ts`;
+          const maintenancePath = `${hooksDir}/useJobMaintenance.ts`;
+          const corePath = `${hooksDir}/useJobCore.ts`;
+          const barrelPath = `${hooksDir}/useJobs.ts`;
 
-          const quickBooksPath = 'apps/web/src/modules/billing/hooks/useQuickBooksSync.ts';
-          let quickBooks = fs.readFileSync(quickBooksPath, 'utf8');
-          for (const log of [
-            '      console.log("QuickBooks not connected, skipping auto-sync");\n',
-            '        console.log("Invoice already synced to QuickBooks");\n',
-          ]) {
-            if (!quickBooks.includes(log)) throw new Error(`Expected debug log not found: ${log.trim()}`);
-            quickBooks = quickBooks.replace(log, '');
+          function walk(dir) {
+            return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+              const full = path.join(dir, entry.name);
+              return entry.isDirectory() ? walk(full) : [full];
+            });
           }
-          fs.writeFileSync(quickBooksPath, quickBooks);
+
+          const unexpectedRefs = walk('apps/web/src')
+            .filter((file) => /\.(ts|tsx)$/.test(file))
+            .filter((file) => ![legacyPath, criticalPath, barrelPath].includes(file))
+            .filter((file) => {
+              const source = fs.readFileSync(file, 'utf8');
+              return source.includes('useJobsLegacy') || source.includes('useJobsCritical');
+            });
+          if (unexpectedRefs.length) throw new Error(`Unexpected direct legacy job hook references: ${unexpectedRefs.join(', ')}`);
+
+          let legacy = fs.readFileSync(legacyPath, 'utf8');
+          const typeStart = legacy.indexOf('export interface Job {');
+          const helperStart = legacy.indexOf('// Helper to get frequency in days from service type');
+          const updateStart = legacy.indexOf('// Update a job');
+          const deleteStart = legacy.indexOf('// Delete a job');
+          const fieldsStart = legacy.indexOf('// Update specific job fields');
+          if ([typeStart, helperStart, updateStart, deleteStart, fieldsStart].some((index) => index < 0)) {
+            throw new Error('Jobs legacy cleanup anchors changed');
+          }
+
+          legacy = legacy.slice(0, typeStart)
+            + 'import type { Job, JobFormData } from "../types/job";\n\n'
+            + legacy.slice(updateStart, deleteStart)
+            + legacy.slice(fieldsStart);
+          legacy = legacy.replace(
+            'import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";',
+            'import { useMutation, useQueryClient } from "@tanstack/react-query";'
+          );
+          if (/export function use(Jobs|JobsByCustomer|CreateJob|DeleteJob)\b/.test(legacy)) {
+            throw new Error('Duplicate CRUD exports still remain in maintenance hook');
+          }
+          fs.writeFileSync(maintenancePath, legacy);
+          fs.unlinkSync(legacyPath);
+
+          let core = fs.readFileSync(criticalPath, 'utf8');
+          core = core.replace('import type { Job, JobFormData } from "./useJobsLegacy";', 'import type { Job, JobFormData } from "../types/job";');
+          fs.writeFileSync(corePath, core);
+          fs.unlinkSync(criticalPath);
+
+          fs.writeFileSync(barrelPath, `export type { Job, JobFormData } from "../types/job";\nexport type { ImportedJobRow, JobFieldsUpdate } from "./useJobMaintenance";\n\nexport {\n  useImportJobs,\n  useUpdateJob,\n  useUpdateJobFields,\n} from "./useJobMaintenance";\n\nexport {\n  useJobs,\n  useJobsByCustomer,\n  useCreateJob,\n  useDeleteJob,\n} from "./useJobCore";\n`);
           NODE
       - run: npx eslint apps/web/src packages --max-warnings=0
       - run: npm run typecheck
       - run: npx vitest run apps/web/src
       - run: npm run build
-      - name: Commit frontend fixes
+      - name: Commit Jobs consolidation
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/web/src/modules/settings/components/IntegrationsTabContent.tsx apps/web/src/modules/billing/hooks/useQuickBooksSync.ts
+          git add -A apps/web/src/modules/jobs
           git diff --cached --quiet && exit 0
-          git commit -m "fix(frontend): remove audited hardcoded integration data"
+          git commit -m "refactor(frontend): remove duplicate legacy jobs CRUD"
           git push origin HEAD:dev
