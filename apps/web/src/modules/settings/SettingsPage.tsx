@@ -19,11 +19,11 @@ import { TeamSettingsSection } from "./components/TeamSettingsSection";
 import { SecuritySettingsSection } from "./components/SecuritySettingsSection";
 import { ProfileSettingsSection } from "./components/ProfileSettingsSection";
 import { SettingsTabsNavigation } from "./components/SettingsTabsNavigation";
+import { useSettingsNavigation } from "./hooks/useSettingsNavigation";
 import { useLanguage } from "@/contexts/useLanguage";
 import { useStaff, useCurrentStaff, Staff } from "@/hooks/useStaff";
 import { useCompanySettings, useUpdateCompanySettings, BusinessHours } from "@/hooks/useCompanySettings";
 import { changeCurrentPassword, loadNotificationPreferences, saveCurrentProfile, saveNotificationPreferences } from "./services/settingsAccountService";
-import { useLocation, useSearchParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   User,
@@ -52,42 +52,16 @@ import {
   DollarSign,
 } from "lucide-react";
 
-type SettingsTab = "profile" | "company" | "notifications" | "team" | "security" | "automations" | "integrations" | "audit";
-
-const SETTINGS_TABS: SettingsTab[] = ["profile", "company", "notifications", "team", "security", "automations", "integrations", "audit"];
-
-function isSettingsTab(value: string | null): value is SettingsTab {
-  return value !== null && SETTINGS_TABS.includes(value as SettingsTab);
-}
-
 export function Settings() {
   const { t } = useLanguage();
   const queryClient = useQueryClient();
-  const location = useLocation();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const requestedTab = searchParams.get("tab");
-  const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
   
   // Fetch staff from database
   const { data: staffMembers = [], isLoading: isLoadingStaff } = useStaff();
   const { data: currentStaff } = useCurrentStaff();
   const currentRole = currentStaff?.staff_roles?.role;
-  const canManageTeam = currentRole === "admin" || currentRole === "office_manager";
-  const canManageAutomations = canManageTeam || currentRole === "cleaning_manager" || currentRole === "virtual_assistant";
+  const { activeTab, tabs, selectTab, canManageTeam, canManageAutomations } = useSettingsNavigation(currentRole, t);
 
-  useEffect(() => {
-    if (!currentRole) return;
-    const desiredTab = location.pathname === "/integrations" ? "integrations" : requestedTab;
-    if (!isSettingsTab(desiredTab)) {
-      setActiveTab("profile");
-      return;
-    }
-    const baseTab = ["profile", "notifications", "security"].includes(desiredTab);
-    const automationTab = desiredTab === "automations" && canManageAutomations;
-    const administrativeTab = ["company", "team", "integrations", "audit"].includes(desiredTab) && canManageTeam;
-    setActiveTab(baseTab || automationTab || administrativeTab ? desiredTab : "profile");
-  }, [canManageAutomations, canManageTeam, currentRole, location.pathname, requestedTab]);
-  
   // Company settings from database
   const { data: companySettings, isLoading: isLoadingCompany } = useCompanySettings();
   const updateCompanySettings = useUpdateCompanySettings();
@@ -331,23 +305,6 @@ export function Settings() {
     updated[index] = { ...updated[index], [field]: value };
     setBusinessHours(updated);
   };
-
-  const tabs = [
-    { id: "profile" as SettingsTab, label: t("settings.profile"), icon: User },
-    { id: "notifications" as SettingsTab, label: t("settings.notifications"), icon: Bell },
-    { id: "security" as SettingsTab, label: t("settings.security"), icon: Shield },
-    ...(canManageTeam ? [
-      { id: "company" as SettingsTab, label: t("settings.company"), icon: Building2 },
-      { id: "team" as SettingsTab, label: t("settings.team"), icon: Users },
-    ] : []),
-    ...(canManageAutomations ? [
-      { id: "automations" as SettingsTab, label: "Automations", icon: Zap },
-    ] : []),
-    ...(canManageTeam ? [
-      { id: "integrations" as SettingsTab, label: t("settings.integrations"), icon: Link2 },
-      { id: "audit" as SettingsTab, label: t("audit.title"), icon: ClipboardList },
-    ] : []),
-  ];
 
   const renderCompanySettings = () => (
     <div className="space-y-6">
@@ -832,10 +789,7 @@ export function Settings() {
             <SettingsTabsNavigation
               tabs={tabs}
               activeTab={activeTab}
-              onChange={(tab) => {
-                setActiveTab(tab);
-                setSearchParams({ tab }, { replace: true });
-              }}
+              onChange={selectTab}
             />
 
             {/* Content Area */}
