@@ -15,7 +15,10 @@ def append_missing(lang, mapping):
             v=v.replace('\\','\\\\').replace('"','\\"')
             lines.append(f'    "{k}": "{v}",')
     if lines:
-        i=s.rfind('};')
+        marker='} as const;'
+        i=s.rfind(marker)
+        if i < 0:
+            raise RuntimeError(f'translation catalog closing marker not found for {lang}')
         p.write_text(s[:i]+'\n'+'\n'.join(lines)+'\n'+s[i:])
 
 en_extra={
