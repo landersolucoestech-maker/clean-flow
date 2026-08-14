@@ -23,65 +23,63 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Migrate full-height pages to PageLayout
+      - name: Split i18n catalog from provider
         run: |
           node <<'NODE'
           const fs = require('node:fs');
 
-          function replaceOnce(source, from, to, label) {
-            if (!source.includes(from)) throw new Error(`Missing ${label} anchor`);
-            return source.replace(from, to);
+          const providerPath = 'apps/web/src/app/providers/LanguageContext.tsx';
+          let source = fs.readFileSync(providerPath, 'utf8');
+          const declarationStart = source.indexOf('const translations: Record<Language, Record<string, string>> = {\n');
+          const providerStart = source.indexOf('\nexport function LanguageProvider');
+          if (declarationStart < 0 || providerStart < 0) throw new Error('Language catalog anchors changed');
+
+          const block = source.slice(declarationStart, providerStart);
+          const enMarker = '  en: {\n';
+          const ptMarker = '  pt: {\n';
+          const esMarker = '  es: {\n';
+          const enStart = block.indexOf(enMarker);
+          const ptStart = block.indexOf(ptMarker);
+          const esStart = block.indexOf(esMarker);
+          const endMarker = '  },\n};\n';
+          const endStart = block.lastIndexOf(endMarker);
+          if (enStart < 0 || ptStart < 0 || esStart < 0 || endStart < 0 || !(enStart < ptStart && ptStart < esStart && esStart < endStart)) {
+            throw new Error('Translation locale boundaries changed');
           }
 
-          function replaceComponentEnd(source, label) {
-            const pattern = /\n    <\/div>\n  \);\n}\s*$/;
-            if (!pattern.test(source)) throw new Error(`Unexpected ${label} component ending`);
-            return source.replace(pattern, '\n    </PageLayout>\n  );\n}\n');
+          function stripLocaleTerminator(text) {
+            if (!text.endsWith('  },\n')) throw new Error('Unexpected locale terminator');
+            return text.slice(0, -5);
           }
 
-          const schedulePath = 'apps/web/src/modules/schedule/SchedulePage.tsx';
-          let schedule = fs.readFileSync(schedulePath, 'utf8');
-          schedule = replaceOnce(schedule,
-            'import { Header } from "@/components/layout/Header";\nimport { Sidebar } from "@/components/layout/Sidebar";',
-            'import { PageLayout } from "@/components/layout/PageLayout";',
-            'Schedule layout imports');
-          schedule = replaceOnce(schedule,
-            '  return (\n    <div className="flex h-screen bg-background">\n      <Sidebar />\n\n      <div className="flex-1 flex flex-col overflow-hidden">\n        <Header />\n\n        <main className="flex flex-1 flex-col overflow-hidden px-4 py-5 sm:px-6 lg:px-8 lg:py-7">\n          {/* Page Header */}',
-            '  return (\n    <PageLayout fullHeight contentClassName="gap-4">\n      {/* Page Header */}',
-            'Schedule shell start');
-          schedule = replaceOnce(schedule,
-            '        </main>\n      </div>\n\n      {/* Modals */}',
-            '      {/* Modals */}',
-            'Schedule shell end');
-          schedule = replaceComponentEnd(schedule, 'Schedule');
-          fs.writeFileSync(schedulePath, schedule);
+          const enBody = stripLocaleTerminator(block.slice(enStart + enMarker.length, ptStart));
+          const ptBody = stripLocaleTerminator(block.slice(ptStart + ptMarker.length, esStart));
+          const esBody = block.slice(esStart + esMarker.length, endStart);
 
-          const communicationsPath = 'apps/web/src/modules/communications/CommunicationsPage.tsx';
-          let communications = fs.readFileSync(communicationsPath, 'utf8');
-          communications = replaceOnce(communications,
-            'import { Header } from "@/components/layout/Header";\nimport { Sidebar } from "@/components/layout/Sidebar";',
-            'import { PageLayout } from "@/components/layout/PageLayout";',
-            'Communications layout imports');
-          communications = replaceOnce(communications,
-            '  return (\n    <div className="flex h-screen bg-background">\n      <Sidebar />\n      \n      <div className="flex-1 flex flex-col overflow-hidden">\n        <Header />\n        \n        <main className="flex-1 overflow-y-auto p-4 sm:p-6">\n          {/* Chat Layout */}\n          <div className="flex min-h-[680px] flex-col gap-4 lg:h-[calc(100vh-128px)] lg:min-h-0 lg:flex-row">',
-            '  return (\n    <PageLayout fullHeight contentClassName="gap-4">\n      {/* Chat Layout */}\n      <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row">',
-            'Communications shell start');
-          communications = replaceOnce(communications,
-            '          </div>\n        </main>\n      </div>\n      {/* Broadcast Modal */}',
-            '      </div>\n      {/* Broadcast Modal */}',
-            'Communications shell end');
-          communications = replaceComponentEnd(communications, 'Communications');
-          fs.writeFileSync(communicationsPath, communications);
+          fs.mkdirSync('apps/web/src/app/i18n', { recursive: true });
+          fs.writeFileSync('apps/web/src/app/i18n/en.ts', `export const en = {\n${enBody}} as const;\n`);
+          fs.writeFileSync('apps/web/src/app/i18n/pt.ts', `export const pt = {\n${ptBody}} as const;\n`);
+          fs.writeFileSync('apps/web/src/app/i18n/es.ts', `export const es = {\n${esBody}} as const;\n`);
+          fs.writeFileSync('apps/web/src/app/i18n/translations.ts', `import type { Language } from "../providers/language-context";\nimport { en } from "./en";\nimport { pt } from "./pt";\nimport { es } from "./es";\n\nexport const translations: Record<Language, Record<string, string>> = { en, pt, es };\n`);
+
+          const providerPrefix = source.slice(0, declarationStart);
+          const providerTail = source.slice(providerStart + 1);
+          const nextSource = providerPrefix.replace(
+            'import { LanguageContext, type Language } from "./language-context";\n',
+            'import { LanguageContext, type Language } from "./language-context";\nimport { translations } from "../i18n/translations";\n'
+          ) + providerTail;
+          if (nextSource.includes('const translations:')) throw new Error('Provider still contains translation catalog');
+          fs.writeFileSync(providerPath, nextSource);
           NODE
       - run: npx eslint apps/web/src packages --max-warnings=0
       - run: npm run typecheck
       - run: npx vitest run apps/web/src
       - run: npm run build
-      - name: Commit canonical shell migration
+      - name: Commit i18n split
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/web/src/modules/schedule/SchedulePage.tsx apps/web/src/modules/communications/CommunicationsPage.tsx
+          git add apps/web/src/app/providers/LanguageContext.tsx apps/web/src/app/i18n
           git diff --cached --quiet && exit 0
-          git commit -m "refactor(frontend): use canonical full-height page layout"
+          git commit -m "refactor(frontend): separate i18n data from language provider"
           git push origin HEAD:dev
