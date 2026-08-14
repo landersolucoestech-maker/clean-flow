@@ -18,6 +18,8 @@ interface GuardProps {
   allowedRoles?: readonly AppRole[];
 }
 
+const PREVIEW_MODE = import.meta.env.VITE_PREVIEW_MODE === "true";
+
 function roleForAppRole(appRole: AppRole): Role {
   const admin = DEFAULT_ROLES.find((role) => role.id === "admin")!;
   const manager = DEFAULT_ROLES.find((role) => role.id === "manager")!;
@@ -57,6 +59,12 @@ export function AuthenticatedRoute({ children, allowUnconfigured = false, allowe
   const [isIdentityLoading, setIsIdentityLoading] = useState(true);
 
   useEffect(() => {
+    if (PREVIEW_MODE) {
+      setCurrentRole(roleForAppRole("admin"));
+      setIsIdentityLoading(false);
+      return;
+    }
+
     if (!session?.user.email) {
       setStaffIdentity(null);
       setCurrentRole(null);
@@ -85,6 +93,7 @@ export function AuthenticatedRoute({ children, allowUnconfigured = false, allowe
     };
   }, [session?.user.email, setCurrentRole]);
 
+  if (PREVIEW_MODE) return children;
   if (isLoading || (session && isIdentityLoading)) return <LoadingScreen />;
   if (!session) {
     return <Navigate to="/auth" replace state={{ from: location.pathname }} />;
@@ -107,6 +116,11 @@ export function PlatformAdminRoute({ children }: GuardProps) {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 
   useEffect(() => {
+    if (PREVIEW_MODE) {
+      setIsAdmin(true);
+      return;
+    }
+
     if (!session?.user.id) {
       setIsAdmin(false);
       return;
@@ -126,6 +140,7 @@ export function PlatformAdminRoute({ children }: GuardProps) {
     };
   }, [session?.user.id]);
 
+  if (PREVIEW_MODE) return children;
   if (isSessionLoading || (session && isAdmin === null)) return <LoadingScreen />;
   if (!session || !isAdmin) return <Navigate to="/admin/auth" replace />;
 
