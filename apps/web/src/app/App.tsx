@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "./providers/LanguageContext";
 import { QuickBooksSyncProvider } from "../modules/billing/providers/QuickBooksSyncProvider";
-import { AuthenticatedRoute, PlatformAdminRoute } from "../modules/auth/RouteGuards";
+import { AuthenticatedRoute, PlatformAdminRoute } from "../modules/auth/guards/RouteGuards";
 
 const HomePage = lazy(() => import("./HomePage"));
 const Auth = lazy(() => import("../modules/auth/AuthPage").then(({ Auth }) => ({ default: Auth })));
