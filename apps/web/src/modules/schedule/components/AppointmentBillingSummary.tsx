@@ -1,0 +1,50 @@
+import { Send } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+
+interface AppointmentBillingSummaryProps {
+  amount?: number | string;
+  onSendInvoice: () => void;
+}
+
+function formatAmount(amount?: number | string) {
+  return amount != null && amount !== "" ? `$${Number(amount).toFixed(2)}` : "Not set";
+}
+
+export function AppointmentBillingSummary({ amount, onSendInvoice }: AppointmentBillingSummaryProps) {
+  const formattedAmount = formatAmount(amount);
+  return (
+    <section aria-label="Billing summary" className="relative">
+      <div className="pointer-events-none absolute -left-8 -top-10 h-24 w-24 rounded-full bg-success/12" />
+      <div className="pointer-events-none absolute -right-8 -top-10 h-24 w-24 rounded-full bg-warning/14" />
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">Cleaning Rate</span>
+            <span className="text-sm font-semibold text-foreground">{formattedAmount}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-semibold text-foreground">Total</span>
+            <span className="text-sm font-semibold text-foreground">{formattedAmount}</span>
+          </div>
+          <div className="pt-1">
+            <span className="text-sm text-muted-foreground">Invoice status</span>
+            <div className="mt-2 flex items-center gap-2">
+              <Button variant="outline" size="sm" className="h-8 gap-1.5 rounded-full px-3 text-xs shadow-none" onClick={onSendInvoice}>
+                <Send className="h-4 w-4" />
+                Send Invoice
+              </Button>
+              <Badge className="border-transparent bg-secondary px-2.5 py-1 text-[10px] font-semibold text-secondary-foreground shadow-none">Sent</Badge>
+            </div>
+          </div>
+        </div>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">Payment status</span>
+            <Badge className="border-transparent bg-secondary px-3 py-1 text-[10px] font-semibold text-secondary-foreground shadow-none">Pending</Badge>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
