@@ -340,15 +340,15 @@ export function Communications() {
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header />
         
-        <main className="flex-1 overflow-y-auto p-6 space-y-6 pl-[10px] pb-0 pr-[10px] pt-px mx-[8px] py-0 my-[4px]">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
           {/* Chat Layout */}
-          <div className="flex gap-6 h-[calc(100vh-140px)]">
+          <div className="flex min-h-[680px] flex-col gap-4 lg:h-[calc(100vh-128px)] lg:min-h-0 lg:flex-row">
             {/* Conversations Sidebar */}
-            <div className="w-80 flex flex-col border border-border rounded-lg bg-card">
+            <div className="flex w-full flex-col overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm lg:w-80 lg:shrink-0">
               {/* Header */}
-              <div className="p-4 border-b border-border">
+              <div className="border-b border-border/80 p-4">
                 <div className="flex items-center justify-between mb-1">
-                  <h2 className="text-xl font-bold text-foreground">{t("communications.title")}</h2>
+                  <h2 className="text-xl font-bold tracking-tight text-foreground">{t("communications.title")}</h2>
                   <div className="flex items-center gap-1">
                     <Button
                       variant="ghost"
@@ -400,7 +400,7 @@ export function Communications() {
                         placeholder={t("communications.searchConversations")}
                         value={conversationSearch}
                         onChange={(e) => setConversationSearch(e.target.value)}
-                        className="pl-10 bg-background"
+                        className="pl-10"
                       />
                     </div>
                     
@@ -477,8 +477,8 @@ export function Communications() {
                             key={conv.id}
                             className={`p-3 rounded-lg cursor-pointer transition-colors ${
                               selectedConversation === conv.id
-                                ? "bg-primary/10"
-                                : "hover:bg-muted/50"
+                                ? "bg-primary-light"
+                                : "hover:bg-accent/50"
                             }`}
                             onClick={() => handleSelectConversation(conv.id)}
                           >
@@ -502,7 +502,7 @@ export function Communications() {
                                 </Badge>
                               )}
                               {conv.favorite && (
-                                <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+                                <Star className="w-3 h-3 fill-warning text-warning" />
                               )}
                               {/* Customer Status Badge */}
                               {(() => {
@@ -533,7 +533,7 @@ export function Communications() {
                         placeholder={t("communications.searchConversations")}
                         value={teamSearch}
                         onChange={(e) => setTeamSearch(e.target.value)}
-                        className="pl-10 bg-background"
+                        className="pl-10"
                       />
                     </div>
                     
@@ -610,8 +610,8 @@ export function Communications() {
                             key={conv.id}
                             className={`p-3 rounded-lg cursor-pointer transition-colors ${
                               selectedConversation === conv.id
-                                ? "bg-primary/10"
-                                : "hover:bg-muted/50"
+                                ? "bg-primary-light"
+                                : "hover:bg-accent/50"
                             }`}
                             onClick={() => handleSelectConversation(conv.id)}
                           >
@@ -635,7 +635,7 @@ export function Communications() {
                                 </Badge>
                               )}
                               {conv.favorite && (
-                                <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+                                <Star className="w-3 h-3 fill-warning text-warning" />
                               )}
                               {conv.staff?.team && (
                                 <Badge variant="outline" className="text-xs">
@@ -653,9 +653,9 @@ export function Communications() {
             </div>
 
             {/* Chat Area */}
-            <div className="flex-1 flex flex-col border border-border rounded-lg bg-card">
+            <div className="flex min-h-[520px] flex-1 flex-col overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm">
               {/* Chat Header */}
-              <div className="p-4 border-b border-border flex items-center justify-between">
+              <div className="flex items-center justify-between border-b border-border/80 p-4">
                 <h3 className="font-semibold text-foreground">
                   {selectedConversationName}
                 </h3>
@@ -720,7 +720,7 @@ export function Communications() {
                           className={`flex ${msg.sender_type === 'user' ? 'justify-end' : 'justify-start'}`}
                         >
                           <div
-                            className={`max-w-[70%] p-3 rounded-lg ${
+                            className={`max-w-[85%] rounded-2xl p-3 sm:max-w-[70%] ${
                               msg.sender_type === 'user'
                                 ? 'bg-primary text-primary-foreground'
                                 : 'bg-muted text-foreground'
@@ -779,7 +779,7 @@ export function Communications() {
                   </p>
                   <Button 
                     variant="hero" 
-                    className="flex items-center space-x-2"
+                    className="flex items-center gap-2"
                     onClick={() => setNewMessageModalOpen(true)}
                   >
                     <Plus className="w-4 h-4" />
@@ -789,7 +789,7 @@ export function Communications() {
               )}
 
               {/* Message Input Area */}
-              <div className="p-4 border-t border-border">
+              <div className="border-t border-border/80 bg-card p-3 sm:p-4">
                 {/* Attachment Preview */}
                 {attachmentFile && (
                   <div className="mb-3 p-2 bg-muted rounded-lg flex items-center gap-3">
@@ -864,7 +864,7 @@ export function Communications() {
                           handleSendMessage();
                         }
                       }}
-                      className="pr-16 bg-background"
+                      className="pr-16"
                       disabled={!selectedConversation}
                     />
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
@@ -887,7 +887,7 @@ export function Communications() {
                     size="icon"
                     onClick={handleSendMessage}
                     disabled={(!messageText.trim() && !attachmentFile) || !selectedConversation || sendMessageMutation.isPending || isUploading}
-                    className="rounded-full"
+                    className="rounded-xl"
                   >
                     {sendMessageMutation.isPending || isUploading ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
