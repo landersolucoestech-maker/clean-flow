@@ -187,7 +187,7 @@ export function BroadcastModal({ open, onOpenChange, customers }: BroadcastModal
         const { error: recipientError } = await supabase.from("broadcast_recipients" as never).insert(recipients as never);
         if (recipientError) throw recipientError;
 
-        const { data: result, error: sendError } = await supabase.functions.invoke("ringcentral-broadcast", {
+        const { data: result, error: sendError } = await supabase.functions.invoke("send-broadcast", {
           body: { broadcast_id: broadcastId },
         });
         if (sendError) throw sendError;
@@ -196,7 +196,7 @@ export function BroadcastModal({ open, onOpenChange, customers }: BroadcastModal
       }
 
       for (const member of availableStaff.filter((item) => selectedStaff.has(item.id))) {
-        const { error } = await supabase.functions.invoke("ringcentral-send-message", {
+        const { data: result, error } = await supabase.functions.invoke("send-sms-message", {
           body: {
             company_id: company.id,
             to_phone: member.phone,
@@ -204,7 +204,7 @@ export function BroadcastModal({ open, onOpenChange, customers }: BroadcastModal
             attachment_url: attachmentUrls[0] || undefined,
           },
         });
-        if (error) failed++; else sent++;
+        if (error || !result?.success) failed++; else sent++;
       }
 
       attachments.forEach((item) => { if (item.preview) URL.revokeObjectURL(item.preview); });
@@ -215,8 +215,6 @@ export function BroadcastModal({ open, onOpenChange, customers }: BroadcastModal
     } catch (error) {
       console.error("Broadcast send failed", error);
       toast.error("Failed to send broadcast");
-      // Keep uploaded files and current form so the user can retry. Closing the
-      // dialog cleans those objects instead of leaving public orphans.
     } finally {
       setSending(false);
     }
@@ -252,19 +250,13 @@ export function BroadcastModal({ open, onOpenChange, customers }: BroadcastModal
             <div className="p-2 space-y-1">
               {tab === "customers" ? availableCustomers.map((customer) => (
                 <label key={customer.id} className="flex items-center gap-3 rounded-md p-2 hover:bg-muted cursor-pointer">
-                  <Checkbox
-                    checked={selectedCustomers.has(customer.id)}
-                    onCheckedChange={() => toggle(selectedCustomers, customer.id, setSelectedCustomers)}
-                  />
+                  <Checkbox checked={selectedCustomers.has(customer.id)} onCheckedChange={() => toggle(selectedCustomers, customer.id, setSelectedCustomers)} />
                   <span className="flex-1"><span className="font-medium">{customer.name}</span><span className="block text-xs text-muted-foreground">{customer.phone || customer.phone2}</span></span>
                   <Badge variant="outline">{customer.status || "Unknown"}</Badge>
                 </label>
               )) : availableStaff.map((member) => (
                 <label key={member.id} className="flex items-center gap-3 rounded-md p-2 hover:bg-muted cursor-pointer">
-                  <Checkbox
-                    checked={selectedStaff.has(member.id)}
-                    onCheckedChange={() => toggle(selectedStaff, member.id, setSelectedStaff)}
-                  />
+                  <Checkbox checked={selectedStaff.has(member.id)} onCheckedChange={() => toggle(selectedStaff, member.id, setSelectedStaff)} />
                   <span className="flex-1"><span className="font-medium">{member.name}</span><span className="block text-xs text-muted-foreground">{member.phone}</span></span>
                   {member.team && <Badge variant="outline">Team {member.team}</Badge>}
                 </label>
