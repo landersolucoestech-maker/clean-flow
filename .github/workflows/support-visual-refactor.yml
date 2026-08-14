@@ -1,0 +1,73 @@
+name: Support visual refactor
+
+on:
+  push:
+    branches: [DEV]
+    paths:
+      - .github/workflows/support-visual-refactor.yml
+
+permissions:
+  contents: write
+
+jobs:
+  refactor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: DEV
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Refine support visual presentation
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          p = Path('apps/web/src/modules/support/SupportPage.tsx')
+          text = p.read_text(encoding='utf-8')
+
+          def rep(old, new, count=1):
+              global text
+              if old not in text:
+                  raise SystemExit(f'Expected text not found: {old[:180]}')
+              text = text.replace(old, new, count)
+
+          rep('''      case "open": return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";\n      case "in_progress": return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";\n      case "waiting_customer": return "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200";\n      case "resolved": return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";\n      case "closed": return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";''', '''      case "open": return "bg-primary-light text-primary-dark";\n      case "in_progress": return "bg-warning/10 text-warning-foreground";\n      case "waiting_customer": return "bg-warning/15 text-warning-foreground";\n      case "resolved": return "bg-success/10 text-success";\n      case "closed": return "bg-muted text-muted-foreground";''')
+          rep('''      case "low": return "bg-gray-100 text-gray-800";\n      case "medium": return "bg-blue-100 text-blue-800";\n      case "high": return "bg-orange-100 text-orange-800";\n      case "urgent": return "bg-red-100 text-red-800";''', '''      case "low": return "bg-muted text-muted-foreground";\n      case "medium": return "bg-primary-light text-primary-dark";\n      case "high": return "bg-warning/10 text-warning-foreground";\n      case "urgent": return "bg-destructive/10 text-destructive";''')
+
+          rep('''        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">''', '''        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">''')
+          text = text.replace('<Card>\n            <CardContent className="flex items-center gap-4 p-6">', '<Card className="border-border/80 shadow-sm">\n            <CardContent className="flex items-center gap-4 p-5">')
+          rep('''              <div className="p-3 rounded-full bg-blue-100 dark:bg-blue-900">\n                <Ticket className="w-6 h-6 text-blue-600 dark:text-blue-300" />''', '''              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-light">\n                <Ticket className="h-6 w-6 text-primary-dark" />''')
+          rep('''              <div className="p-3 rounded-full bg-yellow-100 dark:bg-yellow-900">\n                <Clock className="w-6 h-6 text-yellow-600 dark:text-yellow-300" />''', '''              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-warning/10">\n                <Clock className="h-6 w-6 text-warning-foreground" />''')
+          rep('''              <div className="p-3 rounded-full bg-orange-100 dark:bg-orange-900">\n                <AlertCircle className="w-6 h-6 text-orange-600 dark:text-orange-300" />''', '''              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-warning/15">\n                <AlertCircle className="h-6 w-6 text-warning-foreground" />''')
+          rep('''              <div className="p-3 rounded-full bg-green-100 dark:bg-green-900">\n                <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-300" />''', '''              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-success/10">\n                <CheckCircle className="h-6 w-6 text-success" />''')
+
+          rep('''          <TabsList>''', '''          <TabsList className="w-full justify-start overflow-x-auto sm:w-auto">''')
+          rep('''            <div className="flex flex-col sm:flex-row gap-4">''', '''            <div className="flex flex-col gap-3 rounded-2xl border border-border/80 bg-card p-4 shadow-sm sm:flex-row sm:items-center">''')
+          rep('''                <SelectTrigger className="w-48">''', '''                <SelectTrigger className="w-full sm:w-48">''')
+          rep('''            <Card>\n              <CardContent className="p-0">''', '''            <Card className="overflow-hidden border-border/80 shadow-sm">\n              <CardContent className="p-0">''')
+          rep('''                          className="cursor-pointer hover:bg-muted/50"''', '''                          className="cursor-pointer"''')
+          text = text.replace('className="hover:shadow-md transition-shadow cursor-pointer"', 'className="cursor-pointer border-border/80 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"')
+
+          p.write_text(text, encoding='utf-8')
+          PY
+      - run: npm ci
+      - name: Lint
+        run: npm run lint -- --max-warnings=0
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Commit verified support refactor
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/web/src/modules/support/SupportPage.tsx
+          git diff --cached --quiet && exit 0
+          git commit -m "style: modernize support page presentation"
+          git push origin HEAD:DEV
