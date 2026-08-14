@@ -2,7 +2,6 @@ import { type ReactNode } from "react";
 import { useLocation } from "react-router-dom";
 import { ContactRound, Repeat, UserCheck, UserPlus, Users, UserX } from "lucide-react";
 import { PageLayoutTopContentProvider } from "@/components/layout/PageLayoutTopContent";
-import { Card, CardContent } from "@/components/ui/card";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useLeads, LEAD_STATUSES } from "../leads/hooks/useLeads";
 import { useContacts } from "../contacts/hooks/useContacts";
@@ -23,24 +22,27 @@ type Metric = {
 
 function MetricStrip({ metrics }: { metrics: Metric[] }) {
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+    <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 2xl:grid-cols-5">
       {metrics.map((metric) => (
-        <Card key={metric.label} className="rounded-md border-border/80 shadow-sm">
-          <CardContent className="flex min-h-[92px] items-center justify-between p-4">
-            <div className="min-w-0">
-              <p className="truncate text-xs font-medium text-muted-foreground">{metric.label}</p>
-              <p className="mt-1 text-2xl font-semibold tracking-tight text-foreground">{metric.value}</p>
-              <p className="truncate text-xs text-muted-foreground">{metric.helper}</p>
+        <div
+          key={metric.label}
+          className="flex min-h-[88px] items-center justify-between rounded-lg border border-border/70 bg-card px-4 py-3 shadow-sm"
+        >
+          <div className="min-w-0">
+            <p className="truncate text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+              {metric.label}
+            </p>
+            <p className="mt-1 text-2xl font-semibold leading-none tracking-tight text-foreground">{metric.value}</p>
+            <p className="mt-1 truncate text-xs text-muted-foreground">{metric.helper}</p>
+          </div>
+          {metric.icon ? (
+            <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${metric.tone}`}>
+              <metric.icon className="h-4 w-4" />
             </div>
-            {metric.icon ? (
-              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${metric.tone}`}>
-                <metric.icon className="h-5 w-5" />
-              </div>
-            ) : (
-              <span className={`h-3 w-3 shrink-0 rounded-full ring-4 ring-background ${metric.dot ?? "bg-muted-foreground"}`} />
-            )}
-          </CardContent>
-        </Card>
+          ) : (
+            <span className={`h-2.5 w-2.5 shrink-0 rounded-full ring-4 ring-background ${metric.dot ?? "bg-muted-foreground"}`} />
+          )}
+        </div>
       ))}
     </div>
   );
@@ -99,9 +101,5 @@ function CrmWorkspaceHeader() {
 }
 
 export function CrmPageBridge({ children }: CrmPageBridgeProps) {
-  return (
-    <PageLayoutTopContentProvider content={<CrmWorkspaceHeader />}>
-      {children}
-    </PageLayoutTopContentProvider>
-  );
+  return <PageLayoutTopContentProvider content={<CrmWorkspaceHeader />}>{children}</PageLayoutTopContentProvider>;
 }
