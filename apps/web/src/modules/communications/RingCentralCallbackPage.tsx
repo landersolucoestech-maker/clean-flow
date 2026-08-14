@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { Loader2, CheckCircle, XCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { completeRingCentralOAuth } from "./services/communicationsOAuthService";
 
 export default function RingCentralCallback() {
   const [searchParams] = useSearchParams();
@@ -10,16 +10,27 @@ export default function RingCentralCallback() {
   const [message, setMessage] = useState("Conectando ao RingCentral...");
 
   useEffect(() => {
+    const notifyOpener = (success: boolean, error: string | null, phoneNumber?: string) => {
+      if (!window.opener) return;
+      window.opener.postMessage({
+        type: "ringcentral-callback",
+        success,
+        error,
+        phoneNumber,
+      }, window.location.origin);
+    };
+
     const handleCallback = async () => {
       const code = searchParams.get("code");
       const state = searchParams.get("state");
-      const error = searchParams.get("error");
+      const providerError = searchParams.get("error");
       const errorDescription = searchParams.get("error_description");
 
-      if (error) {
+      if (providerError) {
+        const errorMessage = errorDescription || "Autorização negada";
         setStatus("error");
-        setMessage(errorDescription || "Autorização negada");
-        notifyOpener(false, errorDescription || "Autorização negada");
+        setMessage(errorMessage);
+        notifyOpener(false, errorMessage);
         return;
       }
 
@@ -31,51 +42,22 @@ export default function RingCentralCallback() {
       }
 
       try {
-        // Build redirect URI (same as auth request)
         const redirectUri = `${window.location.origin}/integrations/ringcentral/callback`;
-
-        const { data, error: callbackError } = await supabase.functions.invoke("ringcentral-callback", {
-          body: {
-            code,
-            state,
-            redirect_uri: redirectUri,
-          },
-        });
-
-        if (callbackError || !data?.success) {
-          throw new Error(callbackError?.message || data?.error || "Failed to exchange token");
-        }
-
+        const data = await completeRingCentralOAuth(code, state, redirectUri);
         setStatus("success");
         setMessage(`Conectado! Número: ${data.phone_number || "N/A"}`);
         notifyOpener(true, null, data.phone_number);
-
-        // Auto-close after success
-        setTimeout(() => {
-          window.close();
-        }, 2000);
-
-      } catch (err) {
-        console.error("Callback error:", err);
+        window.setTimeout(() => window.close(), 2000);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
         setStatus("error");
-        setMessage(err instanceof Error ? err.message : "Erro desconhecido");
-        notifyOpener(false, err instanceof Error ? err.message : "Erro desconhecido");
+        setMessage(errorMessage);
+        notifyOpener(false, errorMessage);
       }
     };
 
-    handleCallback();
+    void handleCallback();
   }, [searchParams]);
-
-  const notifyOpener = (success: boolean, error: string | null, phoneNumber?: string) => {
-    if (window.opener) {
-      window.opener.postMessage({
-        type: "ringcentral-callback",
-        success,
-        error,
-        phoneNumber,
-      }, window.location.origin);
-    }
-  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
