@@ -1,6 +1,6 @@
 name: Frontend Audit Fixes
 
-# One-shot CreateLeadModal service extraction runner.
+# One-shot CustomerDetails chat extraction runner.
 on:
   push:
     branches: [dev]
@@ -24,17 +24,17 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: node scripts/refactor-create-lead-service.mjs
+      - run: node scripts/refactor-customer-chat.mjs
       - run: node scripts/frontend-audit.mjs
       - run: npx eslint apps/web/src packages --max-warnings=0
       - run: npm run typecheck
       - run: npx vitest run apps/web/src
       - run: npm run build
-      - name: Commit CreateLeadModal service extraction
+      - name: Commit CustomerDetails chat extraction
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx apps/web/src/modules/crm/leads/services/leadCreationService.ts
+          git add apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx apps/web/src/modules/crm/customers/components/CustomerChatTab.tsx
           git diff --cached --quiet && exit 0
-          git commit -m "refactor(frontend): isolate lead creation persistence"
+          git commit -m "refactor(frontend): extract customer chat tab"
           git push origin HEAD:dev
