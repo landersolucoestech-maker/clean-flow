@@ -17,6 +17,8 @@ import { AuditTab } from "@/components/settings/AuditTab";
 import { NotificationSettingsSection } from "./components/NotificationSettingsSection";
 import { TeamSettingsSection } from "./components/TeamSettingsSection";
 import { SecuritySettingsSection } from "./components/SecuritySettingsSection";
+import { ProfileSettingsSection } from "./components/ProfileSettingsSection";
+import { SettingsTabsNavigation } from "./components/SettingsTabsNavigation";
 import { useLanguage } from "@/contexts/useLanguage";
 import { useStaff, useCurrentStaff, Staff } from "@/hooks/useStaff";
 import { useCompanySettings, useUpdateCompanySettings, BusinessHours } from "@/hooks/useCompanySettings";
@@ -346,61 +348,6 @@ export function Settings() {
       { id: "audit" as SettingsTab, label: t("audit.title"), icon: ClipboardList },
     ] : []),
   ];
-
-  const renderProfileSettings = () => (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <User className="w-5 h-5" />
-          {t("settings.personalInfo")}
-        </CardTitle>
-        <CardDescription>{t("settings.updateProfileInfo")}</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Profile Image */}
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center text-2xl font-semibold text-foreground">
-            {fullName.charAt(0)}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <Label>{t("settings.fullName")}</Label>
-            <Input 
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              placeholder={t("settings.enterFullName")}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>{t("common.email")}</Label>
-            <Input 
-              type="email"
-              value={userEmail}
-              readOnly
-              aria-readonly="true"
-              placeholder={t("settings.enterEmail")}
-            />
-            <p className="text-xs text-muted-foreground">Login email changes are managed by an administrator.</p>
-          </div>
-        </div>
-
-        <div className="space-y-2 max-w-md">
-          <Label>{t("common.phone")}</Label>
-          <Input 
-            value={userPhone}
-            onChange={(e) => setUserPhone(e.target.value)}
-            placeholder="(00) 00000-0000"
-          />
-        </div>
-
-        <Button onClick={handleSaveProfile} variant="hero">
-          {t("settings.saveChanges")}
-        </Button>
-      </CardContent>
-    </Card>
-  );
 
   const renderCompanySettings = () => (
     <div className="space-y-6">
@@ -771,7 +718,17 @@ export function Settings() {
   const renderContent = () => {
     switch (activeTab) {
       case "profile":
-        return renderProfileSettings();
+        return (
+          <ProfileSettingsSection
+            t={t}
+            fullName={fullName}
+            setFullName={setFullName}
+            userEmail={userEmail}
+            userPhone={userPhone}
+            setUserPhone={setUserPhone}
+            onSave={handleSaveProfile}
+          />
+        );
       case "company":
         return renderCompanySettings();
       case "notifications":
@@ -848,7 +805,17 @@ export function Settings() {
       case "audit":
         return <AuditTab />;
       default:
-        return renderProfileSettings();
+        return (
+          <ProfileSettingsSection
+            t={t}
+            fullName={fullName}
+            setFullName={setFullName}
+            userEmail={userEmail}
+            userPhone={userPhone}
+            setUserPhone={setUserPhone}
+            onSave={handleSaveProfile}
+          />
+        );
     }
   };
 
@@ -862,29 +829,14 @@ export function Settings() {
             </div>
 
             {/* Horizontal Tabs */}
-            <div className="flex items-center gap-2 overflow-x-auto border-b border-border/80 pb-4">
-              {tabs.map((tab) => {
-                const Icon = tab.icon;
-                const isActive = activeTab === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => {
-                      setActiveTab(tab.id);
-                      setSearchParams({ tab: tab.id }, { replace: true });
-                    }}
-                    className={`flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
-                      isActive
-                        ? "bg-primary text-primary-foreground shadow-sm"
-                        : "bg-muted/70 text-muted-foreground hover:bg-accent hover:text-foreground"
-                    }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span>{tab.label}</span>
-                  </button>
-                );
-              })}
-            </div>
+            <SettingsTabsNavigation
+              tabs={tabs}
+              activeTab={activeTab}
+              onChange={(tab) => {
+                setActiveTab(tab);
+                setSearchParams({ tab }, { replace: true });
+              }}
+            />
 
             {/* Content Area */}
             <div>
