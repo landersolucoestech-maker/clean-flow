@@ -42,7 +42,7 @@ import { cn, parseDateString, formatDateLong, getCurrentDateInEST } from "@/lib/
 import { useCreateInvoice, useGenerateInvoiceNumber } from "@/hooks/useInvoices";
 import { useQuickBooks } from "@/hooks/useQuickBooks";
 import { useQuickBooksStore } from "@/stores/quickbooks.store";
-import { supabase } from "@/integrations/supabase/client";
+import { findInvoiceCustomerByName, findOrCreateQuickBooksCustomer } from "@/modules/billing/services/invoicePreparationService";
 
 interface InvoiceItem {
   id: number;
@@ -148,17 +148,12 @@ export function InvoiceModal({ open, onOpenChange, appointment, depositAmount, i
           return;
         }
         
-        // Otherwise, look up by name
-        const { data, error } = await supabase
-          .from("customers")
-          .select("id, email")
-          .ilike("name", appointment.customer)
-          .limit(1);
-        
-        if (!error && data && data.length > 0) {
-          setCustomerId(data[0].id);
-          setCustomerEmail(data[0].email);
-        } else {
+        // Otherwise, look up by name through the billing service.
+        try {
+          const customer = await findInvoiceCustomerByName(appointment.customer);
+          setCustomerId(customer?.id ?? null);
+          setCustomerEmail(customer?.email ?? null);
+        } catch {
           setCustomerId(null);
           setCustomerEmail(null);
         }
@@ -255,34 +250,13 @@ export function InvoiceModal({ open, onOpenChange, appointment, depositAmount, i
           // Get QB customer ID from mapping or search/create
           let qbCustomerId = customerMapping[customerId];
           
-          // If no mapping exists, try to find or create customer in QuickBooks
+          // Resolve the QuickBooks customer through the billing service.
           if (!qbCustomerId && appointment?.customer) {
-            // Call edge function to search/create customer
-            const { data: customerSearchResult } = await supabase.functions.invoke("quickbooks-api", {
-              body: {
-                action: "search-customer",
-                customerName: appointment.customer,
-              },
-            });
-
-            if (customerSearchResult?.customer?.Id) {
-              qbCustomerId = customerSearchResult.customer.Id;
-              // Save mapping for future use
+            const resolvedCustomer = await findOrCreateQuickBooksCustomer(appointment.customer, customerEmail);
+            if (resolvedCustomer) {
+              qbCustomerId = resolvedCustomer.id;
               useQuickBooksStore.getState().setCustomerMapping(customerId, qbCustomerId);
-            } else {
-              // Create customer in QuickBooks
-              const { data: newCustomerResult } = await supabase.functions.invoke("quickbooks-api", {
-                body: {
-                  action: "create-customer",
-                  name: appointment.customer,
-                  email: customerEmail,
-                },
-              });
-
-              if (newCustomerResult?.Customer?.Id) {
-                qbCustomerId = newCustomerResult.Customer.Id;
-                // Save mapping for future use
-                useQuickBooksStore.getState().setCustomerMapping(customerId, qbCustomerId);
+              if (resolvedCustomer.created) {
                 addSyncLog({
                   type: "customer",
                   action: "create",
