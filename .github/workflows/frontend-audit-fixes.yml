@@ -23,7 +23,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: node scripts/refactor-lead-details-data.mjs
+      - name: Apply lead details data extraction
+        run: node scripts/refactor-lead-details-data.mjs
       - run: node scripts/frontend-audit.mjs
       - run: npx eslint apps/web/src packages --max-warnings=0
       - run: npm run typecheck
