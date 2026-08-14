@@ -98,16 +98,15 @@ Deno.serve(async (req) => {
         ? `Hi ${customer.name || "Customer"}, invoice ${invoice.invoice_number} for $${Number(invoice.total || 0).toFixed(2)} is overdue. ${paymentInfo}Please pay ASAP. - ${companyName}`
         : `Hi ${customer.name || "Customer"}, reminder: invoice ${invoice.invoice_number} for $${Number(invoice.total || 0).toFixed(2)} is due on ${invoice.due_date}. ${paymentInfo}- ${companyName}`;
 
-      const response = await fetch(`${supabaseUrl}/functions/v1/ringcentral-send-message`, {
+      const response = await fetch(`${supabaseUrl}/functions/v1/send-sms-message`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${serviceRoleKey}` },
         body: JSON.stringify({ company_id: companyId, to_phone: formattedPhone, message }),
       });
-      if (!response.ok) {
-        await response.body?.cancel();
-        throw new Error(`RingCentral delivery failed (${response.status})`);
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || !payload?.success) {
+        throw new Error(typeof payload?.error === "string" ? payload.error : `SMS delivery failed (${response.status})`);
       }
-      await response.body?.cancel();
 
       const { error: logError } = await supabase.from("automation_logs").insert({
         company_id: companyId,
