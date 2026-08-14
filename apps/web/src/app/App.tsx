@@ -32,8 +32,8 @@ const RingCentralCallback = lazy(() => import("../modules/communications/RingCen
 const DialpadCallback = lazy(() => import("../modules/communications/DialpadCallbackPage"));
 const GoogleCallback = lazy(() => import("../modules/settings/GoogleCallbackPage"));
 const NotFound = lazy(() => import("./NotFoundPage"));
-const Setup = lazy(() => import("../modules/auth/SetupPage").then(({ Setup }) => ({ default: Setup })));
-const SetPassword = lazy(() => import("../modules/auth/SetPasswordPage").then(({ SetPassword }) => ({ default: SetPassword })));
+const Setup = lazy(() => import("../modules/auth/pages/SetupPage").then(({ Setup }) => ({ default: Setup })));
+const SetPassword = lazy(() => import("../modules/auth/pages/SetPasswordPage").then(({ SetPassword }) => ({ default: SetPassword })));
 
 const queryClient = new QueryClient();
 const OPERATIONAL_ROLES = ["admin", "office_manager", "cleaning_manager", "virtual_assistant"] as const;
