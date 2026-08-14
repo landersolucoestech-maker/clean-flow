@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import { User, Phone, Mail, MapPin, Calendar, Briefcase, CreditCard, Clock, FileText, MessageSquare, FileCheck, Send, ChevronDown, Receipt, CheckCircle, Download, Eye, PenLine, Loader2, FileX, Users, StickyNote, DollarSign, AlertCircle, History } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Customer } from "@/hooks/useCustomers";
+import { CustomerDetailsHeader, CustomerDetailsTabsList } from "./CustomerDetailsChrome";
+import { formatCustomerDate, getCustomerLastServiceDate, getCustomerStatusBadgeClass, getCustomerTotalRevenue, parseInactiveCustomerInfo } from "../utils/customerDetails";
 import { useJobsByCustomer } from "@/hooks/useJobs";
 import { useInvoicesByCustomer } from "@/hooks/useInvoices";
 import { useCustomerTerms } from "@/hooks/useCustomerTerms";
@@ -38,41 +40,6 @@ interface CustomerDetailsModalProps {
   customer: Customer | null;
 }
 
-// Helper to format date
-const formatDate = (dateStr: string | null | undefined): string => {
-  if (!dateStr) return "-";
-  const date = new Date(dateStr + "T00:00:00");
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-};
-
-// Helper to get status badge color
-const getStatusBadgeClass = (status: string): string => {
-  switch (status.toLowerCase()) {
-    case "completed":
-      return "bg-success/10 text-success hover:bg-success/15";
-    case "scheduled":
-      return "bg-primary-light text-primary hover:bg-primary/15";
-    case "in-progress":
-    case "on-the-way":
-      return "bg-amber-500/10 text-amber-600 hover:bg-amber-500/20";
-    case "cancelled":
-      return "bg-destructive/10 text-destructive hover:bg-destructive/15";
-    case "paid":
-      return "bg-success/10 text-success hover:bg-success/15";
-    case "sent":
-      return "bg-primary-light text-primary hover:bg-primary/15";
-    case "draft":
-    case "open":
-      return "bg-warning/10 text-warning-foreground hover:bg-warning/15";
-    case "overdue":
-      return "bg-destructive/10 text-destructive hover:bg-destructive/15";
-    case "pending payment":
-      return "bg-warning/10 text-warning-foreground hover:bg-warning/15";
-    default:
-      return "bg-muted text-muted-foreground";
-  }
-};
-
 export function CustomerDetailsModal({
   open,
   onOpenChange,
@@ -84,37 +51,9 @@ export function CustomerDetailsModal({
   const { data: customerTerms = [], isLoading: isLoadingTerms } = useCustomerTerms(customer?.id || null);
   const { data: customerRelationships = [], isLoading: isLoadingRelationships } = useCustomerRelationships(customer?.id || null);
 
-  // Calculate last service date from completed jobs
-  const lastCompletedJob = customerJobs
-    .filter(job => job.status.toLowerCase() === 'completed')
-    .sort((a, b) => {
-      const dateA = a.scheduled_date ? new Date(a.scheduled_date).getTime() : 0;
-      const dateB = b.scheduled_date ? new Date(b.scheduled_date).getTime() : 0;
-      return dateB - dateA;
-    })[0];
-  
-  const lastServiceDate = lastCompletedJob?.scheduled_date || customer?.last_service;
-
-  // Calculate total revenue from paid invoices
-  const totalRevenue = customerInvoices
-    .filter(inv => inv.status.toLowerCase() === 'paid')
-    .reduce((sum, inv) => sum + (Number(inv.total) || 0), 0);
-
-  // Parse inactive info from additional_info
-  const parseInactiveInfo = () => {
-    if (customer?.status !== "Inactive" || !customer?.additional_info) return null;
-    
-    const info = customer.additional_info;
-    const dateMatch = info.match(/Inactive since: ([^|]+)/);
-    const reasonMatch = info.match(/Reason: (.+)/);
-    
-    return {
-      date: dateMatch ? dateMatch[1].trim() : null,
-      reason: reasonMatch ? reasonMatch[1].trim() : null,
-    };
-  };
-
-  const inactiveInfo = parseInactiveInfo();
+  const lastServiceDate = getCustomerLastServiceDate(customerJobs, customer?.last_service);
+  const totalRevenue = getCustomerTotalRevenue(customerInvoices);
+  const inactiveInfo = parseInactiveCustomerInfo(customer);
 
   const [newMessage, setNewMessage] = useState("");
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
@@ -145,55 +84,11 @@ export function CustomerDetailsModal({
   return <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
-              <span className="text-primary font-bold text-lg">
-                {customer.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-              </span>
-            </div>
-            <div>
-              <DialogTitle className="text-xl">{customer.name}</DialogTitle>
-              <div className="flex items-center gap-2 mt-1">
-                <Badge variant={customer.status === "Active" ? "default" : "secondary"}>
-                  {customer.status}
-                </Badge>
-                {inactiveInfo?.date && (
-                  <span className="text-xs text-muted-foreground">
-                    since {formatDate(inactiveInfo.date)}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
+          <CustomerDetailsHeader customer={customer} inactiveInfo={inactiveInfo} />
         </DialogHeader>
 
         <Tabs defaultValue="overview" className="mt-4">
-          <TabsList className="grid w-full grid-cols-8 h-auto">
-            <TabsTrigger value="overview" className="text-xs px-1 py-2">
-              Overview
-            </TabsTrigger>
-            <TabsTrigger value="timeline" className="text-xs px-1 py-2">
-              Timeline
-            </TabsTrigger>
-            <TabsTrigger value="contact" className="text-xs px-1 py-2">
-              Contact
-            </TabsTrigger>
-            <TabsTrigger value="addresses" className="text-xs px-1 py-2">
-              Addresses
-            </TabsTrigger>
-            <TabsTrigger value="jobs" className="text-xs px-1 py-2">
-              Jobs
-            </TabsTrigger>
-            <TabsTrigger value="invoices" className="text-xs px-1 py-2">
-              Invoices
-            </TabsTrigger>
-            <TabsTrigger value="chat" className="text-xs px-1 py-2">
-              Chat
-            </TabsTrigger>
-            <TabsTrigger value="contract" className="text-xs px-1 py-2">
-              Contract
-            </TabsTrigger>
-          </TabsList>
+          <CustomerDetailsTabsList />
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-4 mt-4">
@@ -238,7 +133,7 @@ export function CustomerDetailsModal({
                   <Calendar className="w-4 h-4" />
                   <span className="text-xs">Last Service</span>
                 </div>
-                <p className="text-sm font-medium">{formatDate(lastServiceDate)}</p>
+                <p className="text-sm font-medium">{formatCustomerDate(lastServiceDate)}</p>
               </div>
               <div className="p-4 rounded-lg bg-muted/30 space-y-2">
                 <div className="flex items-center gap-2 text-muted-foreground">
@@ -361,7 +256,7 @@ export function CustomerDetailsModal({
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <p className="text-xs text-muted-foreground">Inactive Since</p>
-                    <p className="text-sm font-medium">{inactiveInfo.date ? formatDate(inactiveInfo.date) : "-"}</p>
+                    <p className="text-sm font-medium">{inactiveInfo.date ? formatCustomerDate(inactiveInfo.date) : "-"}</p>
                   </div>
                   {inactiveInfo.reason && (
                     <div className="space-y-1 col-span-2">
@@ -410,7 +305,7 @@ export function CustomerDetailsModal({
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
                             <p className="text-sm font-medium">
-                              {formatDate(rel.start_date)} — {rel.end_date ? formatDate(rel.end_date) : "Present"}
+                              {formatCustomerDate(rel.start_date)} — {rel.end_date ? formatCustomerDate(rel.end_date) : "Present"}
                             </p>
                             {!rel.end_date && (
                               <Badge className="bg-success/10 text-success text-xs">Active</Badge>
@@ -622,7 +517,7 @@ export function CustomerDetailsModal({
                   <Calendar className="w-4 h-4" />
                   <span className="text-xs">Last Service</span>
                 </div>
-                <p className="text-sm font-medium">{formatDate(lastServiceDate)}</p>
+                <p className="text-sm font-medium">{formatCustomerDate(lastServiceDate)}</p>
               </div>
               <div className="p-4 rounded-lg bg-muted/30 space-y-2">
                 <div className="flex items-center gap-2 text-muted-foreground">
@@ -653,7 +548,7 @@ export function CustomerDetailsModal({
                         </div>
                         <div>
                           <p className="text-sm font-medium">{job.service_type || job.title || "Cleaning"}</p>
-                          <p className="text-xs text-muted-foreground">{formatDate(job.scheduled_date)}</p>
+                          <p className="text-xs text-muted-foreground">{formatCustomerDate(job.scheduled_date)}</p>
                           {job.address && (
                             <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                               <MapPin className="w-3 h-3" />
@@ -663,7 +558,7 @@ export function CustomerDetailsModal({
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-1">
-                        <Badge className={getStatusBadgeClass(job.status)}>
+                        <Badge className={getCustomerStatusBadgeClass(job.status)}>
                           {job.status === "in-progress" ? "In Progress" : 
                            job.status === "on-the-way" ? "On The Way" :
                            job.status.charAt(0).toUpperCase() + job.status.slice(1)}
@@ -755,11 +650,11 @@ export function CustomerDetailsModal({
                               <span className="text-xs text-muted-foreground">-</span>
                             )}
                           </TableCell>
-                          <TableCell>{formatDate(invoice.issue_date)}</TableCell>
+                          <TableCell>{formatCustomerDate(invoice.issue_date)}</TableCell>
                           <TableCell>${invoice.total?.toFixed(2) || "0.00"}</TableCell>
-                          <TableCell>{formatDate(invoice.due_date)}</TableCell>
+                          <TableCell>{formatCustomerDate(invoice.due_date)}</TableCell>
                           <TableCell>
-                            <Badge className={getStatusBadgeClass(invoice.status)}>
+                            <Badge className={getCustomerStatusBadgeClass(invoice.status)}>
                               {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
                             </Badge>
                           </TableCell>
