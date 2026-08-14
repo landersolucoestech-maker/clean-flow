@@ -19,6 +19,7 @@ import { TeamSettingsSection } from "./components/TeamSettingsSection";
 import { SecuritySettingsSection } from "./components/SecuritySettingsSection";
 import { ProfileSettingsSection } from "./components/ProfileSettingsSection";
 import { SettingsTabsNavigation } from "./components/SettingsTabsNavigation";
+import { BusinessHoursSettingsSection } from "./components/BusinessHoursSettingsSection";
 import { useSettingsNavigation } from "./hooks/useSettingsNavigation";
 import { useLanguage } from "@/contexts/useLanguage";
 import { useStaff, useCurrentStaff, Staff } from "@/hooks/useStaff";
@@ -399,50 +400,7 @@ export function Settings() {
         </CardContent>
       </Card>
 
-      {/* Business Hours */}
-      <Card>
-        <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-            <Clock className="w-5 h-5" />
-            {t("settings.businessHours")}
-          </CardTitle>
-          <CardDescription>{t("settings.setOperatingHours")}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {businessHours.map((schedule, index) => (
-              <div key={schedule.day} className="flex items-center justify-between p-3 border border-border rounded-lg">
-                <div className="flex items-center gap-4 flex-1">
-                  <Switch 
-                    checked={schedule.isOpen}
-                    onCheckedChange={(checked) => handleUpdateBusinessHours(index, "isOpen", checked)}
-                  />
-                  <span className="font-medium w-24">{schedule.day}</span>
-                  {schedule.isOpen ? (
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="time"
-                        value={schedule.open}
-                        onChange={(e) => handleUpdateBusinessHours(index, "open", e.target.value)}
-                        className="w-32"
-                      />
-                      <span className="text-muted-foreground">{t("settings.to")}</span>
-                      <Input
-                        type="time"
-                        value={schedule.close}
-                        onChange={(e) => handleUpdateBusinessHours(index, "close", e.target.value)}
-                        className="w-32"
-                      />
-                    </div>
-                  ) : (
-                    <span className="text-muted-foreground">{t("settings.closed")}</span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <BusinessHoursSettingsSection t={t} businessHours={businessHours} onUpdate={handleUpdateBusinessHours} />
 
       {/* Grid: Review Links, GPS Settings, Payment Settings */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
