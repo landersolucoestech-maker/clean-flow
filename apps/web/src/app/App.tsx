@@ -38,6 +38,7 @@ const SetPassword = lazy(() => import("../modules/auth/pages/SetPasswordPage").t
 const queryClient = new QueryClient();
 const OPERATIONAL_ROLES = ["admin", "office_manager", "cleaning_manager", "virtual_assistant"] as const;
 const FINANCE_ROLES = ["admin", "office_manager"] as const;
+const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -46,7 +47,7 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <BrowserRouter>
+          <BrowserRouter basename={baseUrl || undefined}>
             <Suspense fallback={<div className="flex min-h-screen items-center justify-center text-muted-foreground">Carregando...</div>}>
               <Routes>
                 <Route path="/" element={<AuthenticatedRoute><HomePage /></AuthenticatedRoute>} />
