@@ -9,7 +9,7 @@ import { QuickBooksSyncProvider } from "../modules/billing/providers/QuickBooksS
 import { AuthenticatedRoute, PlatformAdminRoute } from "../modules/auth/guards/RouteGuards";
 
 const HomePage = lazy(() => import("./HomePage"));
-const Auth = lazy(() => import("../modules/auth/AuthPage").then(({ Auth }) => ({ default: Auth })));
+const Auth = lazy(() => import("../modules/auth/pages/AuthPage").then(({ Auth }) => ({ default: Auth })));
 const Customers = lazy(() => import("../modules/crm/customers/CustomersPage").then(({ Customers }) => ({ default: Customers })));
 const Leads = lazy(() => import("../modules/crm/leads/LeadsPage").then(({ Leads }) => ({ default: Leads })));
 const Contacts = lazy(() => import("../modules/crm/contacts/ContactsPage").then(({ Contacts }) => ({ default: Contacts })));
