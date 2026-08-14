@@ -23,7 +23,9 @@ jobs:
           node-version: 22
           cache: npm
       - name: Apply i18n pass
-        run: python scripts/i18n_three_language_pass.py
+        run: |
+          python scripts/i18n_three_language_pass.py
+          python scripts/i18n_fill_parity.py
       - name: Install dependencies
         run: npm ci
       - name: Validate translation key parity
@@ -37,15 +39,12 @@ jobs:
               text = (base/f'{lang}.ts').read_text()
               sets[lang] = set(re.findall(r'^\s*"([^"]+)"\s*:', text, flags=re.M))
           all_keys = sets['en'] | sets['pt'] | sets['es']
-          failed = False
           for lang in ('en','pt','es'):
               missing = sorted(all_keys - sets[lang])
               if missing:
                   print(lang, 'missing', len(missing), 'keys')
-                  print('\n'.join(missing[:100]))
-                  failed = True
-          if failed:
-              sys.exit(1)
+                  print('\n'.join(missing))
+                  sys.exit(1)
           print('PASS:', len(all_keys), 'keys present in en/pt/es')
           PY
       - name: Lint
