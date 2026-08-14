@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { CheckCircle, Loader2, XCircle } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { completeDialpadOAuth } from "./services/communicationsOAuthService";
 
 export default function DialpadCallback() {
   const [searchParams] = useSearchParams();
@@ -43,25 +43,20 @@ export default function DialpadCallback() {
 
       try {
         const redirectUri = `${window.location.origin}/integrations/dialpad/callback`;
-        const { data, error } = await supabase.functions.invoke("dialpad-callback", {
-          body: { code, state, redirect_uri: redirectUri },
-        });
-        if (error || !data?.success) throw new Error(error?.message || data?.error || "Falha ao concluir OAuth do Dialpad");
-
+        const data = await completeDialpadOAuth(code, state, redirectUri);
         setStatus("success");
         setMessage(`Dialpad conectado${data.phone_number ? `: ${data.phone_number}` : ""}`);
         notifyOpener(true, null, data.phone_number, data.warning || null);
         window.setTimeout(() => window.close(), 1800);
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
-        console.error("Dialpad callback error:", error);
         setStatus("error");
         setMessage(errorMessage);
         notifyOpener(false, errorMessage);
       }
     };
 
-    handleCallback();
+    void handleCallback();
   }, [searchParams]);
 
   return (
