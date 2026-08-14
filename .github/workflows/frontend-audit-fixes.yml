@@ -1,6 +1,5 @@
 name: Frontend Audit Fixes
 
-# Retry AppointmentModal contract extraction preserving team options.
 on:
   push:
     branches: [dev]
@@ -24,17 +23,17 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: node scripts/refactor-appointment-modal-types.mjs
+      - run: node scripts/refactor-lead-form-state.mjs
       - run: node scripts/frontend-audit.mjs
       - run: npx eslint apps/web/src packages --max-warnings=0
       - run: npm run typecheck
       - run: npx vitest run apps/web/src
       - run: npm run build
-      - name: Commit AppointmentModal contract extraction
+      - name: Commit lead form state extraction
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/web/src/modules/schedule/components/AppointmentModal.tsx apps/web/src/modules/schedule/types/appointmentModal.ts
+          git add apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx apps/web/src/modules/crm/leads/components/EditLeadModal.tsx
           git diff --cached --quiet && exit 0
-          git commit -m "refactor(frontend): extract appointment modal contracts"
+          git commit -m "refactor(frontend): centralize lead form state"
           git push origin HEAD:dev
