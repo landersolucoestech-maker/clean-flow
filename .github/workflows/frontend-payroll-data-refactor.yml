@@ -1,5 +1,6 @@
 name: Frontend Payroll Data Refactor
 
+# One-shot frontend-only refactor runner. Retired after a successful commit.
 on:
   push:
     branches: [dev]
