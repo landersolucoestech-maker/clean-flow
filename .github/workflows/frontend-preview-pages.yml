@@ -1,3 +1,4 @@
+# Dev-only visual preview. No production Supabase is used here.
 name: Frontend Preview Pages
 
 on:
