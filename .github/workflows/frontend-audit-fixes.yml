@@ -1,6 +1,6 @@
 name: Frontend Audit Fixes
 
-# One-shot CalculatePayrollModal decomposition runner.
+# Retry CalculatePayrollModal decomposition with structural guards.
 on:
   push:
     branches: [dev]
