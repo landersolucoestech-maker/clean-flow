@@ -1,6 +1,6 @@
 name: Frontend Audit Fixes
 
-# One-shot CustomerDetailsModal decomposition runner.
+# One-shot CreateLeadModal service extraction runner.
 on:
   push:
     branches: [dev]
@@ -24,17 +24,17 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: node scripts/refactor-customer-details.mjs
+      - run: node scripts/refactor-create-lead-service.mjs
       - run: node scripts/frontend-audit.mjs
       - run: npx eslint apps/web/src packages --max-warnings=0
       - run: npm run typecheck
       - run: npx vitest run apps/web/src
       - run: npm run build
-      - name: Commit CustomerDetailsModal decomposition
+      - name: Commit CreateLeadModal service extraction
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx apps/web/src/modules/crm/customers/components/CustomerDetailsChrome.tsx apps/web/src/modules/crm/customers/utils/customerDetails.ts
+          git add apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx apps/web/src/modules/crm/leads/services/leadCreationService.ts
           git diff --cached --quiet && exit 0
-          git commit -m "refactor(frontend): decompose customer details modal"
+          git commit -m "refactor(frontend): isolate lead creation persistence"
           git push origin HEAD:dev
