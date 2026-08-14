@@ -4,6 +4,7 @@ import re
 SRC = Path("apps/web/src")
 CATALOG = SRC / "app/i18n/en.ts"
 TARGET_ROOTS = [SRC / "app/layout", SRC / "modules"]
+T_IMPORT = 'import { T } from "@/shared/components/i18n/T";\n'
 
 catalog_text = CATALOG.read_text()
 pairs = re.findall(r'^\s*"([^"]+)"\s*:\s*"((?:\\.|[^"])*)"\s*,?$', catalog_text, flags=re.M)
@@ -74,12 +75,8 @@ for path in sorted(set(paths)):
     if new_text == text:
         continue
 
-    if 'from "@/components/i18n/T"' not in new_text:
-        import_matches = list(re.finditer(r'import[\s\S]*?;\n', new_text))
-        if not import_matches:
-            raise RuntimeError(f"No import insertion point for {path}")
-        pos = import_matches[-1].end()
-        new_text = new_text[:pos] + 'import { T } from "@/components/i18n/T";\n' + new_text[pos:]
+    if '@/shared/components/i18n/T' not in new_text:
+        new_text = T_IMPORT + new_text
 
     path.write_text(new_text)
     files_changed += 1
