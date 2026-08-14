@@ -32,10 +32,10 @@ import { useLanguage } from "@/contexts/useLanguage";
 import { useJobs } from "@/hooks/useJobs";
 import { useCompanySettings } from "@/hooks/useCompanySettings";
 import { formatCurrency } from "@/lib/currency";
-import { supabase } from "@/integrations/supabase/client";
 import { getErrorMessage } from "@/lib/errors";
 import type { PayrollListRow, PayrollRecord, PayrollSortDirection, PayrollSortField } from "./types/payrollView";
-import { buildPayrollListRows, sortPayrollRecords } from "./utils/payrollView";
+import { buildPayrollListRows, isCompletedJobStatus, isUuid, normalizePayrollName, sortPayrollRecords } from "./utils/payrollView";
+import { fetchExistingPayrollRecordKeys, fetchPayrollRecordsForPeriod, sendPayrollStatementSms, updatePayrollRecordValues } from "./services/payrollDataService";
 
 const PayrollPDFPreviewModal = lazy(() =>
   import("@/components/payroll/PayrollPDFPreviewModal").then(({ PayrollPDFPreviewModal }) => ({
@@ -268,28 +268,13 @@ export function Payroll() {
     const periodEndISO = format(endDate, "yyyy-MM-dd");
 
     try {
-      // Fetch fresh records directly from database to ensure we have latest data
-      const { data: initialRecords, error: fetchError } = await supabase
-        .from("payroll_records")
-        .select("*")
-        .eq("period_start", periodStartISO)
-        .eq("period_end", periodEndISO);
-
-      if (fetchError) throw fetchError;
-      let freshRecords = initialRecords;
+      let freshRecords = await fetchPayrollRecordsForPeriod(periodStartISO, periodEndISO);
 
       // If there are no records yet, auto-generate them from finished jobs for this period
       if (!freshRecords || freshRecords.length === 0) {
         await handleGenerateFromJobs();
 
-        const refetch = await supabase
-          .from("payroll_records")
-          .select("*")
-          .eq("period_start", periodStartISO)
-          .eq("period_end", periodEndISO);
-
-        if (refetch.error) throw refetch.error;
-        freshRecords = refetch.data ?? [];
+        freshRecords = await fetchPayrollRecordsForPeriod(periodStartISO, periodEndISO);
       }
 
       if (!freshRecords || freshRecords.length === 0) {
@@ -301,15 +286,6 @@ export function Payroll() {
         return;
       }
 
-      const normalizeName = (value: string) =>
-        value
-          .normalize("NFKD")
-          .replace(/[\u0300-\u036f]/g, "")
-          .toLowerCase()
-          .replace(/[^a-z0-9 ]+/g, " ")
-          .replace(/\s+/g, " ")
-          .trim();
-
       let updatedCount = 0;
 
       for (const calc of calculations) {
@@ -317,9 +293,9 @@ export function Payroll() {
         let employeeRecords = freshRecords.filter((r) => r.staff_id === calc.employeeId);
 
         if (employeeRecords.length === 0) {
-          const targetName = normalizeName(calc.employeeName);
+          const targetName = normalizePayrollName(calc.employeeName);
           employeeRecords = freshRecords.filter(
-            (r) => normalizeName(r.employee_name) === targetName
+            (r) => normalizePayrollName(r.employee_name) === targetName
           );
         }
 
@@ -345,16 +321,12 @@ export function Payroll() {
           const unitValue = staffBaseValueMap.get(record.staff_id ?? "") ?? record.base_value;
           const newTotal = unitValue + bonusForThisRecord;
 
-          const { error } = await supabase
-            .from("payroll_records")
-            .update({
-              base_value: unitValue,
-              bonus: bonusForThisRecord,
-              total: newTotal,
-            })
-            .eq("id", record.id);
+          await updatePayrollRecordValues(record.id, {
+            base_value: unitValue,
+            bonus: bonusForThisRecord,
+            total: newTotal,
+          });
 
-          if (error) throw error;
           updatedCount++;
         }
       }
@@ -393,18 +365,6 @@ export function Payroll() {
     const periodStartISO = format(startDate, "yyyy-MM-dd");
     const periodEndISO = format(endDate, "yyyy-MM-dd");
 
-    const normalizeName = (value: string) =>
-      value
-        .normalize("NFKD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase()
-        .replace(/[^a-z0-9 ]+/g, " ")
-        .replace(/\s+/g, " ")
-        .trim();
-
-    const isUuid = (value: string) =>
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
-
     // Returns all staff members that match the assigned value
     // Priority: 1) UUID match, 2) Exact name match, 3) Fuzzy name match, 4) Team number fallback
     const findStaffFromAssignedValue = (assignedValue: string): (typeof staffList)[number][] => {
@@ -417,8 +377,8 @@ export function Payroll() {
       }
 
       // 2) Try exact name match first (case-insensitive)
-      const normalizedInput = normalizeName(assignedValue);
-      const exactMatch = staffList.find((s) => normalizeName(s.name) === normalizedInput);
+      const normalizedInput = normalizePayrollName(assignedValue);
+      const exactMatch = staffList.find((s) => normalizePayrollName(s.name) === normalizedInput);
       if (exactMatch) {
         return [exactMatch];
       }
@@ -427,7 +387,7 @@ export function Payroll() {
       let best: { staff: (typeof staffList)[number]; score: number } | null = null;
 
       for (const s of staffList) {
-        const sn = normalizeName(s.name);
+        const sn = normalizePayrollName(s.name);
         if (!sn) continue;
 
         let score = 0;
@@ -462,39 +422,20 @@ export function Payroll() {
       return [];
     };
 
-    const isCompletedJob = (status: string | null) => {
-      if (!status) return false;
-      const s = status.toLowerCase().trim();
-      return (
-        s.includes("completed") ||
-        s.includes("finished") ||
-        s.includes("done") ||
-        s.includes("conclu") ||
-        s.includes("finaliz")
-      );
-    };
-
     setIsGeneratingFromJobs(true);
 
     try {
-      // Fetch existing records for this period (fresh) to avoid duplicates and allow re-runs safely
-      const { data: existingPeriodRecords, error: existingErr } = await supabase
-        .from("payroll_records")
-        .select("id, staff_id, notes")
-        .eq("period_start", periodStartISO)
-        .eq("period_end", periodEndISO);
-
-      if (existingErr) throw existingErr;
+      const existingPeriodRecords = await fetchExistingPayrollRecordKeys(periodStartISO, periodEndISO);
 
       const existingKeys = new Set<string>(
-        (existingPeriodRecords || [])
+        existingPeriodRecords
           .filter((r) => !!r.staff_id && !!r.notes)
           .map((r) => `${r.staff_id}|${r.notes}`)
       );
 
       // Filter completed/finished jobs within the selected period
       const completedJobs = jobsList.filter((job) => {
-        if (!isCompletedJob(job.status)) return false;
+        if (!isCompletedJobStatus(job.status)) return false;
         if (!job.scheduled_date) return false;
 
         // scheduled_date is YYYY-MM-DD, so string comparison works
@@ -1184,32 +1125,15 @@ export function Payroll() {
       const employeeRecords = filteredData.filter(r => r.employeeName === previewRecord.employeeName);
       const totalValue = employeeRecords.reduce((sum, r) => sum + r.baseValue, 0);
       
-      // Upload to Supabase storage
       const fileName = `payroll/${previewRecord.id}_${Date.now()}_payroll_${previewRecord.employeeName.replace(/\s+/g, "_")}.pdf`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from("broadcast-attachments")
-        .upload(fileName, previewPdfBlob, { contentType: "application/pdf" });
-      
-      if (uploadError) throw uploadError;
-      
-      // Get public URL
-      const { data: urlData } = supabase.storage
-        .from("broadcast-attachments")
-        .getPublicUrl(fileName);
-      
-      // Send SMS with attachment
-      const { error: smsError } = await supabase.functions.invoke("ringcentral-send-message", {
-        body: {
-          company_id: companySettings?.id,
-          to_phone: staffMember.phone,
-          message: `Hi ${previewRecord.employeeName}, here is your payroll statement for ${previewRecord.period}. Total: ${totalValue.toLocaleString("en-US", { style: "currency", currency: "USD" })}`,
-          attachment_url: urlData.publicUrl,
-        },
+      await sendPayrollStatementSms({
+        companyId: companySettings?.id,
+        phone: staffMember.phone,
+        message: `Hi ${previewRecord.employeeName}, here is your payroll statement for ${previewRecord.period}. Total: ${totalValue.toLocaleString("en-US", { style: "currency", currency: "USD" })}`,
+        fileName,
+        pdfBlob: previewPdfBlob,
       });
-      
-      if (smsError) throw smsError;
-      
+
       toast({
         title: "SMS Sent",
         description: `Payroll PDF sent to ${previewRecord.employeeName} at ${staffMember.phone}.`,
@@ -1251,32 +1175,15 @@ export function Payroll() {
       const employeeRecords = filteredData.filter(r => r.employeeName === record.employeeName);
       const totalValue = employeeRecords.reduce((sum, r) => sum + r.baseValue, 0);
       
-      // Upload to Supabase storage
       const fileName = `payroll/${record.id}_${Date.now()}_payroll_${record.employeeName.replace(/\s+/g, "_")}.pdf`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from("broadcast-attachments")
-        .upload(fileName, pdfBlob, { contentType: "application/pdf" });
-      
-      if (uploadError) throw uploadError;
-      
-      // Get public URL
-      const { data: urlData } = supabase.storage
-        .from("broadcast-attachments")
-        .getPublicUrl(fileName);
-      
-      // Send SMS with attachment
-      const { error: smsError } = await supabase.functions.invoke("ringcentral-send-message", {
-        body: {
-          company_id: companySettings?.id,
-          to_phone: staffMember.phone,
-          message: `Hi ${record.employeeName}, here is your payroll statement for ${record.period}. Total: ${totalValue.toLocaleString("en-US", { style: "currency", currency: "USD" })}`,
-          attachment_url: urlData.publicUrl,
-        },
+      await sendPayrollStatementSms({
+        companyId: companySettings?.id,
+        phone: staffMember.phone,
+        message: `Hi ${record.employeeName}, here is your payroll statement for ${record.period}. Total: ${totalValue.toLocaleString("en-US", { style: "currency", currency: "USD" })}`,
+        fileName,
+        pdfBlob,
       });
-      
-      if (smsError) throw smsError;
-      
+
       toast({
         title: "SMS Sent",
         description: `Payroll PDF sent to ${record.employeeName} at ${staffMember.phone}.`,
@@ -1343,32 +1250,15 @@ export function Payroll() {
           const totalValue = employeeRecords.reduce((sum, r) => sum + r.baseValue, 0);
           const period = employeeRecords[0]?.period || "";
           
-          // Upload to Supabase storage
           const fileName = `payroll/${Date.now()}_payroll_${employeeName.replace(/\s+/g, "_")}.pdf`;
-          
-          const { error: uploadError } = await supabase.storage
-            .from("broadcast-attachments")
-            .upload(fileName, pdfBlob, { contentType: "application/pdf" });
-          
-          if (uploadError) throw uploadError;
-          
-          // Get public URL
-          const { data: urlData } = supabase.storage
-            .from("broadcast-attachments")
-            .getPublicUrl(fileName);
-          
-          // Send SMS with attachment
-          const { error: smsError } = await supabase.functions.invoke("ringcentral-send-message", {
-            body: {
-              company_id: companySettings?.id,
-              to_phone: staffMember.phone,
-              message: `Hi ${employeeName}, here is your payroll statement for ${period}. Total: ${totalValue.toLocaleString("en-US", { style: "currency", currency: "USD" })}`,
-              attachment_url: urlData.publicUrl,
-            },
+          await sendPayrollStatementSms({
+            companyId: companySettings?.id,
+            phone: staffMember.phone,
+            message: `Hi ${employeeName}, here is your payroll statement for ${period}. Total: ${totalValue.toLocaleString("en-US", { style: "currency", currency: "USD" })}`,
+            fileName,
+            pdfBlob,
           });
-          
-          if (smsError) throw smsError;
-          
+
           successCount++;
         } catch (error) {
           console.error(`Error sending SMS to ${employeeName}:`, error);
