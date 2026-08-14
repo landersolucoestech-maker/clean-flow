@@ -97,6 +97,10 @@ function findImagesWithoutAlt(file, source) {
   return findings;
 }
 
+function hasDirectSupabaseClientImport(source) {
+  return /from\s+["'](?:@\/integrations\/supabase\/client|@\/app\/infrastructure\/supabase\/client|\.\.?\/[^"']*supabase\/client)["']/.test(source);
+}
+
 const files = walk(ROOT);
 const sourceFiles = files.filter((file) => !file.includes(`${path.sep}mocks${path.sep}`));
 const findings = {
@@ -138,7 +142,7 @@ for (const file of sourceFiles) {
   findings.targetBlankWithoutRel.push(...findUnsafeBlankTargets(file, source));
   findings.imagesWithoutAlt.push(...findImagesWithoutAlt(file, source));
 
-  if (/\.(tsx|jsx)$/.test(file) && !relative.includes("/hooks/") && !relative.includes("/services/") && /\bsupabase\.(from|rpc|functions|auth|storage)\b/.test(source)) {
+  if (/\.(tsx|jsx)$/.test(file) && !relative.includes("/hooks/") && !relative.includes("/services/") && (hasDirectSupabaseClientImport(source) || /\bsupabase\s*\.\s*(from|rpc|functions|auth|storage)\b/s.test(source))) {
     findings.directSupabaseInUI.push({ file: relative });
   }
 
