@@ -17,28 +17,28 @@ export function AdminDashboard() {
     <AdminLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard administrativo</h1>
-          <p className="mt-1 text-gray-500">Contagens operacionais atuais do sistema</p>
+          <h1 className="text-2xl font-bold text-foreground">Dashboard administrativo</h1>
+          <p className="mt-1 text-muted-foreground">Contagens operacionais atuais do sistema</p>
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
           {cards.map((card) => (
-            <Card key={card.title} className="border-gray-200 bg-white shadow-sm">
+            <Card key={card.title} className="border-border/80 bg-card shadow-sm">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between">
-                  <card.icon className="h-5 w-5 text-orange-600" />
-                  <span className="text-2xl font-bold text-gray-900">
+                  <card.icon className="h-5 w-5 text-primary" />
+                  <span className="text-2xl font-bold text-foreground">
                     {isLoadingStats ? "—" : card.value.toLocaleString("pt-BR")}
                   </span>
                 </div>
-                <p className="mt-4 text-sm text-gray-500">{card.title}</p>
+                <p className="mt-4 text-sm text-muted-foreground">{card.title}</p>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        <Card className="border-gray-200 bg-white shadow-sm">
-          <CardContent className="p-6 text-sm text-gray-600">
+        <Card className="border-border/80 bg-card shadow-sm">
+          <CardContent className="p-6 text-sm text-muted-foreground">
             Métricas de receita, assinatura e conversão não são exibidas porque o projeto ainda não possui um provedor de pagamentos configurado.
           </CardContent>
         </Card>

@@ -95,15 +95,15 @@ export function AdminSupport() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "open":
-        return <Badge className="bg-red-100 text-red-700 hover:bg-red-100">Aberto</Badge>;
+        return <Badge className="bg-destructive/10 text-destructive hover:bg-destructive/10">Aberto</Badge>;
       case "in_progress":
-        return <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-100">Em Andamento</Badge>;
+        return <Badge className="bg-warning/10 text-warning-foreground hover:bg-warning/10">Em Andamento</Badge>;
       case "resolved":
-        return <Badge className="bg-green-100 text-green-700 hover:bg-green-100">Resolvido</Badge>;
+        return <Badge className="bg-success/10 text-success hover:bg-success/10">Resolvido</Badge>;
       case "waiting_customer":
-        return <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100">Aguardando</Badge>;
+        return <Badge className="bg-primary-light text-primary-dark hover:bg-primary-light">Aguardando</Badge>;
       case "closed":
-        return <Badge className="bg-gray-100 text-gray-700 hover:bg-gray-100">Fechado</Badge>;
+        return <Badge className="bg-muted text-foreground hover:bg-muted">Fechado</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -113,11 +113,11 @@ export function AdminSupport() {
     switch (priority) {
       case "high":
       case "urgent":
-        return <Badge className="bg-red-500 text-white hover:bg-red-500">Alta</Badge>;
+        return <Badge className="bg-destructive text-white hover:bg-destructive">Alta</Badge>;
       case "medium":
-        return <Badge className="bg-orange-500 text-white hover:bg-orange-500">Média</Badge>;
+        return <Badge className="bg-primary text-white hover:bg-primary">Média</Badge>;
       case "low":
-        return <Badge variant="outline" className="text-gray-600 border-gray-300">Baixa</Badge>;
+        return <Badge variant="outline" className="text-muted-foreground border-border">Baixa</Badge>;
       default:
         return <Badge variant="outline">{priority}</Badge>;
     }
@@ -134,98 +134,98 @@ export function AdminSupport() {
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Tickets de Suporte</h1>
-          <p className="text-gray-500 mt-1">Gerencie todas as solicitações de suporte dos usuários</p>
+          <h1 className="text-2xl font-bold text-foreground">Tickets de Suporte</h1>
+          <p className="text-muted-foreground mt-1">Gerencie todas as solicitações de suporte dos usuários</p>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="bg-white border border-gray-200 shadow-sm">
+          <Card className="bg-card border border-border/80 shadow-sm">
             <CardContent className="p-5">
               <div className="flex items-start justify-between">
-                <div className="p-2.5 rounded-full bg-red-100">
-                  <AlertCircle className="w-5 h-5 text-red-600" />
+                <div className="p-2.5 rounded-full bg-destructive/10">
+                  <AlertCircle className="w-5 h-5 text-destructive" />
                 </div>
               </div>
               <div className="mt-4">
-                <p className="text-2xl font-bold text-gray-900">{openTickets}</p>
-                <p className="text-sm text-gray-500 mt-1">Tickets Abertos</p>
-                <p className="text-xs text-gray-400">Aguardando atendimento</p>
+                <p className="text-2xl font-bold text-foreground">{openTickets}</p>
+                <p className="text-sm text-muted-foreground mt-1">Tickets Abertos</p>
+                <p className="text-xs text-muted-foreground/70">Aguardando atendimento</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white border border-gray-200 shadow-sm">
+          <Card className="bg-card border border-border/80 shadow-sm">
             <CardContent className="p-5">
               <div className="flex items-start justify-between">
-                <div className="p-2.5 rounded-full bg-orange-100">
-                  <Clock className="w-5 h-5 text-orange-600" />
+                <div className="p-2.5 rounded-full bg-warning/10">
+                  <Clock className="w-5 h-5 text-primary" />
                 </div>
               </div>
               <div className="mt-4">
-                <p className="text-2xl font-bold text-gray-900">{inProgressTickets}</p>
-                <p className="text-sm text-gray-500 mt-1">Em Andamento</p>
-                <p className="text-xs text-gray-400">Sendo atendidos</p>
+                <p className="text-2xl font-bold text-foreground">{inProgressTickets}</p>
+                <p className="text-sm text-muted-foreground mt-1">Em Andamento</p>
+                <p className="text-xs text-muted-foreground/70">Sendo atendidos</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white border border-gray-200 shadow-sm">
+          <Card className="bg-card border border-border/80 shadow-sm">
             <CardContent className="p-5">
               <div className="flex items-start justify-between">
-                <div className="p-2.5 rounded-full bg-green-100">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
+                <div className="p-2.5 rounded-full bg-success/10">
+                  <CheckCircle className="w-5 h-5 text-success" />
                 </div>
               </div>
               <div className="mt-4">
-                <p className="text-2xl font-bold text-gray-900">{resolvedTickets}</p>
-                <p className="text-sm text-gray-500 mt-1">Resolvidos</p>
-                <p className="text-xs text-gray-400">Finalizados</p>
+                <p className="text-2xl font-bold text-foreground">{resolvedTickets}</p>
+                <p className="text-sm text-muted-foreground mt-1">Resolvidos</p>
+                <p className="text-xs text-muted-foreground/70">Finalizados</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white border border-gray-200 shadow-sm">
+          <Card className="bg-card border border-border/80 shadow-sm">
             <CardContent className="p-5">
               <div className="flex items-start justify-between">
-                <div className="p-2.5 rounded-full bg-gray-100">
-                  <LayoutGrid className="w-5 h-5 text-gray-600" />
+                <div className="p-2.5 rounded-full bg-muted">
+                  <LayoutGrid className="w-5 h-5 text-muted-foreground" />
                 </div>
               </div>
               <div className="mt-4">
-                <p className="text-2xl font-bold text-gray-900">{totalTickets}</p>
-                <p className="text-sm text-gray-500 mt-1">Total</p>
-                <p className="text-xs text-gray-400">Todos os tickets</p>
+                <p className="text-2xl font-bold text-foreground">{totalTickets}</p>
+                <p className="text-sm text-muted-foreground mt-1">Total</p>
+                <p className="text-xs text-muted-foreground/70">Todos os tickets</p>
               </div>
             </CardContent>
           </Card>
         </div>
 
         {/* Tickets Table */}
-        <Card className="bg-white border border-gray-200 shadow-sm">
-          <CardHeader className="border-b border-gray-100 pb-4">
+        <Card className="bg-card border border-border/80 shadow-sm">
+          <CardHeader className="border-b border-border/60 pb-4">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <CardTitle className="text-base font-semibold text-gray-900">
+                <CardTitle className="text-base font-semibold text-foreground">
                   Lista de Tickets
                 </CardTitle>
-                <p className="text-sm text-gray-500 mt-1">Visualize e gerencie todos os tickets de suporte</p>
+                <p className="text-sm text-muted-foreground mt-1">Visualize e gerencie todos os tickets de suporte</p>
               </div>
               <div className="flex items-center gap-3">
                 <div className="relative w-72">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground/70 w-4 h-4" />
                   <Input
                     placeholder="Buscar por ID, título ou usuário..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 bg-white border-gray-200"
+                    className="pl-10 bg-card border-border/80"
                   />
                 </div>
                 <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
-                  <SelectTrigger className="w-40 bg-white border-gray-200">
+                  <SelectTrigger className="w-40 bg-card border-border/80">
                     <SelectValue placeholder="Todos os Status" />
                   </SelectTrigger>
-                  <SelectContent className="bg-white">
+                  <SelectContent className="bg-card">
                     <SelectItem value="all">Todos os Status</SelectItem>
                     <SelectItem value="open">Aberto</SelectItem>
                     <SelectItem value="in_progress">Em Andamento</SelectItem>
@@ -234,10 +234,10 @@ export function AdminSupport() {
                   </SelectContent>
                 </Select>
                 <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-                  <SelectTrigger className="w-44 bg-white border-gray-200">
+                  <SelectTrigger className="w-44 bg-card border-border/80">
                     <SelectValue placeholder="Todas Prioridades" />
                   </SelectTrigger>
-                  <SelectContent className="bg-white">
+                  <SelectContent className="bg-card">
                     <SelectItem value="all">Todas Prioridades</SelectItem>
                     <SelectItem value="high">Alta</SelectItem>
                     <SelectItem value="medium">Média</SelectItem>
@@ -249,45 +249,45 @@ export function AdminSupport() {
           </CardHeader>
           <CardContent className="p-0">
             {isLoadingTickets ? (
-              <div className="p-8 text-center text-gray-500">
+              <div className="p-8 text-center text-muted-foreground">
                 Carregando...
               </div>
             ) : filteredTickets.length === 0 ? (
-              <div className="p-8 text-center text-gray-500">
+              <div className="p-8 text-center text-muted-foreground">
                 Nenhum ticket encontrado
               </div>
             ) : (
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-gray-50 hover:bg-gray-50">
-                    <TableHead className="text-gray-600 font-medium">ID</TableHead>
-                    <TableHead className="text-gray-600 font-medium">Título</TableHead>
-                    <TableHead className="text-gray-600 font-medium">Usuário</TableHead>
-                    <TableHead className="text-gray-600 font-medium">Organização</TableHead>
-                    <TableHead className="text-gray-600 font-medium">Status</TableHead>
-                    <TableHead className="text-gray-600 font-medium">Prioridade</TableHead>
-                    <TableHead className="text-gray-600 font-medium">Categoria</TableHead>
-                    <TableHead className="text-gray-600 font-medium">Criado em</TableHead>
-                    <TableHead className="text-gray-600 font-medium text-right">Ações</TableHead>
+                  <TableRow className="bg-background hover:bg-background">
+                    <TableHead className="text-muted-foreground font-medium">ID</TableHead>
+                    <TableHead className="text-muted-foreground font-medium">Título</TableHead>
+                    <TableHead className="text-muted-foreground font-medium">Usuário</TableHead>
+                    <TableHead className="text-muted-foreground font-medium">Organização</TableHead>
+                    <TableHead className="text-muted-foreground font-medium">Status</TableHead>
+                    <TableHead className="text-muted-foreground font-medium">Prioridade</TableHead>
+                    <TableHead className="text-muted-foreground font-medium">Categoria</TableHead>
+                    <TableHead className="text-muted-foreground font-medium">Criado em</TableHead>
+                    <TableHead className="text-muted-foreground font-medium text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredTickets.map((ticket) => (
                     <TableRow 
                       key={ticket.id} 
-                      className="hover:bg-gray-50 cursor-pointer"
+                      className="hover:bg-background cursor-pointer"
                       onClick={() => setSelectedTicket(ticket)}
                     >
-                      <TableCell className="text-blue-600 font-mono text-sm">
+                      <TableCell className="text-primary font-mono text-sm">
                         {ticket.ticket_number}
                       </TableCell>
-                      <TableCell className="text-gray-900 font-medium max-w-[200px] truncate">
+                      <TableCell className="text-foreground font-medium max-w-[200px] truncate">
                         {ticket.subject}
                       </TableCell>
-                      <TableCell className="text-gray-700">
+                      <TableCell className="text-foreground">
                         {ticket.company_settings?.trade_name || "-"}
                       </TableCell>
-                      <TableCell className="text-gray-500">
+                      <TableCell className="text-muted-foreground">
                         {ticket.company_settings?.legal_name || "-"}
                       </TableCell>
                       <TableCell>
@@ -296,20 +296,20 @@ export function AdminSupport() {
                       <TableCell>
                         {getPriorityBadge(ticket.priority)}
                       </TableCell>
-                      <TableCell className="text-gray-500">
+                      <TableCell className="text-muted-foreground">
                         {ticket.category || "-"}
                       </TableCell>
-                      <TableCell className="text-gray-500">
+                      <TableCell className="text-muted-foreground">
                         {format(new Date(ticket.created_at), "yyyy-MM-dd HH:mm")}
                       </TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-gray-600">
+                            <Button variant="ghost" size="icon" className="text-muted-foreground/70 hover:text-muted-foreground">
                               <MoreHorizontal className="w-4 h-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="bg-white">
+                          <DropdownMenuContent align="end" className="bg-card">
                             <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setSelectedTicket(ticket); }}>
                               Ver detalhes
                             </DropdownMenuItem>
@@ -333,12 +333,12 @@ export function AdminSupport() {
 
       {/* Ticket Details Modal */}
       <Dialog open={!!selectedTicket} onOpenChange={(open) => !open && setSelectedTicket(null)}>
-        <DialogContent className="sm:max-w-[700px] h-[80vh] flex flex-col bg-white">
+        <DialogContent className="sm:max-w-[700px] h-[80vh] flex flex-col bg-card">
           {selectedTicket && (
             <>
               <DialogHeader>
-                <DialogTitle className="flex items-center gap-2 text-gray-900">
-                  <span className="text-gray-500 font-mono text-sm">
+                <DialogTitle className="flex items-center gap-2 text-foreground">
+                  <span className="text-muted-foreground font-mono text-sm">
                     {selectedTicket.ticket_number}
                   </span>
                   <span>{selectedTicket.subject}</span>
@@ -359,24 +359,24 @@ export function AdminSupport() {
                     >
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
                         msg.is_staff_reply 
-                          ? "bg-red-500" 
-                          : "bg-gray-200"
+                          ? "bg-destructive" 
+                          : "bg-muted"
                       }`}>
                         {msg.is_staff_reply ? (
                           <Headphones className="w-4 h-4 text-white" />
                         ) : (
-                          <User className="w-4 h-4 text-gray-500" />
+                          <User className="w-4 h-4 text-muted-foreground" />
                         )}
                       </div>
                       <div className={`flex-1 max-w-[80%] ${msg.is_staff_reply ? "text-right" : ""}`}>
                         <div className={`inline-block p-3 rounded-lg ${
                           msg.is_staff_reply 
-                            ? "bg-red-500 text-white" 
-                            : "bg-gray-100 text-gray-900"
+                            ? "bg-destructive text-white" 
+                            : "bg-muted text-foreground"
                         }`}>
                           <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
                         </div>
-                        <p className="text-xs text-gray-400 mt-1">
+                        <p className="text-xs text-muted-foreground/70 mt-1">
                           {format(new Date(msg.created_at), "MM/dd/yyyy HH:mm")}
                         </p>
                       </div>
@@ -385,18 +385,18 @@ export function AdminSupport() {
                 </div>
               </ScrollArea>
 
-              <div className="flex gap-2 pt-4 border-t border-gray-200">
+              <div className="flex gap-2 pt-4 border-t border-border/80">
                 <Textarea
                   value={replyMessage}
                   onChange={(e) => setReplyMessage(e.target.value)}
                   placeholder="Digite sua resposta..."
                   rows={2}
-                  className="flex-1 border-gray-200"
+                  className="flex-1 border-border/80"
                 />
                 <Button 
                   onClick={handleSendReply} 
                   disabled={!replyMessage.trim()}
-                  className="self-end bg-red-500 hover:bg-red-600 text-white"
+                  className="self-end bg-destructive hover:bg-destructive/90 text-white"
                 >
                   <Send className="w-4 h-4" />
                 </Button>

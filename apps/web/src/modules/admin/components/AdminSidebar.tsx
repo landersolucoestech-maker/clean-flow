@@ -32,21 +32,21 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
   return (
     <div
       className={cn(
-        "relative flex flex-col h-screen bg-white border-r border-gray-200 transition-all duration-300",
+        "relative flex flex-col h-screen bg-card border-r border-border/80 transition-all duration-300",
         isCollapsed ? "w-20" : "w-64",
         className
       )}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100">
+      <div className="flex items-center justify-between px-4 py-4 border-b border-border/60">
         {!isCollapsed && (
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">G</span>
             </div>
             <div>
-              <span className="text-base font-semibold text-gray-900">Clean Flow</span>
-              <p className="text-xs text-gray-500">Portal Admin</p>
+              <span className="text-base font-semibold text-foreground">Clean Flow</span>
+              <p className="text-xs text-muted-foreground">Portal Admin</p>
             </div>
           </div>
         )}
@@ -55,7 +55,7 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
           size="icon"
           onClick={() => setIsCollapsed(!isCollapsed)}
           className={cn(
-            "text-gray-500 hover:text-gray-700 hover:bg-gray-100",
+            "text-muted-foreground hover:text-foreground hover:bg-muted",
             isCollapsed && "mx-auto"
           )}
         >
@@ -78,7 +78,7 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
                 "w-full justify-start text-left h-11 transition-all duration-200 rounded-lg font-medium",
                 isActive 
                   ? "bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700" 
-                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
                 isCollapsed ? "px-3" : "px-4"
               )}
             >
@@ -86,7 +86,7 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
                 className={cn(
                   "w-5 h-5 transition-colors",
                   isCollapsed ? "mx-auto" : "mr-3",
-                  isActive ? "text-white" : "text-gray-500"
+                  isActive ? "text-white" : "text-muted-foreground"
                 )} 
               />
               {!isCollapsed && (
@@ -98,22 +98,22 @@ export function AdminSidebar({ className }: AdminSidebarProps) {
       </nav>
 
       {/* Footer - User Info */}
-      <div className="p-3 border-t border-gray-100">
+      <div className="p-3 border-t border-border/60">
         <div 
           className={cn(
-            "flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors",
+            "flex items-center gap-3 p-3 rounded-lg hover:bg-background cursor-pointer transition-colors",
             isCollapsed && "justify-center"
           )}
         >
-          <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
+          <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
             <span className="text-white font-semibold text-xs">AD</span>
           </div>
           {!isCollapsed && (
             <>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">Administrador</p>
+                <p className="text-sm font-medium text-foreground truncate">Administrador</p>
               </div>
-              <ChevronDown className="w-4 h-4 text-gray-400" />
+              <ChevronDown className="w-4 h-4 text-muted-foreground/70" />
             </>
           )}
         </div>
