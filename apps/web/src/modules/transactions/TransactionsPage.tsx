@@ -645,9 +645,9 @@ export function Transactions() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               {selectedTransaction?.type === "receita" ? (
-                <ArrowUpRight className="w-5 h-5 text-green-600" />
+                <ArrowUpRight className="w-5 h-5 text-success" />
               ) : (
-                <ArrowDownLeft className="w-5 h-5 text-red-600" />
+                <ArrowDownLeft className="w-5 h-5 text-destructive" />
               )}
               {t("transactions.transactionDetails")}
             </DialogTitle>
@@ -668,7 +668,7 @@ export function Transactions() {
                 </div>
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">{t("transactions.type")}</p>
-                  <Badge className={selectedTransaction.type === "receita" ? "bg-green-500/20 text-green-600" : "bg-red-500/20 text-red-600"}>
+                  <Badge className={selectedTransaction.type === "receita" ? "bg-success/15 text-success" : "bg-destructive/15 text-destructive"}>
                     {selectedTransaction.type === "receita" ? t("transactions.revenue") : t("transactions.expense")}
                   </Badge>
                 </div>
@@ -693,7 +693,7 @@ export function Transactions() {
                     className={cn(
                       normalizeKey(selectedTransaction.status) === "pendente" 
                         ? "bg-amber-500/20 text-amber-500" 
-                        : "bg-green-500/20 text-green-500"
+                        : "bg-success/15 text-success"
                     )}
                   >
                     {normalizeKey(selectedTransaction.status) === "pendente" ? "Pendente" : "Concluído"}
@@ -701,7 +701,7 @@ export function Transactions() {
                 </div>
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">{t("transactions.value")}</p>
-                  <p className={`text-xl font-bold ${selectedTransaction.type === "receita" ? "text-green-600" : "text-red-600"}`}>
+                  <p className={`text-xl font-bold ${selectedTransaction.type === "receita" ? "text-success" : "text-destructive"}`}>
                     {formatCurrency(Math.abs(Number(selectedTransaction.amount)))}
                   </p>
                 </div>

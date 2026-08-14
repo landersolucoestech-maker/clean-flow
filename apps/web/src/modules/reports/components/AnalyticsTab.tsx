@@ -64,10 +64,10 @@ function MetricCard({
   statusType = "success",
 }: MetricCardProps) {
   const getPercentileColor = (p: number) => {
-    if (p >= 80) return "text-green-500";
-    if (p >= 60) return "text-blue-500";
-    if (p >= 40) return "text-yellow-500";
-    return "text-red-500";
+    if (p >= 80) return "text-success";
+    if (p >= 60) return "text-primary";
+    if (p >= 40) return "text-warning-foreground";
+    return "text-destructive";
   };
 
   const getProgressColor = (p: number) => {
@@ -80,9 +80,9 @@ function MetricCard({
   const getStatusBadge = () => {
     if (!status) return null;
     const colors = {
-      success: "bg-green-500/10 text-green-500 border-green-500/20",
-      warning: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
-      info: "bg-blue-500/10 text-blue-500 border-blue-500/20",
+      success: "bg-success/10 text-success border-success/20",
+      warning: "bg-warning/10 text-warning-foreground border-warning/20",
+      info: "bg-primary-light text-primary border-primary/20",
     };
     return (
       <Badge variant="outline" className={colors[statusType]}>
@@ -581,13 +581,13 @@ export function AnalyticsTab() {
             icon={<Clock className="w-6 h-6" />}
             title="Scheduled Jobs"
             value={String(metrics.scheduledJobs)}
-            iconClassName="bg-orange-500/20 text-orange-500"
+            iconClassName="bg-warning/15 text-warning-foreground"
           />
           <KPICard
             icon={<RefreshCw className="w-6 h-6" />}
             title="In Progress"
             value={String(metrics.inProgressJobs)}
-            iconClassName="bg-blue-500/20 text-blue-500"
+            iconClassName="bg-primary/15 text-primary"
           />
         </div>
       </div>
@@ -603,19 +603,19 @@ export function AnalyticsTab() {
             icon={<Calendar className="w-6 h-6" />}
             title="Agendamentos Criados"
             value={String(metrics.schedulesCreatedThisMonth)}
-            iconClassName="bg-blue-500/20 text-blue-500"
+            iconClassName="bg-primary/15 text-primary"
           />
           <KPICard
             icon={<CalendarCheck className="w-6 h-6" />}
             title="Agendamentos Concluídos"
             value={String(metrics.schedulesCompletedThisMonth)}
-            iconClassName="bg-green-500/20 text-green-500"
+            iconClassName="bg-success/15 text-success"
           />
           <KPICard
             icon={<CalendarX className="w-6 h-6" />}
             title="Agendamentos Cancelados"
             value={String(metrics.schedulesCancelledThisMonth)}
-            iconClassName="bg-red-500/20 text-red-500"
+            iconClassName="bg-destructive/15 text-destructive"
           />
           <MetricCard
             icon={<TrendingUp className="w-5 h-5 text-primary" />}
@@ -673,19 +673,19 @@ export function AnalyticsTab() {
             icon={<Users className="w-6 h-6" />}
             title="Total de Funcionários"
             value={String(metrics.totalStaff)}
-            iconClassName="bg-blue-500/20 text-blue-500"
+            iconClassName="bg-primary/15 text-primary"
           />
           <KPICard
             icon={<CheckCircle className="w-6 h-6" />}
             title="Funcionários Ativos"
             value={String(metrics.activeStaff)}
-            iconClassName="bg-green-500/20 text-green-500"
+            iconClassName="bg-success/15 text-success"
           />
           <KPICard
             icon={<XCircle className="w-6 h-6" />}
             title="Funcionários Inativos"
             value={String(metrics.inactiveStaff)}
-            iconClassName="bg-red-500/20 text-red-500"
+            iconClassName="bg-destructive/15 text-destructive"
           />
         </div>
 
@@ -701,7 +701,7 @@ export function AnalyticsTab() {
             icon={<Clock className="w-6 h-6" />}
             title="Payroll Pendente"
             value={formatCurrency(metrics.pendingPayroll)}
-            iconClassName="bg-yellow-500/20 text-yellow-500"
+            iconClassName="bg-warning/15 text-warning-foreground"
           />
           <MetricCard
             icon={<CreditCard className="w-5 h-5 text-primary" />}
@@ -751,19 +751,19 @@ export function AnalyticsTab() {
             icon={<MessageSquare className="w-6 h-6" />}
             title="Total de Conversas"
             value={String(metrics.totalMessages)}
-            iconClassName="bg-blue-500/20 text-blue-500"
+            iconClassName="bg-primary/15 text-primary"
           />
           <KPICard
             icon={<Bell className="w-6 h-6" />}
             title="Mensagens Não Lidas"
             value={String(metrics.unreadMessages)}
-            iconClassName="bg-yellow-500/20 text-yellow-500"
+            iconClassName="bg-warning/15 text-warning-foreground"
           />
           <KPICard
             icon={<Mail className="w-6 h-6" />}
             title="Conversas Arquivadas"
             value={String(metrics.archivedMessages)}
-            iconClassName="bg-gray-500/20 text-gray-500"
+            iconClassName="bg-muted text-muted-foreground"
           />
         </div>
       </div>

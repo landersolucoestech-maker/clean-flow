@@ -545,7 +545,7 @@ export function Leads() {
 
   const getStatusConfig = (status: string) => {
     const config = LEAD_STATUSES.find(s => s.value === status);
-    return config || { value: status, label: status, color: "bg-gray-500" };
+    return config || { value: status, label: status, color: "bg-muted-foreground" };
   };
 
   const getStatusIcon = (status: string) => {

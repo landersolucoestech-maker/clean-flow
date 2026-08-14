@@ -167,9 +167,9 @@ export function Rules() {
   const getTypeBadge = (type: string) => {
     switch (type) {
       case "receita":
-        return <Badge className="bg-green-500/20 text-green-600 hover:bg-green-500/30">Receita</Badge>;
+        return <Badge className="bg-success/15 text-success hover:bg-success/20">Receita</Badge>;
       case "despesa":
-        return <Badge className="bg-red-500/20 text-red-600 hover:bg-red-500/30">Despesa</Badge>;
+        return <Badge className="bg-destructive/15 text-destructive hover:bg-destructive/20">Despesa</Badge>;
       default:
         return <Badge variant="secondary">{type}</Badge>;
     }
@@ -211,9 +211,9 @@ export function Rules() {
         <KPICard
           title="Regras Ativas"
           value={activeRules}
-          valueClassName="text-green-600"
-          iconClassName="bg-green-500/20"
-          icon={<CheckCircle className="w-6 h-6 text-green-600" />}
+          valueClassName="text-success"
+          iconClassName="bg-success/15"
+          icon={<CheckCircle className="w-6 h-6 text-success" />}
         />
         <KPICard
           title="Regras Inativas"

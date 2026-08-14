@@ -49,25 +49,25 @@ const formatDate = (dateStr: string | null | undefined): string => {
 const getStatusBadgeClass = (status: string): string => {
   switch (status.toLowerCase()) {
     case "completed":
-      return "bg-green-500/10 text-green-600 hover:bg-green-500/20";
+      return "bg-success/10 text-success hover:bg-success/15";
     case "scheduled":
-      return "bg-blue-500/10 text-blue-600 hover:bg-blue-500/20";
+      return "bg-primary-light text-primary hover:bg-primary/15";
     case "in-progress":
     case "on-the-way":
       return "bg-amber-500/10 text-amber-600 hover:bg-amber-500/20";
     case "cancelled":
-      return "bg-red-500/10 text-red-600 hover:bg-red-500/20";
+      return "bg-destructive/10 text-destructive hover:bg-destructive/15";
     case "paid":
-      return "bg-green-500/10 text-green-600 hover:bg-green-500/20";
+      return "bg-success/10 text-success hover:bg-success/15";
     case "sent":
-      return "bg-blue-500/10 text-blue-600 hover:bg-blue-500/20";
+      return "bg-primary-light text-primary hover:bg-primary/15";
     case "draft":
     case "open":
-      return "bg-yellow-500/10 text-yellow-600 hover:bg-yellow-500/20";
+      return "bg-warning/10 text-warning-foreground hover:bg-warning/15";
     case "overdue":
-      return "bg-red-500/10 text-red-600 hover:bg-red-500/20";
+      return "bg-destructive/10 text-destructive hover:bg-destructive/15";
     case "pending payment":
-      return "bg-orange-500/10 text-orange-600 hover:bg-orange-500/20";
+      return "bg-warning/10 text-warning-foreground hover:bg-warning/15";
     default:
       return "bg-muted text-muted-foreground";
   }
@@ -252,7 +252,7 @@ export function CustomerDetailsModal({
                   <DollarSign className="w-4 h-4" />
                   <span className="text-xs">Revenue</span>
                 </div>
-                <p className="text-sm font-medium text-green-600">${totalRevenue.toFixed(2)}</p>
+                <p className="text-sm font-medium text-success">${totalRevenue.toFixed(2)}</p>
               </div>
             </div>
 
@@ -393,7 +393,7 @@ export function CustomerDetailsModal({
                     className={cn(
                       "p-4 rounded-lg border",
                       !rel.end_date 
-                        ? "border-green-500/30 bg-green-500/5" 
+                        ? "border-success/30 bg-success/5" 
                         : "border-border/50 bg-muted/30"
                     )}
                   >
@@ -402,7 +402,7 @@ export function CustomerDetailsModal({
                         <div className={cn(
                           "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold",
                           !rel.end_date 
-                            ? "bg-green-500/20 text-green-600" 
+                            ? "bg-success/15 text-success" 
                             : "bg-muted text-muted-foreground"
                         )}>
                           {customerRelationships.length - index}
@@ -413,7 +413,7 @@ export function CustomerDetailsModal({
                               {formatDate(rel.start_date)} — {rel.end_date ? formatDate(rel.end_date) : "Present"}
                             </p>
                             {!rel.end_date && (
-                              <Badge className="bg-green-500/10 text-green-600 text-xs">Active</Badge>
+                              <Badge className="bg-success/10 text-success text-xs">Active</Badge>
                             )}
                           </div>
                           {rel.end_reason && (
@@ -669,7 +669,7 @@ export function CustomerDetailsModal({
                            job.status.charAt(0).toUpperCase() + job.status.slice(1)}
                         </Badge>
                         {job.amount && (
-                          <span className="text-sm font-medium text-green-600">
+                          <span className="text-sm font-medium text-success">
                             ${Number(job.amount).toFixed(2)}
                           </span>
                         )}
@@ -847,15 +847,15 @@ export function CustomerDetailsModal({
                   <div className="p-4 bg-muted/30 border-b border-border">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="p-2 bg-green-500/10 rounded-lg">
-                          <FileCheck className="w-5 h-5 text-green-600" />
+                        <div className="p-2 bg-success/10 rounded-lg">
+                          <FileCheck className="w-5 h-5 text-success" />
                         </div>
                         <div>
                           <h4 className="font-medium text-foreground">{term.term_name}</h4>
                           <p className="text-xs text-muted-foreground">{term.term_description || "Service Agreement"}</p>
                         </div>
                       </div>
-                      <Badge className="bg-green-500/10 text-green-600 hover:bg-green-500/20">
+                      <Badge className="bg-success/10 text-success hover:bg-success/15">
                         <CheckCircle className="w-3 h-3 mr-1" />
                         Signed
                       </Badge>

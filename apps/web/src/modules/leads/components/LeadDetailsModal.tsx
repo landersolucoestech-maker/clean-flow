@@ -1041,11 +1041,11 @@ export function LeadDetailsModal({
                     Invoice de 50% (${depositAmount}) será gerado automaticamente
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <CheckCircle className="w-4 h-4 text-success" />
                     Campos de preferências serão liberados para edição
                   </li>
                   <li className="flex items-center gap-2">
-                    <Briefcase className="w-4 h-4 text-blue-500" />
+                    <Briefcase className="w-4 h-4 text-primary" />
                     Após pagamento do invoice, botão "Criar Job" será liberado
                   </li>
                 </ul>
@@ -1073,13 +1073,13 @@ export function LeadDetailsModal({
           {canCreateJob && (
             <>
               <Separator />
-              <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
+              <div className="p-4 bg-success/10 border border-success/20 rounded-lg">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <CheckCircle className="w-5 h-5 text-green-600" />
+                    <CheckCircle className="w-5 h-5 text-success" />
                     <div>
-                      <h4 className="font-semibold text-green-700">Pagamento Confirmado!</h4>
-                      <p className="text-sm text-green-600">
+                      <h4 className="font-semibold text-success">Pagamento Confirmado!</h4>
+                      <p className="text-sm text-success">
                         O depósito foi recebido. Você pode criar o Job agora.
                       </p>
                     </div>
@@ -1087,7 +1087,7 @@ export function LeadDetailsModal({
                   {onCreateJob && (
                     <Button 
                       onClick={() => onCreateJob(estimate)}
-                      className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+                      className="flex items-center gap-2 bg-success hover:bg-success/90"
                     >
                       <Briefcase className="w-4 h-4" />
                       Criar Job
@@ -1101,12 +1101,12 @@ export function LeadDetailsModal({
           {isApproved && !canCreateJob && !estimate.invoicePaid && (
             <>
               <Separator />
-              <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
+              <div className="p-4 bg-success/10 border border-success/20 rounded-lg">
                 <div className="flex items-center gap-2">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  <CheckCircle className="w-5 h-5 text-success" />
                   <div>
-                    <h4 className="font-semibold text-green-700">{t("estimate.leadApproved")}</h4>
-                    <p className="text-sm text-green-600">
+                    <h4 className="font-semibold text-success">{t("estimate.leadApproved")}</h4>
+                    <p className="text-sm text-success">
                       {t("estimate.leadApprovedDesc")} (${depositAmount})
                     </p>
                   </div>
@@ -1147,7 +1147,7 @@ export function LeadDetailsModal({
               <Button 
                 onClick={handleApprove}
                 disabled={isApproving}
-                className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+                className="flex items-center gap-2 bg-success hover:bg-success/90"
               >
                 {isApproving ? (
                   <>

@@ -379,12 +379,12 @@ export function AuditTab() {
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-green-500/10">
-                <CheckCircle className="w-5 h-5 text-green-600" />
+              <div className="p-2 rounded-lg bg-success/10">
+                <CheckCircle className="w-5 h-5 text-success" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">{t("audit.completeRecords")}</p>
-                <p className="text-2xl font-bold text-green-600">{stats.completeRecords}</p>
+                <p className="text-2xl font-bold text-success">{stats.completeRecords}</p>
               </div>
             </div>
           </CardContent>
@@ -393,12 +393,12 @@ export function AuditTab() {
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-orange-500/10">
-                <AlertTriangle className="w-5 h-5 text-orange-600" />
+              <div className="p-2 rounded-lg bg-warning/10">
+                <AlertTriangle className="w-5 h-5 text-warning-foreground" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">{t("audit.incompleteRecords")}</p>
-                <p className="text-2xl font-bold text-orange-600">{stats.incompleteRecords}</p>
+                <p className="text-2xl font-bold text-warning-foreground">{stats.incompleteRecords}</p>
               </div>
             </div>
           </CardContent>
@@ -457,10 +457,10 @@ export function AuditTab() {
           </CardTitle>
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="flex items-center gap-1">
-              <CheckCircle className="w-3 h-3 text-green-600" />
+              <CheckCircle className="w-3 h-3 text-success" />
               {completeCount} {t("audit.complete")}
             </Badge>
-            <Badge variant="outline" className="flex items-center gap-1 text-orange-600 border-orange-300">
+            <Badge variant="outline" className="flex items-center gap-1 text-warning-foreground border-warning/30">
               <AlertTriangle className="w-3 h-3" />
               {incompleteCount} {t("audit.incomplete")}
             </Badge>
@@ -469,7 +469,7 @@ export function AuditTab() {
         <CardContent>
           {currentRecords.length === 0 ? (
             <div className="text-center py-12">
-              <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
+              <CheckCircle className="w-12 h-12 text-success mx-auto mb-4" />
               <p className="text-lg font-medium text-foreground">{t("audit.allComplete")}</p>
               <p className="text-sm text-muted-foreground">{getEmptyStateMessage(selectedCategory)}</p>
             </div>
@@ -514,13 +514,13 @@ export function AuditTab() {
                         <div className="flex items-center gap-2">
                           <span className="font-medium text-foreground">{record.name}</span>
                           {record.missingFields.length > 0 && (
-                            <Badge variant="outline" className="text-orange-600 border-orange-300">
+                            <Badge variant="outline" className="text-warning-foreground border-warning/30">
                               <AlertTriangle className="w-3 h-3 mr-1" />
                               {record.missingFields.length} {t("audit.fields")}
                             </Badge>
                           )}
                           {record.isComplete && (
-                            <Badge variant="outline" className="text-green-600 border-green-300">
+                            <Badge variant="outline" className="text-success border-success/30">
                               <CheckCircle className="w-3 h-3 mr-1" />
                               {t("audit.complete")}
                             </Badge>
@@ -532,7 +532,7 @@ export function AuditTab() {
                               <Badge
                                 key={field.key}
                                 variant="secondary"
-                                className="text-xs bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400"
+                                className="text-xs bg-warning/10 text-warning-foreground dark:bg-orange-900/30 dark:text-orange-400"
                               >
                                 {field.label}
                               </Badge>

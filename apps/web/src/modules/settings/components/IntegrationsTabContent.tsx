@@ -397,11 +397,11 @@ export function IntegrationsTab() {
       </Card>
 
       {/* RingCentral Integration Card */}
-      <Card className={`border-2 ${rcConnected ? 'border-success/50 bg-success/5' : 'border-orange-500/30 bg-orange-500/5'}`}>
+      <Card className={`border-2 ${rcConnected ? 'border-success/50 bg-success/5' : 'border-warning/30 bg-warning/5'}`}>
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-lg">
-              <Phone className={`w-5 h-5 ${rcConnected ? 'text-success' : 'text-orange-500'}`} />
+              <Phone className={`w-5 h-5 ${rcConnected ? 'text-success' : 'text-warning-foreground'}`} />
               RingCentral
               {rcConnected && (
                 <Badge variant="default" className="bg-success text-success-foreground ml-2">
@@ -419,8 +419,8 @@ export function IntegrationsTab() {
           {rcConnected && rcConnection && (
             <div className="p-3 bg-muted rounded-lg">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-orange-500/10 rounded-full">
-                  <Phone className="w-5 h-5 text-orange-500" />
+                <div className="p-2 bg-warning/10 rounded-full">
+                  <Phone className="w-5 h-5 text-warning-foreground" />
                 </div>
                 <div>
                   <p className="text-sm font-medium">Número SMS:</p>
@@ -457,7 +457,7 @@ export function IntegrationsTab() {
                 size="lg"
                 onClick={connectRC}
                 disabled={rcLoading}
-                className="bg-orange-500 hover:bg-orange-600 text-white"
+                className="bg-warning hover:bg-warning/90 text-white"
               >
                 {rcLoading ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />

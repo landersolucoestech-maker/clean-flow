@@ -675,7 +675,7 @@ export function CalculatePayrollModal({
                           )}
 
                           {emp.totalBonus > 0 && (
-                            <div className="text-xs text-green-600 font-medium">
+                            <div className="text-xs text-success font-medium">
                               Total: +${emp.totalBonus.toFixed(2)}
                             </div>
                           )}
