@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import {
   Calendar,
   Users,
+  ContactRound,
   DollarSign,
   BarChart3,
   Settings,
@@ -34,10 +35,12 @@ interface SidebarProps {
 interface NavItem {
   icon: React.ComponentType<{ className?: string }>;
   labelKey: string;
+  label?: string;
   href?: string;
   permission?: string;
   submenu?: {
     labelKey: string;
+    label?: string;
     href: string;
     icon: React.ComponentType<{ className?: string }>;
     permission?: string;
@@ -47,14 +50,22 @@ interface NavItem {
 const navigationItems: NavItem[] = [
   { icon: Home, labelKey: "sidebar.dashboard", href: "/" },
   { icon: Calendar, labelKey: "sidebar.schedule", href: "/schedule", permission: "schedule.view" },
-  { icon: Users, labelKey: "sidebar.customers", href: "/customers", permission: "customers.view" },
+  {
+    icon: Users,
+    labelKey: "sidebar.crm",
+    label: "CRM",
+    submenu: [
+      { labelKey: "sidebar.customers", href: "/crm/customers", icon: Users, permission: "customers.view" },
+      { labelKey: "sidebar.leads", href: "/crm/leads", icon: ClipboardList, permission: "leads.view" },
+      { labelKey: "sidebar.contacts", label: "Contacts", href: "/crm/contacts", icon: ContactRound, permission: "customers.view" },
+    ],
+  },
   {
     icon: Calculator,
     labelKey: "sidebar.accounting",
     submenu: [
       { labelKey: "sidebar.transactions", href: "/transactions", icon: ArrowRightLeft, permission: "transactions.view" },
       { labelKey: "sidebar.invoices", href: "/invoices", icon: DollarSign, permission: "invoices.view" },
-      { labelKey: "sidebar.leads", href: "/leads", icon: ClipboardList, permission: "leads.view" },
       { labelKey: "sidebar.payroll", href: "/payroll", icon: Wallet, permission: "payroll.view" },
     ],
   },
@@ -66,7 +77,7 @@ const navigationItems: NavItem[] = [
 
 export function Sidebar({ className }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [openSubmenu, setOpenSubmenu] = useState<string | null>("sidebar.accounting");
+  const [openSubmenu, setOpenSubmenu] = useState<string | null>("sidebar.crm");
   const navigate = useNavigate();
   const location = useLocation();
   const { hasPermission } = usePermission();
@@ -121,7 +132,7 @@ export function Sidebar({ className }: SidebarProps) {
 
       <nav className="scrollbar-thin flex-1 space-y-1.5 overflow-y-auto p-3">
         {filteredNavigationItems.map((item) => {
-          const label = t(item.labelKey);
+          const label = item.label ?? t(item.labelKey);
           const activeItem = isActiveRoute(item);
 
           if (item.submenu) {
@@ -159,7 +170,7 @@ export function Sidebar({ className }: SidebarProps) {
                         )}
                       >
                         <subItem.icon className="mr-3 h-4 w-4" />
-                        <span>{t(subItem.labelKey)}</span>
+                        <span>{subItem.label ?? t(subItem.labelKey)}</span>
                       </Button>
                     ))}
                   </CollapsibleContent>
