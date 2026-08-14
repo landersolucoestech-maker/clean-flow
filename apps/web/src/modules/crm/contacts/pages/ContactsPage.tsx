@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { usePermission } from "@/hooks/usePermission";
-import { CrmTabs } from "../../components/CrmTabs";
+import { CrmPageBridge } from "../../components/CrmPageBridge";
 import { ContactDetailsDialog } from "../components/ContactDetailsDialog";
 import { ContactFormDialog } from "../components/ContactFormDialog";
 import { useContacts } from "../hooks/useContacts";
@@ -93,10 +93,9 @@ export function Contacts() {
   };
 
   return (
-    <PageLayout>
+    <CrmPageBridge>
+      <PageLayout>
       <div className="space-y-6">
-        <CrmTabs />
-
         {!mayView ? (
           <Card className="border-destructive/40">
             <CardContent className="p-6">
@@ -259,6 +258,7 @@ export function Contacts() {
           </AlertDialog>
         </>
       )}
-    </PageLayout>
+      </PageLayout>
+    </CrmPageBridge>
   );
 }

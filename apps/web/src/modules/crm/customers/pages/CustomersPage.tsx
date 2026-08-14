@@ -1,5 +1,10 @@
 import { Customers as CustomersPageContent } from "./CustomersPageContent";
+import { CrmPageBridge } from "../../components/CrmPageBridge";
 
 export function Customers() {
-  return <CustomersPageContent />;
+  return (
+    <CrmPageBridge>
+      <CustomersPageContent />
+    </CrmPageBridge>
+  );
 }

@@ -15,7 +15,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/useLanguage";
 import { readSpreadsheetFile } from "@/lib/spreadsheet";
-import { CrmTabs } from "../../components/CrmTabs";
 
 export function Customers() {
   const { t } = useLanguage();
@@ -338,18 +337,6 @@ export function Customers() {
       contentClassName="gap-5"
     >
       <div className="space-y-5">
-          {/* CRM Page Header */}
-          <section className="flex flex-col gap-1 border-b border-border/70 pb-4">
-            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">CRM</h1>
-            <p className="text-sm text-muted-foreground">Manage customers, leads and contacts from one unified workspace.</p>
-            <div className="mt-3 md:hidden">
-              <Button variant="hero" onClick={() => setIsCustomerModalOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                {t("customers.addCustomer")}
-              </Button>
-            </div>
-          </section>
-
           {/* Customer Modal - Create */}
           <CustomerModal open={isCustomerModalOpen} onOpenChange={setIsCustomerModalOpen} mode="create" />
 
@@ -436,8 +423,6 @@ export function Customers() {
               </CardContent>
             </Card>
           </div>
-
-          <CrmTabs />
 
           {/* Customer workspace */}
           <Card className="overflow-hidden rounded-md border-border/80 shadow-sm">
