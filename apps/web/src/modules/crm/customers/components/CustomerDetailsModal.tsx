@@ -11,6 +11,7 @@ import { User, Phone, Mail, MapPin, Calendar, Briefcase, CreditCard, Clock, File
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Customer } from "@/hooks/useCustomers";
 import { CustomerDetailsHeader, CustomerDetailsTabsList } from "./CustomerDetailsChrome";
+import { CustomerChatTab } from "./CustomerChatTab";
 import { formatCustomerDate, getCustomerLastServiceDate, getCustomerStatusBadgeClass, getCustomerTotalRevenue, parseInactiveCustomerInfo } from "../utils/customerDetails";
 import { useJobsByCustomer } from "@/hooks/useJobs";
 import { useInvoicesByCustomer } from "@/hooks/useInvoices";
@@ -20,13 +21,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-
-interface ChatMessage {
-  id: number;
-  sender: "customer" | "business";
-  message: string;
-  timestamp: string;
-}
 
 interface AdditionalNote {
   id: string;
@@ -55,29 +49,11 @@ export function CustomerDetailsModal({
   const totalRevenue = getCustomerTotalRevenue(customerInvoices);
   const inactiveInfo = parseInactiveCustomerInfo(customer);
 
-  const [newMessage, setNewMessage] = useState("");
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-  
   const [additionalNotesExpanded, setAdditionalNotesExpanded] = useState(true);
   const [notesExpanded, setNotesExpanded] = useState(true);
 
   // Find active relationship (no end_date)
   const activeRelationship = customerRelationships.find(r => !r.end_date);
-
-  const handleSendMessage = () => {
-    if (!newMessage.trim()) return;
-    
-    const newMsg: ChatMessage = {
-      id: chatMessages.length + 1,
-      sender: "business",
-      message: newMessage,
-      timestamp: new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })
-    };
-    
-    setChatMessages([...chatMessages, newMsg]);
-    setNewMessage("");
-  };
-
 
   if (!customer) return null;
 
@@ -667,60 +643,7 @@ export function CustomerDetailsModal({
             )}
           </TabsContent>
 
-          {/* Chat History Tab */}
-          <TabsContent value="chat" className="mt-4">
-            <div className="flex flex-col h-[350px]">
-              {/* Chat messages */}
-              <div className="flex-1 overflow-y-auto space-y-3 mb-4 p-2">
-                {chatMessages.length > 0 ? (
-                  chatMessages.map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={`flex ${msg.sender === "business" ? "justify-end" : "justify-start"}`}
-                    >
-                      <div
-                        className={`max-w-[75%] rounded-lg px-4 py-2 ${
-                          msg.sender === "business"
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted"
-                        }`}
-                      >
-                        <p className="text-sm">{msg.message}</p>
-                        <p className={`text-xs mt-1 ${
-                          msg.sender === "business" 
-                            ? "text-primary-foreground/70" 
-                            : "text-muted-foreground"
-                        }`}>
-                          {msg.timestamp}
-                        </p>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="flex flex-col items-center justify-center h-full text-center">
-                    <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
-                      <MessageSquare className="w-6 h-6 text-muted-foreground" />
-                    </div>
-                    <p className="text-sm text-muted-foreground">No messages yet</p>
-                  </div>
-                )}
-              </div>
-              
-              {/* Message input */}
-              <div className="flex gap-2 pt-3 border-t">
-                <Input
-                  placeholder="Type a message..."
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-                  className="flex-1"
-                />
-                <Button onClick={handleSendMessage} size="icon" aria-label="Send message">
-                  <Send className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </TabsContent>
+          <CustomerChatTab />
 
           {/* Contract Tab */}
           <TabsContent value="contract" className="mt-4 space-y-4">
