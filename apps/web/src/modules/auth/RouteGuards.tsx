@@ -16,6 +16,19 @@ interface GuardProps {
 type AppRole = Enums<"app_role">;
 type StaffIdentity = { id: string; role: AppRole };
 
+function withCrmContactPermissions(permissions: string[]): string[] {
+  if (permissions.includes("*")) return permissions;
+
+  const contactPermissions = [
+    permissions.includes("customers.view") ? "contacts.view" : null,
+    permissions.includes("customers.create") ? "contacts.create" : null,
+    permissions.includes("customers.edit") ? "contacts.edit" : null,
+    permissions.includes("customers.delete") ? "contacts.delete" : null,
+  ].filter((permission): permission is string => Boolean(permission));
+
+  return Array.from(new Set([...permissions, ...contactPermissions]));
+}
+
 function roleForAppRole(appRole: AppRole): Role {
   const admin = DEFAULT_ROLES.find((role) => role.id === "admin")!;
   const manager = DEFAULT_ROLES.find((role) => role.id === "manager")!;
@@ -35,6 +48,7 @@ function roleForAppRole(appRole: AppRole): Role {
     id: appRole,
     name: appRole.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase()),
     company_id: "single-company",
+    permissions: withCrmContactPermissions(template.permissions),
   };
 }
 
