@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,11 +12,12 @@ import { Download, Plus, Trash2, Settings2, Loader2, AlertTriangle } from "lucid
 import { format } from "date-fns";
 import { toast } from "@/hooks/use-toast";
 import { useJobs, Job } from "@/hooks/useJobs";
-import { useStaff, Staff } from "@/hooks/useStaff";
+import { useStaff } from "@/hooks/useStaff";
 import { usePayrollRules, PayrollRule, useSavePayrollRules } from "@/hooks/usePayrollRules";
 import { useCompanySettings } from "@/hooks/useCompanySettings";
 import { formatCurrency } from "@/lib/currency";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { resolveAssignedPayrollStaff, shouldIncludePayrollJobStatus } from "../utils/payrollAssignment";
 
 interface EmployeePayrollData {
   staffId: string;
@@ -122,97 +123,9 @@ export function CalculatePayrollModal({
 
   const isLoading = loadingJobs || loadingStaff || loadingRules;
 
-  // Helper functions
-  const normalizeName = (value: string) =>
-    value
-      .normalize("NFKD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase()
-      .replace(/[^a-z0-9 ]+/g, " ")
-      .replace(/\s+/g, " ")
-      .trim();
-
-  const isUuid = (value: string) =>
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
-
-  const findStaffFromAssignedValue = useCallback((assignedValue: string): Staff[] => {
-    if (!assignedValue) return [];
-
-    const raw = assignedValue.trim();
-
-    // 1) If staff_assigned stores staff IDs (UUID)
-    if (isUuid(raw)) {
-      const staff = staffList.find((s) => s.id === raw);
-      return staff ? [staff] : [];
-    }
-
-    // 2) Team number / "Team 1" fallback
-    const teamMatch = raw.match(/^team\s*(\d+)$/i) || raw.match(/^(\d+)$/);
-    if (teamMatch) {
-      const teamNumber = teamMatch[1];
-      return staffList.filter((s) => s.is_active && s.team === teamNumber);
-    }
-
-    // 3) Exact name match
-    const a = normalizeName(raw);
-    if (!a) return [];
-
-    const exactMatch = staffList.find((s) => normalizeName(s.name) === a);
-    if (exactMatch) return [exactMatch];
-
-    // 4) Fuzzy name match
-    let best: { staff: Staff; score: number } | null = null;
-
-    for (const s of staffList) {
-      const sn = normalizeName(s.name);
-      if (!sn) continue;
-
-      let score = 0;
-      if (sn.includes(a)) score += 50;
-      if (a.includes(sn)) score += 30;
-
-      const aTokens = a.split(" ");
-      const sTokens = new Set(sn.split(" "));
-      const tokenMatches = aTokens.filter((t) => sTokens.has(t)).length;
-      score += tokenMatches * 6;
-
-      if (aTokens.length === 1 && sTokens.has(aTokens[0])) score += 25;
-
-      if (!best || score > best.score) best = { staff: s, score };
-    }
-
-    return best && best.score >= 15 ? [best.staff] : [];
-  }, [staffList]);
-
   // Calculate employee data from jobs (completed or all based on toggle)
   useEffect(() => {
     if (isLoading || !open) return;
-
-    const isCompletedStatus = (status: string | null) => {
-      if (!status) return false;
-      const s = status.toLowerCase().trim();
-      return (
-        s.includes("completed") ||
-        s.includes("finished") ||
-        s.includes("done") ||
-        s.includes("conclu") ||
-        s.includes("finaliz")
-      );
-    };
-
-    const isScheduledOrInProgress = (status: string | null) => {
-      if (!status) return false;
-      const s = status.toLowerCase().trim();
-      return (
-        s.includes("scheduled") ||
-        s.includes("agendado") ||
-        s.includes("in_progress") ||
-        s.includes("em_andamento") ||
-        s.includes("on_our_way") ||
-        s.includes("a_caminho") ||
-        s.includes("cleaning")
-      );
-    };
 
     const rulesByStaffId = new Map<string, PayrollRule>();
     payrollRules.forEach((r) => rulesByStaffId.set(r.staff_id, r));
@@ -221,14 +134,7 @@ export function CalculatePayrollModal({
     const filteredJobs = jobs.filter((job) => {
       if (!job.scheduled_date) return false;
       
-      // Check if job should be included based on status
-      const isCompleted = isCompletedStatus(job.status);
-      const isInProgress = isScheduledOrInProgress(job.status);
-      
-      // If includeNonCompleted is true, include both completed and scheduled/in-progress jobs
-      // Otherwise, only include completed jobs
-      if (!includeNonCompleted && !isCompleted) return false;
-      if (includeNonCompleted && !isCompleted && !isInProgress) return false;
+      if (!shouldIncludePayrollJobStatus(job.status, includeNonCompleted)) return false;
 
       // scheduled_date might be ISO; keep YYYY-MM-DD
       const jobDate = job.scheduled_date.slice(0, 10);
@@ -247,7 +153,7 @@ export function CalculatePayrollModal({
       const hoursWorked = job.duration_minutes ? job.duration_minutes / 60 : 0;
 
       // Resolve staff list from staff_assigned (supports UUIDs, names, and team numbers)
-      const resolved = assignedList.flatMap((assignedValue) => findStaffFromAssignedValue(assignedValue));
+      const resolved = assignedList.flatMap((assignedValue) => resolveAssignedPayrollStaff(assignedValue, staffList));
       const uniqueStaff = Array.from(new Map(resolved.map((s) => [s.id, s])).values());
       if (uniqueStaff.length === 0) continue;
 
@@ -342,7 +248,7 @@ export function CalculatePayrollModal({
     });
 
     setEmployeeData(data);
-  }, [open, jobs, staffList, payrollRules, existingRecords, isLoading, periodStartISO, periodEndISO, includeNonCompleted, findStaffFromAssignedValue]);
+  }, [open, jobs, staffList, payrollRules, existingRecords, isLoading, periodStartISO, periodEndISO, includeNonCompleted]);
 
   const recalculateTotals = (data: EmployeePayrollData[]): EmployeePayrollData[] => {
     return data.map((emp) => {
