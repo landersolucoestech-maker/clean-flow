@@ -1,71 +1,13 @@
-name: Schedule visual refactor
+name: Schedule visual refactor archive
 
 on:
-  push:
-    branches: [DEV]
-    paths:
-      - .github/workflows/schedule-visual-refactor.yml
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  refactor:
+  archived:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: DEV
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - name: Refine schedule responsive presentation
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-
-          p = Path('apps/web/src/modules/schedule/SchedulePage.tsx')
-          text = p.read_text(encoding='utf-8')
-
-          def once(old, new):
-              global text
-              if old not in text:
-                  raise SystemExit(f'Expected text not found: {old[:140]}')
-              text = text.replace(old, new, 1)
-
-          once('className="flex-1 flex flex-col overflow-hidden p-6"',
-               'className="flex flex-1 flex-col overflow-hidden px-4 py-5 sm:px-6 lg:px-8 lg:py-7"')
-          once('className="flex items-center justify-between shrink-0 mb-4"',
-               'className="mb-4 flex shrink-0 flex-col gap-4 lg:flex-row lg:items-start lg:justify-between"')
-          once('className="text-3xl font-bold text-foreground"',
-               'className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl"')
-          once('className="flex items-center gap-2"',
-               'className="flex flex-wrap items-center gap-2 lg:justify-end"')
-          once('variant="hero" size="lg" className="flex items-center space-x-2"',
-               'variant="hero" className="flex items-center gap-2"')
-          once('<Card className="flex-1 overflow-hidden">',
-               '<Card className="flex-1 overflow-hidden border-border/80 shadow-sm">')
-          once('<CardContent className="p-0 h-full">',
-               '<CardContent className="h-full p-0">')
-
-          p.write_text(text, encoding='utf-8')
-          PY
-      - run: npm ci
-      - name: Lint
-        run: npm run lint -- --max-warnings=0
-      - name: Typecheck
-        run: npm run typecheck
-      - name: Test
-        run: npm test
-      - name: Build
-        run: npm run build
-      - name: Commit verified schedule refactor
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/web/src/modules/schedule/SchedulePage.tsx
-          git diff --cached --quiet && exit 0
-          git commit -m "style: refine schedule responsive layout"
-          git push origin HEAD:DEV
+      - run: echo "Schedule visual refactor completed; workflow archived and read-only."
