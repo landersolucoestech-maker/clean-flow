@@ -1,5 +1,6 @@
 # Dev-only visual preview. No production Supabase is used here.
 # Publishes the latest validated UI correction pass from dev.
+# Refresh marker: unified CRM shell.
 name: Frontend Preview Pages
 
 on:
