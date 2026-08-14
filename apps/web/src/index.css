@@ -17,35 +17,34 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Clean Flow visual system inspired by the provided MAID FLOW reference. */
 @layer base {
   :root {
     --background: 210 20% 98%;
-    --foreground: 216 56% 14%;
+    --foreground: 216 42% 15%;
     --surface: 0 0% 100%;
-    --surface-muted: 210 20% 97%;
+    --surface-muted: 210 18% 97%;
 
-    --primary: 160 80% 36%;
+    --primary: 166 72% 31%;
     --primary-foreground: 0 0% 100%;
-    --primary-light: 160 56% 91%;
-    --primary-dark: 166 82% 28%;
+    --primary-light: 164 35% 94%;
+    --primary-dark: 166 76% 24%;
 
-    --secondary: 182 69% 42%;
+    --secondary: 181 42% 38%;
     --secondary-foreground: 0 0% 100%;
-    --secondary-light: 182 48% 92%;
+    --secondary-light: 180 28% 94%;
 
-    --accent: 164 50% 94%;
-    --accent-foreground: 216 56% 14%;
-    --muted: 210 20% 94%;
-    --muted-foreground: 215 16% 47%;
+    --accent: 210 18% 95%;
+    --accent-foreground: 216 42% 15%;
+    --muted: 210 18% 95%;
+    --muted-foreground: 215 14% 43%;
 
-    --success: 153 67% 43%;
+    --success: 153 58% 36%;
     --success-foreground: 0 0% 100%;
-    --warning: 38 94% 58%;
-    --warning-foreground: 216 56% 14%;
-    --rose: 350 83% 66%;
+    --warning: 38 80% 52%;
+    --warning-foreground: 216 42% 15%;
+    --rose: 350 70% 58%;
     --rose-foreground: 0 0% 100%;
-    --destructive: 0 78% 58%;
+    --destructive: 0 68% 52%;
     --destructive-foreground: 0 0% 100%;
 
     --brand-google: 217 89% 61%;
@@ -54,63 +53,63 @@
     --brand-quickbooks-foreground: 0 0% 100%;
 
     --card: 0 0% 100%;
-    --card-foreground: 216 56% 14%;
+    --card-foreground: 216 42% 15%;
     --popover: 0 0% 100%;
-    --popover-foreground: 216 56% 14%;
+    --popover-foreground: 216 42% 15%;
 
-    --border: 214 25% 88%;
-    --input: 214 25% 88%;
-    --ring: 166 82% 34%;
+    --border: 214 22% 87%;
+    --input: 214 22% 84%;
+    --ring: 166 72% 31%;
 
-    --radius: 0.875rem;
+    --radius: 0.5rem;
 
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
     --gradient-surface: linear-gradient(135deg, hsl(var(--surface)), hsl(var(--surface-muted)));
-    --gradient-hero: linear-gradient(135deg, hsl(var(--primary-dark)), hsl(var(--secondary)));
+    --gradient-hero: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-dark)));
 
-    --shadow-sm: 0 1px 2px rgb(15 23 42 / 0.04);
-    --shadow-md: 0 8px 24px rgb(15 23 42 / 0.06);
-    --shadow-lg: 0 14px 40px rgb(15 23 42 / 0.08);
-    --shadow-xl: 0 24px 60px rgb(15 23 42 / 0.10);
+    --shadow-sm: 0 1px 2px rgb(15 23 42 / 0.035);
+    --shadow-md: 0 4px 12px rgb(15 23 42 / 0.045);
+    --shadow-lg: 0 10px 24px rgb(15 23 42 / 0.06);
+    --shadow-xl: 0 18px 40px rgb(15 23 42 / 0.08);
 
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 216 32% 28%;
-    --sidebar-primary: 160 80% 36%;
+    --sidebar-background: 215 28% 16%;
+    --sidebar-foreground: 210 18% 92%;
+    --sidebar-primary: 166 65% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 164 50% 94%;
-    --sidebar-accent-foreground: 166 82% 28%;
-    --sidebar-border: 214 25% 91%;
-    --sidebar-ring: 160 80% 36%;
+    --sidebar-accent: 215 24% 22%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 215 22% 24%;
+    --sidebar-ring: 166 65% 45%;
   }
 
   .dark {
-    --background: 216 56% 8%;
-    --foreground: 210 25% 96%;
-    --card: 216 48% 11%;
-    --card-foreground: 210 25% 96%;
-    --popover: 216 48% 11%;
-    --popover-foreground: 210 25% 96%;
-    --primary: 160 72% 44%;
-    --primary-foreground: 216 56% 8%;
-    --secondary: 182 61% 40%;
-    --secondary-foreground: 216 56% 8%;
-    --muted: 216 25% 18%;
-    --muted-foreground: 214 16% 67%;
-    --accent: 166 28% 17%;
-    --accent-foreground: 210 25% 96%;
-    --destructive: 0 62% 42%;
+    --background: 216 40% 8%;
+    --foreground: 210 20% 96%;
+    --card: 216 34% 11%;
+    --card-foreground: 210 20% 96%;
+    --popover: 216 34% 11%;
+    --popover-foreground: 210 20% 96%;
+    --primary: 164 61% 44%;
+    --primary-foreground: 216 40% 8%;
+    --secondary: 182 50% 40%;
+    --secondary-foreground: 216 40% 8%;
+    --muted: 216 22% 18%;
+    --muted-foreground: 214 14% 67%;
+    --accent: 216 22% 18%;
+    --accent-foreground: 210 20% 96%;
+    --destructive: 0 58% 42%;
     --destructive-foreground: 0 0% 100%;
-    --border: 216 24% 21%;
-    --input: 216 24% 21%;
-    --ring: 160 72% 44%;
-    --sidebar-background: 216 48% 10%;
-    --sidebar-foreground: 210 25% 92%;
-    --sidebar-primary: 160 72% 44%;
-    --sidebar-primary-foreground: 216 56% 8%;
-    --sidebar-accent: 166 28% 17%;
-    --sidebar-accent-foreground: 210 25% 96%;
-    --sidebar-border: 216 24% 21%;
-    --sidebar-ring: 160 72% 44%;
+    --border: 216 20% 22%;
+    --input: 216 20% 24%;
+    --ring: 164 61% 44%;
+    --sidebar-background: 216 36% 9%;
+    --sidebar-foreground: 210 20% 92%;
+    --sidebar-primary: 164 61% 44%;
+    --sidebar-primary-foreground: 216 40% 8%;
+    --sidebar-accent: 216 22% 17%;
+    --sidebar-accent-foreground: 210 20% 96%;
+    --sidebar-border: 216 20% 20%;
+    --sidebar-ring: 164 61% 44%;
   }
 }
 
