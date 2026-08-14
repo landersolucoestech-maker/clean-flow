@@ -48,8 +48,10 @@ source = source.replaceAll('frequencyOptionsKeys', 'CUSTOMER_FREQUENCY_OPTIONS')
 source = source.replaceAll('paymentMethods', 'CUSTOMER_PAYMENT_METHODS');
 source = source.replaceAll('daysOfWeekKeys', 'CUSTOMER_DAYS_OF_WEEK');
 
-if (source.includes('FREQUENCY_OPTIONS')) throw new Error('Inline frequency dependency remains in CustomerModal');
+if (source.includes('import { FREQUENCY_OPTIONS } from "@/lib/serviceEnums";')) throw new Error('Old frequency import remains in CustomerModal');
+if (source.includes('const frequencyOptionsKeys')) throw new Error('Inline frequency options remain in CustomerModal');
 if (source.includes('const paymentMethods')) throw new Error('Inline payment methods remain in CustomerModal');
+if (source.includes('const daysOfWeekKeys')) throw new Error('Inline day options remain in CustomerModal');
 if (source.includes('interface FormAddress')) throw new Error('Inline FormAddress remains in CustomerModal');
 if (!source.includes('buildCustomerFormData(formData, addresses)')) throw new Error('Customer payload helper is not wired');
 if (!source.includes('mapCustomerToFormState(customer)')) throw new Error('Customer hydration helper is not wired');
