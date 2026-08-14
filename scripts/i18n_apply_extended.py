@@ -88,25 +88,20 @@ def component_bodies(text: str):
     ]
     for pat in patterns:
         for m in pat.finditer(text):
-            brace = text.find("{", m.start())
-            # For function declarations, the first { may be in a typed/destructured param. Find the last { in match.
             brace = m.end() - 1
             end = find_matching_brace(text, brace)
             if end > brace:
                 candidates.append((brace, end))
-    # Remove duplicate/nested regex overreach, shortest unique spans first.
     return sorted(set(candidates), key=lambda x: (x[0], x[1]))
 
 
 def ensure_binding(text: str, name: str) -> str:
-    # Recompute from the end so insertions do not invalidate earlier offsets.
     bodies = component_bodies(text)
     insertions = []
     for start, end in bodies:
         body = text[start + 1:end]
         if not re.search(rf"\b{name}\b", body):
             continue
-        # Only add a binding if this body contains a translation/locale use and does not define it already.
         needs = (name == "t" and 't("' in body) or (name == "locale" and re.search(r"\blocale\b", body))
         if not needs:
             continue
@@ -127,26 +122,28 @@ def ensure_binding(text: str, name: str) -> str:
 
 
 def replace_attribute(text: str, attr: str, value: str, key: str) -> str:
+    # Literal attributes can contain apostrophes/quotes that make a backreference regex
+    # brittle. Match either quote style independently and replace every occurrence.
     escaped = re.escape(value)
-    pattern = re.compile(rf"\b{re.escape(attr)}\s*=\s*([\"']){escaped}\1")
+    pattern = re.compile(
+        rf'\b{re.escape(attr)}\s*=\s*(?:"{escaped}"|\'{escaped}\')'
+    )
     return pattern.sub(f'{attr}={{t({js_string(key)})}}', text)
 
 
 def replace_toast(text: str, value: str, key: str) -> str:
     qvalue = re.escape(value)
-    # direct sonner style
-    text = re.sub(
-        rf"(toast\.(?:success|error|info|warning)\(\s*)([\"']){qvalue}\2",
-        lambda m: m.group(1) + f"t({js_string(key)})",
-        text,
+    # Do not use a numeric backreference after a variable-width alternation: when the
+    # same message appears more than once it can leave one literal behind. Match quote
+    # styles independently and replace all direct/object-style occurrences.
+    direct = re.compile(
+        rf'(toast\.(?:success|error|info|warning)\(\s*)(?:"{qvalue}"|\'{qvalue}\')'
     )
-    # object-style title/description used by use-toast
-    text = re.sub(
-        rf"((?:title|description)\s*:\s*)([\"']){qvalue}\2",
-        lambda m: m.group(1) + f"t({js_string(key)})",
-        text,
+    text = direct.sub(lambda m: m.group(1) + f"t({js_string(key)})", text)
+    obj = re.compile(
+        rf'((?:title|description)\s*:\s*)(?:"{qvalue}"|\'{qvalue}\')'
     )
-    return text
+    return obj.sub(lambda m: m.group(1) + f"t({js_string(key)})", text)
 
 
 attrs, toasts, locale_files = parse_audit()
