@@ -1,78 +1,13 @@
-name: Payroll visual refactor
+name: Payroll visual refactor archive
 
 on:
-  push:
-    branches: [DEV]
-    paths:
-      - .github/workflows/payroll-visual-refactor.yml
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  refactor:
+  archived:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: DEV
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - name: Refine payroll shell and responsive presentation
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-
-          p = Path('apps/web/src/modules/payroll/PayrollPage.tsx')
-          text = p.read_text(encoding='utf-8')
-
-          def rep(old, new, count=1):
-              global text
-              if old not in text:
-                  raise SystemExit(f'Expected text not found: {old[:160]}')
-              text = text.replace(old, new, count)
-
-          rep('import { Sidebar } from "@/components/layout/Sidebar";\nimport { Header } from "@/components/layout/Header";', 'import { PageLayout } from "@/components/layout/PageLayout";')
-
-          rep('''  return <div className="flex min-h-screen bg-background">\n      <Sidebar />\n      <div className="flex-1 flex flex-col">\n        <Header />\n        <main className="flex-1 overflow-y-auto p-6 space-y-6 pl-[10px] pb-0 pr-[10px] pt-px mx-[8px] py-0 my-[4px]">''', '''  return <PageLayout>\n      <div className="space-y-6">''')
-
-          rep('''          <div className="flex items-center justify-between">\n            <h1 className="text-3xl font-bold text-foreground">{t("payroll.title")}</h1>\n            <div className="flex gap-3">''', '''          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">\n            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{t("payroll.title")}</h1>\n            <div className="flex flex-wrap gap-2 lg:justify-end">''')
-
-          rep('''                className="gap-2 bg-blue-600 hover:bg-blue-700"''', '''                className="gap-2"''')
-
-          rep('''          <Card className="border-primary/20 bg-primary/5">\n            <CardContent className="bg-white py-0 pt-0 px-4">\n              <div className="flex-wrap items-end justify-start py-px gap-[16px] flex flex-row">''', '''          <Card className="border-border/80 shadow-sm">\n            <CardContent className="p-4">\n              <div className="flex flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-end">''')
-          rep('''                <div className="space-y-2 min-w-[250px]">''', '''                <div className="min-w-0 flex-1 space-y-2 lg:min-w-[250px] lg:flex-none">''')
-          rep('''                <div className="space-y-2 min-w-[150px]">''', '''                <div className="min-w-0 flex-1 space-y-2 lg:min-w-[150px] lg:flex-none">''')
-          rep('''className={cn("w-[200px] justify-start text-left font-normal", !startDate && "text-muted-foreground")}''', '''className={cn("w-full justify-start text-left font-normal lg:w-[200px]", !startDate && "text-muted-foreground")}''')
-          rep('''className={cn("w-[200px] justify-start text-left font-normal", !endDate && "text-muted-foreground")}''', '''className={cn("w-full justify-start text-left font-normal lg:w-[200px]", !endDate && "text-muted-foreground")}''')
-
-          rep('''      case "Paid":\n        return <Badge className="bg-green-500/20 text-green-600 hover:bg-green-500/30">Paid</Badge>;\n      case "Pending":\n        return <Badge className="bg-yellow-500/20 text-yellow-600 hover:bg-yellow-500/30">Pending</Badge>;\n      case "Overdue":\n        return <Badge className="bg-red-500/20 text-red-600 hover:bg-red-500/30">Overdue</Badge>;''', '''      case "Paid":\n        return <Badge className="bg-success/10 text-success hover:bg-success/15">Paid</Badge>;\n      case "Pending":\n        return <Badge className="bg-warning/10 text-warning-foreground hover:bg-warning/15">Pending</Badge>;\n      case "Overdue":\n        return <Badge className="bg-destructive/10 text-destructive hover:bg-destructive/15">Overdue</Badge>;''')
-          rep('''<span className="text-green-600 font-medium">''', '''<span className="font-medium text-success">''')
-
-          rep('''          <Card>\n            <CardHeader>\n              <CardTitle className="text-lg">{t("payroll.payrollList")}</CardTitle>\n            </CardHeader>\n            <CardContent className="px-0">\n              <div className="rounded-md border">\n                <Table>''', '''          <Card className="border-border/80 shadow-sm">\n            <CardHeader className="pb-3">\n              <CardTitle className="text-base font-semibold tracking-tight">{t("payroll.payrollList")}</CardTitle>\n            </CardHeader>\n            <CardContent className="px-4 pb-4">\n                <Table>''')
-          rep('''                </Table>\n              </div>\n\n              {/* Summary */}\n              <div className="flex justify-end mt-4 pt-4 border-t">''', '''                </Table>\n\n              {/* Summary */}\n              <div className="mt-4 flex justify-start border-t border-border/80 pt-4 sm:justify-end">''')
-
-          rep('''        </main>\n      </div>\n    </div>;''', '''      </div>\n    </PageLayout>;''')
-
-          p.write_text(text, encoding='utf-8')
-          PY
-      - run: npm ci
-      - name: Lint
-        run: npm run lint -- --max-warnings=0
-      - name: Typecheck
-        run: npm run typecheck
-      - name: Test
-        run: npm test
-      - name: Build
-        run: npm run build
-      - name: Commit verified payroll refactor
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/web/src/modules/payroll/PayrollPage.tsx
-          git diff --cached --quiet && exit 0
-          git commit -m "style: modernize payroll page shell and layout"
-          git push origin HEAD:DEV
+      - run: echo "Payroll visual refactor completed; workflow archived and read-only."
