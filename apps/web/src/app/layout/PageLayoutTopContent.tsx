@@ -1,6 +1,5 @@
-import { createContext, type ReactNode, useContext } from "react";
-
-const PageLayoutTopContentContext = createContext<ReactNode>(null);
+import { type ReactNode } from "react";
+import { PageLayoutTopContentContext } from "./page-layout-top-content-context";
 
 interface PageLayoutTopContentProviderProps {
   children: ReactNode;
@@ -13,8 +12,4 @@ export function PageLayoutTopContentProvider({ children, content }: PageLayoutTo
       {children}
     </PageLayoutTopContentContext.Provider>
   );
-}
-
-export function usePageLayoutTopContent() {
-  return useContext(PageLayoutTopContentContext);
 }
