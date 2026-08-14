@@ -61,7 +61,7 @@ jobs:
         run: node scripts/frontend-audit.mjs
 
       - name: Lint frontend
-        run: npx eslint apps/web/src packages
+        run: npx eslint apps/web/src packages --max-warnings=0
 
       - name: Typecheck frontend
         run: npm run typecheck
