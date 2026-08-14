@@ -1,6 +1,6 @@
 name: Frontend Audit Fixes
 
-# Retry CalculatePayrollModal decomposition with structural guards.
+# Retry CalculatePayrollModal decomposition after removing the obsolete hook dependency.
 on:
   push:
     branches: [dev]
