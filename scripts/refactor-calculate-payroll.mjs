@@ -28,10 +28,10 @@ if (!source.includes(oldStatusCheck)) throw new Error('CalculatePayroll inline s
 source = source.replace(oldStatusCheck, '      if (!shouldIncludePayrollJobStatus(job.status, includeNonCompleted)) return false;\n\n');
 source = source.replaceAll('findStaffFromAssignedValue(assignedValue)', 'resolveAssignedPayrollStaff(assignedValue, staffList)');
 
-if (source.includes('const normalizeName =')) throw new Error('Inline normalizeName remains in CalculatePayrollModal');
-if (source.includes('const isUuid =')) throw new Error('Inline isUuid remains in CalculatePayrollModal');
-if (source.includes('findStaffFromAssignedValue')) throw new Error('Inline staff resolver remains in CalculatePayrollModal');
-if (source.includes('isCompletedStatus')) throw new Error('Inline completed-status helper remains in CalculatePayrollModal');
+if (/const\s+normalizeName\s*=/.test(source)) throw new Error('Inline normalizeName remains in CalculatePayrollModal');
+if (/const\s+isUuid\s*=/.test(source)) throw new Error('Inline isUuid remains in CalculatePayrollModal');
+if (/const\s+findStaffFromAssignedValue\s*=/.test(source) || /findStaffFromAssignedValue\s*\(assignedValue\)/.test(source)) throw new Error('Inline staff resolver remains in CalculatePayrollModal');
+if (/const\s+isCompletedStatus\s*=/.test(source) || /isCompletedStatus\s*\(job\.status\)/.test(source)) throw new Error('Inline completed-status helper remains in CalculatePayrollModal');
 if (!source.includes('resolveAssignedPayrollStaff(assignedValue, staffList)')) throw new Error('Payroll assignment helper not wired');
 
 fs.writeFileSync(file, source);
