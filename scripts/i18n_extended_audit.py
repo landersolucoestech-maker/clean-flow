@@ -5,8 +5,19 @@ ROOTS = [Path("apps/web/src/app"), Path("apps/web/src/modules"), Path("apps/web/
 ATTRS = ("placeholder", "title", "aria-label", "aria-description", "alt")
 intentional = {
     "Clean Flow", "CRM", "SMS", "MMS", "PDF", "GPS", "QuickBooks", "Facebook", "Instagram", "Nextdoor",
-    "English", "Português", "Español", "USD", "BRL", "EUR", "GBP",
+    "English", "Português", "Español", "USD", "BRL", "EUR", "GBP", "X",
 }
+technical_patterns = [
+    re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$"),
+    re.compile(r"^https?://", re.I),
+    re.compile(r"^@\w+$"),
+    re.compile(r"^(?:INV|JOB)-\d+$", re.I),
+    re.compile(r"^[A-Z]{1,3}$"),
+    re.compile(r"^\+?[\d\s().-]+$"),
+]
+
+def is_intentional(value: str) -> bool:
+    return value in intentional or any(pattern.search(value) for pattern in technical_patterns)
 
 attribute_findings = []
 toast_findings = []
@@ -18,7 +29,7 @@ for root in ROOTS:
         for attr in ATTRS:
             for m in re.finditer(rf'\b{re.escape(attr)}\s*=\s*["\']([^"\']*[A-Za-zÀ-ÿ][^"\']*)["\']', text):
                 value = m.group(1).strip()
-                if value and value not in intentional and not value.startswith("http"):
+                if value and not is_intentional(value):
                     attribute_findings.append((path.as_posix(), attr, value))
         patterns = [
             r'\btoast\.(?:success|error|info|warning)\(\s*["\']([^"\']*[A-Za-zÀ-ÿ][^"\']*)["\']',
