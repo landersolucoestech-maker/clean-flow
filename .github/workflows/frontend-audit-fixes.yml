@@ -1,6 +1,6 @@
 name: Frontend Audit Fixes
 
-# One-shot CustomerModal decomposition runner.
+# Retry CustomerModal decomposition with refined codemod guards.
 on:
   push:
     branches: [dev]
