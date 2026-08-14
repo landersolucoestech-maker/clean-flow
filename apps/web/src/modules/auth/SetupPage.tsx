@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { supabase } from "@/integrations/supabase/client";
+import { bootstrapFirstAdmin } from "./services/authService";
 import { getErrorMessage } from "@/lib/errors";
 
 export function Setup() {
@@ -24,11 +24,7 @@ export function Setup() {
 
     setIsSubmitting(true);
     try {
-      const { error } = await supabase.rpc("bootstrap_first_admin", {
-        company_name: companyName.trim(),
-        staff_name: staffName.trim() || null,
-      });
-      if (error) throw error;
+      await bootstrapFirstAdmin(companyName.trim(), staffName.trim() || null);
       toast.success("Administrador inicial configurado.");
       navigate("/", { replace: true });
       window.location.reload();
