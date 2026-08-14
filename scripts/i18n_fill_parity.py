@@ -36,6 +36,7 @@ pt={
 }
 
 es={
+'frequency.onceAMonth':'Una vez al mes','frequency.regularCleaning2Weeks':'Limpieza regular cada 2 semanas','frequency.regularCleaning3Weeks':'Limpieza regular cada 3 semanas','frequency.regularCleaning4Weeks':'Limpieza regular cada 4 semanas','leads.frequency.daily':'Diariamente','leads.frequency.once_a_month':'Una vez al mes','leads.frequency.regular_cleaning_2_weeks':'Limpieza regular cada 2 semanas','leads.frequency.regular_cleaning_3_weeks':'Limpieza regular cada 3 semanas','leads.frequency.regular_cleaning_4_weeks':'Limpieza regular cada 4 semanas',
 'admin.sidebar.dashboard':'Panel','admin.sidebar.clients':'Empresas','admin.sidebar.auth':'Autenticación','admin.sidebar.logs':'Registros','admin.sidebar.settings':'Configuración','admin.sidebar.subscription':'Planes','admin.sidebar.support':'Soporte','admin.sidebar.exit':'Salir de Admin',
 'admin.dashboard.title':'Panel de la Plataforma','admin.dashboard.description':'Resumen de todas las empresas y métricas de la plataforma','admin.dashboard.recent_companies':'Empresas Recientes','admin.dashboard.recent_activity':'Actividad Reciente','admin.dashboard.no_companies':'No hay empresas registradas','admin.dashboard.no_activity':'No hay actividad reciente',
 'admin.stats.companies':'Empresas','admin.stats.customers':'Total de Clientes','admin.stats.jobs':'Total de Trabajos','admin.stats.invoices':'Total de Facturas','admin.stats.tickets':'Tickets de Soporte',
