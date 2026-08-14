@@ -1,7 +1,6 @@
 import { lazy, Suspense, useState, useMemo, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { Header } from "@/components/layout/Header";
+import { PageLayout } from "@/components/layout/PageLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -1532,11 +1531,11 @@ export function Payroll() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "Paid":
-        return <Badge className="bg-green-500/20 text-green-600 hover:bg-green-500/30">Paid</Badge>;
+        return <Badge className="bg-success/10 text-success hover:bg-success/15">Paid</Badge>;
       case "Pending":
-        return <Badge className="bg-yellow-500/20 text-yellow-600 hover:bg-yellow-500/30">Pending</Badge>;
+        return <Badge className="bg-warning/10 text-warning-foreground hover:bg-warning/15">Pending</Badge>;
       case "Overdue":
-        return <Badge className="bg-red-500/20 text-red-600 hover:bg-red-500/30">Overdue</Badge>;
+        return <Badge className="bg-destructive/10 text-destructive hover:bg-destructive/15">Overdue</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
@@ -1579,15 +1578,12 @@ export function Payroll() {
   // Employees for calculate modal
   // employeesForModal is defined at the top of the component
 
-  return <div className="flex min-h-screen bg-background">
-      <Sidebar />
-      <div className="flex-1 flex flex-col">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-6 space-y-6 pl-[10px] pb-0 pr-[10px] pt-px mx-[8px] py-0 my-[4px]">
+  return <PageLayout>
+      <div className="space-y-6">
           {/* Page Title */}
-          <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold text-foreground">{t("payroll.title")}</h1>
-            <div className="flex gap-3">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{t("payroll.title")}</h1>
+            <div className="flex flex-wrap gap-2 lg:justify-end">
               <Button variant="outline" onClick={() => setRulesModalOpen(true)} className="gap-2">
                 <Settings className="w-4 h-4" />
                 {t("payroll.payrollRules")}
@@ -1603,7 +1599,7 @@ export function Payroll() {
               <Button 
                 onClick={handleBulkSendPDFViaSMS} 
                 variant="default"
-                className="gap-2 bg-blue-600 hover:bg-blue-700"
+                className="gap-2"
                 disabled={selectedRows.length === 0 || isSendingBulkSMS}
               >
                 {isSendingBulkSMS ? (
@@ -1622,11 +1618,11 @@ export function Payroll() {
           </div>
 
           {/* Filter Card */}
-          <Card className="border-primary/20 bg-primary/5">
-            <CardContent className="bg-white py-0 pt-0 px-4">
-              <div className="flex-wrap items-end justify-start py-px gap-[16px] flex flex-row">
+          <Card className="border-border/80 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-end">
                 {/* Employee Combobox */}
-                <div className="space-y-2 min-w-[250px]">
+                <div className="min-w-0 flex-1 space-y-2 lg:min-w-[250px] lg:flex-none">
                   <Label>{t("payroll.employee")}</Label>
                   <Popover open={employeeOpen} onOpenChange={setEmployeeOpen}>
                     <PopoverTrigger asChild>
@@ -1663,7 +1659,7 @@ export function Payroll() {
                 </div>
 
                 {/* Status Dropdown */}
-                <div className="space-y-2 min-w-[150px]">
+                <div className="min-w-0 flex-1 space-y-2 lg:min-w-[150px] lg:flex-none">
                   <Label>{t("common.status")}</Label>
                   <Select value={selectedStatus} onValueChange={setSelectedStatus}>
                     <SelectTrigger className="bg-background">
@@ -1683,7 +1679,7 @@ export function Payroll() {
                   <Label>{t("payroll.startDate")}</Label>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className={cn("w-[200px] justify-start text-left font-normal", !startDate && "text-muted-foreground")}>
+                      <Button variant="outline" className={cn("w-full justify-start text-left font-normal lg:w-[200px]", !startDate && "text-muted-foreground")}>
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {startDate ? format(startDate, "PPP") : t("payroll.pickDate")}
                       </Button>
@@ -1698,7 +1694,7 @@ export function Payroll() {
                   <Label>{t("payroll.endDate")}</Label>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className={cn("w-[200px] justify-start text-left font-normal", !endDate && "text-muted-foreground")}>
+                      <Button variant="outline" className={cn("w-full justify-start text-left font-normal lg:w-[200px]", !endDate && "text-muted-foreground")}>
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {endDate ? format(endDate, "PPP") : t("payroll.pickDate")}
                       </Button>
@@ -1726,12 +1722,11 @@ export function Payroll() {
           </Card>
 
           {/* Payroll Table */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">{t("payroll.payrollList")}</CardTitle>
+          <Card className="border-border/80 shadow-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base font-semibold tracking-tight">{t("payroll.payrollList")}</CardTitle>
             </CardHeader>
-            <CardContent className="px-0">
-              <div className="rounded-md border">
+            <CardContent className="px-4 pb-4">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -1835,7 +1830,7 @@ export function Payroll() {
                           <TableCell>{row.jobCount}</TableCell>
                           <TableCell>
                             {row.bonus > 0 ? (
-                              <span className="text-green-600 font-medium">
+                              <span className="font-medium text-success">
                                 +{formatCurrency(row.bonus, companyCurrency)}
                               </span>
                             ) : (
@@ -1890,10 +1885,9 @@ export function Payroll() {
                     )}
                   </TableBody>
                 </Table>
-              </div>
 
               {/* Summary */}
-              <div className="flex justify-end mt-4 pt-4 border-t">
+              <div className="mt-4 flex justify-start border-t border-border/80 pt-4 sm:justify-end">
                 <div className="text-sm text-muted-foreground">
                   {t("payroll.totalRecords")}: <span className="font-semibold text-foreground">{payrollListRows.length}</span>
                   {" | "}
@@ -1952,7 +1946,6 @@ export function Payroll() {
             open={rulesModalOpen}
             onOpenChange={setRulesModalOpen}
           />
-        </main>
       </div>
-    </div>;
+    </PageLayout>;
 }
