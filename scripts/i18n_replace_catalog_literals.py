@@ -1,14 +1,15 @@
 from pathlib import Path
 import re
 
-ROOT = Path("apps/web/src")
-CATALOG = ROOT / "app/i18n/en.ts"
+SRC = Path("apps/web/src")
+CATALOG = SRC / "app/i18n/en.ts"
+TARGET_ROOTS = [SRC / "app/layout", SRC / "modules"]
 
 catalog_text = CATALOG.read_text()
 pairs = re.findall(r'^\s*"([^"]+)"\s*:\s*"((?:\\.|[^"])*)"\s*,?$', catalog_text, flags=re.M)
 value_to_keys: dict[str, list[str]] = {}
 for key, raw_value in pairs:
-    value = bytes(raw_value, "utf-8").decode("unicode_escape") if "\\" in raw_value else raw_value
+    value = raw_value.replace('\\"', '"').replace('\\n', '\n').replace('\\\\', '\\')
     value_to_keys.setdefault(value, []).append(key)
 
 module_prefixes = [
@@ -46,16 +47,16 @@ allow = {"Clean Flow", "CLEAN", "FLOW", "CRM", "SMS", "PDF", "QuickBooks", "Next
 
 files_changed = 0
 replacements = 0
-unmatched: list[tuple[str, str]] = []
+unmatched: set[tuple[str, str]] = set()
 
-for path in ROOT.rglob("*.tsx"):
-    if "/i18n/" in path.as_posix():
-        continue
+paths = []
+for root in TARGET_ROOTS:
+    paths.extend(root.rglob("*.tsx"))
+
+for path in sorted(set(paths)):
     text = path.read_text()
-    changed = False
 
     def replace_match(match: re.Match[str]) -> str:
-        nonlocal_dummy = None
         global replacements
         leading, value, trailing = match.groups()
         normalized = " ".join(value.split())
@@ -63,27 +64,29 @@ for path in ROOT.rglob("*.tsx"):
             return match.group(0)
         keys = value_to_keys.get(normalized)
         if not keys:
-            unmatched.append((path.as_posix(), normalized))
+            unmatched.add((path.as_posix(), normalized))
             return match.group(0)
         key = choose_key(path.as_posix(), keys)
         replacements += 1
         return f'>{leading}<T k="{key}" />{trailing}<'
 
     new_text = literal_pattern.sub(replace_match, text)
-    if new_text != text:
-        changed = True
-        if 'from "@/components/i18n/T"' not in new_text:
-            import_lines = list(re.finditer(r'^import .*?;\s*$', new_text, flags=re.M))
-            if not import_lines:
-                raise RuntimeError(f"No import insertion point for {path}")
-            pos = import_lines[-1].end()
-            new_text = new_text[:pos] + '\nimport { T } from "@/components/i18n/T";' + new_text[pos:]
-        path.write_text(new_text)
-        files_changed += 1
+    if new_text == text:
+        continue
+
+    if 'from "@/components/i18n/T"' not in new_text:
+        import_matches = list(re.finditer(r'import[\s\S]*?;\n', new_text))
+        if not import_matches:
+            raise RuntimeError(f"No import insertion point for {path}")
+        pos = import_matches[-1].end()
+        new_text = new_text[:pos] + 'import { T } from "@/components/i18n/T";\n' + new_text[pos:]
+
+    path.write_text(new_text)
+    files_changed += 1
 
 Path("i18n-unmatched-literals.txt").write_text(
-    "\n".join(f"{path}: {value}" for path, value in sorted(set(unmatched)))
+    "\n".join(f"{path}: {value}" for path, value in sorted(unmatched))
 )
 print(f"Changed files: {files_changed}")
 print(f"Catalog-backed replacements: {replacements}")
-print(f"Unmatched unique literals: {len(set(unmatched))}")
+print(f"Unmatched unique literals: {len(unmatched)}")
