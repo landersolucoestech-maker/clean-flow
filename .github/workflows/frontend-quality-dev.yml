@@ -36,6 +36,26 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Enforce CRM boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ -d apps/web/src/modules/customers ] || [ -d apps/web/src/modules/leads ]; then
+            echo "Customers and Leads must remain under apps/web/src/modules/crm."
+            exit 1
+          fi
+
+          obsolete_refs=$(grep -RInE '["'"'"'`]\/(customers|leads)(["'"'"'`/?#]|$)' apps/web/src \
+            --include='*.ts' --include='*.tsx' \
+            --exclude='App.tsx' || true)
+
+          if [ -n "$obsolete_refs" ]; then
+            echo "Found obsolete direct CRM routes outside compatibility redirects:"
+            echo "$obsolete_refs"
+            exit 1
+          fi
+
       - name: Lint frontend
         run: npx eslint apps/web/src packages
 
