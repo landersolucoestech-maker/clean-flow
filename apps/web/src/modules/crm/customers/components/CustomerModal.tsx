@@ -34,56 +34,20 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { Customer, CustomerAddress, useCreateCustomer, useUpdateCustomer } from "@/hooks/useCustomers";
+import { Customer, useCreateCustomer, useUpdateCustomer } from "@/hooks/useCustomers";
 import { useLanguage } from "@/contexts/useLanguage";
 import { AddressAutocompleteInput } from "./AddressAutocompleteInput";
 import { AddressSuggestion } from "@/hooks/useAddressAutocomplete";
 import { useCustomerRelationships, useCreateRelationship, useEndRelationship } from "@/hooks/useCustomerRelationships";
-import { FREQUENCY_OPTIONS } from "@/lib/serviceEnums";
+import { CUSTOMER_DAYS_OF_WEEK, CUSTOMER_FREQUENCY_OPTIONS, CUSTOMER_PAYMENT_METHODS } from "../constants/customerFormOptions";
+import { buildCustomerFormData, createEmptyCustomerFormState, createEmptyFormAddress, mapCustomerAddresses, mapCustomerToFormState } from "../utils/customerFormState";
+import type { FormAddress } from "../utils/customerFormState";
 
 interface CustomerModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   customer?: Customer | null;
   mode: "create" | "edit";
-}
-
-// Use centralized frequency options from serviceEnums
-const frequencyOptionsKeys = FREQUENCY_OPTIONS.map(freq => ({
-  value: freq,
-  label: freq,
-}));
-
-const paymentMethods = [
-  { value: "quickbooks", label: "QuickBooks (QB)" },
-  { value: "cash", label: "Cash" },
-  { value: "check", label: "Check" },
-  { value: "venmo", label: "Venmo" },
-  { value: "zelle", label: "Zelle" },
-];
-
-const daysOfWeekKeys = [
-  { value: "monday", key: "days.monday" },
-  { value: "tuesday", key: "days.tuesday" },
-  { value: "wednesday", key: "days.wednesday" },
-  { value: "thursday", key: "days.thursday" },
-  { value: "friday", key: "days.friday" },
-  { value: "saturday", key: "days.saturday" },
-  { value: "sunday", key: "days.sunday" },
-];
-
-interface FormAddress {
-  id: string;
-  name: string;
-  street: string;
-  complement: string;
-  city: string;
-  state: string;
-  postal_code: string;
-  notes: string;
-  additional_notes: string;
-  frequency: string;
-  preferred_day: string;
 }
 
 export function CustomerModal({
@@ -105,168 +69,32 @@ export function CustomerModal({
   // Track original status to detect changes
   const [originalStatus, setOriginalStatus] = useState<string | null>(null);
 
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone1: "",
-    phone2: "",
-    status: "active",
-    paymentMethod: "quickbooks",
-    customerSince: new Date(),
-    source: "",
-    referralName: "",
-    inactiveDate: null as Date | null,
-    inactiveReason: "",
-    // Billing Contact fields
-    billingContactName: "",
-    billingContactRelationship: "",
-    billingContactEmail: "",
-    billingContactPhone: "",
-    billingContactPhone2: "",
-    billingContactNotes: "",
-  });
-
-  const [addresses, setAddresses] = useState<FormAddress[]>([
-    { id: "1", name: "Home", street: "", complement: "", city: "", state: "", postal_code: "", notes: "", additional_notes: "", frequency: "weekly", preferred_day: "monday" },
-  ]);
+  const [formData, setFormData] = useState(createEmptyCustomerFormState);
+  const [addresses, setAddresses] = useState<FormAddress[]>(() => [createEmptyFormAddress()]);
 
   // Sync form data when customer changes or modal opens
   useEffect(() => {
-    if (open && mode === "edit" && customer) {
-      const isInactive = customer.status !== "Active";
-      const newStatus = isInactive ? "inactive" : "active";
-      setOriginalStatus(newStatus);
-      setFormData({
-        firstName: customer.name?.split(" ")[0] || "",
-        lastName: customer.name?.split(" ").slice(1).join(" ") || "",
-        email: customer.email || "",
-        phone1: customer.phone || "",
-        phone2: customer.phone2 || "",
-        status: newStatus,
-        paymentMethod: customer.payment_method || "quickbooks",
-        customerSince: customer.customer_since ? new Date(customer.customer_since) : new Date(),
-        source: customer.source || "",
-        referralName: customer.source?.startsWith("referral:") 
-          ? customer.source.replace("referral:", "") 
-          : "",
-        inactiveDate: isInactive && customer.additional_info?.includes("Inactive since:") 
-          ? new Date(customer.additional_info.match(/Inactive since: ([^|]+)/)?.[1] || new Date())
-          : (isInactive ? new Date() : null),
-        inactiveReason: isInactive && customer.additional_info?.includes("Reason:") 
-          ? customer.additional_info.match(/Reason: (.+)/)?.[1] || ""
-          : "",
-        // Billing Contact fields
-        billingContactName: customer.billing_contact_name || "",
-        billingContactRelationship: customer.billing_contact_relationship || "",
-        billingContactEmail: customer.billing_contact_email || "",
-        billingContactPhone: customer.billing_contact_phone || "",
-        billingContactPhone2: customer.billing_contact_phone2 || "",
-        billingContactNotes: customer.billing_contact_notes || "",
-      });
-      
-      // If source starts with "referral:", extract the name and set source to "referral"
-      if (customer.source?.startsWith("referral:")) {
-        setFormData(prev => ({ ...prev, source: "referral" }));
-      }
-      
-      if (customer.addresses && customer.addresses.length > 0) {
-        setAddresses(customer.addresses.map((addr, index) => ({
-          id: addr.id || String(index + 1),
-          name: addr.name || "Home",
-          street: addr.street || "",
-          complement: addr.complement || "",
-          city: addr.city || "",
-          state: addr.state || "",
-          postal_code: addr.postal_code || "",
-          notes: addr.notes || "",
-          additional_notes: addr.additional_notes || "",
-          frequency: addr.frequency || "weekly",
-          preferred_day: addr.preferred_day || "monday",
-        })));
-      } else {
-        setAddresses([
-          { id: "1", name: "Home", street: "", complement: "", city: "", state: "", postal_code: "", notes: "", additional_notes: "", frequency: "weekly", preferred_day: "monday" },
-        ]);
-      }
-    } else if (open && mode === "create") {
-      // Reset form for create mode
+    if (!open) return;
+
+    if (mode === "edit" && customer) {
+      const nextFormData = mapCustomerToFormState(customer);
+      setOriginalStatus(nextFormData.status);
+      setFormData(nextFormData);
+      setAddresses(mapCustomerAddresses(customer));
+      return;
+    }
+
+    if (mode === "create") {
       setOriginalStatus(null);
-      setFormData({
-        firstName: "",
-        lastName: "",
-        email: "",
-        phone1: "",
-        phone2: "",
-        status: "active",
-        paymentMethod: "quickbooks",
-        customerSince: new Date(),
-        source: "",
-        referralName: "",
-        inactiveDate: null,
-        inactiveReason: "",
-        // Billing Contact fields
-        billingContactName: "",
-        billingContactRelationship: "",
-        billingContactEmail: "",
-        billingContactPhone: "",
-        billingContactPhone2: "",
-        billingContactNotes: "",
-      });
-      setAddresses([
-        { id: "1", name: "Home", street: "", complement: "", city: "", state: "", postal_code: "", notes: "", additional_notes: "", frequency: "weekly", preferred_day: "monday" },
-      ]);
+      setFormData(createEmptyCustomerFormState());
+      setAddresses([createEmptyFormAddress()]);
     }
   }, [open, customer, mode]);
 
   const title = mode === "create" ? t("modal.addCustomer") : t("modal.editCustomer");
 
   const handleSubmit = () => {
-    // Build additional_info with inactive details if applicable
-    let additionalInfo = "";
-    if (formData.status === "inactive") {
-      const inactiveDateStr = formData.inactiveDate 
-        ? format(formData.inactiveDate, "yyyy-MM-dd") 
-        : format(new Date(), "yyyy-MM-dd");
-      additionalInfo = `Inactive since: ${inactiveDateStr}`;
-      if (formData.inactiveReason) {
-        additionalInfo += ` | Reason: ${formData.inactiveReason}`;
-      }
-    }
-
-    const customerFormData = {
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      email: formData.email,
-      phone1: formData.phone1,
-      phone2: formData.phone2,
-      status: formData.status,
-      paymentMethod: formData.paymentMethod,
-      customerSince: formData.customerSince,
-      source: formData.source === "referral" && formData.referralName 
-        ? `referral:${formData.referralName}` 
-        : formData.source,
-      additionalInfo: additionalInfo || undefined,
-      // Billing Contact fields
-      billingContactName: formData.billingContactName || undefined,
-      billingContactRelationship: formData.billingContactRelationship || undefined,
-      billingContactEmail: formData.billingContactEmail || undefined,
-      billingContactPhone: formData.billingContactPhone || undefined,
-      billingContactPhone2: formData.billingContactPhone2 || undefined,
-      billingContactNotes: formData.billingContactNotes || undefined,
-      addresses: addresses.map(addr => ({
-        name: addr.name,
-        street: addr.street,
-        complement: addr.complement,
-        city: addr.city,
-        state: addr.state,
-        postal_code: addr.postal_code,
-        notes: addr.notes,
-        additional_notes: addr.additional_notes,
-        frequency: addr.frequency,
-        preferred_day: addr.preferred_day,
-      })),
-    };
+    const customerFormData = buildCustomerFormData(formData, addresses);
 
     if (mode === "create") {
       createCustomer.mutate(customerFormData, {
@@ -317,7 +145,7 @@ export function CustomerModal({
 
   const addAddress = () => {
     const newId = Date.now().toString();
-    setAddresses([...addresses, { id: newId, name: "", street: "", complement: "", city: "", state: "", postal_code: "", notes: "", additional_notes: "", frequency: "weekly", preferred_day: "monday" }]);
+    setAddresses([...addresses, { ...createEmptyFormAddress(newId), name: "" }]);
   };
 
   const removeAddress = (id: string) => {
@@ -562,7 +390,7 @@ export function CustomerModal({
                           <SelectValue placeholder={t("modal.selectService")} />
                         </SelectTrigger>
                         <SelectContent>
-                          {frequencyOptionsKeys.map((option) => (
+                          {CUSTOMER_FREQUENCY_OPTIONS.map((option) => (
                             <SelectItem key={option.value} value={option.value}>
                               {option.label}
                             </SelectItem>
@@ -582,7 +410,7 @@ export function CustomerModal({
                           <SelectValue placeholder={t("payroll.select")} />
                         </SelectTrigger>
                         <SelectContent>
-                          {daysOfWeekKeys.map((day) => (
+                          {CUSTOMER_DAYS_OF_WEEK.map((day) => (
                             <SelectItem key={day.value} value={day.value}>
                               {t(day.key)}
                             </SelectItem>
@@ -744,7 +572,7 @@ export function CustomerModal({
                 <SelectValue placeholder={t("payroll.select")} />
               </SelectTrigger>
               <SelectContent>
-                {paymentMethods.map((method) => (
+                {CUSTOMER_PAYMENT_METHODS.map((method) => (
                   <SelectItem key={method.value} value={method.value}>
                     {method.label}
                   </SelectItem>
