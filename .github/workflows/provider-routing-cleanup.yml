@@ -1,58 +1,13 @@
-name: Provider routing cleanup
+name: Provider routing cleanup archive
 
 on:
-  push:
-    branches: [DEV]
-    paths:
-      - .github/workflows/provider-routing-cleanup.yml
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  cleanup:
+  archived:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: DEV
-      - name: Replace remaining generic RingCentral SMS calls
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-
-          excluded = {
-              'supabase/functions/ringcentral-send-message/index.ts',
-              'supabase/functions/ringcentral-broadcast/index.ts',
-              'supabase/functions/send-sms-message/index.ts',
-          }
-          changed = []
-          for path in Path('supabase/functions').rglob('index.ts'):
-              relative = path.as_posix()
-              text = path.read_text(encoding='utf-8')
-              if 'ringcentral-send-message' not in text or relative in excluded:
-                  continue
-              updated = text.replace('/functions/v1/ringcentral-send-message', '/functions/v1/send-sms-message')
-              if updated != text:
-                  path.write_text(updated, encoding='utf-8')
-                  changed.append(relative)
-          print('changed consumers:')
-          for path in changed:
-              print(path)
-          print('remaining direct references:')
-          for path in Path('supabase/functions').rglob('index.ts'):
-              if 'ringcentral-send-message' in path.read_text(encoding='utf-8'):
-                  print(path.as_posix())
-          PY
-      - name: Commit provider routing cleanup
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add supabase/functions
-          if git diff --cached --quiet; then
-            echo "No additional consumers needed migration"
-            exit 0
-          fi
-          git commit -m "refactor: route remaining SMS consumers through provider gateway"
-          git push origin HEAD:DEV
+      - run: echo "Provider routing cleanup completed; workflow archived and read-only."
