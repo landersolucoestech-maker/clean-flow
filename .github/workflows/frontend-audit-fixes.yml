@@ -1,0 +1,71 @@
+name: Frontend Audit Fixes
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - ".github/workflows/frontend-audit-fixes.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Apply deterministic frontend fixes
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+
+          const integrationsPath = 'apps/web/src/modules/settings/components/IntegrationsTabContent.tsx';
+          let integrations = fs.readFileSync(integrationsPath, 'utf8');
+          const hardcoded = 'https://uszeseqzmqsqjbstffgy.supabase.co/functions/v1/website-lead-capture';
+          if (!integrations.includes(hardcoded)) throw new Error('Expected hardcoded webhook URL not found');
+          if (!integrations.includes('import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";')) throw new Error('Integration import anchor not found');
+          integrations = integrations.replace(
+            'import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";',
+            'import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";\nimport { SUPABASE_URL } from "@/integrations/supabase/client";'
+          );
+          integrations = integrations.replace(
+            'export function IntegrationsTab() {\n  const [copiedId, setCopiedId] = useState<string | null>(null);',
+            'export function IntegrationsTab() {\n  const websiteLeadCaptureUrl = `${SUPABASE_URL}/functions/v1/website-lead-capture`;\n  const [copiedId, setCopiedId] = useState<string | null>(null);'
+          );
+          integrations = integrations.replace(`value="${hardcoded}"`, 'value={websiteLeadCaptureUrl}');
+          integrations = integrations.replace(`"${hardcoded}",\n                          "website_webhook"`, 'websiteLeadCaptureUrl,\n                          "website_webhook"');
+          if (integrations.includes(hardcoded)) throw new Error('Hardcoded webhook URL still present');
+          fs.writeFileSync(integrationsPath, integrations);
+
+          const quickBooksPath = 'apps/web/src/modules/billing/hooks/useQuickBooksSync.ts';
+          let quickBooks = fs.readFileSync(quickBooksPath, 'utf8');
+          for (const log of [
+            '      console.log("QuickBooks not connected, skipping auto-sync");\n',
+            '        console.log("Invoice already synced to QuickBooks");\n',
+          ]) {
+            if (!quickBooks.includes(log)) throw new Error(`Expected debug log not found: ${log.trim()}`);
+            quickBooks = quickBooks.replace(log, '');
+          }
+          fs.writeFileSync(quickBooksPath, quickBooks);
+          NODE
+      - run: npx eslint apps/web/src packages --max-warnings=0
+      - run: npm run typecheck
+      - run: npx vitest run apps/web/src
+      - run: npm run build
+      - name: Commit frontend fixes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/web/src/modules/settings/components/IntegrationsTabContent.tsx apps/web/src/modules/billing/hooks/useQuickBooksSync.ts
+          git diff --cached --quiet && exit 0
+          git commit -m "fix(frontend): remove audited hardcoded integration data"
+          git push origin HEAD:dev
