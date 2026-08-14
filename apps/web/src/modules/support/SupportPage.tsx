@@ -68,21 +68,21 @@ export function Support() {
 
   const getStatusColor = (status: TicketStatus) => {
     switch (status) {
-      case "open": return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
-      case "in_progress": return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
-      case "waiting_customer": return "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200";
-      case "resolved": return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
-      case "closed": return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
+      case "open": return "bg-primary-light text-primary-dark";
+      case "in_progress": return "bg-warning/10 text-warning-foreground";
+      case "waiting_customer": return "bg-warning/15 text-warning-foreground";
+      case "resolved": return "bg-success/10 text-success";
+      case "closed": return "bg-muted text-muted-foreground";
       default: return "";
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case "low": return "bg-gray-100 text-gray-800";
-      case "medium": return "bg-blue-100 text-blue-800";
-      case "high": return "bg-orange-100 text-orange-800";
-      case "urgent": return "bg-red-100 text-red-800";
+      case "low": return "bg-muted text-muted-foreground";
+      case "medium": return "bg-primary-light text-primary-dark";
+      case "high": return "bg-warning/10 text-warning-foreground";
+      case "urgent": return "bg-destructive/10 text-destructive";
       default: return "";
     }
   };
@@ -111,11 +111,11 @@ export function Support() {
         />
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="flex items-center gap-4 p-6">
-              <div className="p-3 rounded-full bg-blue-100 dark:bg-blue-900">
-                <Ticket className="w-6 h-6 text-blue-600 dark:text-blue-300" />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <Card className="border-border/80 shadow-sm">
+            <CardContent className="flex items-center gap-4 p-5">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-light">
+                <Ticket className="h-6 w-6 text-primary-dark" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{tickets.length}</p>
@@ -124,10 +124,10 @@ export function Support() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="flex items-center gap-4 p-6">
-              <div className="p-3 rounded-full bg-yellow-100 dark:bg-yellow-900">
-                <Clock className="w-6 h-6 text-yellow-600 dark:text-yellow-300" />
+          <Card className="border-border/80 shadow-sm">
+            <CardContent className="flex items-center gap-4 p-5">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-warning/10">
+                <Clock className="h-6 w-6 text-warning-foreground" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{openTickets.length}</p>
@@ -136,10 +136,10 @@ export function Support() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="flex items-center gap-4 p-6">
-              <div className="p-3 rounded-full bg-orange-100 dark:bg-orange-900">
-                <AlertCircle className="w-6 h-6 text-orange-600 dark:text-orange-300" />
+          <Card className="border-border/80 shadow-sm">
+            <CardContent className="flex items-center gap-4 p-5">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-warning/15">
+                <AlertCircle className="h-6 w-6 text-warning-foreground" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{waitingTickets.length}</p>
@@ -148,10 +148,10 @@ export function Support() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="flex items-center gap-4 p-6">
-              <div className="p-3 rounded-full bg-green-100 dark:bg-green-900">
-                <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-300" />
+          <Card className="border-border/80 shadow-sm">
+            <CardContent className="flex items-center gap-4 p-5">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-success/10">
+                <CheckCircle className="h-6 w-6 text-success" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{resolvedTickets.length}</p>
@@ -162,7 +162,7 @@ export function Support() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList>
+          <TabsList className="w-full justify-start overflow-x-auto sm:w-auto">
             <TabsTrigger value="tickets" className="gap-2">
               <Ticket className="w-4 h-4" />
               {t("support.tabs.my_tickets")}
@@ -179,7 +179,7 @@ export function Support() {
 
           <TabsContent value="tickets" className="space-y-4">
             {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col gap-3 rounded-2xl border border-border/80 bg-card p-4 shadow-sm sm:flex-row sm:items-center">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                 <Input
@@ -190,7 +190,7 @@ export function Support() {
                 />
               </div>
               <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
-                <SelectTrigger className="w-48">
+                <SelectTrigger className="w-full sm:w-48">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -204,7 +204,7 @@ export function Support() {
             </div>
 
             {/* Tickets Table */}
-            <Card>
+            <Card className="overflow-hidden border-border/80 shadow-sm">
               <CardContent className="p-0">
                 {isLoading ? (
                   <div className="p-8 text-center text-muted-foreground">
@@ -240,7 +240,7 @@ export function Support() {
                       {filteredTickets.map((ticket) => (
                         <TableRow
                           key={ticket.id}
-                          className="cursor-pointer hover:bg-muted/50"
+                          className="cursor-pointer"
                           onClick={() => setSelectedTicket(ticket)}
                         >
                           <TableCell className="font-mono text-sm">
@@ -305,7 +305,7 @@ export function Support() {
 
           <TabsContent value="docs">
             <div className="grid md:grid-cols-3 gap-4">
-              <Card className="hover:shadow-md transition-shadow cursor-pointer">
+              <Card className="cursor-pointer border-border/80 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
                 <CardContent className="p-6 text-center">
                   <BookOpen className="w-12 h-12 mx-auto text-primary mb-4" />
                   <h3 className="font-medium mb-2">{t("support.docs.getting_started")}</h3>
@@ -315,7 +315,7 @@ export function Support() {
                 </CardContent>
               </Card>
 
-              <Card className="hover:shadow-md transition-shadow cursor-pointer">
+              <Card className="cursor-pointer border-border/80 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
                 <CardContent className="p-6 text-center">
                   <MessageSquare className="w-12 h-12 mx-auto text-primary mb-4" />
                   <h3 className="font-medium mb-2">{t("support.docs.integrations")}</h3>
@@ -325,7 +325,7 @@ export function Support() {
                 </CardContent>
               </Card>
 
-              <Card className="hover:shadow-md transition-shadow cursor-pointer">
+              <Card className="cursor-pointer border-border/80 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
                 <CardContent className="p-6 text-center">
                   <HelpCircle className="w-12 h-12 mx-auto text-primary mb-4" />
                   <h3 className="font-medium mb-2">{t("support.docs.troubleshooting")}</h3>
