@@ -1,16 +1,13 @@
 name: Frontend Audit Fixes
 
 on:
-  push:
-    branches: [dev]
-    paths:
-      - ".github/workflows/frontend-audit-fixes.yml"
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  fix:
+  validate:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -23,112 +20,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Centralize shared Leads form types and formatter
-        run: |
-          node <<'NODE'
-          const fs = require('node:fs');
-          const ts = require('typescript');
-
-          const createPath = 'apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx';
-          const editPath = 'apps/web/src/modules/crm/leads/components/EditLeadModal.tsx';
-
-          function parse(file, source) {
-            return ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
-          }
-
-          function findInterface(sf, name) {
-            const node = sf.statements.find((statement) => ts.isInterfaceDeclaration(statement) && statement.name.text === name);
-            if (!node) throw new Error(`Interface ${name} missing in ${sf.fileName}`);
-            return node;
-          }
-
-          function findVar(sf, name) {
-            for (const statement of sf.statements) {
-              if (!ts.isVariableStatement(statement)) continue;
-              for (const declaration of statement.declarationList.declarations) {
-                if (ts.isIdentifier(declaration.name) && declaration.name.text === name) return { statement, declaration };
-              }
-            }
-            throw new Error(`Variable ${name} missing in ${sf.fileName}`);
-          }
-
-          function normalize(text) {
-            return text.replace(/\s+/g, '').replace(/AddressEntry|InteractionEntry|Interaction/g, 'SharedType');
-          }
-
-          function removeRanges(source, ranges) {
-            let next = source;
-            for (const range of [...ranges].sort((a, b) => b.start - a.start)) {
-              next = next.slice(0, range.start) + next.slice(range.end);
-            }
-            return next;
-          }
-
-          function insertAfterImports(file, source, importText) {
-            const sf = parse(file, source);
-            const imports = sf.statements.filter(ts.isImportDeclaration);
-            const last = imports[imports.length - 1];
-            return source.slice(0, last.end) + `\n${importText}` + source.slice(last.end);
-          }
-
-          let create = fs.readFileSync(createPath, 'utf8');
-          let edit = fs.readFileSync(editPath, 'utf8');
-          const createSf = parse(createPath, create);
-          const editSf = parse(editPath, edit);
-
-          const createAddress = findInterface(createSf, 'AddressEntry');
-          const editAddress = findInterface(editSf, 'AddressEntry');
-          if (normalize(createAddress.getText(createSf)) !== normalize(editAddress.getText(editSf))) {
-            throw new Error('Create/Edit AddressEntry contracts differ');
-          }
-
-          const createInteraction = findInterface(createSf, 'Interaction');
-          const editInteraction = findInterface(editSf, 'InteractionEntry');
-          if (normalize(createInteraction.getText(createSf)) !== normalize(editInteraction.getText(editSf))) {
-            throw new Error('Create/Edit interaction entry contracts differ');
-          }
-
-          const createFormatter = findVar(createSf, 'formatCurrency');
-          const editFormatter = findVar(editSf, 'formatCurrency');
-          if (!createFormatter.declaration.initializer || !editFormatter.declaration.initializer) throw new Error('formatCurrency initializer missing');
-          if (normalize(createFormatter.declaration.initializer.getText(createSf)) !== normalize(editFormatter.declaration.initializer.getText(editSf))) {
-            throw new Error('Create/Edit formatCurrency implementations differ');
-          }
-
-          create = removeRanges(create, [
-            { start: createAddress.getFullStart(), end: createAddress.end },
-            { start: createInteraction.getFullStart(), end: createInteraction.end },
-            { start: createFormatter.statement.getFullStart(), end: createFormatter.statement.end },
-          ]);
-          edit = removeRanges(edit, [
-            { start: editAddress.getFullStart(), end: editAddress.end },
-            { start: editInteraction.getFullStart(), end: editInteraction.end },
-            { start: editFormatter.statement.getFullStart(), end: editFormatter.statement.end },
-          ]);
-
-          create = create.replace(/\bAddressEntry\b/g, 'LeadAddressEntry').replace(/\bInteraction\b/g, 'LeadInteractionEntry').replace(/\bformatCurrency\b/g, 'formatLeadCurrency');
-          edit = edit.replace(/\bAddressEntry\b/g, 'LeadAddressEntry').replace(/\bInteractionEntry\b/g, 'LeadInteractionEntry').replace(/\bformatCurrency\b/g, 'formatLeadCurrency');
-
-          const sharedImports = 'import type { LeadAddressEntry, LeadInteractionEntry } from "../types/leadForm";\nimport { formatLeadCurrency } from "../utils/leadForm";';
-          create = insertAfterImports(createPath, create, sharedImports);
-          edit = insertAfterImports(editPath, edit, sharedImports);
-
-          if (/interface\s+(AddressEntry|InteractionEntry)\b/.test(create + edit)) throw new Error('Duplicate lead entry interface remains');
-          if (/const\s+formatCurrency\b/.test(create + edit)) throw new Error('Duplicate lead currency formatter remains');
-
-          fs.writeFileSync(createPath, create);
-          fs.writeFileSync(editPath, edit);
-          NODE
       - run: node scripts/frontend-audit.mjs
       - run: npx eslint apps/web/src packages --max-warnings=0
       - run: npm run typecheck
       - run: npx vitest run apps/web/src
       - run: npm run build
-      - name: Commit shared Leads form contracts
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/web/src/modules/crm/leads
-          git diff --cached --quiet && exit 0
-          git commit -m "refactor(frontend): share lead form contracts and formatting"
-          git push origin HEAD:dev
