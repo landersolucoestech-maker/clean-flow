@@ -1,0 +1,21 @@
+name: Remove duplicate uppercase DEV
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - ".github/workflows/remove-uppercase-dev.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  remove-duplicate-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 1
+      - name: Delete uppercase DEV branch
+        run: git push origin --delete DEV
