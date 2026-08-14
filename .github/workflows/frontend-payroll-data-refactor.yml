@@ -23,60 +23,154 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Isolate payroll queries and pure helpers
+      - name: Isolate payroll queries, helpers and SMS delivery
         run: |
           node <<'NODE'
           const fs = require('node:fs');
           const path = 'apps/web/src/modules/payroll/PayrollPage.tsx';
           let src = fs.readFileSync(path, 'utf8');
 
-          src = src.replace('import { supabase } from "@/integrations/supabase/client";\n', '');
-          src = src.replace(
-            'import { buildPayrollListRows, sortPayrollRecords } from "./utils/payrollView";',
-            'import { buildPayrollListRows, isCompletedJobStatus, isUuid, normalizePayrollName, sortPayrollRecords } from "./utils/payrollView";\nimport { fetchExistingPayrollRecordKeys, fetchPayrollRecordsForPeriod, sendPayrollStatementSms, updatePayrollRecordValues } from "./services/payrollDataService";',
-          );
+          const oldUtilsImport = 'import { buildPayrollListRows, sortPayrollRecords } from "./utils/payrollView";';
+          if (src.includes(oldUtilsImport)) {
+            src = src.replace(
+              oldUtilsImport,
+              'import { buildPayrollListRows, isCompletedJobStatus, isUuid, normalizePayrollName, sortPayrollRecords } from "./utils/payrollView";\nimport { fetchExistingPayrollRecordKeys, fetchPayrollRecordsForPeriod, sendPayrollStatementSms, updatePayrollRecordValues } from "./services/payrollDataService";',
+            );
+          }
 
           const firstFetchStart = src.indexOf('      // Fetch fresh records directly from database to ensure we have latest data');
-          const firstFetchEnd = src.indexOf('      // If there are no records yet, auto-generate them from finished jobs for this period', firstFetchStart);
-          if (firstFetchStart < 0 || firstFetchEnd < 0) throw new Error('Initial payroll fetch block missing');
-          src = src.slice(0, firstFetchStart) + '      let freshRecords = await fetchPayrollRecordsForPeriod(periodStartISO, periodEndISO);\n\n' + src.slice(firstFetchEnd);
+          if (firstFetchStart >= 0) {
+            const firstFetchEnd = src.indexOf('      // If there are no records yet, auto-generate them from finished jobs for this period', firstFetchStart);
+            if (firstFetchEnd < 0) throw new Error('Initial payroll fetch end missing');
+            src = src.slice(0, firstFetchStart) + '      let freshRecords = await fetchPayrollRecordsForPeriod(periodStartISO, periodEndISO);\n\n' + src.slice(firstFetchEnd);
+          }
 
           const refetchStart = src.indexOf('        const refetch = await supabase');
-          const refetchEnd = src.indexOf('      }\n\n      if (!freshRecords || freshRecords.length === 0)', refetchStart);
-          if (refetchStart < 0 || refetchEnd < 0) throw new Error('Payroll refetch block missing');
-          src = src.slice(0, refetchStart) + '        freshRecords = await fetchPayrollRecordsForPeriod(periodStartISO, periodEndISO);\n' + src.slice(refetchEnd);
+          if (refetchStart >= 0) {
+            const refetchEnd = src.indexOf('      }\n\n      if (!freshRecords || freshRecords.length === 0)', refetchStart);
+            if (refetchEnd < 0) throw new Error('Payroll refetch end missing');
+            src = src.slice(0, refetchStart) + '        freshRecords = await fetchPayrollRecordsForPeriod(periodStartISO, periodEndISO);\n' + src.slice(refetchEnd);
+          }
 
-          const normalizeBlock = `      const normalizeName = (value: string) =>\n        value\n          .normalize("NFKD")\n          .replace(/[\\u0300-\\u036f]/g, "")\n          .toLowerCase()\n          .replace(/[^a-z0-9 ]+/g, " ")\n          .replace(/\\s+/g, " ")\n          .trim();\n\n`;
-          if (!src.includes(normalizeBlock)) throw new Error('First normalizeName block missing');
-          src = src.replace(normalizeBlock, '');
+          const normalizeBlocks = [
+`      const normalizeName = (value: string) =>
+        value
+          .normalize("NFKD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase()
+          .replace(/[^a-z0-9 ]+/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+
+`,
+`    const normalizeName = (value: string) =>
+      value
+        .normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9 ]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+
+`,
+          ];
+          for (const block of normalizeBlocks) src = src.replace(block, '');
           src = src.replaceAll('normalizeName(', 'normalizePayrollName(');
 
           const updateStart = src.indexOf('          const { error } = await supabase\n            .from("payroll_records")\n            .update({');
-          const updateEnd = src.indexOf('          updatedCount++;', updateStart);
-          if (updateStart < 0 || updateEnd < 0) throw new Error('Payroll record update block missing');
-          const updateReplacement = `          await updatePayrollRecordValues(record.id, {\n            base_value: unitValue,\n            bonus: bonusForThisRecord,\n            total: newTotal,\n          });\n\n`;
-          src = src.slice(0, updateStart) + updateReplacement + src.slice(updateEnd);
+          if (updateStart >= 0) {
+            const updateEnd = src.indexOf('          updatedCount++;', updateStart);
+            if (updateEnd < 0) throw new Error('Payroll record update end missing');
+            src = src.slice(0, updateStart) + `          await updatePayrollRecordValues(record.id, {
+            base_value: unitValue,
+            bonus: bonusForThisRecord,
+            total: newTotal,
+          });
 
-          const secondNormalizeBlock = `    const normalizeName = (value: string) =>\n      value\n        .normalize("NFKD")\n        .replace(/[\\u0300-\\u036f]/g, "")\n        .toLowerCase()\n        .replace(/[^a-z0-9 ]+/g, " ")\n        .replace(/\\s+/g, " ")\n        .trim();\n\n`;
-          if (src.includes(secondNormalizeBlock)) src = src.replace(secondNormalizeBlock, '');
+` + src.slice(updateEnd);
+          }
 
-          const uuidBlock = `    const isUuid = (value: string) =>\n      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);\n\n`;
-          if (!src.includes(uuidBlock)) throw new Error('Inline UUID helper missing');
-          src = src.replace(uuidBlock, '');
+          src = src.replace(`    const isUuid = (value: string) =>
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+
+`, '');
 
           const completedStart = src.indexOf('    const isCompletedJob = (status: string | null) => {');
-          const completedEnd = src.indexOf('    setIsGeneratingFromJobs(true);', completedStart);
-          if (completedStart < 0 || completedEnd < 0) throw new Error('Completed job helper block missing');
-          src = src.slice(0, completedStart) + src.slice(completedEnd);
+          if (completedStart >= 0) {
+            const completedEnd = src.indexOf('    setIsGeneratingFromJobs(true);', completedStart);
+            if (completedEnd < 0) throw new Error('Completed job helper end missing');
+            src = src.slice(0, completedStart) + src.slice(completedEnd);
+          }
           src = src.replaceAll('isCompletedJob(', 'isCompletedJobStatus(');
 
           const existingStart = src.indexOf('      // Fetch existing records for this period (fresh) to avoid duplicates and allow re-runs safely');
-          const existingEnd = src.indexOf('      const existingKeys = new Set<string>(', existingStart);
-          if (existingStart < 0 || existingEnd < 0) throw new Error('Existing payroll records fetch block missing');
-          src = src.slice(0, existingStart) + '      const existingPeriodRecords = await fetchExistingPayrollRecordKeys(periodStartISO, periodEndISO);\n\n' + src.slice(existingEnd);
+          if (existingStart >= 0) {
+            const existingEnd = src.indexOf('      const existingKeys = new Set<string>(', existingStart);
+            if (existingEnd < 0) throw new Error('Existing payroll fetch end missing');
+            src = src.slice(0, existingStart) + '      const existingPeriodRecords = await fetchExistingPayrollRecordKeys(periodStartISO, periodEndISO);\n\n' + src.slice(existingEnd);
+          }
           src = src.replace('(existingPeriodRecords || [])', 'existingPeriodRecords');
 
-          if (/supabase\.from\("payroll_records"\)/.test(src)) throw new Error('Direct payroll_records query remains');
+          function replaceSmsFlow(handlerName, endMarker, buildCall) {
+            const handlerStart = src.indexOf(handlerName);
+            if (handlerStart < 0) throw new Error(`${handlerName} missing`);
+            const uploadStart = src.indexOf('      // Upload to Supabase storage', handlerStart);
+            if (uploadStart < 0) throw new Error(`Upload block missing in ${handlerName}`);
+            const end = src.indexOf(endMarker, uploadStart);
+            if (end < 0) throw new Error(`SMS block end missing in ${handlerName}`);
+            src = src.slice(0, uploadStart) + buildCall + src.slice(end);
+          }
+
+          replaceSmsFlow(
+            '  const handleSendFromPreview = async () => {',
+            '      toast({\n        title: "SMS Sent",',
+`      const fileName = \`payroll/\${previewRecord.id}_\${Date.now()}_payroll_\${previewRecord.employeeName.replace(/\\s+/g, "_")}.pdf\`;
+      await sendPayrollStatementSms({
+        companyId: companySettings?.id,
+        phone: staffMember.phone,
+        message: \`Hi \${previewRecord.employeeName}, here is your payroll statement for \${previewRecord.period}. Total: \${totalValue.toLocaleString("en-US", { style: "currency", currency: "USD" })}\`,
+        fileName,
+        pdfBlob: previewPdfBlob,
+      });
+
+`,
+          );
+
+          replaceSmsFlow(
+            '  const handleSendPDFViaSMS = async (record: PayrollListRow) => {',
+            '      toast({\n        title: "SMS Sent",',
+`      const fileName = \`payroll/\${record.id}_\${Date.now()}_payroll_\${record.employeeName.replace(/\\s+/g, "_")}.pdf\`;
+      await sendPayrollStatementSms({
+        companyId: companySettings?.id,
+        phone: staffMember.phone,
+        message: \`Hi \${record.employeeName}, here is your payroll statement for \${record.period}. Total: \${totalValue.toLocaleString("en-US", { style: "currency", currency: "USD" })}\`,
+        fileName,
+        pdfBlob,
+      });
+
+`,
+          );
+
+          const bulkHandlerStart = src.indexOf('  const handleBulkSendPDFViaSMS = async () => {');
+          if (bulkHandlerStart < 0) throw new Error('Bulk SMS handler missing');
+          const bulkUploadStart = src.indexOf('          // Upload to Supabase storage', bulkHandlerStart);
+          const bulkEnd = src.indexOf('          successCount++;', bulkUploadStart);
+          if (bulkUploadStart < 0 || bulkEnd < 0) throw new Error('Bulk SMS upload/send block missing');
+          src = src.slice(0, bulkUploadStart) + `          const fileName = \`payroll/\${Date.now()}_payroll_\${employeeName.replace(/\\s+/g, "_")}.pdf\`;
+          await sendPayrollStatementSms({
+            companyId: companySettings?.id,
+            phone: staffMember.phone,
+            message: \`Hi \${employeeName}, here is your payroll statement for \${period}. Total: \${totalValue.toLocaleString("en-US", { style: "currency", currency: "USD" })}\`,
+            fileName,
+            pdfBlob,
+          });
+
+` + src.slice(bulkEnd);
+
+          src = src.replace('import { supabase } from "@/integrations/supabase/client";\n', '');
+
+          if (/\bsupabase\./.test(src)) throw new Error('Direct Supabase access remains in PayrollPage');
+          if (/ringcentral-send-message/.test(src)) throw new Error('Direct RingCentral SMS call remains in PayrollPage');
           fs.writeFileSync(path, src);
           NODE
       - run: node scripts/frontend-audit.mjs
