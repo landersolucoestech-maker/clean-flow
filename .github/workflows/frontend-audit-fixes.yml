@@ -23,17 +23,17 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: node scripts/refactor-leads-page-services.mjs
+      - run: node scripts/refactor-lead-preferences-history.mjs
       - run: node scripts/frontend-audit.mjs
       - run: npx eslint apps/web/src packages --max-warnings=0
       - run: npm run typecheck
       - run: npx vitest run apps/web/src
       - run: npm run build
-      - name: Commit leads page service extraction
+      - name: Commit lead preferences history extraction
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/web/src/modules/crm/leads/pages/LeadsPageContent.tsx apps/web/src/modules/crm/leads/services/leadsPageQueries.ts apps/web/src/modules/crm/leads/services/leadAddressSync.ts
+          git add apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx apps/web/src/modules/crm/leads/components/EditLeadModal.tsx apps/web/src/modules/crm/leads/components/LeadPreferencesHistorySections.tsx
           git diff --cached --quiet && exit 0
-          git commit -m "refactor(frontend): isolate leads page data access"
+          git commit -m "refactor(frontend): share lead preferences and history sections"
           git push origin HEAD:dev
