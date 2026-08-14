@@ -1305,11 +1305,9 @@ export function Payroll() {
   // employeesForModal is defined at the top of the component
 
   return <PageLayout>
-      <div className="space-y-6">
-          {/* Page Title */}
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{t("payroll.title")}</h1>
-            <div className="flex flex-wrap gap-2 lg:justify-end">
+      <div className="space-y-4">
+          {/* Payroll actions */}
+          <div className="flex flex-wrap justify-end gap-2">
               <Button variant="outline" onClick={() => setRulesModalOpen(true)} className="gap-2">
                 <Settings className="w-4 h-4" />
                 {t("payroll.payrollRules")}
@@ -1340,13 +1338,12 @@ export function Payroll() {
                   </>
                 )}
               </Button>
-            </div>
           </div>
 
           {/* Filter Card */}
-          <Card className="border-border/80 shadow-sm">
+          <Card>
             <CardContent className="p-4">
-              <div className="flex flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-end">
+              <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end">
                 {/* Employee Combobox */}
                 <div className="min-w-0 flex-1 space-y-2 lg:min-w-[250px] lg:flex-none">
                   <Label>{t("payroll.employee")}</Label>
@@ -1448,7 +1445,7 @@ export function Payroll() {
           </Card>
 
           {/* Payroll Table */}
-          <Card className="border-border/80 shadow-sm">
+          <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base font-semibold tracking-tight">{t("payroll.payrollList")}</CardTitle>
             </CardHeader>

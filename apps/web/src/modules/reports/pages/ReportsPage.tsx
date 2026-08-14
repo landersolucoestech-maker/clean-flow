@@ -303,15 +303,9 @@ export function Reports() {
 
   return (
     <PageLayout>
-      <div className="space-y-6">
-          {/* Page Header */}
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{t("reports.title")}</h1>
-              <p className="text-muted-foreground">
-                {t("reports.subtitle")}
-              </p>
-            </div>
+      <div className="space-y-4">
+          {/* Report actions */}
+          <div className="flex justify-end">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button disabled={isLoading}>

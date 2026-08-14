@@ -304,37 +304,23 @@ export function Billing() {
   };
 
   return (
-    <PageLayout>
-      <div className="space-y-6">
-          {/* Page Header */}
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{t("billing.title")}</h1>
-              <p className="text-muted-foreground">
-                {t("billing.subtitle")}
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-              {qbConnected && (
-                <Button 
-                  variant="outline" 
-                  onClick={handleSyncWithQB}
-                  disabled={syncInvoices.isPending}
-                >
-                  <RefreshCw className={`w-4 h-4 mr-2 ${syncInvoices.isPending ? 'animate-spin' : ''}`} />
-                  Sync QuickBooks
-                </Button>
-              )}
-              <Button 
-                variant="hero" 
-                className="flex items-center gap-2"
-                onClick={() => setCreateInvoiceOpen(true)}
-              >
-                <Plus className="w-4 h-4" />
-                <span>{t("billing.createInvoice")}</span>
-              </Button>
-            </div>
-          </div>
+    <PageLayout
+      headerActions={
+        <>
+          {qbConnected && (
+            <Button variant="outline" size="sm" onClick={handleSyncWithQB} disabled={syncInvoices.isPending}>
+              <RefreshCw className={`mr-2 h-4 w-4 ${syncInvoices.isPending ? "animate-spin" : ""}`} />
+              Sync QuickBooks
+            </Button>
+          )}
+          <Button size="sm" onClick={() => setCreateInvoiceOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            <span>{t("billing.createInvoice")}</span>
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
 
           {/* Modals */}
           <CreateInvoiceModal open={createInvoiceOpen} onOpenChange={setCreateInvoiceOpen} />
@@ -346,9 +332,9 @@ export function Billing() {
           />
 
           {/* Stats Cards - Using QuickBooks synced data */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <Card className="cursor-pointer hover:border-warning/50 transition-colors" onClick={() => setStatusFilter("sent")}>
-              <CardContent className="p-6">
+              <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">{t("billing.invoiceSent")}</p>
@@ -363,7 +349,7 @@ export function Billing() {
             </Card>
 
             <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => setStatusFilter("viewed")}>
-              <CardContent className="p-6">
+              <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">{t("billing.openedInvoices")}</p>
@@ -378,7 +364,7 @@ export function Billing() {
             </Card>
 
             <Card className="cursor-pointer hover:border-success/50 transition-colors" onClick={() => setStatusFilter("paid")}>
-              <CardContent className="p-6">
+              <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">{t("billing.paidInvoices")}</p>
@@ -393,7 +379,7 @@ export function Billing() {
             </Card>
 
             <Card className="cursor-pointer hover:border-destructive/50 transition-colors" onClick={() => setStatusFilter("overdue")}>
-              <CardContent className="p-6">
+              <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">{t("billing.overdueInvoices")}</p>
@@ -419,7 +405,7 @@ export function Billing() {
               )}
             </CardHeader>
             <CardContent>
-              <div className="flex items-center gap-4 mb-6">
+              <div className="mb-3 flex items-center gap-3">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input

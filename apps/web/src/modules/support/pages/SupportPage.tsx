@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { PageLayout } from "@/components/layout/PageLayout";
-import { PageHeader } from "@/components/shared/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -97,22 +96,19 @@ export function Support() {
   ];
 
   return (
-    <PageLayout>
-      <div className="space-y-6">
-        <PageHeader
-          title={t("support.title")}
-          description={t("support.page_description")}
-          actions={
-            <Button onClick={() => setShowCreateModal(true)}>
-              <Plus className="w-4 h-4 mr-2" />
-              {t("support.new_ticket")}
-            </Button>
-          }
-        />
+    <PageLayout
+      headerActions={
+        <Button size="sm" onClick={() => setShowCreateModal(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          {t("support.new_ticket")}
+        </Button>
+      }
+    >
+      <div className="space-y-4">
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <Card className="border-border/80 shadow-sm">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <Card>
             <CardContent className="flex items-center gap-4 p-5">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-light">
                 <Ticket className="h-6 w-6 text-primary-dark" />
@@ -124,7 +120,7 @@ export function Support() {
             </CardContent>
           </Card>
 
-          <Card className="border-border/80 shadow-sm">
+          <Card>
             <CardContent className="flex items-center gap-4 p-5">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-warning/10">
                 <Clock className="h-6 w-6 text-warning-foreground" />
@@ -136,7 +132,7 @@ export function Support() {
             </CardContent>
           </Card>
 
-          <Card className="border-border/80 shadow-sm">
+          <Card>
             <CardContent className="flex items-center gap-4 p-5">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-warning/15">
                 <AlertCircle className="h-6 w-6 text-warning-foreground" />
@@ -148,7 +144,7 @@ export function Support() {
             </CardContent>
           </Card>
 
-          <Card className="border-border/80 shadow-sm">
+          <Card>
             <CardContent className="flex items-center gap-4 p-5">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-success/10">
                 <CheckCircle className="h-6 w-6 text-success" />
@@ -179,7 +175,7 @@ export function Support() {
 
           <TabsContent value="tickets" className="space-y-4">
             {/* Filters */}
-            <div className="flex flex-col gap-3 rounded-2xl border border-border/80 bg-card p-4 shadow-sm sm:flex-row sm:items-center">
+            <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-3 sm:flex-row sm:items-center">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                 <Input
@@ -204,7 +200,7 @@ export function Support() {
             </div>
 
             {/* Tickets Table */}
-            <Card className="overflow-hidden border-border/80 shadow-sm">
+            <Card className="overflow-hidden">
               <CardContent className="p-0">
                 {isLoading ? (
                   <div className="p-8 text-center text-muted-foreground">

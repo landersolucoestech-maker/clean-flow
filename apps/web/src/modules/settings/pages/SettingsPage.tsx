@@ -308,7 +308,7 @@ export function Settings() {
   };
 
   const renderCompanySettings = () => (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <Card>
         <CardHeader>
         <CardTitle className="flex items-center gap-2">
@@ -737,13 +737,7 @@ export function Settings() {
   return (
     <PageLayout>
           <div className="space-y-6">
-            {/* Header */}
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{t("settings.title")}</h1>
-              <p className="text-muted-foreground">{t("settings.description")}</p>
-            </div>
-
-            {/* Horizontal Tabs */}
+{/* Horizontal Tabs */}
             <SettingsTabsNavigation
               tabs={tabs}
               activeTab={activeTab}
