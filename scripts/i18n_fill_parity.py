@@ -23,6 +23,7 @@ en_extra={
 }
 
 pt={
+'frequency.onceAMonth':'Uma vez por mês','frequency.regularCleaning2Weeks':'Limpeza regular a cada 2 semanas','frequency.regularCleaning3Weeks':'Limpeza regular a cada 3 semanas','frequency.regularCleaning4Weeks':'Limpeza regular a cada 4 semanas','leads.frequency.daily':'Diariamente','leads.frequency.once_a_month':'Uma vez por mês','leads.frequency.regular_cleaning_2_weeks':'Limpeza regular a cada 2 semanas','leads.frequency.regular_cleaning_3_weeks':'Limpeza regular a cada 3 semanas','leads.frequency.regular_cleaning_4_weeks':'Limpeza regular a cada 4 semanas',
 'admin.sidebar.dashboard':'Dashboard','admin.sidebar.clients':'Empresas','admin.sidebar.auth':'Autenticação','admin.sidebar.logs':'Logs','admin.sidebar.settings':'Configurações','admin.sidebar.subscription':'Planos','admin.sidebar.support':'Suporte','admin.sidebar.exit':'Sair do Admin',
 'admin.dashboard.title':'Dashboard da Plataforma','admin.dashboard.description':'Visão geral de todas as empresas e métricas da plataforma','admin.dashboard.recent_companies':'Empresas Recentes','admin.dashboard.recent_activity':'Atividade Recente','admin.dashboard.no_companies':'Nenhuma empresa cadastrada','admin.dashboard.no_activity':'Nenhuma atividade recente',
 'admin.stats.companies':'Empresas','admin.stats.customers':'Total de Clientes','admin.stats.jobs':'Total de Serviços','admin.stats.invoices':'Total de Faturas','admin.stats.tickets':'Chamados de Suporte',
@@ -50,7 +51,6 @@ append_missing('en',en_extra)
 append_missing('pt',pt)
 append_missing('es',es)
 
-# Verify parity locally and fail if anything remains.
 sets={}
 for lang in ('en','pt','es'):
     _,s=load(lang)
