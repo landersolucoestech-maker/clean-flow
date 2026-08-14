@@ -301,9 +301,9 @@ export function Customers() {
           {t("customers.addCustomer")}
         </Button>
       }
-      contentClassName="gap-4"
+      contentClassName="gap-3"
     >
-      <div className="space-y-4">
+      <div className="space-y-3">
           {/* Customer Modal - Create */}
           <CustomerModal open={isCustomerModalOpen} onOpenChange={setIsCustomerModalOpen} mode="create" />
 
@@ -314,14 +314,14 @@ export function Customers() {
           <CustomerDetailsModal open={isDetailsModalOpen} onOpenChange={setIsDetailsModalOpen} customer={selectedCustomer} />
 
           {/* Customer workspace */}
-          <Card className="overflow-hidden rounded-md border-border/80 shadow-sm">
-            <CardHeader className="border-b border-border/70 px-5 py-3">
+          <Card className="overflow-hidden">
+            <CardHeader className="border-b border-border px-4 py-3">
               <div className="flex flex-col gap-1">
                 <CardTitle className="text-sm font-semibold">Customers</CardTitle>
                 <p className="text-xs text-muted-foreground">Search, filter and manage the customer directory.</p>
               </div>
             </CardHeader>
-            <div className="flex flex-col gap-3 border-b border-border/70 bg-muted/10 p-4 lg:flex-row lg:items-center">
+            <div className="flex flex-col gap-3 border-b border-border bg-muted/20 p-3 lg:flex-row lg:items-center">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input placeholder={searchField === "all" ? "Search by name, phone, email or address..." : searchField === "name" ? "Search by name..." : searchField === "phone" ? "Search by phone..." : searchField === "email" ? "Search by email..." : "Search by address..."} value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10" />

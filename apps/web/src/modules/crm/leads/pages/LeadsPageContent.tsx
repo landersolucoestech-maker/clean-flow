@@ -657,9 +657,9 @@ export function Leads() {
 
   return (
     <PageLayout>
-      <div className="space-y-6">
-          <Card className="overflow-hidden rounded-md border-border/80 shadow-sm">
-            <div className="border-b border-border/70 px-5 py-4">
+      <div className="space-y-3">
+          <Card className="overflow-hidden">
+            <div className="border-b border-border px-4 py-3">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <h2 className="text-base font-semibold text-foreground">Leads</h2>
@@ -673,7 +673,7 @@ export function Leads() {
             </div>
 
           {/* Filters and Search */}
-          <div className="flex flex-col gap-3 border-b border-border/70 bg-muted/10 p-4 lg:flex-row lg:flex-wrap lg:items-center">
+          <div className="flex flex-col gap-3 border-b border-border bg-muted/20 p-3 lg:flex-row lg:flex-wrap lg:items-center">
             <div className="relative min-w-0 flex-1 lg:min-w-[240px]">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input

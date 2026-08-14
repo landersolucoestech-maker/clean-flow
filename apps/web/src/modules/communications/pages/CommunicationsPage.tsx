@@ -171,19 +171,8 @@ export function Communications() {
   );
 
   return (
-    <PageLayout fullHeight headerActions={headerActions} contentClassName="gap-4 pb-4">
-      <section className="flex shrink-0 flex-col gap-1">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Unified inbox</p>
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Communications</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Manage customer conversations across every communication channel from one workspace.</p>
-          </div>
-          <div className="flex gap-2 md:hidden">{headerActions}</div>
-        </div>
-      </section>
-
-      <section className="grid min-h-0 flex-1 overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm lg:grid-cols-[190px_330px_minmax(0,1fr)] 2xl:grid-cols-[190px_350px_minmax(0,1fr)_280px]">
+    <PageLayout fullHeight headerActions={headerActions} contentClassName="gap-0 pb-4">
+      <section className="grid min-h-0 flex-1 overflow-hidden rounded-lg border border-border bg-card lg:grid-cols-[190px_330px_minmax(0,1fr)] 2xl:grid-cols-[190px_350px_minmax(0,1fr)_280px]">
         <aside className="hidden min-h-0 border-r border-border/80 bg-muted/20 lg:flex lg:flex-col">
           <div className="border-b border-border/80 p-4">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Channels</p>
@@ -197,7 +186,7 @@ export function Communications() {
                   key={item.id}
                   type="button"
                   onClick={() => setChannel(item.id)}
-                  className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm transition-colors ${active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-background hover:text-foreground"}`}
+                  className={`flex w-full items-center justify-between rounded-md px-3 py-2.5 text-left text-sm transition-colors ${active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-background hover:text-foreground"}`}
                 >
                   <span className="flex items-center gap-2"><Icon className="h-4 w-4" />{item.label}</span>
                   {!item.available && <span className={`text-[9px] font-semibold uppercase ${active ? "text-primary-foreground/70" : "text-muted-foreground"}`}>Ready</span>}
@@ -212,9 +201,9 @@ export function Communications() {
 
         <aside className="flex min-h-0 flex-col border-r border-border/80">
           <div className="space-y-3 border-b border-border/80 p-3.5">
-            <div className="flex rounded-xl bg-muted p-1">
-              <button type="button" onClick={() => setAudience("customers")} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${audience === "customers" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}><Users className="mr-1.5 inline h-3.5 w-3.5" />Customers</button>
-              <button type="button" onClick={() => setAudience("team")} className={`flex-1 rounded-lg px-3 py-2 text-xs font-semibold ${audience === "team" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}><UserCircle className="mr-1.5 inline h-3.5 w-3.5" />Team</button>
+            <div className="flex rounded-md bg-muted p-1">
+              <button type="button" onClick={() => setAudience("customers")} className={`flex-1 rounded-sm px-3 py-2 text-xs font-medium ${audience === "customers" ? "bg-card text-foreground" : "text-muted-foreground"}`}><Users className="mr-1.5 inline h-3.5 w-3.5" />Customers</button>
+              <button type="button" onClick={() => setAudience("team")} className={`flex-1 rounded-sm px-3 py-2 text-xs font-medium ${audience === "team" ? "bg-card text-foreground" : "text-muted-foreground"}`}><UserCircle className="mr-1.5 inline h-3.5 w-3.5" />Team</button>
             </div>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -250,7 +239,7 @@ export function Communications() {
                 {visibleConversations.map((conversation) => {
                   const active = selectedConversation === conversation.id;
                   return (
-                    <button key={conversation.id} type="button" onClick={() => selectConversation(conversation)} className={`mb-1 w-full rounded-xl p-3 text-left transition-colors ${active ? "bg-primary-light ring-1 ring-primary/20" : "hover:bg-muted/70"}`}>
+                    <button key={conversation.id} type="button" onClick={() => selectConversation(conversation)} className={`mb-1 w-full rounded-md p-3 text-left transition-colors ${active ? "bg-primary-light ring-1 ring-primary/20" : "hover:bg-muted/70"}`}>
                       <div className="flex items-start gap-3">
                         <Avatar className="h-9 w-9 shrink-0"><AvatarFallback className="bg-muted text-xs">{initials(conversationName(conversation))}</AvatarFallback></Avatar>
                         <div className="min-w-0 flex-1">
@@ -279,7 +268,7 @@ export function Communications() {
                 <div className="mx-auto flex w-full max-w-4xl flex-col gap-3 p-4 sm:p-6">
                   {messagesLoading ? <div className="flex h-40 items-center justify-center"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div> : messages.length === 0 ? <div className="flex h-48 flex-col items-center justify-center text-center"><MessageSquare className="mb-3 h-8 w-8 text-muted-foreground/50" /><p className="text-sm font-medium">No messages yet</p><p className="mt-1 text-xs text-muted-foreground">Send the first message to start this conversation.</p></div> : messages.map((message) => {
                     const outgoing = message.sender_type !== "customer" && message.sender_type !== "external";
-                    return <div key={message.id} className={`flex ${outgoing ? "justify-end" : "justify-start"}`}><div className={`max-w-[82%] rounded-2xl px-4 py-2.5 text-sm shadow-sm ${outgoing ? "rounded-br-md bg-primary text-primary-foreground" : "rounded-bl-md border border-border bg-card text-foreground"}`}><p className="whitespace-pre-wrap leading-5">{message.content}</p>{message.attachment_url && <a href={message.attachment_url} target="_blank" rel="noreferrer" className="mt-2 block text-xs underline">Open attachment</a>}<p className={`mt-1 text-[10px] ${outgoing ? "text-primary-foreground/70" : "text-muted-foreground"}`}>{new Date(message.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p></div></div>;
+                    return <div key={message.id} className={`flex ${outgoing ? "justify-end" : "justify-start"}`}><div className={`max-w-[82%] rounded-lg px-4 py-2.5 text-sm ${outgoing ? "rounded-br-md bg-primary text-primary-foreground" : "rounded-bl-md border border-border bg-card text-foreground"}`}><p className="whitespace-pre-wrap leading-5">{message.content}</p>{message.attachment_url && <a href={message.attachment_url} target="_blank" rel="noreferrer" className="mt-2 block text-xs underline">Open attachment</a>}<p className={`mt-1 text-[10px] ${outgoing ? "text-primary-foreground/70" : "text-muted-foreground"}`}>{new Date(message.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p></div></div>;
                   })}
                 </div>
               </ScrollArea>
@@ -290,13 +279,13 @@ export function Communications() {
               </div>
             </>
           ) : (
-            <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-6 text-center"><div className="mb-4 rounded-2xl bg-primary-light p-4 text-primary"><Inbox className="h-8 w-8" /></div><h2 className="text-lg font-semibold text-foreground">Select a conversation</h2><p className="mt-1 max-w-sm text-sm leading-6 text-muted-foreground">Choose a customer or team conversation from the unified inbox, or start a new message.</p><Button className="mt-5" onClick={() => setNewMessageOpen(true)}><Plus className="mr-2 h-4 w-4" />New message</Button></div>
+            <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-6 text-center"><div className="mb-4 rounded-lg bg-primary/10 p-4 text-primary"><Inbox className="h-8 w-8" /></div><h2 className="text-lg font-semibold text-foreground">Select a conversation</h2><p className="mt-1 max-w-sm text-sm leading-6 text-muted-foreground">Choose a customer or team conversation from the unified inbox, or start a new message.</p><Button className="mt-5" onClick={() => setNewMessageOpen(true)}><Plus className="mr-2 h-4 w-4" />New message</Button></div>
           )}
         </main>
 
         <aside className="hidden min-h-0 border-l border-border/80 bg-muted/10 2xl:flex 2xl:flex-col">
           <div className="border-b border-border/80 p-4"><p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Contact context</p></div>
-          {selected ? <div className="space-y-5 p-4"><div className="flex items-center gap-3"><Avatar className="h-11 w-11"><AvatarFallback>{initials(conversationName(selected))}</AvatarFallback></Avatar><div className="min-w-0"><p className="truncate text-sm font-semibold">{conversationName(selected)}</p><p className="truncate text-xs text-muted-foreground">{audience === "customers" ? "Customer" : "Team member"}</p></div></div><div className="space-y-3 rounded-xl border border-border bg-card p-3"><div><p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Channel</p><p className="mt-1 flex items-center gap-2 text-sm"><Smartphone className="h-3.5 w-3.5" />SMS</p></div><div><p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Contact</p><p className="mt-1 break-words text-sm">{conversationContact(selected)}</p></div><div><p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Status</p><p className="mt-1 text-sm">{selected.unread ? "Unread" : "Read"}</p></div></div><p className="text-xs leading-5 text-muted-foreground">This contextual column is ready to receive CRM details, assignment, tags and future channel metadata as integrations are enabled.</p></div> : <div className="flex flex-1 items-center justify-center p-5 text-center text-xs text-muted-foreground">Contact details appear here when a conversation is selected.</div>}
+          {selected ? <div className="space-y-5 p-4"><div className="flex items-center gap-3"><Avatar className="h-11 w-11"><AvatarFallback>{initials(conversationName(selected))}</AvatarFallback></Avatar><div className="min-w-0"><p className="truncate text-sm font-semibold">{conversationName(selected)}</p><p className="truncate text-xs text-muted-foreground">{audience === "customers" ? "Customer" : "Team member"}</p></div></div><div className="space-y-3 rounded-md border border-border bg-card p-3"><div><p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Channel</p><p className="mt-1 flex items-center gap-2 text-sm"><Smartphone className="h-3.5 w-3.5" />SMS</p></div><div><p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Contact</p><p className="mt-1 break-words text-sm">{conversationContact(selected)}</p></div><div><p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Status</p><p className="mt-1 text-sm">{selected.unread ? "Unread" : "Read"}</p></div></div><p className="text-xs leading-5 text-muted-foreground">This contextual column is ready to receive CRM details, assignment, tags and future channel metadata as integrations are enabled.</p></div> : <div className="flex flex-1 items-center justify-center p-5 text-center text-xs text-muted-foreground">Contact details appear here when a conversation is selected.</div>}
         </aside>
       </section>
 

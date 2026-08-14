@@ -409,12 +409,8 @@ export function Schedule() {
         </Button>
       }
     >
-      {/* Page Header */}
-          <div className="flex shrink-0 flex-col gap-4 border-b border-border/60 pb-4 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{t("schedule.title")}</h1>
-              <p className="text-muted-foreground">{t("schedule.subtitle")}</p>
-            </div>
+      {/* Schedule toolbar */}
+          <div className="flex shrink-0 items-center justify-end">
             <div className="flex flex-wrap items-center gap-2 lg:justify-end">
               <input
                 type="file"
@@ -483,7 +479,7 @@ export function Schedule() {
           </div>
 
           {/* Calendar */}
-          <Card className="flex-1 overflow-hidden border-border/80 shadow-sm">
+          <Card className="flex-1 overflow-hidden">
             <CardContent className="h-full p-0">
               <CalendarGrid
                 appointments={filteredAppointments}

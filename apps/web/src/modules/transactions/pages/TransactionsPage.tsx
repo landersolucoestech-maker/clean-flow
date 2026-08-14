@@ -316,13 +316,9 @@ export function Transactions() {
   );
 
   return (
-    <PageLayout headerActions={primaryActions} contentClassName="space-y-7">
-      {/* Page Header */}
-      <PageHeader title={t("transactions.title")} description="Controle financeiro e fluxo de caixa" />
-      <div className="flex flex-wrap gap-2 md:hidden">{primaryActions}</div>
-
+    <PageLayout headerActions={primaryActions} contentClassName="space-y-4">
       {/* KPI Cards - 5 cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
         {/* Total Revenue */}
         <Card className="border-border/80 shadow-sm">
           <CardContent className="p-4">
@@ -400,7 +396,7 @@ export function Transactions() {
       </div>
 
       {/* Search and Filters Row */}
-      <div className="flex flex-col gap-3 rounded-2xl border border-border/80 bg-card p-4 shadow-sm lg:flex-row lg:flex-wrap lg:items-center">
+      <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-3 lg:flex-row lg:flex-wrap lg:items-center">
         {/* Search Input */}
         <div className="relative w-full min-w-0 flex-1 lg:max-w-[360px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -494,7 +490,7 @@ export function Transactions() {
       </div>
 
       {/* Transactions Card List */}
-      <Card className="overflow-hidden border-border/80 shadow-sm">
+      <Card className="overflow-hidden">
         <CardContent className="overflow-x-auto p-0">
           {/* Table Header */}
           <div className="flex min-w-[820px] items-center gap-4 border-b border-border bg-surface-muted/80 px-6 py-3">

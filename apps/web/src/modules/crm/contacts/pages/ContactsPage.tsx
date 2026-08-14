@@ -95,7 +95,7 @@ export function Contacts() {
   return (
     <CrmPageBridge>
       <PageLayout>
-      <div className="space-y-6">
+      <div className="space-y-3">
         {!mayView ? (
           <Card className="border-destructive/40">
             <CardContent className="p-6">
@@ -113,8 +113,8 @@ export function Contacts() {
               {mayCreate && <Button size="sm" onClick={openCreate}><Plus className="mr-2 h-4 w-4" />Create Contact</Button>}
             </div>
 
-            <Card>
-              <CardContent className="p-4 sm:p-5">
+            <Card className="overflow-hidden">
+              <CardContent className="border-b border-border bg-muted/20 p-3">
                 <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_220px_180px]">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -147,7 +147,7 @@ export function Contacts() {
               </Card>
             )}
 
-            <Card>
+            <Card className="overflow-hidden">
               <CardContent className="p-0">
                 {isLoading ? (
                   <div className="space-y-3 p-5">
