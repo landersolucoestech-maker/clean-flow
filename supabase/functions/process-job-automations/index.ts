@@ -92,9 +92,7 @@ Deno.serve(async (req) => {
 
     if (jobError || !job?.company_id) return json({ error: "Job not found" }, 404);
     const companyId = job.company_id as string;
-    if (requestedCompanyId && requestedCompanyId !== companyId) {
-      return json({ error: "Cross-company automation is not allowed" }, 403);
-    }
+    if (requestedCompanyId && requestedCompanyId !== companyId) return json({ error: "Cross-company automation is not allowed" }, 403);
 
     const customer = customerFrom(job.customer as AutomationCustomer | AutomationCustomer[] | null);
     if (!customer) return json({ error: "No customer associated with job" }, 400);
@@ -111,11 +109,7 @@ Deno.serve(async (req) => {
 
     const delayValue = Number(automation.delay_value || 0);
     if (delayValue > 0) {
-      return json({
-        success: true,
-        message: "Automation has delay configured and will be processed by the scheduler",
-        delay: { value: delayValue, type: automation.delay_type },
-      });
+      return json({ success: true, message: "Automation has delay configured and will be processed by the scheduler", delay: { value: delayValue, type: automation.delay_type } });
     }
 
     const { data: settings } = await supabase
@@ -146,9 +140,7 @@ Deno.serve(async (req) => {
       .eq("sent_via", sentVia)
       .eq("status", "sent")
       .limit(1);
-    if (existing?.length) {
-      return json({ success: true, idempotent: true, automation_id: automation.id, message_sent: false });
-    }
+    if (existing?.length) return json({ success: true, idempotent: true, automation_id: automation.id, message_sent: false });
 
     const message = renderMessage(automation.message || "", {
       ClientName: customer.name || "Customer",
@@ -157,13 +149,13 @@ Deno.serve(async (req) => {
     });
 
     if (toPhone) {
-      const response = await fetch(`${supabaseUrl}/functions/v1/ringcentral-send-message`, {
+      const response = await fetch(`${supabaseUrl}/functions/v1/send-sms-message`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${serviceRoleKey}` },
         body: JSON.stringify({ company_id: companyId, to_phone: toPhone, message }),
       });
-      await response.body?.cancel();
-      if (!response.ok) return json({ error: "Failed to send SMS" }, 502);
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || !payload?.success) return json({ error: typeof payload?.error === "string" ? payload.error : "Failed to send SMS" }, 502);
     } else if (toEmail) {
       const response = await fetch(`${supabaseUrl}/functions/v1/send-email`, {
         method: "POST",
@@ -188,14 +180,7 @@ Deno.serve(async (req) => {
     });
     if (logError) console.warn("Automation sent but log persistence failed", logError);
 
-    return json({
-      success: true,
-      automation_id: automation.id,
-      message_sent: true,
-      sent_to: sentTo,
-      sent_via: sentVia,
-      language,
-    });
+    return json({ success: true, automation_id: automation.id, message_sent: true, sent_to: sentTo, sent_via: sentVia, language });
   } catch (error) {
     console.error("Error processing automation:", error);
     return json({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
