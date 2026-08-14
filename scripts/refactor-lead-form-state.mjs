@@ -52,6 +52,10 @@ for (const { path, includeReset } of files) {
       source.slice(0, resetStart) +
       '  const resetForm = () => {\n    resetLeadFormState();\n    setNewTag("");\n  };\n\n' +
       source.slice(nextStart);
+  } else {
+    const deps = "  }, [estimate, open]);";
+    if (!source.includes(deps)) throw new Error(`${path}: estimate effect dependency anchor missing`);
+    source = source.replace(deps, "  }, [estimate, open, setAddresses, setFormData, setInteractions]);");
   }
 
   if (source.includes("const [formData, setFormData] = useState(")) {
