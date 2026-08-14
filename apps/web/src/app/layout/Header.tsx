@@ -13,7 +13,7 @@ import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useLanguage } from "@/contexts/useLanguage";
 import { useCompanySettings } from "@/hooks/useCompanySettings";
 import { useCurrentStaff } from "@/hooks/useStaff";
-import { supabase } from "@/integrations/supabase/client";
+import { signOut } from "@/modules/auth/services/authService";
 import { useNavigate } from "react-router-dom";
 
 export function Header() {
@@ -23,7 +23,7 @@ export function Header() {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await signOut();
     navigate("/auth", { replace: true });
   };
 
