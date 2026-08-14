@@ -1,70 +1,13 @@
-name: Archive temporary workflows
+name: Archive temporary workflows archive
 
 on:
-  push:
-    branches: [DEV]
-    paths:
-      - .github/workflows/archive-temporary-workflows.yml
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  archive:
+  archived:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: DEV
-      - name: Archive execution-only workflows
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-
-          workflow_dir = Path('.github/workflows')
-          names = [
-            'admin-visual-token-refactor.yml',
-            'billing-sync-layout-refactor.yml',
-            'button-variants-refactor.yml',
-            'communications-visual-refactor.yml',
-            'customers-refactor.yml',
-            'dashboard-visual-refactor.yml',
-            'final-ui-residual-cleanup.yml',
-            'language-context-refactor.yml',
-            'leads-visual-refactor.yml',
-            'payroll-visual-refactor.yml',
-            'reports-visual-refactor.yml',
-            'responsive-grid-cleanup.yml',
-            'schedule-visual-refactor.yml',
-            'semantic-token-cleanup.yml',
-            'settings-visual-refactor.yml',
-            'shared-visual-refactor.yml',
-            'source-usage-audit.yml',
-            'support-visual-refactor.yml',
-            'transactions-visual-refactor.yml',
-            'ui-residual-audit.yml',
-            'ui-residual-audit-2.yml',
-            'ui-residual-audit-3.yml',
-          ]
-
-          for name in names:
-              path = workflow_dir / name
-              if not path.exists():
-                  print(f'skip missing: {name}')
-                  continue
-              display = name.removesuffix('.yml').replace('-', ' ').title()
-              path.write_text(
-                  f'''name: {display} archive\n\non:\n  workflow_dispatch:\n\npermissions:\n  contents: read\n\njobs:\n  archived:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo "{display} completed; workflow archived and read-only."\n''',
-                  encoding='utf-8',
-              )
-              print(f'archived: {name}')
-          PY
-      - name: Commit archive state
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .github/workflows
-          git diff --cached --quiet && exit 0
-          git commit -m "ci: archive temporary refactor workflows"
-          git push origin HEAD:DEV
+      - run: echo "Temporary workflow archival helper completed; workflow archived and read-only."
