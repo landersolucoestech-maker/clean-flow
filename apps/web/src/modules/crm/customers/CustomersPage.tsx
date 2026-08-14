@@ -1,10 +1,10 @@
 import { Customers as CustomersPageContent } from "./pages/CustomersPageContent";
-import { CrmLegacyPageBridge } from "../components/CrmLegacyPageBridge";
+import { CrmPageBridge } from "../components/CrmPageBridge";
 
 export function Customers() {
   return (
-    <CrmLegacyPageBridge>
+    <CrmPageBridge>
       <CustomersPageContent />
-    </CrmLegacyPageBridge>
+    </CrmPageBridge>
   );
 }
