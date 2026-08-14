@@ -325,7 +325,7 @@ export function AuditTab() {
         break;
       case "leads":
         toast.info("Navegando para Leads...");
-        navigate("/leads");
+        navigate("/crm/leads");
         break;
       case "invoices":
         setEditingInvoiceId(record.id);
