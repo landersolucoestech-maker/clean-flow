@@ -656,7 +656,14 @@ export function Leads() {
   const visitScheduled = statsByStatus["visit_scheduled"] || 0;
 
   return (
-    <PageLayout>
+    <PageLayout
+      headerActions={
+        <Button size="sm" onClick={() => setCreateModalOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          <span>{t("leads.newLead")}</span>
+        </Button>
+      }
+    >
       <div className="space-y-3">
           <Card className="overflow-hidden">
             <div className="border-b border-border px-4 py-3">
@@ -665,10 +672,6 @@ export function Leads() {
                   <h2 className="text-base font-semibold text-foreground">Leads</h2>
                   <p className="mt-0.5 text-sm text-muted-foreground">Manage the sales pipeline from first contact through conversion.</p>
                 </div>
-                <Button variant="hero" size="sm" className="flex items-center gap-2" onClick={() => setCreateModalOpen(true)}>
-                  <Plus className="h-4 w-4" />
-                  <span>{t("leads.newLead")}</span>
-                </Button>
               </div>
             </div>
 

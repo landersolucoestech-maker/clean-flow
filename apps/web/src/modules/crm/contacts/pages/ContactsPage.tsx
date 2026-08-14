@@ -94,7 +94,9 @@ export function Contacts() {
 
   return (
     <CrmPageBridge>
-      <PageLayout>
+      <PageLayout
+        headerActions={mayCreate ? <Button size="sm" onClick={openCreate}><Plus className="mr-2 h-4 w-4" />Create Contact</Button> : undefined}
+      >
       <div className="space-y-3">
         {!mayView ? (
           <Card className="border-destructive/40">
@@ -105,15 +107,14 @@ export function Contacts() {
           </Card>
         ) : (
           <>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <Card className="overflow-hidden">
+            <div className="flex flex-col gap-3 border-b border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="text-base font-semibold text-foreground">Contacts</h2>
                 <p className="mt-0.5 text-sm text-muted-foreground">Manage suppliers, partners, service providers and other business contacts.</p>
               </div>
-              {mayCreate && <Button size="sm" onClick={openCreate}><Plus className="mr-2 h-4 w-4" />Create Contact</Button>}
             </div>
 
-            <Card className="overflow-hidden">
               <CardContent className="border-b border-border bg-muted/20 p-3">
                 <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_220px_180px]">
                   <div className="relative">
@@ -136,7 +137,6 @@ export function Contacts() {
                   </Select>
                 </div>
               </CardContent>
-            </Card>
 
             {error && (
               <Card className="border-destructive/40 bg-destructive/5">
@@ -147,7 +147,6 @@ export function Contacts() {
               </Card>
             )}
 
-            <Card className="overflow-hidden">
               <CardContent className="p-0">
                 {isLoading ? (
                   <div className="space-y-3 p-5">
