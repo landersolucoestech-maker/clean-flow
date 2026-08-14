@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { loadGoogleCalendarPreferences } from "../hooks/useGoogleCalendarSync";
+import { DialpadIntegrationPanel } from "./DialpadIntegrationPanel";
 import { IntegrationsTab as IntegrationsTabContent } from "./IntegrationsTabContent";
 
 export function IntegrationsTab() {
@@ -29,5 +30,10 @@ export function IntegrationsTab() {
     );
   }
 
-  return <IntegrationsTabContent />;
+  return (
+    <div className="space-y-6">
+      <DialpadIntegrationPanel />
+      <IntegrationsTabContent />
+    </div>
+  );
 }
