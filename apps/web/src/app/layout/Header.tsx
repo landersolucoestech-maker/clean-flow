@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { User, LogOut, Settings, UserCircle, Building2 } from "lucide-react";
+import { User, LogOut, Settings, UserCircle, Building2, UsersRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -15,7 +15,7 @@ import { useLanguage } from "@/contexts/useLanguage";
 import { useCompanySettings } from "@/hooks/useCompanySettings";
 import { useCurrentStaff } from "@/hooks/useStaff";
 import { signOut } from "@/modules/auth/services/authService";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 interface HeaderProps {
   actions?: ReactNode;
@@ -26,6 +26,9 @@ export function Header({ actions }: HeaderProps) {
   const { data: companySettings } = useCompanySettings();
   const { data: currentStaff } = useCurrentStaff();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isCrm = location.pathname === "/crm" || location.pathname.startsWith("/crm/");
+  const HeaderIcon = isCrm ? UsersRound : Building2;
 
   const handleLogout = async () => {
     await signOut();
@@ -36,13 +39,22 @@ export function Header({ actions }: HeaderProps) {
     <header className="sticky top-0 z-30 flex min-h-16 items-center justify-between gap-3 border-b border-border/80 bg-card/95 px-4 py-2 backdrop-blur sm:px-6 lg:px-8">
       <div className="flex min-w-0 items-center gap-3">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-light text-primary-dark">
-          <Building2 className="h-4 w-4" />
+          <HeaderIcon className="h-4 w-4" />
         </div>
         <div className="min-w-0">
-          <p className="truncate text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Workspace</p>
-          <p className="truncate text-sm font-semibold text-foreground">
-            {companySettings?.trade_name || companySettings?.legal_name || "Clean Flow"}
-          </p>
+          {isCrm ? (
+            <>
+              <p className="truncate text-sm font-semibold text-foreground">CRM</p>
+              <p className="truncate text-[11px] text-muted-foreground">Centralize customer relationships and opportunities.</p>
+            </>
+          ) : (
+            <>
+              <p className="truncate text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Workspace</p>
+              <p className="truncate text-sm font-semibold text-foreground">
+                {companySettings?.trade_name || companySettings?.legal_name || "Clean Flow"}
+              </p>
+            </>
+          )}
         </div>
       </div>
 
