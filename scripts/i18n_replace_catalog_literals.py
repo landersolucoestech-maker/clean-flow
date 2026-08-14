@@ -1,17 +1,24 @@
 from pathlib import Path
+import json
 import re
 
 SRC = Path("apps/web/src")
-CATALOG = SRC / "app/i18n/en.ts"
+CATALOG_DIR = SRC / "app/i18n"
 TARGET_ROOTS = [SRC / "app/layout", SRC / "modules"]
 T_IMPORT = 'import { T } from "@/shared/components/i18n/T";\n'
+GENERATED_MAP = Path("i18n-generated-literal-keys.json")
 
-catalog_text = CATALOG.read_text()
-pairs = re.findall(r'^\s*"([^"]+)"\s*:\s*"((?:\\.|[^"])*)"\s*,?$', catalog_text, flags=re.M)
 value_to_keys: dict[str, list[str]] = {}
-for key, raw_value in pairs:
-    value = raw_value.replace('\\"', '"').replace('\\n', '\n').replace('\\\\', '\\')
-    value_to_keys.setdefault(value, []).append(key)
+for lang in ("en", "pt", "es"):
+    catalog_text = (CATALOG_DIR / f"{lang}.ts").read_text()
+    pairs = re.findall(r'^\s*"([^"]+)"\s*:\s*"((?:\\.|[^"])*)"\s*,?$', catalog_text, flags=re.M)
+    for key, raw_value in pairs:
+        value = raw_value.replace('\\"', '"').replace('\\n', '\n').replace('\\\\', '\\')
+        value_to_keys.setdefault(value, []).append(key)
+
+generated_source_keys: dict[str, str] = {}
+if GENERATED_MAP.exists():
+    generated_source_keys = json.loads(GENERATED_MAP.read_text())
 
 module_prefixes = [
     ("/crm/customers/", "customers."),
@@ -40,11 +47,11 @@ def choose_key(path: str, keys: list[str]) -> str:
     for prefix in priorities:
         matching = [k for k in keys if k.startswith(prefix)]
         if matching:
-            return sorted(matching, key=lambda x: (len(x), x))[0]
-    return sorted(keys, key=lambda x: (len(x), x))[0]
+            return sorted(set(matching), key=lambda x: (len(x), x))[0]
+    return sorted(set(keys), key=lambda x: (len(x), x))[0]
 
 literal_pattern = re.compile(r'>(\s*)([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ0-9 &/+().,:;!?\-#]*?)(\s*)<')
-allow = {"Clean Flow", "CLEAN", "FLOW", "CRM", "SMS", "PDF", "QuickBooks", "Nextdoor", "Facebook", "Instagram"}
+allow = {"Clean Flow", "CLEAN", "FLOW", "CRM", "SMS", "MMS", "PDF", "GPS", "QuickBooks", "Nextdoor", "Facebook", "Instagram", "AD", "G", "X", "English", "Português", "Español"}
 
 files_changed = 0
 replacements = 0
@@ -61,9 +68,10 @@ for path in sorted(set(paths)):
         global replacements
         leading, value, trailing = match.groups()
         normalized = " ".join(value.split())
-        if normalized in allow:
+        if normalized in allow or "&&" in normalized or "=>" in normalized:
             return match.group(0)
-        keys = value_to_keys.get(normalized)
+        generated_key = generated_source_keys.get(normalized)
+        keys = [generated_key] if generated_key else value_to_keys.get(normalized)
         if not keys:
             unmatched.add((path.as_posix(), normalized))
             return match.group(0)
