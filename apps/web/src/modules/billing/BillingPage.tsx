@@ -1,6 +1,5 @@
 import { useState, useMemo } from "react";
-import { Header } from "@/components/layout/Header";
-import { Sidebar } from "@/components/layout/Sidebar";
+import { PageLayout } from "@/components/layout/PageLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -305,22 +304,17 @@ export function Billing() {
   };
 
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar />
-      
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
-        
-        <main className="flex-1 overflow-y-auto p-6 space-y-6 pl-[10px] pb-0 pr-[10px] pt-px mx-[8px] py-0 my-[4px]">
+    <PageLayout>
+      <div className="space-y-6">
           {/* Page Header */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">{t("billing.title")}</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{t("billing.title")}</h1>
               <p className="text-muted-foreground">
                 {t("billing.subtitle")}
               </p>
             </div>
-            <div className="flex items-center space-x-3">
+            <div className="flex flex-wrap items-center gap-2 lg:justify-end">
               {qbConnected && (
                 <Button 
                   variant="outline" 
@@ -333,8 +327,7 @@ export function Billing() {
               )}
               <Button 
                 variant="hero" 
-                size="lg" 
-                className="flex items-center space-x-2"
+                className="flex items-center gap-2"
                 onClick={() => setCreateInvoiceOpen(true)}
               >
                 <Plus className="w-4 h-4" />
@@ -353,7 +346,7 @@ export function Billing() {
           />
 
           {/* Stats Cards - Using QuickBooks synced data */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <Card className="cursor-pointer hover:border-warning/50 transition-colors" onClick={() => setStatusFilter("sent")}>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
@@ -433,11 +426,11 @@ export function Billing() {
                     placeholder={searchField === "all" ? t("billing.searchPlaceholder") : searchField === "invoice" ? t("billing.searchByInvoice") : searchField === "customer" ? t("billing.searchByCustomer") : t("billing.searchByJobId")}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 bg-background border-border"
+                    className="pl-10"
                   />
                 </div>
                 <Select value={searchField} onValueChange={setSearchField}>
-                  <SelectTrigger className="w-[160px] bg-background border-border">
+                  <SelectTrigger className="w-full lg:w-[160px]">
                     <SelectValue placeholder="Search by" />
                   </SelectTrigger>
                   <SelectContent className="bg-popover border-border">
@@ -448,7 +441,7 @@ export function Billing() {
                   </SelectContent>
                 </Select>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-[140px] bg-background border-border">
+                  <SelectTrigger className="w-full lg:w-[140px]">
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
                   <SelectContent className="bg-popover border-border">
@@ -493,7 +486,7 @@ export function Billing() {
                     filteredInvoices.map((invoice) => (
                       <TableRow 
                         key={invoice.id} 
-                        className="cursor-pointer hover:bg-muted/50"
+                        className="cursor-pointer"
                         onClick={() => handleEditInvoice(invoice)}
                       >
                         <TableCell className="font-mono">{invoice.invoice_number}</TableCell>
@@ -601,7 +594,6 @@ export function Billing() {
               </Table>
             </CardContent>
           </Card>
-        </main>
       </div>
 
       {/* Job Creation Modal - opens after deposit invoice is marked as paid */}
@@ -671,6 +663,6 @@ export function Billing() {
           }}
         />
       )}
-    </div>
+    </PageLayout>
   );
 }

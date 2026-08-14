@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Header } from "@/components/layout/Header";
-import { Sidebar } from "@/components/layout/Sidebar";
+import { PageLayout } from "@/components/layout/PageLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -188,22 +187,17 @@ export function SyncLogs() {
   };
 
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar />
-      
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
-        
-        <main className="flex-1 overflow-y-auto p-6 space-y-6">
+    <PageLayout>
+      <div className="space-y-6">
           {/* Page Header */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Sync Logs</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Sync Logs</h1>
               <p className="text-muted-foreground">
                 Monitor QuickBooks synchronization activity and troubleshoot issues
               </p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 lg:justify-end">
               {isConnected ? (
                 <Badge className="bg-success/10 text-success border-success/20 px-3 py-1">
                   <CheckCircle className="w-3 h-3 mr-1" />
@@ -231,8 +225,8 @@ export function SyncLogs() {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <Card className="border-border/80 shadow-sm">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -244,7 +238,7 @@ export function SyncLogs() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border-border/80 shadow-sm">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -256,7 +250,7 @@ export function SyncLogs() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border-border/80 shadow-sm">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -268,7 +262,7 @@ export function SyncLogs() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border-border/80 shadow-sm">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -287,7 +281,7 @@ export function SyncLogs() {
           </div>
 
           {/* Filters and Actions */}
-          <Card>
+          <Card className="border-border/80 shadow-sm">
             <CardHeader className="pb-4">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <CardTitle className="text-lg">Sync History</CardTitle>
@@ -310,7 +304,7 @@ export function SyncLogs() {
             </CardHeader>
             <CardContent>
               {/* Filter Controls */}
-              <div className="flex flex-col md:flex-row gap-4 mb-4">
+              <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                   <Input
@@ -322,7 +316,7 @@ export function SyncLogs() {
                 </div>
                 
                 <Select value={typeFilter} onValueChange={setTypeFilter}>
-                  <SelectTrigger className="w-[150px]">
+                  <SelectTrigger className="w-full lg:w-[150px]">
                     <Filter className="w-4 h-4 mr-2" />
                     <SelectValue placeholder="Type" />
                   </SelectTrigger>
@@ -336,7 +330,7 @@ export function SyncLogs() {
                 </Select>
 
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-[150px]">
+                  <SelectTrigger className="w-full lg:w-[150px]">
                     <Filter className="w-4 h-4 mr-2" />
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
@@ -370,8 +364,7 @@ export function SyncLogs() {
                   </p>
                 </div>
               ) : (
-                <div className="rounded-md border">
-                  <Table>
+                <Table>
                     <TableHeader>
                       <TableRow>
                         <TableHead className="w-[180px]">Timestamp</TableHead>
@@ -444,12 +437,10 @@ export function SyncLogs() {
                       ))}
                     </TableBody>
                   </Table>
-                </div>
               )}
             </CardContent>
           </Card>
-        </main>
       </div>
-    </div>
+    </PageLayout>
   );
 }
