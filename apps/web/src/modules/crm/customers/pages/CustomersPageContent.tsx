@@ -327,7 +327,15 @@ export function Customers() {
     );
   }
 
-  return <PageLayout>
+  return <PageLayout
+      headerActions={
+        <Button variant="hero" size="sm" onClick={() => setIsCustomerModalOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          {t("customers.addCustomer")}
+        </Button>
+      }
+      contentClassName="space-y-7"
+    >
       <div className="space-y-6">
           {/* Page Header */}
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -337,38 +345,10 @@ export function Customers() {
                 {t("customers.subtitle")}
               </p>
             </div>
-            <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleImportExcel}
-                accept=".xlsx,.csv"
-                className="hidden"
-              />
-              <Button 
-                variant="outline" 
-                onClick={() => fileInputRef.current?.click()}
-                disabled={importCustomers.isPending}
-              >
-                {importCustomers.isPending ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    {t("common.importing")}
-                  </>
-                ) : (
-                  <>
-                    <Upload className="w-4 h-4 mr-2" />
-                    {t("common.import")}
-                  </>
-                )}
-              </Button>
-              <Button variant="outline" onClick={handleExportExcel}>
-                <Download className="w-4 h-4 mr-2" />
-                {t("common.exportExcel")}
-              </Button>
-              <Button variant="hero" className="flex items-center gap-2" onClick={() => setIsCustomerModalOpen(true)}>
-                <Plus className="w-4 h-4" />
-                <span>{t("customers.addCustomer")}</span>
+            <div className="md:hidden">
+              <Button variant="hero" onClick={() => setIsCustomerModalOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                {t("customers.addCustomer")}
               </Button>
             </div>
           </div>
@@ -478,6 +458,7 @@ export function Customers() {
                 <SelectItem value="address">Address</SelectItem>
               </SelectContent>
             </Select>
+            <input type="file" ref={fileInputRef} onChange={handleImportExcel} accept=".xlsx,.csv" className="hidden" />
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-full lg:w-[140px]">
                 <SelectValue placeholder="Status" />
@@ -488,6 +469,23 @@ export function Customers() {
                 <SelectItem value="inactive">Inactive</SelectItem>
               </SelectContent>
             </Select>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon" aria-label="Customer data tools">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => fileInputRef.current?.click()} disabled={importCustomers.isPending}>
+                  {importCustomers.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+                  {importCustomers.isPending ? t("common.importing") : t("common.import")}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => void handleExportExcel()}>
+                  <Download className="mr-2 h-4 w-4" />
+                  {t("common.exportExcel")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* Customer Directory */}

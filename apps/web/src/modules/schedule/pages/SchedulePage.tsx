@@ -8,7 +8,8 @@ import { AppointmentModal } from "@/components/schedule/AppointmentModal";
 import { FilterModal } from "@/components/schedule/FilterModal";
 import type { FilterState } from "@/components/schedule/FilterModal";
 import { useLanguage } from "@/contexts/useLanguage";
-import { Plus, Upload, Download, Loader2, Trash2, CheckSquare, X, Filter } from "lucide-react";
+import { Plus, Upload, Download, Loader2, Trash2, CheckSquare, X, Filter, MoreHorizontal } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { useCustomers } from "@/hooks/useCustomers";
 import { useCleanersAndDrivers } from "@/hooks/useStaff";
@@ -398,9 +399,18 @@ export function Schedule() {
   };
 
   return (
-    <PageLayout fullHeight contentClassName="gap-4">
+    <PageLayout
+      fullHeight
+      contentClassName="gap-4"
+      headerActions={
+        <Button variant="hero" size="sm" onClick={handleNewAppointment}>
+          <Plus className="mr-2 h-4 w-4" />
+          {t("common.createJob")}
+        </Button>
+      }
+    >
       {/* Page Header */}
-          <div className="mb-4 flex shrink-0 flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex shrink-0 flex-col gap-4 border-b border-border/60 pb-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{t("schedule.title")}</h1>
               <p className="text-muted-foreground">{t("schedule.subtitle")}</p>
@@ -445,28 +455,27 @@ export function Schedule() {
                     {activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
                   </Button>
 
-                  <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={importJobs.isPending}>
-                    {importJobs.isPending ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        {t("common.importing")}
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="w-4 h-4 mr-2" />
-                        {t("common.import")}
-                      </>
-                    )}
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="icon" aria-label="Schedule data tools">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => fileInputRef.current?.click()} disabled={importJobs.isPending}>
+                        {importJobs.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+                        {importJobs.isPending ? t("common.importing") : t("common.import")}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => void handleExportExcel()} disabled={isLoading}>
+                        <Download className="mr-2 h-4 w-4" />
+                        {t("common.exportExcel")}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
 
-                  <Button variant="outline" onClick={handleExportExcel} disabled={isLoading}>
-                    <Download className="w-4 h-4 mr-2" />
-                    {t("common.exportExcel")}
-                  </Button>
-
-                  <Button variant="hero" className="flex items-center gap-2" onClick={handleNewAppointment}>
-                    <Plus className="w-4 h-4" />
-                    <span>{t("common.createJob")}</span>
+                  <Button variant="hero" className="md:hidden" onClick={handleNewAppointment}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    {t("common.createJob")}
                   </Button>
                 </>
               )}

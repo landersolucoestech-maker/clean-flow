@@ -302,29 +302,24 @@ export function Transactions() {
     );
   }
 
+  const primaryActions = (
+    <>
+      <Button variant="outline" size="sm" onClick={() => navigate("/rules")}>
+        <Settings2 className="mr-2 h-4 w-4" />
+        Regras
+      </Button>
+      <Button size="sm" onClick={() => setShowNewTransactionModal(true)}>
+        <Plus className="mr-2 h-4 w-4" />
+        Nova Transação
+      </Button>
+    </>
+  );
+
   return (
-    <PageLayout>
+    <PageLayout headerActions={primaryActions} contentClassName="space-y-7">
       {/* Page Header */}
-      <PageHeader
-        title={t("transactions.title")}
-        description="Controle financeiro e fluxo de caixa"
-        actions={
-          <>
-            <Button variant="outline" size="sm" onClick={() => navigate("/rules")}>
-              <Settings2 className="w-4 h-4 mr-2" />
-              Regras
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleExport} disabled={filteredTransactions.length === 0}>
-              <Download className="w-4 h-4 mr-2" />
-              Exportar
-            </Button>
-            <Button onClick={() => setShowNewTransactionModal(true)}>
-              <Plus className="w-4 h-4 mr-2" />
-              Nova Transação
-            </Button>
-          </>
-        }
-      />
+      <PageHeader title={t("transactions.title")} description="Controle financeiro e fluxo de caixa" />
+      <div className="flex flex-wrap gap-2 md:hidden">{primaryActions}</div>
 
       {/* KPI Cards - 5 cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
@@ -492,6 +487,10 @@ export function Transactions() {
         <FilterSelect value={typeFilter} onValueChange={setTypeFilter} options={typeOptions} className="w-full sm:w-[140px]" />
         <FilterSelect value={statusFilter} onValueChange={setStatusFilter} options={statusOptions} className="w-full sm:w-[140px]" />
         <FilterSelect value={categoryFilter} onValueChange={setCategoryFilter} options={categoryOptions} className="w-full sm:w-[160px]" />
+        <Button variant="outline" size="sm" className="lg:ml-auto" onClick={handleExport} disabled={filteredTransactions.length === 0}>
+          <Download className="mr-2 h-4 w-4" />
+          Exportar dados
+        </Button>
       </div>
 
       {/* Transactions Card List */}
