@@ -28,6 +28,7 @@ const AdminAuth = lazy(() => import("../modules/admin/pages/AdminAuth").then(({ 
 const AdminLogs = lazy(() => import("../modules/admin/pages/AdminLogs").then(({ AdminLogs }) => ({ default: AdminLogs })));
 const AdminSupport = lazy(() => import("../modules/admin/pages/AdminSupport").then(({ AdminSupport }) => ({ default: AdminSupport })));
 const RingCentralCallback = lazy(() => import("../modules/communications/RingCentralCallbackPage"));
+const DialpadCallback = lazy(() => import("../modules/communications/DialpadCallbackPage"));
 const GoogleCallback = lazy(() => import("../modules/settings/GoogleCallbackPage"));
 const NotFound = lazy(() => import("./NotFoundPage"));
 const Setup = lazy(() => import("../modules/auth/SetupPage").then(({ Setup }) => ({ default: Setup })));
@@ -70,6 +71,7 @@ const App = () => (
                 <Route path="/leads" element={<AuthenticatedRoute allowedRoles={OPERATIONAL_ROLES}><Leads /></AuthenticatedRoute>} />
                 <Route path="/sync-logs" element={<AuthenticatedRoute allowedRoles={FINANCE_ROLES}><SyncLogs /></AuthenticatedRoute>} />
                 <Route path="/integrations/ringcentral/callback" element={<RingCentralCallback />} />
+                <Route path="/integrations/dialpad/callback" element={<DialpadCallback />} />
                 <Route path="/integrations/google/callback" element={<GoogleCallback />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
