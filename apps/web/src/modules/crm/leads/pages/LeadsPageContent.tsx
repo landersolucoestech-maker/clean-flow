@@ -658,51 +658,22 @@ export function Leads() {
   return (
     <PageLayout>
       <div className="space-y-6">
-          {/* Page Header */}
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{t("leads.title")}</h1>
-              <p className="text-muted-foreground">
-                {t("leads.subtitle")}
-              </p>
+          <Card className="overflow-hidden rounded-md border-border/80 shadow-sm">
+            <div className="border-b border-border/70 px-5 py-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-base font-semibold text-foreground">Leads</h2>
+                  <p className="mt-0.5 text-sm text-muted-foreground">Manage the sales pipeline from first contact through conversion.</p>
+                </div>
+                <Button variant="hero" size="sm" className="flex items-center gap-2" onClick={() => setCreateModalOpen(true)}>
+                  <Plus className="h-4 w-4" />
+                  <span>{t("leads.newLead")}</span>
+                </Button>
+              </div>
             </div>
-            <Button 
-              variant="hero" 
-              className="flex items-center gap-2"
-              onClick={() => setCreateModalOpen(true)}
-            >
-              <Plus className="w-4 h-4" />
-              <span>{t("leads.newLead")}</span>
-            </Button>
-          </div>
-
-
-          {/* Pipeline Status Cards */}
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
-            {LEAD_STATUSES.map(status => (
-              <Card 
-                key={status.value}
-                className={cn(
-                  "cursor-pointer border-border/80 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md",
-                  statusFilter === status.value && "ring-2 ring-primary"
-                )}
-                onClick={() => setStatusFilter(statusFilter === status.value ? "all" : status.value)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-medium text-muted-foreground truncate">{t(`leads.status.${status.value}`) || status.label}</p>
-                      <p className="text-xl font-bold">{statsByStatus[status.value] || 0}</p>
-                    </div>
-                    <div className={cn("h-3 w-3 rounded-full ring-4 ring-background", status.color)} />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
 
           {/* Filters and Search */}
-          <div className="flex flex-col gap-3 rounded-2xl border border-border/80 bg-card p-4 shadow-sm lg:flex-row lg:flex-wrap lg:items-center">
+          <div className="flex flex-col gap-3 border-b border-border/70 bg-muted/10 p-4 lg:flex-row lg:flex-wrap lg:items-center">
             <div className="relative min-w-0 flex-1 lg:min-w-[240px]">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
@@ -750,7 +721,6 @@ export function Leads() {
 
 
           {/* Leads Table */}
-          <Card className="overflow-hidden border-border/80 shadow-sm">
             <CardContent className="p-0">
               {isLoading ? (
                 <div className="flex items-center justify-center h-64">

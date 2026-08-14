@@ -368,24 +368,6 @@ export function Customers() {
             </DropdownMenu>
             </div>
 
-            <CardHeader className="flex flex-row items-center justify-between gap-3 border-b border-border/60 px-5 py-3">
-              <CardTitle className="text-sm font-semibold">{t("customers.contactList")}</CardTitle>
-              {selectedIds.size > 0 && (
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={handleBulkDelete}
-                  disabled={bulkDeleteCustomers.isPending}
-                >
-                  {bulkDeleteCustomers.isPending ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <Trash2 className="w-4 h-4 mr-2" />
-                  )}
-                  {t("common.deleteSelected")} ({selectedIds.size})
-                </Button>
-              )}
-            </CardHeader>
             <CardContent className="p-0">
               {viewMode === "table" ? (/* Customer Table */
             <Table>
