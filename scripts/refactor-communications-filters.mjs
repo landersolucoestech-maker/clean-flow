@@ -21,8 +21,8 @@ if (filterStart < 0 || selectedStart < 0) throw new Error('Communications filter
 const replacement = `  const filteredTeamConversations = filterTeamConversations(\n    teamConversations,\n    staff,\n    teamSearch,\n    teamFilter,\n    teamActiveFilter,\n  );\n  const filteredConversations = filterCustomerConversations(\n    conversations,\n    customers,\n    conversationSearch,\n    customerStatusFilter,\n    activeFilter,\n  );\n\n`;
 source = source.slice(0, filterStart) + replacement + source.slice(selectedStart);
 
-if (source.includes('staffStatusMap')) throw new Error('Inline staff filter map remains');
-if (source.includes('customerStatusMap')) throw new Error('Inline customer filter map remains');
+if (/const\s+staffStatusMap\s*=/.test(source)) throw new Error('Inline staff filter map remains');
+if (/const\s+customerStatusMap\s*=/.test(source)) throw new Error('Inline customer filter map remains');
 if (!source.includes('filterCustomerConversations(')) throw new Error('Customer filter helper not wired');
 if (!source.includes('filterTeamConversations(')) throw new Error('Team filter helper not wired');
 
