@@ -1,6 +1,6 @@
 name: Frontend Audit Fixes
 
-# Retry Communications filter extraction with structural guards.
+# Retry Communications filter extraction preserving presentation status data.
 on:
   push:
     branches: [dev]
