@@ -1,0 +1,391 @@
+ATTR | apps/web/src/modules/admin/pages/AdminAuth.tsx | placeholder | admin@platform.com
+ATTR | apps/web/src/modules/admin/pages/AdminClients.tsx | placeholder | Buscar por nome ou ID...
+ATTR | apps/web/src/modules/admin/pages/AdminLogs.tsx | placeholder | Buscar...
+ATTR | apps/web/src/modules/admin/pages/AdminLogs.tsx | placeholder | Todos os tipos
+ATTR | apps/web/src/modules/admin/pages/AdminSupport.tsx | aria-label | Ticket actions
+ATTR | apps/web/src/modules/admin/pages/AdminSupport.tsx | placeholder | Buscar por ID, título ou usuário...
+ATTR | apps/web/src/modules/admin/pages/AdminSupport.tsx | placeholder | Digite sua resposta...
+ATTR | apps/web/src/modules/admin/pages/AdminSupport.tsx | placeholder | Todas Prioridades
+ATTR | apps/web/src/modules/admin/pages/AdminSupport.tsx | placeholder | Todos os Status
+ATTR | apps/web/src/modules/auth/guards/RouteGuards.tsx | aria-label | Loading session
+ATTR | apps/web/src/modules/auth/pages/AuthPage.tsx | placeholder | you@company.com
+ATTR | apps/web/src/modules/billing/components/EditInvoiceModal.tsx | placeholder | INV-001
+ATTR | apps/web/src/modules/billing/components/EditInvoiceModal.tsx | placeholder | JOB-001
+ATTR | apps/web/src/modules/billing/pages/BillingPage.tsx | aria-label | Invoice actions
+ATTR | apps/web/src/modules/billing/pages/BillingPage.tsx | placeholder | Search by
+ATTR | apps/web/src/modules/billing/pages/BillingPage.tsx | placeholder | Status
+ATTR | apps/web/src/modules/communications/components/BroadcastModal.tsx | placeholder | Type your message...
+ATTR | apps/web/src/modules/communications/components/NewMessageModal.tsx | placeholder | Search customers...
+ATTR | apps/web/src/modules/communications/components/NewMessageModal.tsx | placeholder | Search team members...
+ATTR | apps/web/src/modules/communications/components/NewMessageModal.tsx | placeholder | Type your message...
+ATTR | apps/web/src/modules/communications/pages/CommunicationsPage.tsx | aria-label | Archive conversation
+ATTR | apps/web/src/modules/communications/pages/CommunicationsPage.tsx | aria-label | Attach file
+ATTR | apps/web/src/modules/communications/pages/CommunicationsPage.tsx | aria-label | Send message
+ATTR | apps/web/src/modules/communications/pages/CommunicationsPage.tsx | placeholder | Search conversations...
+ATTR | apps/web/src/modules/communications/pages/CommunicationsPage.tsx | placeholder | Write a message...
+ATTR | apps/web/src/modules/crm/components/CrmTabs.tsx | aria-label | CRM navigation
+ATTR | apps/web/src/modules/crm/contacts/pages/ContactsPage.tsx | aria-label | Contact actions
+ATTR | apps/web/src/modules/crm/contacts/pages/ContactsPage.tsx | placeholder | Contact Type
+ATTR | apps/web/src/modules/crm/contacts/pages/ContactsPage.tsx | placeholder | Search contacts...
+ATTR | apps/web/src/modules/crm/contacts/pages/ContactsPage.tsx | placeholder | Status
+ATTR | apps/web/src/modules/crm/customers/components/AddressAutocompleteInput.tsx | placeholder | Start typing an address...
+ATTR | apps/web/src/modules/crm/customers/components/CustomerChatTab.tsx | aria-label | Send message
+ATTR | apps/web/src/modules/crm/customers/components/CustomerChatTab.tsx | placeholder | Type a message...
+ATTR | apps/web/src/modules/crm/customers/components/CustomerModal.tsx | placeholder | 123 Main St
+ATTR | apps/web/src/modules/crm/customers/components/CustomerModal.tsx | placeholder | Any special billing instructions, preferred contact times, etc.
+ATTR | apps/web/src/modules/crm/customers/components/CustomerModal.tsx | placeholder | Apt 4B
+ATTR | apps/web/src/modules/crm/customers/components/CustomerModal.tsx | placeholder | Customer preferences, special requests, warnings...
+ATTR | apps/web/src/modules/crm/customers/components/CustomerModal.tsx | placeholder | Doe
+ATTR | apps/web/src/modules/crm/customers/components/CustomerModal.tsx | placeholder | Gate code, parking instructions, special access...
+ATTR | apps/web/src/modules/crm/customers/components/CustomerModal.tsx | placeholder | Home, Business...
+ATTR | apps/web/src/modules/crm/customers/components/CustomerModal.tsx | placeholder | John
+ATTR | apps/web/src/modules/crm/customers/components/CustomerModal.tsx | placeholder | NY
+ATTR | apps/web/src/modules/crm/customers/components/CustomerModal.tsx | placeholder | New York
+ATTR | apps/web/src/modules/crm/customers/components/CustomerModal.tsx | placeholder | Select relationship
+ATTR | apps/web/src/modules/crm/customers/components/CustomerModal.tsx | placeholder | billing@email.com
+ATTR | apps/web/src/modules/crm/customers/components/CustomerModal.tsx | placeholder | e.g., Ana Smith
+ATTR | apps/web/src/modules/crm/customers/components/CustomerModal.tsx | placeholder | e.g., Moved away, No longer needs service, Budget constraints...
+ATTR | apps/web/src/modules/crm/customers/components/CustomerModal.tsx | placeholder | john.doe@email.com
+ATTR | apps/web/src/modules/crm/customers/pages/CustomersPageContent.tsx | aria-label | Customer actions
+ATTR | apps/web/src/modules/crm/customers/pages/CustomersPageContent.tsx | aria-label | Customer data tools
+ATTR | apps/web/src/modules/crm/customers/pages/CustomersPageContent.tsx | aria-label | Select all
+ATTR | apps/web/src/modules/crm/customers/pages/CustomersPageContent.tsx | placeholder | Search by
+ATTR | apps/web/src/modules/crm/customers/pages/CustomersPageContent.tsx | placeholder | Status
+ATTR | apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx | placeholder | Add custom tag...
+ATTR | apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx | placeholder | City
+ATTR | apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx | placeholder | Company or business name
+ATTR | apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx | placeholder | Enter contact name
+ATTR | apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx | placeholder | Enter referrer name
+ATTR | apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx | placeholder | Gate code, parking instructions, etc.
+ATTR | apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx | placeholder | ST
+ATTR | apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx | placeholder | Select a customer
+ATTR | apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx | placeholder | Select frequency
+ATTR | apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx | placeholder | Select property
+ATTR | apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx | placeholder | Select source
+ATTR | apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx | placeholder | Select stage
+ATTR | apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx | placeholder | Select type
+ATTR | apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx | placeholder | Start typing...
+ATTR | apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx | placeholder | customer@email.com
+ATTR | apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx | placeholder | e.g., 2
+ATTR | apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx | placeholder | e.g., 2000
+ATTR | apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx | placeholder | e.g., 3
+ATTR | apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx | placeholder | e.g., Home
+ATTR | apps/web/src/modules/crm/leads/components/EditLeadModal.tsx | placeholder | Add custom tag...
+ATTR | apps/web/src/modules/crm/leads/components/EditLeadModal.tsx | placeholder | City
+ATTR | apps/web/src/modules/crm/leads/components/EditLeadModal.tsx | placeholder | Company or business name
+ATTR | apps/web/src/modules/crm/leads/components/EditLeadModal.tsx | placeholder | Enter contact name
+ATTR | apps/web/src/modules/crm/leads/components/EditLeadModal.tsx | placeholder | Enter referrer name
+ATTR | apps/web/src/modules/crm/leads/components/EditLeadModal.tsx | placeholder | Gate code, parking instructions, etc.
+ATTR | apps/web/src/modules/crm/leads/components/EditLeadModal.tsx | placeholder | ST
+ATTR | apps/web/src/modules/crm/leads/components/EditLeadModal.tsx | placeholder | Select a customer
+ATTR | apps/web/src/modules/crm/leads/components/EditLeadModal.tsx | placeholder | Select frequency
+ATTR | apps/web/src/modules/crm/leads/components/EditLeadModal.tsx | placeholder | Select property
+ATTR | apps/web/src/modules/crm/leads/components/EditLeadModal.tsx | placeholder | Select source
+ATTR | apps/web/src/modules/crm/leads/components/EditLeadModal.tsx | placeholder | Select stage
+ATTR | apps/web/src/modules/crm/leads/components/EditLeadModal.tsx | placeholder | Select type
+ATTR | apps/web/src/modules/crm/leads/components/EditLeadModal.tsx | placeholder | Start typing...
+ATTR | apps/web/src/modules/crm/leads/components/EditLeadModal.tsx | placeholder | customer@email.com
+ATTR | apps/web/src/modules/crm/leads/components/EditLeadModal.tsx | placeholder | e.g., 2
+ATTR | apps/web/src/modules/crm/leads/components/EditLeadModal.tsx | placeholder | e.g., 2000
+ATTR | apps/web/src/modules/crm/leads/components/EditLeadModal.tsx | placeholder | e.g., 3
+ATTR | apps/web/src/modules/crm/leads/components/EditLeadModal.tsx | placeholder | e.g., Home
+ATTR | apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx | placeholder | Descreva a interação...
+ATTR | apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx | placeholder | Selecione...
+ATTR | apps/web/src/modules/crm/leads/components/LeadPreferencesHistorySections.tsx | placeholder | Describe the interaction...
+ATTR | apps/web/src/modules/crm/leads/components/LeadPreferencesHistorySections.tsx | placeholder | Select days
+ATTR | apps/web/src/modules/crm/leads/components/LeadPreferencesHistorySections.tsx | placeholder | Select time
+ATTR | apps/web/src/modules/crm/leads/components/LeadPreferencesHistorySections.tsx | placeholder | Select type
+ATTR | apps/web/src/modules/crm/leads/pages/LeadsPageContent.tsx | aria-label | Lead actions
+ATTR | apps/web/src/modules/payroll/components/CalculatePayrollModal.tsx | placeholder | Descrição (opcional)
+ATTR | apps/web/src/modules/payroll/components/CalculatePayrollModal.tsx | placeholder | Tipo de bônus
+ATTR | apps/web/src/modules/payroll/components/CalculatePayrollModal.tsx | placeholder | Valor
+ATTR | apps/web/src/modules/payroll/components/CalculatePayrollModal.tsx | title | Configurar regras
+ATTR | apps/web/src/modules/payroll/pages/PayrollPage.tsx | aria-label | Apply payroll filter
+ATTR | apps/web/src/modules/payroll/pages/PayrollPage.tsx | aria-label | Clear payroll filter
+ATTR | apps/web/src/modules/payroll/pages/PayrollPage.tsx | aria-label | Payroll actions
+ATTR | apps/web/src/modules/reports/components/AnalyticsTab.tsx | title | Agendamentos Cancelados
+ATTR | apps/web/src/modules/reports/components/AnalyticsTab.tsx | title | Agendamentos Concluídos
+ATTR | apps/web/src/modules/reports/components/AnalyticsTab.tsx | title | Agendamentos Criados
+ATTR | apps/web/src/modules/reports/components/AnalyticsTab.tsx | title | Cancellations
+ATTR | apps/web/src/modules/reports/components/AnalyticsTab.tsx | title | Completion Time (Avg)
+ATTR | apps/web/src/modules/reports/components/AnalyticsTab.tsx | title | Conversas Arquivadas
+ATTR | apps/web/src/modules/reports/components/AnalyticsTab.tsx | title | Custo vs Receita
+ATTR | apps/web/src/modules/reports/components/AnalyticsTab.tsx | title | Fixed Expenses
+ATTR | apps/web/src/modules/reports/components/AnalyticsTab.tsx | title | Funcionários Ativos
+ATTR | apps/web/src/modules/reports/components/AnalyticsTab.tsx | title | Funcionários Inativos
+ATTR | apps/web/src/modules/reports/components/AnalyticsTab.tsx | title | In Progress
+ATTR | apps/web/src/modules/reports/components/AnalyticsTab.tsx | title | Jobs Completed
+ATTR | apps/web/src/modules/reports/components/AnalyticsTab.tsx | title | Jobs por Funcionário
+ATTR | apps/web/src/modules/reports/components/AnalyticsTab.tsx | title | Mensagens Não Lidas
+ATTR | apps/web/src/modules/reports/components/AnalyticsTab.tsx | title | Net Profit
+ATTR | apps/web/src/modules/reports/components/AnalyticsTab.tsx | title | New Customers
+ATTR | apps/web/src/modules/reports/components/AnalyticsTab.tsx | title | On-Time Completion
+ATTR | apps/web/src/modules/reports/components/AnalyticsTab.tsx | title | Payroll (Total Pago)
+ATTR | apps/web/src/modules/reports/components/AnalyticsTab.tsx | title | Payroll Pendente
+ATTR | apps/web/src/modules/reports/components/AnalyticsTab.tsx | title | Payroll por Funcionário
+ATTR | apps/web/src/modules/reports/components/AnalyticsTab.tsx | title | Profit Margin
+ATTR | apps/web/src/modules/reports/components/AnalyticsTab.tsx | title | Recurring Customers
+ATTR | apps/web/src/modules/reports/components/AnalyticsTab.tsx | title | Revenue
+ATTR | apps/web/src/modules/reports/components/AnalyticsTab.tsx | title | Revenue per Job
+ATTR | apps/web/src/modules/reports/components/AnalyticsTab.tsx | title | Revenue por Funcionário
+ATTR | apps/web/src/modules/reports/components/AnalyticsTab.tsx | title | Scheduled Jobs
+ATTR | apps/web/src/modules/reports/components/AnalyticsTab.tsx | title | Taxa de Conversão
+ATTR | apps/web/src/modules/reports/components/AnalyticsTab.tsx | title | Tips
+ATTR | apps/web/src/modules/reports/components/AnalyticsTab.tsx | title | Total Customers
+ATTR | apps/web/src/modules/reports/components/AnalyticsTab.tsx | title | Total Expenses
+ATTR | apps/web/src/modules/reports/components/AnalyticsTab.tsx | title | Total de Conversas
+ATTR | apps/web/src/modules/reports/components/AnalyticsTab.tsx | title | Total de Funcionários
+ATTR | apps/web/src/modules/reports/components/AnalyticsTab.tsx | title | Variable Expenses
+ATTR | apps/web/src/modules/schedule/calendar/CalendarGrid.tsx | aria-label | Next week
+ATTR | apps/web/src/modules/schedule/calendar/CalendarGrid.tsx | aria-label | Previous week
+ATTR | apps/web/src/modules/schedule/calendar/CalendarGrid.tsx | title | Edit Job
+ATTR | apps/web/src/modules/schedule/components/AppointmentBillingSummary.tsx | aria-label | Billing summary
+ATTR | apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx | aria-label | Appointment summary
+ATTR | apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx | aria-label | GPS Status Tracking
+ATTR | apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx | placeholder | Enter additional note here...
+ATTR | apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx | placeholder | Enter customer feedback here...
+ATTR | apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx | placeholder | Enter your note here...
+ATTR | apps/web/src/modules/schedule/components/AppointmentManualTimeEditor.tsx | aria-label | Job timeline
+ATTR | apps/web/src/modules/schedule/components/AppointmentManualTimeEditor.tsx | placeholder | e.g. 7:30 AM
+ATTR | apps/web/src/modules/schedule/components/AppointmentModal.tsx | placeholder | e.g., $150
+ATTR | apps/web/src/modules/schedule/components/AppointmentModal.tsx | placeholder | e.g., 2h, 3h 30m
+ATTR | apps/web/src/modules/schedule/components/AppointmentNotesSections.tsx | aria-label | Additional notes
+ATTR | apps/web/src/modules/schedule/components/AppointmentNotesSections.tsx | aria-label | Delete entry
+ATTR | apps/web/src/modules/schedule/components/AppointmentNotesSections.tsx | aria-label | Feedback
+ATTR | apps/web/src/modules/schedule/components/AppointmentNotesSections.tsx | aria-label | Job notes
+ATTR | apps/web/src/modules/schedule/components/AppointmentNotesSections.tsx | title | Additional Notes
+ATTR | apps/web/src/modules/schedule/components/AppointmentNotesSections.tsx | title | Feedback
+ATTR | apps/web/src/modules/schedule/components/AppointmentNotesSections.tsx | title | Job Notes
+ATTR | apps/web/src/modules/schedule/components/InvoiceModal.tsx | aria-label | Download invoice
+ATTR | apps/web/src/modules/schedule/components/InvoiceModal.tsx | aria-label | Print invoice
+ATTR | apps/web/src/modules/schedule/components/InvoiceModal.tsx | placeholder | Item description
+ATTR | apps/web/src/modules/schedule/components/InvoiceModal.tsx | placeholder | Qty
+ATTR | apps/web/src/modules/schedule/components/InvoiceModal.tsx | placeholder | Rate
+ATTR | apps/web/src/modules/schedule/components/InvoiceModal.tsx | title | Auto-generated invoice number
+ATTR | apps/web/src/modules/schedule/components/JobStatusTracker.tsx | alt | GPS trajectory map
+ATTR | apps/web/src/modules/schedule/components/ReviewRequestPreviewModal.tsx | placeholder | Enter your review request message...
+ATTR | apps/web/src/modules/schedule/pages/SchedulePage.tsx | aria-label | Schedule data tools
+ATTR | apps/web/src/modules/settings/components/AutomationsTab.tsx | placeholder | Hi {ClientName}!&#10;&#10;Your message here...&#10;&#10;{CompanyName}
+ATTR | apps/web/src/modules/settings/components/AutomationsTab.tsx | placeholder | Select condition
+ATTR | apps/web/src/modules/settings/components/AutomationsTab.tsx | placeholder | Select condition (optional)
+ATTR | apps/web/src/modules/settings/components/AutomationsTab.tsx | placeholder | Select trigger
+ATTR | apps/web/src/modules/settings/components/AutomationsTab.tsx | placeholder | e.g., On Our Way
+ATTR | apps/web/src/modules/settings/components/DialpadIntegrationPanel.tsx | aria-label | Copy Dialpad redirect URI
+ATTR | apps/web/src/modules/settings/components/IntegrationsTabContent.tsx | placeholder | Selecione um calendário
+ATTR | apps/web/src/modules/settings/components/SecuritySettingsSection.tsx | aria-label | Two-factor authentication is managed in Supabase
+ATTR | apps/web/src/modules/settings/components/TeamUserModal.tsx | aria-label | Delete team member
+ATTR | apps/web/src/modules/settings/components/TeamUserModal.tsx | placeholder | Enter QuickBooks vendor or employee ID
+ATTR | apps/web/src/modules/settings/components/TeamUserModal.tsx | placeholder | Enter email address
+ATTR | apps/web/src/modules/settings/components/TeamUserModal.tsx | placeholder | Enter email or phone for Zelle
+ATTR | apps/web/src/modules/settings/components/TeamUserModal.tsx | placeholder | Enter full name
+ATTR | apps/web/src/modules/settings/components/TeamUserModal.tsx | placeholder | Select payment method
+ATTR | apps/web/src/modules/settings/components/TeamUserModal.tsx | placeholder | Select role
+ATTR | apps/web/src/modules/settings/components/TeamUserModal.tsx | placeholder | Select team
+ATTR | apps/web/src/modules/settings/pages/SettingsPage.tsx | placeholder | @username
+ATTR | apps/web/src/modules/settings/pages/SettingsPage.tsx | placeholder | email@example.com or phone
+ATTR | apps/web/src/modules/settings/pages/SyncLogsPage.tsx | placeholder | Search logs...
+ATTR | apps/web/src/modules/settings/pages/SyncLogsPage.tsx | placeholder | Status
+ATTR | apps/web/src/modules/settings/pages/SyncLogsPage.tsx | placeholder | Type
+ATTR | apps/web/src/modules/transactions/components/TransactionModal.tsx | placeholder | Digite o nome do serviço
+ATTR | apps/web/src/modules/transactions/components/TransactionModal.tsx | placeholder | Nome da transação
+ATTR | apps/web/src/modules/transactions/components/TransactionModal.tsx | placeholder | Selecione o status
+ATTR | apps/web/src/modules/transactions/components/TransactionModal.tsx | placeholder | Selecione o tipo
+ATTR | apps/web/src/modules/transactions/components/TransactionModal.tsx | placeholder | Selecione o tipo de serviço
+ATTR | apps/web/src/modules/transactions/pages/RulesPage.tsx | placeholder | Buscar regras...
+ATTR | apps/web/src/modules/transactions/pages/RulesPage.tsx | placeholder | Ex: Combustível
+ATTR | apps/web/src/modules/transactions/pages/RulesPage.tsx | placeholder | Ex: Descrição contém
+ATTR | apps/web/src/modules/transactions/pages/RulesPage.tsx | placeholder | Ex: Transporte
+ATTR | apps/web/src/modules/transactions/pages/RulesPage.tsx | placeholder | Selecione o tipo
+ATTR | apps/web/src/modules/transactions/pages/RulesPage.tsx | title | Regras Ativas
+ATTR | apps/web/src/modules/transactions/pages/RulesPage.tsx | title | Regras Inativas
+ATTR | apps/web/src/modules/transactions/pages/RulesPage.tsx | title | Regras de Categorização
+ATTR | apps/web/src/modules/transactions/pages/RulesPage.tsx | title | Total de Regras
+ATTR | apps/web/src/modules/transactions/pages/TransactionsPage.tsx | placeholder | Buscar transações...
+ATTR | apps/web/src/shared/components/ActionDropdown.tsx | aria-label | Actions
+ATTR | apps/web/src/shared/components/PageHeader.tsx | aria-label | Go back
+ATTR | apps/web/src/shared/components/SearchInput.tsx | placeholder | Buscar...
+ATTR | apps/web/src/shared/components/ui/date-picker.tsx | placeholder | Pick a date
+TOAST | apps/web/src/modules/admin/pages/AdminAuth.tsx | Access Denied
+TOAST | apps/web/src/modules/admin/pages/AdminAuth.tsx | Welcome, Admin!
+TOAST | apps/web/src/modules/admin/pages/AdminAuth.tsx | You have successfully logged in to the admin panel.
+TOAST | apps/web/src/modules/auth/pages/AuthPage.tsx | Check your email
+TOAST | apps/web/src/modules/auth/pages/AuthPage.tsx | Email required
+TOAST | apps/web/src/modules/auth/pages/AuthPage.tsx | Enter your login email first.
+TOAST | apps/web/src/modules/auth/pages/AuthPage.tsx | Error
+TOAST | apps/web/src/modules/auth/pages/AuthPage.tsx | If the account exists, a recovery link was sent.
+TOAST | apps/web/src/modules/auth/pages/AuthPage.tsx | Unable to request reset
+TOAST | apps/web/src/modules/auth/pages/AuthPage.tsx | Welcome back!
+TOAST | apps/web/src/modules/auth/pages/AuthPage.tsx | You have successfully logged in.
+TOAST | apps/web/src/modules/auth/pages/SetPasswordPage.tsx | Password configured successfully.
+TOAST | apps/web/src/modules/auth/pages/SetPasswordPage.tsx | Passwords do not match.
+TOAST | apps/web/src/modules/auth/pages/SetPasswordPage.tsx | Use at least 12 characters.
+TOAST | apps/web/src/modules/auth/pages/SetupPage.tsx | Administrador inicial configurado.
+TOAST | apps/web/src/modules/auth/pages/SetupPage.tsx | Informe o nome da empresa.
+TOAST | apps/web/src/modules/billing/components/EditInvoiceModal.tsx | Erro ao salvar invoice
+TOAST | apps/web/src/modules/billing/components/EditInvoiceModal.tsx | Falha ao sincronizar com QuickBooks
+TOAST | apps/web/src/modules/billing/components/EditInvoiceModal.tsx | QuickBooks não conectado
+TOAST | apps/web/src/modules/billing/components/EditInvoiceModal.tsx | QuickBooks não conectado. Invoice salvo apenas localmente.
+TOAST | apps/web/src/modules/billing/pages/BillingPage.tsx | Conecte ao QuickBooks primeiro
+TOAST | apps/web/src/modules/billing/pages/BillingPage.tsx | Customer not found. Please try again.
+TOAST | apps/web/src/modules/billing/pages/BillingPage.tsx | Depósito confirmado! Crie o job agora.
+TOAST | apps/web/src/modules/billing/pages/BillingPage.tsx | Este lead já possui um job criado.
+TOAST | apps/web/src/modules/billing/pages/BillingPage.tsx | Invoice sincronizado com sucesso!
+TOAST | apps/web/src/modules/billing/pages/BillingPage.tsx | QuickBooks não conectado
+TOAST | apps/web/src/modules/communications/components/BroadcastModal.tsx | Company context is unavailable
+TOAST | apps/web/src/modules/communications/components/BroadcastModal.tsx | Enter a message or attach a file
+TOAST | apps/web/src/modules/communications/components/BroadcastModal.tsx | Failed to remove attachment
+TOAST | apps/web/src/modules/communications/components/BroadcastModal.tsx | Failed to send broadcast
+TOAST | apps/web/src/modules/communications/components/BroadcastModal.tsx | Failed to upload attachment
+TOAST | apps/web/src/modules/communications/components/BroadcastModal.tsx | Select at least one recipient
+TOAST | apps/web/src/modules/communications/components/NewMessageModal.tsx | Failed to send message
+TOAST | apps/web/src/modules/communications/components/NewMessageModal.tsx | Message sent successfully
+TOAST | apps/web/src/modules/communications/components/NewMessageModal.tsx | Please enter a message
+TOAST | apps/web/src/modules/communications/components/NewMessageModal.tsx | Please select a recipient
+TOAST | apps/web/src/modules/communications/pages/CommunicationsPage.tsx | Conversation archived
+TOAST | apps/web/src/modules/communications/pages/CommunicationsPage.tsx | Unable to archive conversation
+TOAST | apps/web/src/modules/crm/contacts/components/ContactFormDialog.tsx | Enter a valid email address
+TOAST | apps/web/src/modules/crm/contacts/components/ContactFormDialog.tsx | Name is required
+TOAST | apps/web/src/modules/crm/customers/pages/CustomersPageContent.tsx | Customer list exported successfully!
+TOAST | apps/web/src/modules/crm/customers/pages/CustomersPageContent.tsx | Invalid file format.
+TOAST | apps/web/src/modules/crm/customers/pages/CustomersPageContent.tsx | No data found in the file.
+TOAST | apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx | Error saving lead
+TOAST | apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx | Lead created successfully!
+TOAST | apps/web/src/modules/crm/leads/components/EditLeadModal.tsx | Error saving lead
+TOAST | apps/web/src/modules/crm/leads/components/EditLeadModal.tsx | Lead updated successfully!
+TOAST | apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx | Erro ao adicionar interação
+TOAST | apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx | Erro ao aprovar estimate. Tente novamente.
+TOAST | apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx | Erro: Lead não possui ID válido
+TOAST | apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx | Interação adicionada com sucesso!
+TOAST | apps/web/src/modules/crm/leads/components/LeadDetailsModal.tsx | Selecione o tipo de interação
+TOAST | apps/web/src/modules/crm/leads/pages/LeadsPageContent.tsx | Cliente não encontrado. Selecione um cliente existente.
+TOAST | apps/web/src/modules/crm/leads/pages/LeadsPageContent.tsx | Depósito confirmado! Crie o job agora.
+TOAST | apps/web/src/modules/crm/leads/pages/LeadsPageContent.tsx | Este lead precisa ser aprovado antes de criar um job.
+TOAST | apps/web/src/modules/crm/leads/pages/LeadsPageContent.tsx | Lead aprovado!
+TOAST | apps/web/src/modules/crm/leads/pages/LeadsPageContent.tsx | Lead marcado como perdido
+TOAST | apps/web/src/modules/crm/leads/pages/LeadsPageContent.tsx | O invoice de depósito (50%) precisa ser pago antes de criar um job para Deep Cleaning.
+TOAST | apps/web/src/modules/payroll/components/CalculatePayrollModal.tsx | Arquivo Excel gerado com sucesso.
+TOAST | apps/web/src/modules/payroll/components/CalculatePayrollModal.tsx | Download iniciado
+TOAST | apps/web/src/modules/payroll/components/CalculatePayrollModal.tsx | Erro
+TOAST | apps/web/src/modules/payroll/components/CalculatePayrollModal.tsx | Payroll calculado
+TOAST | apps/web/src/modules/payroll/components/CalculatePayrollModal.tsx | Preencha tipo e valor do bônus.
+TOAST | apps/web/src/modules/payroll/components/CalculatePayrollModal.tsx | Valor inválido.
+TOAST | apps/web/src/modules/payroll/components/PayrollRulesModal.tsx | Nenhuma alteração
+TOAST | apps/web/src/modules/payroll/components/PayrollRulesModal.tsx | Não há regras modificadas para salvar.
+TOAST | apps/web/src/modules/payroll/components/PayrollRulesModal.tsx | Regras salvas
+TOAST | apps/web/src/modules/payroll/pages/PayrollPage.tsx | Bulk SMS Failed
+TOAST | apps/web/src/modules/payroll/pages/PayrollPage.tsx | Bulk SMS Sent
+TOAST | apps/web/src/modules/payroll/pages/PayrollPage.tsx | Download started
+TOAST | apps/web/src/modules/payroll/pages/PayrollPage.tsx | Erro ao confirmar payroll
+TOAST | apps/web/src/modules/payroll/pages/PayrollPage.tsx | Erro ao gerar payroll
+TOAST | apps/web/src/modules/payroll/pages/PayrollPage.tsx | Error
+TOAST | apps/web/src/modules/payroll/pages/PayrollPage.tsx | Excel file generated successfully.
+TOAST | apps/web/src/modules/payroll/pages/PayrollPage.tsx | Failed to generate PDF preview.
+TOAST | apps/web/src/modules/payroll/pages/PayrollPage.tsx | Failed to generate PDF.
+TOAST | apps/web/src/modules/payroll/pages/PayrollPage.tsx | Missing phone numbers
+TOAST | apps/web/src/modules/payroll/pages/PayrollPage.tsx | Nenhum funcionário encontrado
+TOAST | apps/web/src/modules/payroll/pages/PayrollPage.tsx | Nenhum registro encontrado
+TOAST | apps/web/src/modules/payroll/pages/PayrollPage.tsx | No records selected
+TOAST | apps/web/src/modules/payroll/pages/PayrollPage.tsx | Não há jobs finalizados (ou não há staff atribuído) neste período.
+TOAST | apps/web/src/modules/payroll/pages/PayrollPage.tsx | PDF Downloaded
+TOAST | apps/web/src/modules/payroll/pages/PayrollPage.tsx | PDF Generated
+TOAST | apps/web/src/modules/payroll/pages/PayrollPage.tsx | Payroll confirmado
+TOAST | apps/web/src/modules/payroll/pages/PayrollPage.tsx | Payroll gerado automaticamente
+TOAST | apps/web/src/modules/payroll/pages/PayrollPage.tsx | Phone not found
+TOAST | apps/web/src/modules/payroll/pages/PayrollPage.tsx | Please select at least one record to send.
+TOAST | apps/web/src/modules/payroll/pages/PayrollPage.tsx | Registros excluídos
+TOAST | apps/web/src/modules/payroll/pages/PayrollPage.tsx | SMS Sent
+TOAST | apps/web/src/modules/payroll/pages/PayrollPage.tsx | Selecione a data inicial e final para gerar o payroll.
+TOAST | apps/web/src/modules/payroll/pages/PayrollPage.tsx | Selecione o período
+TOAST | apps/web/src/modules/payroll/pages/PayrollPage.tsx | Tente novamente.
+TOAST | apps/web/src/modules/reports/components/AIConsultantCard.tsx | Análise concluída!
+TOAST | apps/web/src/modules/reports/components/AIConsultantCard.tsx | Créditos insuficientes. Adicione créditos ao seu workspace.
+TOAST | apps/web/src/modules/reports/components/AIConsultantCard.tsx | Erro ao realizar análise. Tente novamente.
+TOAST | apps/web/src/modules/reports/components/AIConsultantCard.tsx | Limite de requisições excedido. Tente novamente mais tarde.
+TOAST | apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx | Additional note added
+TOAST | apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx | Additional note deleted
+TOAST | apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx | Failed to clear time
+TOAST | apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx | Failed to delete feedback
+TOAST | apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx | Failed to delete note
+TOAST | apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx | Failed to save feedback
+TOAST | apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx | Failed to save note
+TOAST | apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx | Failed to save time
+TOAST | apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx | Feedback added successfully
+TOAST | apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx | Feedback deleted
+TOAST | apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx | Invalid time format. Use format like 7:30 AM
+TOAST | apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx | Job Finished must be after Job Started
+TOAST | apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx | Job Started must be before Job Finished
+TOAST | apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx | Note added successfully
+TOAST | apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx | Note deleted
+TOAST | apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx | Please enter a note
+TOAST | apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx | Please enter feedback
+TOAST | apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx | Review request was not sent
+TOAST | apps/web/src/modules/schedule/components/InvoiceModal.tsx | Adicione pelo menos um item ao invoice.
+TOAST | apps/web/src/modules/schedule/components/InvoiceModal.tsx | Cliente não encontrado no sistema. Crie o cliente primeiro.
+TOAST | apps/web/src/modules/schedule/components/InvoiceModal.tsx | Erro ao enviar para QuickBooks. Invoice salvo localmente.
+TOAST | apps/web/src/modules/schedule/components/InvoiceModal.tsx | Invoice criado e enviado via QuickBooks!
+TOAST | apps/web/src/modules/schedule/components/InvoiceModal.tsx | Invoice downloaded!
+TOAST | apps/web/src/modules/schedule/components/InvoiceModal.tsx | Não foi possível mapear o cliente no QuickBooks. Invoice salvo localmente.
+TOAST | apps/web/src/modules/schedule/components/InvoiceModal.tsx | Please fill in item description and rate
+TOAST | apps/web/src/modules/schedule/components/InvoiceModal.tsx | Printing invoice...
+TOAST | apps/web/src/modules/schedule/components/JobStatusTracker.tsx | Your login is not linked to an active staff member.
+TOAST | apps/web/src/modules/schedule/pages/SchedulePage.tsx | Customer not found. Please select an existing customer.
+TOAST | apps/web/src/modules/schedule/pages/SchedulePage.tsx | Invalid file format.
+TOAST | apps/web/src/modules/schedule/pages/SchedulePage.tsx | Jobs exported successfully!
+TOAST | apps/web/src/modules/schedule/pages/SchedulePage.tsx | No data found in the file.
+TOAST | apps/web/src/modules/schedule/pages/SchedulePage.tsx | No jobs to export.
+TOAST | apps/web/src/modules/settings/components/AuditTab.tsx | Navegando para Company Settings...
+TOAST | apps/web/src/modules/settings/components/AuditTab.tsx | Navegando para Leads...
+TOAST | apps/web/src/modules/settings/components/AuditTab.tsx | Navegando para Payroll...
+TOAST | apps/web/src/modules/settings/components/AuditTab.tsx | Navegando para Team...
+TOAST | apps/web/src/modules/settings/components/AutomationsTab.tsx | Automation saved
+TOAST | apps/web/src/modules/settings/components/AutomationsTab.tsx | No changes to save
+TOAST | apps/web/src/modules/settings/components/AutomationsTab.tsx | Please fill in all required fields
+TOAST | apps/web/src/modules/settings/components/DialpadIntegrationPanel.tsx | Falha ao copiar Redirect URI
+TOAST | apps/web/src/modules/settings/components/DialpadIntegrationPanel.tsx | Redirect URI copiada
+TOAST | apps/web/src/modules/settings/components/IntegrationsTabContent.tsx | Copiado para a área de transferência!
+TOAST | apps/web/src/modules/settings/components/IntegrationsTabContent.tsx | Falha ao copiar
+TOAST | apps/web/src/modules/settings/components/IntegrationsTabContent.tsx | Sincronização de leads desativada
+TOAST | apps/web/src/modules/settings/components/TeamUserModal.tsx | Email is required to create or update the login
+TOAST | apps/web/src/modules/settings/components/TeamUserModal.tsx | Please fill in all required fields
+TOAST | apps/web/src/modules/settings/components/TeamUserModal.tsx | Zelle key (email or phone) is required when using Zelle as payment method
+TOAST | apps/web/src/modules/settings/pages/SettingsPage.tsx | Authenticated account not found
+TOAST | apps/web/src/modules/settings/pages/SettingsPage.tsx | Company settings not found
+TOAST | apps/web/src/modules/settings/pages/SettingsPage.tsx | Could not change password
+TOAST | apps/web/src/modules/settings/pages/SettingsPage.tsx | Could not load notification preferences
+TOAST | apps/web/src/modules/settings/pages/SettingsPage.tsx | Could not save notification preferences
+TOAST | apps/web/src/modules/settings/pages/SettingsPage.tsx | Could not save profile
+TOAST | apps/web/src/modules/settings/pages/SettingsPage.tsx | Current password is incorrect
+TOAST | apps/web/src/modules/settings/pages/SettingsPage.tsx | Full name is required
+TOAST | apps/web/src/modules/settings/pages/SettingsPage.tsx | Google Review URL must start with http:// or https://
+TOAST | apps/web/src/modules/settings/pages/SettingsPage.tsx | New passwords do not match
+TOAST | apps/web/src/modules/settings/pages/SettingsPage.tsx | Nextdoor Review URL must start with http:// or https://
+TOAST | apps/web/src/modules/settings/pages/SettingsPage.tsx | Notification preferences saved!
+TOAST | apps/web/src/modules/settings/pages/SettingsPage.tsx | Password changed successfully
+TOAST | apps/web/src/modules/settings/pages/SettingsPage.tsx | Password must be at least 12 characters
+TOAST | apps/web/src/modules/settings/pages/SettingsPage.tsx | Please fill in all password fields
+TOAST | apps/web/src/modules/settings/pages/SettingsPage.tsx | Profile saved successfully!
+TOAST | apps/web/src/modules/settings/pages/SettingsPage.tsx | Profile saved, but login metadata synchronization needs attention
+TOAST | apps/web/src/modules/settings/pages/SyncLogsPage.tsx | Cannot retry: No local ID available
+TOAST | apps/web/src/modules/settings/pages/SyncLogsPage.tsx | Logs exported successfully
+TOAST | apps/web/src/modules/settings/pages/SyncLogsPage.tsx | Sync logs cleared
+TOAST | apps/web/src/modules/transactions/components/TransactionModal.tsx | Por favor, insira o nome da transação
+TOAST | apps/web/src/modules/transactions/components/TransactionModal.tsx | Por favor, insira o valor
+TOAST | apps/web/src/modules/transactions/components/TransactionModal.tsx | Por favor, selecione a categoria
+TOAST | apps/web/src/modules/transactions/components/TransactionModal.tsx | Por favor, selecione a data
+TOAST | apps/web/src/modules/transactions/components/TransactionModal.tsx | Por favor, selecione o tipo da transação
+LOCALE | apps/web/src/modules/admin/pages/AdminDashboard.tsx | toLocaleString("pt-BR"
+LOCALE | apps/web/src/modules/billing/pages/BillingPage.tsx | new Intl.NumberFormat('en-US'
+LOCALE | apps/web/src/modules/crm/customers/components/CustomerChatTab.tsx | toLocaleString("en-US"
+LOCALE | apps/web/src/modules/crm/customers/components/CustomerDetailsModal.tsx | toLocaleDateString("en-US"
+LOCALE | apps/web/src/modules/payroll/pages/PayrollPage.tsx | toLocaleString("en-US"
+LOCALE | apps/web/src/modules/payroll/pages/PayrollPage.tsx | toLocaleString("pt-BR"
+LOCALE | apps/web/src/modules/payroll/pages/PayrollPage.tsx | toLocaleString('en-US'
+LOCALE | apps/web/src/modules/reports/components/AnalyticsTab.tsx | new Intl.NumberFormat('en-US'
+LOCALE | apps/web/src/modules/schedule/calendar/CalendarGrid.tsx | toLocaleDateString("en-US"
+LOCALE | apps/web/src/modules/schedule/components/AppointmentDetailsView.tsx | toLocaleDateString("en-US"
+LOCALE | apps/web/src/modules/settings/components/DialpadIntegrationPanel.tsx | toLocaleDateString("pt-BR"
+LOCALE | apps/web/src/modules/settings/components/IntegrationsTabContent.tsx | toLocaleDateString("pt-BR"
+LOCALE | apps/web/src/modules/transactions/components/TransactionModal.tsx | new Intl.NumberFormat("en-US"
+LOCALE | apps/web/src/modules/transactions/pages/RulesPage.tsx | toLocaleDateString("pt-BR"
+LOCALE | apps/web/src/modules/transactions/pages/TransactionsPage.tsx | new Intl.DateTimeFormat("pt-BR"
+LOCALE | apps/web/src/modules/transactions/pages/TransactionsPage.tsx | new Intl.NumberFormat("pt-BR"
