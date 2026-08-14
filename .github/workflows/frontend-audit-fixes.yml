@@ -33,6 +33,12 @@ jobs:
             return source.replace(from, to);
           }
 
+          function replaceComponentEnd(source, label) {
+            const pattern = /\n    <\/div>\n  \);\n}\s*$/;
+            if (!pattern.test(source)) throw new Error(`Unexpected ${label} component ending`);
+            return source.replace(pattern, '\n    </PageLayout>\n  );\n}\n');
+          }
+
           const schedulePath = 'apps/web/src/modules/schedule/SchedulePage.tsx';
           let schedule = fs.readFileSync(schedulePath, 'utf8');
           schedule = replaceOnce(schedule,
@@ -47,9 +53,7 @@ jobs:
             '        </main>\n      </div>\n\n      {/* Modals */}',
             '      {/* Modals */}',
             'Schedule shell end');
-          const scheduleEnd = '\n    </div>\n  );\n}';
-          if (!schedule.endsWith(scheduleEnd)) throw new Error('Unexpected Schedule component ending');
-          schedule = schedule.slice(0, -scheduleEnd.length) + '\n    </PageLayout>\n  );\n}';
+          schedule = replaceComponentEnd(schedule, 'Schedule');
           fs.writeFileSync(schedulePath, schedule);
 
           const communicationsPath = 'apps/web/src/modules/communications/CommunicationsPage.tsx';
@@ -66,9 +70,7 @@ jobs:
             '          </div>\n        </main>\n      </div>\n      {/* Broadcast Modal */}',
             '      </div>\n      {/* Broadcast Modal */}',
             'Communications shell end');
-          const communicationsEnd = '\n    </div>\n  );\n}';
-          if (!communications.endsWith(communicationsEnd)) throw new Error('Unexpected Communications component ending');
-          communications = communications.slice(0, -communicationsEnd.length) + '\n    </PageLayout>\n  );\n}';
+          communications = replaceComponentEnd(communications, 'Communications');
           fs.writeFileSync(communicationsPath, communications);
           NODE
       - run: npx eslint apps/web/src packages --max-warnings=0
