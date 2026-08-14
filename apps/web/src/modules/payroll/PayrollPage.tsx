@@ -34,54 +34,15 @@ import { useCompanySettings } from "@/hooks/useCompanySettings";
 import { formatCurrency } from "@/lib/currency";
 import { supabase } from "@/integrations/supabase/client";
 import { getErrorMessage } from "@/lib/errors";
+import type { PayrollListRow, PayrollRecord, PayrollSortDirection, PayrollSortField } from "./types/payrollView";
+import { buildPayrollListRows, sortPayrollRecords } from "./utils/payrollView";
 
 const PayrollPDFPreviewModal = lazy(() =>
   import("@/components/payroll/PayrollPDFPreviewModal").then(({ PayrollPDFPreviewModal }) => ({
     default: PayrollPDFPreviewModal,
   })),
 );
-interface PayrollRecord {
-  id: string;
-  period: string;
-  periodStartISO: string;
-  periodEndISO: string;
-  employeeName: string;
-  staffId: string | null;
-  cleaningType: string;
-  client: string;
-  /** Value per job (service value) */
-  baseValue: number;
-  /** Bonus for this job record */
-  bonus: number;
-  paymentType: "Direct Deposit" | "Check" | "Cash" | "QuickBooks" | "zelle" | "quickbooks" | "check" | "cash" | string;
-  status: "Pending" | "Paid" | "Overdue";
-  jobIdShort?: string | null;
-}
 
-interface PayrollListRow {
-  /** Group id (period + team member) */
-  id: string;
-  period: string;
-  periodStartISO: string;
-  periodEndISO: string;
-  employeeName: string;
-  staffId: string | null;
-  jobCount: number;
-  /** Service value per job */
-  unitValue: number;
-  /** Total bonus for this group */
-  bonus: number;
-  /** unitValue * jobCount + bonus */
-  value: number;
-  paymentType: PayrollRecord["paymentType"];
-  status: PayrollRecord["status"];
-  /** Underlying payroll_records ids */
-  recordIds: string[];
-}
-// Employee list will come from useStaff hook
-// Payroll data will come from usePayrollRecords hook
-type SortField = "period" | "employeeName" | "baseValue" | "status";
-type SortDirection = "asc" | "desc";
 
 export function Payroll() {
   const { t } = useLanguage();
@@ -90,8 +51,8 @@ export function Payroll() {
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [selectedEmployee, setSelectedEmployee] = useState<string>("all");
-  const [sortField, setSortField] = useState<SortField>("period");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+  const [sortField, setSortField] = useState<PayrollSortField>("period");
+  const [sortDirection, setSortDirection] = useState<PayrollSortDirection>("desc");
   
   const [employeeOpen, setEmployeeOpen] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
@@ -186,74 +147,11 @@ export function Payroll() {
   // Show all records by default, or filtered records if filter is applied
   const filteredData = hasFiltered && localFilteredData !== null ? localFilteredData : payrollData;
 
-  // Consolidated list (period + team member) - USING REAL VALUES
-  const payrollListRows: PayrollListRow[] = useMemo(() => {
-    const statusRank: Record<PayrollRecord["status"], number> = { Paid: 0, Pending: 1, Overdue: 2 };
-
-    const byGroup = new Map<string, PayrollListRow>();
-
-    for (const r of filteredData) {
-      const resolvedStaffId = r.staffId ?? staffList.find((s) => s.name === r.employeeName)?.id ?? null;
-      
-      // Use the actual base_value from the record (already contains real value)
-      const unitValue = r.baseValue;
-
-      const groupId = `${r.periodStartISO}|${r.periodEndISO}|${resolvedStaffId ?? r.employeeName}`;
-      const current = byGroup.get(groupId);
-
-      if (!current) {
-        byGroup.set(groupId, {
-          id: groupId,
-          period: r.period,
-          periodStartISO: r.periodStartISO,
-          periodEndISO: r.periodEndISO,
-          employeeName: r.employeeName,
-          staffId: resolvedStaffId,
-          jobCount: 1,
-          unitValue,
-          bonus: r.bonus,
-          value: unitValue + r.bonus, // Each record represents 1 job
-          paymentType: r.paymentType,
-          status: r.status,
-          recordIds: [r.id],
-        });
-        continue;
-      }
-
-      current.jobCount += 1;
-      current.recordIds.push(r.id);
-      current.bonus += r.bonus;
-      // Add this record's value to total (each record is 1 job with its own value)
-      current.value += unitValue + r.bonus;
-
-      if (statusRank[r.status] > statusRank[current.status]) {
-        current.status = r.status;
-      }
-    }
-
-    const rows = Array.from(byGroup.values());
-
-    rows.sort((a, b) => {
-      let comparison = 0;
-      switch (sortField) {
-        case "period":
-          comparison = a.periodStartISO.localeCompare(b.periodStartISO);
-          break;
-        case "employeeName":
-          comparison = a.employeeName.localeCompare(b.employeeName);
-          break;
-        case "baseValue":
-          comparison = a.value - b.value;
-          break;
-        case "status":
-          comparison = statusRank[a.status] - statusRank[b.status];
-          break;
-      }
-      return sortDirection === "asc" ? comparison : -comparison;
-    });
-
-    return rows;
-  }, [filteredData, staffList, sortField, sortDirection]);
+  // Consolidated list (period + team member)
+  const payrollListRows: PayrollListRow[] = useMemo(
+    () => buildPayrollListRows(filteredData, staffList, sortField, sortDirection),
+    [filteredData, staffList, sortField, sortDirection],
+  );
 
   const payrollGroupIdToRecordIds = useMemo(() => {
     const map = new Map<string, string[]>();
@@ -294,7 +192,7 @@ export function Payroll() {
       filtered = filtered.filter((record) => record.status === selectedStatus);
     }
 
-    setLocalFilteredData(sortData(filtered, sortField, sortDirection));
+    setLocalFilteredData(sortPayrollRecords(filtered, sortField, sortDirection));
     setHasFiltered(true);
     setShowClearButton(true);
     toast({
@@ -337,36 +235,16 @@ export function Payroll() {
       console.error("Error deleting records:", error);
     }
   };
-  const sortData = (data: PayrollRecord[], field: SortField, direction: SortDirection) => {
-    return [...data].sort((a, b) => {
-      let comparison = 0;
-      switch (field) {
-        case "period":
-          comparison = a.period.localeCompare(b.period);
-          break;
-        case "employeeName":
-          comparison = a.employeeName.localeCompare(b.employeeName);
-          break;
-        case "baseValue":
-          comparison = a.baseValue - b.baseValue;
-          break;
-        case "status":
-          comparison = a.status.localeCompare(b.status);
-          break;
-      }
-      return direction === "asc" ? comparison : -comparison;
-    });
-  };
-  const handleSort = (field: SortField) => {
+  const handleSort = (field: PayrollSortField) => {
     const newDirection = sortField === field && sortDirection === "asc" ? "desc" : "asc";
     setSortField(field);
     setSortDirection(newDirection);
-    setLocalFilteredData(sortData(filteredData, field, newDirection));
+    setLocalFilteredData(sortPayrollRecords(filteredData, field, newDirection));
   };
   const SortIcon = ({
     field
   }: {
-    field: SortField;
+    field: PayrollSortField;
   }) => {
     if (sortField !== field) return null;
     return sortDirection === "asc" ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />;
