@@ -1,0 +1,42 @@
+name: Regenerate Supabase types
+
+on:
+  push:
+    branches: [DEV]
+    paths:
+      - .github/workflows/regenerate-supabase-types.yml
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: DEV
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Start local Supabase
+        run: supabase start
+      - name: Rebuild database from migrations
+        run: supabase db reset --local
+      - name: Generate TypeScript database types
+        run: supabase gen types typescript --local > apps/web/src/app/infrastructure/supabase/types.ts
+      - name: Verify required Dialpad schema is represented
+        run: |
+          grep -q "dialpad_connections" apps/web/src/app/infrastructure/supabase/types.ts
+          grep -q "sms_provider" apps/web/src/app/infrastructure/supabase/types.ts
+          grep -q "provider_message_id" apps/web/src/app/infrastructure/supabase/types.ts
+          git diff --check
+      - name: Commit generated types
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/web/src/app/infrastructure/supabase/types.ts
+          git diff --cached --quiet && exit 0
+          git commit -m "chore: regenerate Supabase types from current schema"
+          git push origin HEAD:DEV
