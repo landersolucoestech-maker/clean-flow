@@ -1,21 +1,22 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import type { Session } from "@supabase/supabase-js";
 import { Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import type { Enums } from "@/integrations/supabase/types";
 import { deriveContactPermissions } from "@/modules/crm/permissions/contactPermissions";
 import { DEFAULT_ROLES, usePermissionsStore } from "@/stores/permissions.store";
 import type { Role } from "@/stores/types";
+import { useAuthSession } from "./hooks/useAuthSession";
+import {
+  getCurrentStaffIdentity,
+  isPlatformAdmin,
+  type AppRole,
+  type StaffIdentity,
+} from "./services/authService";
 
 interface GuardProps {
   children: ReactNode;
   allowUnconfigured?: boolean;
   allowedRoles?: readonly AppRole[];
 }
-
-type AppRole = Enums<"app_role">;
-type StaffIdentity = { id: string; role: AppRole };
 
 function roleForAppRole(appRole: AppRole): Role {
   const admin = DEFAULT_ROLES.find((role) => role.id === "admin")!;
@@ -48,35 +49,8 @@ function LoadingScreen() {
   );
 }
 
-function useSupabaseSession() {
-  const [session, setSession] = useState<Session | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    let active = true;
-
-    void supabase.auth.getSession().then(({ data }) => {
-      if (!active) return;
-      setSession(data.session);
-      setIsLoading(false);
-    });
-
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      setSession(nextSession);
-      setIsLoading(false);
-    });
-
-    return () => {
-      active = false;
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
-
-  return { session, isLoading };
-}
-
 export function AuthenticatedRoute({ children, allowUnconfigured = false, allowedRoles }: GuardProps) {
-  const { session, isLoading } = useSupabaseSession();
+  const { session, isLoading } = useAuthSession();
   const location = useLocation();
   const setCurrentRole = usePermissionsStore((state) => state.setCurrentRole);
   const [staffIdentity, setStaffIdentity] = useState<StaffIdentity | null>(null);
@@ -92,22 +66,17 @@ export function AuthenticatedRoute({ children, allowUnconfigured = false, allowe
 
     let active = true;
     setIsIdentityLoading(true);
-    void supabase.rpc("current_staff_id").then(async ({ data: staffId }) => {
-      if (!staffId) return { data: null };
-      const result = await supabase
-        .from("staff")
-        .select("id, staff_roles(role)")
-        .eq("id", staffId)
-        .eq("is_active", true)
-        .maybeSingle();
-      return { data: result.data };
-    }).then(({ data }) => {
+    void getCurrentStaffIdentity()
+      .then((identity) => {
         if (!active) return;
-        const roleJoin = data?.staff_roles;
-        const role = (Array.isArray(roleJoin) ? roleJoin[0]?.role : roleJoin?.role) as AppRole | undefined;
-        const identity = data && role ? { id: data.id, role } : null;
         setStaffIdentity(identity);
         setCurrentRole(identity ? roleForAppRole(identity.role) : null);
+        setIsIdentityLoading(false);
+      })
+      .catch(() => {
+        if (!active) return;
+        setStaffIdentity(null);
+        setCurrentRole(null);
         setIsIdentityLoading(false);
       });
 
@@ -134,7 +103,7 @@ export function AuthenticatedRoute({ children, allowUnconfigured = false, allowe
 }
 
 export function PlatformAdminRoute({ children }: GuardProps) {
-  const { session, isLoading: isSessionLoading } = useSupabaseSession();
+  const { session, isLoading: isSessionLoading } = useAuthSession();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -144,11 +113,12 @@ export function PlatformAdminRoute({ children }: GuardProps) {
     }
 
     let active = true;
-    void supabase
-      .rpc("is_platform_admin", { _user_id: session.user.id })
-      .then(({ data, error }) => {
-        if (!active) return;
-        setIsAdmin(!error && data === true);
+    void isPlatformAdmin(session.user.id)
+      .then((allowed) => {
+        if (active) setIsAdmin(allowed);
+      })
+      .catch(() => {
+        if (active) setIsAdmin(false);
       });
 
     return () => {
