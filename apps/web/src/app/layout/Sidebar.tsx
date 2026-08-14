@@ -57,7 +57,7 @@ const navigationItems: NavItem[] = [
     submenu: [
       { labelKey: "sidebar.customers", href: "/crm/customers", icon: Users, permission: "customers.view" },
       { labelKey: "sidebar.leads", href: "/crm/leads", icon: ClipboardList, permission: "leads.view" },
-      { labelKey: "sidebar.contacts", label: "Contacts", href: "/crm/contacts", icon: ContactRound, permission: "customers.view" },
+      { labelKey: "sidebar.contacts", label: "Contacts", href: "/crm/contacts", icon: ContactRound, permission: "contacts.view" },
     ],
   },
   {
