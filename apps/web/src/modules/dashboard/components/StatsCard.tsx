@@ -13,15 +13,15 @@ interface StatsCardProps {
 
 export function StatsCard({ title, value, change, changeType, icon, className }: StatsCardProps) {
   return (
-    <Card className={cn("border-border/80 shadow-sm transition-shadow hover:shadow-md", className)}>
-      <CardContent className="p-5">
-        <div className="flex items-start justify-between gap-4">
+    <Card className={cn("transition-colors hover:border-foreground/15", className)}>
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="text-xs font-medium text-muted-foreground">{title}</p>
-            <p className="mt-2 truncate text-2xl font-bold tracking-tight text-foreground">{value}</p>
+            <p className="mt-1.5 truncate text-xl font-semibold tracking-tight text-foreground">{value}</p>
             <p
               className={cn(
-                "mt-2 text-xs font-semibold",
+                "mt-1.5 text-[11px] font-medium",
                 changeType === "positive" && "text-success",
                 changeType === "negative" && "text-destructive",
                 changeType === "neutral" && "text-muted-foreground",
@@ -30,7 +30,7 @@ export function StatsCard({ title, value, change, changeType, icon, className }:
               {change}
             </p>
           </div>
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary-light">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary/10">
             {icon}
           </div>
         </div>
