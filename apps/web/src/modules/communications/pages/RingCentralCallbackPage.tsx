@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Loader2, CheckCircle, XCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { completeRingCentralOAuth } from "./services/communicationsOAuthService";
+import { completeRingCentralOAuth } from "../services/communicationsOAuthService";
 
 export default function RingCentralCallback() {
   const [searchParams] = useSearchParams();

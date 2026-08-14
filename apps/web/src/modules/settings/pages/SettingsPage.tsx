@@ -14,17 +14,17 @@ import { TeamUserModal } from "@/components/settings/TeamUserModal";
 import { AutomationsTab } from "@/components/settings/AutomationsTab";
 import { IntegrationsTab } from "@/components/settings/IntegrationsTab";
 import { AuditTab } from "@/components/settings/AuditTab";
-import { NotificationSettingsSection } from "./components/NotificationSettingsSection";
-import { TeamSettingsSection } from "./components/TeamSettingsSection";
-import { SecuritySettingsSection } from "./components/SecuritySettingsSection";
-import { ProfileSettingsSection } from "./components/ProfileSettingsSection";
-import { SettingsTabsNavigation } from "./components/SettingsTabsNavigation";
-import { BusinessHoursSettingsSection } from "./components/BusinessHoursSettingsSection";
-import { useSettingsNavigation } from "./hooks/useSettingsNavigation";
+import { NotificationSettingsSection } from "../components/NotificationSettingsSection";
+import { TeamSettingsSection } from "../components/TeamSettingsSection";
+import { SecuritySettingsSection } from "../components/SecuritySettingsSection";
+import { ProfileSettingsSection } from "../components/ProfileSettingsSection";
+import { SettingsTabsNavigation } from "../components/SettingsTabsNavigation";
+import { BusinessHoursSettingsSection } from "../components/BusinessHoursSettingsSection";
+import { useSettingsNavigation } from "../hooks/useSettingsNavigation";
 import { useLanguage } from "@/contexts/useLanguage";
 import { useStaff, useCurrentStaff, Staff } from "@/hooks/useStaff";
 import { useCompanySettings, useUpdateCompanySettings, BusinessHours } from "@/hooks/useCompanySettings";
-import { changeCurrentPassword, loadNotificationPreferences, saveCurrentProfile, saveNotificationPreferences } from "./services/settingsAccountService";
+import { changeCurrentPassword, loadNotificationPreferences, saveCurrentProfile, saveNotificationPreferences } from "../services/settingsAccountService";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   User,

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Loader2, CheckCircle, XCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { completeGoogleOAuth } from "./services/googleOAuthService";
+import { completeGoogleOAuth } from "../services/googleOAuthService";
 
 export default function GoogleCallback() {
   const [searchParams] = useSearchParams();

@@ -33,10 +33,10 @@ import { useJobs } from "@/hooks/useJobs";
 import { useCompanySettings } from "@/hooks/useCompanySettings";
 import { formatCurrency } from "@/lib/currency";
 import { getErrorMessage } from "@/lib/errors";
-import type { PayrollListRow, PayrollRecord, PayrollSortDirection, PayrollSortField } from "./types/payrollView";
-import { buildPayrollListRows, isCompletedJobStatus, isUuid, normalizePayrollName, sortPayrollRecords } from "./utils/payrollView";
-import { buildStaffBaseValueMap, buildStaffPaymentMethodMap, mapPayrollRecords } from "./utils/payrollData";
-import { fetchExistingPayrollRecordKeys, fetchPayrollRecordsForPeriod, sendPayrollStatementSms, updatePayrollRecordValues } from "./services/payrollDataService";
+import type { PayrollListRow, PayrollRecord, PayrollSortDirection, PayrollSortField } from "../types/payrollView";
+import { buildPayrollListRows, isCompletedJobStatus, isUuid, normalizePayrollName, sortPayrollRecords } from "../utils/payrollView";
+import { buildStaffBaseValueMap, buildStaffPaymentMethodMap, mapPayrollRecords } from "../utils/payrollData";
+import { fetchExistingPayrollRecordKeys, fetchPayrollRecordsForPeriod, sendPayrollStatementSms, updatePayrollRecordValues } from "../services/payrollDataService";
 
 const PayrollPDFPreviewModal = lazy(() =>
   import("@/components/payroll/PayrollPDFPreviewModal").then(({ PayrollPDFPreviewModal }) => ({

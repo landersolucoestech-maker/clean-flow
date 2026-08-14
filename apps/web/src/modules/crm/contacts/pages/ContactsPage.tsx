@@ -11,11 +11,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { usePermission } from "@/hooks/usePermission";
-import { CrmTabs } from "../components/CrmTabs";
-import { ContactDetailsDialog } from "./components/ContactDetailsDialog";
-import { ContactFormDialog } from "./components/ContactFormDialog";
-import { useContacts } from "./hooks/useContacts";
-import { CONTACT_STATUSES, CONTACT_TYPES, type Contact, type ContactDraft } from "./types/contact";
+import { CrmTabs } from "../../components/CrmTabs";
+import { ContactDetailsDialog } from "../components/ContactDetailsDialog";
+import { ContactFormDialog } from "../components/ContactFormDialog";
+import { useContacts } from "../hooks/useContacts";
+import { CONTACT_STATUSES, CONTACT_TYPES, type Contact, type ContactDraft } from "../types/contact";
 
 const PAGE_SIZE = 10;
 

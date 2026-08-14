@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { CheckCircle, Loader2, XCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { completeDialpadOAuth } from "./services/communicationsOAuthService";
+import { completeDialpadOAuth } from "../services/communicationsOAuthService";
 
 export default function DialpadCallback() {
   const [searchParams] = useSearchParams();

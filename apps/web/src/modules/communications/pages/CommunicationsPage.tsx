@@ -51,11 +51,11 @@ import { BroadcastModal } from "@/components/communications/BroadcastModal";
 import { NewMessageModal } from "@/components/communications/NewMessageModal";
 import { useRingCentralSync } from "@/hooks/useRingCentralSync";
 import { useNotificationSound } from "@/hooks/useNotificationSound";
-import { uploadMessageAttachment } from "./services/messageAttachmentService";
-import { getConversationPreviewText, getFileNameFromAttachmentUrl, parseMessageContentForAttachments } from "./utils/messageContent";
-import type { AttachmentRef } from "./utils/messageContent";
-import { buildCustomerStatusById, filterCustomerConversations, filterTeamConversations } from "./utils/conversationFilters";
-import type { ConversationFilter, CustomerStatusFilter, TeamStatusFilter } from "./utils/conversationFilters";
+import { uploadMessageAttachment } from "../services/messageAttachmentService";
+import { getConversationPreviewText, getFileNameFromAttachmentUrl, parseMessageContentForAttachments } from "../utils/messageContent";
+import type { AttachmentRef } from "../utils/messageContent";
+import { buildCustomerStatusById, filterCustomerConversations, filterTeamConversations } from "../utils/conversationFilters";
+import type { ConversationFilter, CustomerStatusFilter, TeamStatusFilter } from "../utils/conversationFilters";
 type RecipientTab = "customers" | "team";
 
 
