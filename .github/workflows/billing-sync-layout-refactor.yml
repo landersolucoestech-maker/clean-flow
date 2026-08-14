@@ -1,0 +1,83 @@
+name: Billing and sync logs layout refactor
+
+on:
+  push:
+    branches: [DEV]
+    paths:
+      - .github/workflows/billing-sync-layout-refactor.yml
+
+permissions:
+  contents: write
+
+jobs:
+  refactor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: DEV
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Refine billing and sync logs layouts
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def apply(path_str, replacements):
+              p = Path(path_str)
+              text = p.read_text(encoding='utf-8')
+              for old, new, count in replacements:
+                  if old not in text:
+                      raise SystemExit(f'Expected text not found in {path_str}: {old[:180]}')
+                  text = text.replace(old, new, count)
+              p.write_text(text, encoding='utf-8')
+
+          apply('apps/web/src/modules/billing/BillingPage.tsx', [
+            ('import { Header } from "@/components/layout/Header";\nimport { Sidebar } from "@/components/layout/Sidebar";', 'import { PageLayout } from "@/components/layout/PageLayout";', 1),
+            ('''  return (\n    <div className="flex h-screen bg-background">\n      <Sidebar />\n      \n      <div className="flex-1 flex flex-col overflow-hidden">\n        <Header />\n        \n        <main className="flex-1 overflow-y-auto p-6 space-y-6 pl-[10px] pb-0 pr-[10px] pt-px mx-[8px] py-0 my-[4px]">''', '''  return (\n    <PageLayout>\n      <div className="space-y-6">''', 1),
+            ('<div className="flex items-center justify-between">\n            <div>\n              <h1 className="text-3xl font-bold text-foreground">{t("billing.title")}</h1>', '<div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">\n            <div>\n              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{t("billing.title")}</h1>', 1),
+            ('<div className="flex items-center space-x-3">', '<div className="flex flex-wrap items-center gap-2 lg:justify-end">', 1),
+            ('variant="hero" \n                size="lg" \n                className="flex items-center space-x-2"', 'variant="hero" \n                className="flex items-center gap-2"', 1),
+            ('<div className="grid grid-cols-1 md:grid-cols-4 gap-6">', '<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">', 1),
+            ('className="pl-10 bg-background border-border"', 'className="pl-10"', 1),
+            ('className="w-[160px] bg-background border-border"', 'className="w-full lg:w-[160px]"', 1),
+            ('className="w-[140px] bg-background border-border"', 'className="w-full lg:w-[140px]"', 1),
+            ('className="cursor-pointer hover:bg-muted/50"', 'className="cursor-pointer"', 1),
+            ('''          </Card>\n        </main>\n      </div>''', '''          </Card>\n      </div>''', 1),
+            ('''      )}\n    </div>\n  );\n}''', '''      )}\n    </PageLayout>\n  );\n}''', 1),
+          ])
+
+          apply('apps/web/src/modules/settings/SyncLogsPage.tsx', [
+            ('import { Header } from "@/components/layout/Header";\nimport { Sidebar } from "@/components/layout/Sidebar";', 'import { PageLayout } from "@/components/layout/PageLayout";', 1),
+            ('''  return (\n    <div className="flex h-screen bg-background">\n      <Sidebar />\n      \n      <div className="flex-1 flex flex-col overflow-hidden">\n        <Header />\n        \n        <main className="flex-1 overflow-y-auto p-6 space-y-6">''', '''  return (\n    <PageLayout>\n      <div className="space-y-6">''', 1),
+            ('<div className="flex items-center justify-between">\n            <div>\n              <h1 className="text-3xl font-bold text-foreground">Sync Logs</h1>', '<div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">\n            <div>\n              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Sync Logs</h1>', 1),
+            ('<div className="flex items-center gap-3">', '<div className="flex flex-wrap items-center gap-2 lg:justify-end">', 1),
+            ('<div className="grid grid-cols-1 md:grid-cols-4 gap-4">', '<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">', 1),
+            ('<Card>', '<Card className="border-border/80 shadow-sm">', 5),
+            ('<div className="flex flex-col md:flex-row gap-4 mb-4">', '<div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center">', 1),
+            ('className="w-[150px]"', 'className="w-full lg:w-[150px]"', 2),
+            ('<div className="rounded-md border">\n                  <Table>', '<Table>', 1),
+            ('</Table>\n                </div>', '</Table>', 1),
+            ('''          </Card>\n        </main>\n      </div>\n    </div>''', '''          </Card>\n      </div>\n    </PageLayout>''', 1),
+          ])
+          PY
+      - run: npm ci
+      - name: Lint
+        run: npm run lint -- --max-warnings=0
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Commit verified layout refactor
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/web/src/modules/billing/BillingPage.tsx apps/web/src/modules/settings/SyncLogsPage.tsx
+          git diff --cached --quiet && exit 0
+          git commit -m "style: modernize billing and sync logs layouts"
+          git push origin HEAD:DEV
