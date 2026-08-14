@@ -23,63 +23,50 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Centralize Leads form configuration and validation
+      - name: Centralize shared Leads form types and formatter
         run: |
           node <<'NODE'
           const fs = require('node:fs');
-          const path = require('node:path');
           const ts = require('typescript');
 
           const createPath = 'apps/web/src/modules/crm/leads/components/CreateLeadModal.tsx';
           const editPath = 'apps/web/src/modules/crm/leads/components/EditLeadModal.tsx';
-          const constantsPath = 'apps/web/src/modules/crm/leads/constants/leadFormOptions.ts';
-          const schemaPath = 'apps/web/src/modules/crm/leads/schemas/leadFormSchema.ts';
-          const constantNames = [
-            'ORIGIN_OPTIONS',
-            'PIPELINE_STAGES',
-            'PROPERTY_TYPES',
-            'RESIDENCE_TYPES',
-            'SERVICE_AREAS',
-            'ADD_ON_SERVICES',
-            'PREFERRED_DAYS',
-            'PREFERRED_TIMES',
-            'INTERACTION_TYPES',
-            'DEFAULT_TAGS',
-          ];
 
           function parse(file, source) {
             return ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
           }
 
-          function findVarStatement(sf, name) {
+          function findInterface(sf, name) {
+            const node = sf.statements.find((statement) => ts.isInterfaceDeclaration(statement) && statement.name.text === name);
+            if (!node) throw new Error(`Interface ${name} missing in ${sf.fileName}`);
+            return node;
+          }
+
+          function findVar(sf, name) {
             for (const statement of sf.statements) {
               if (!ts.isVariableStatement(statement)) continue;
               for (const declaration of statement.declarationList.declarations) {
-                if (ts.isIdentifier(declaration.name) && declaration.name.text === name) {
-                  return { statement, declaration };
-                }
+                if (ts.isIdentifier(declaration.name) && declaration.name.text === name) return { statement, declaration };
               }
             }
-            throw new Error(`Variable ${name} not found in ${sf.fileName}`);
+            throw new Error(`Variable ${name} missing in ${sf.fileName}`);
           }
 
-          function normalizedInitializer(sf, name) {
-            const { declaration } = findVarStatement(sf, name);
-            if (!declaration.initializer) throw new Error(`${name} has no initializer`);
-            return declaration.initializer.getText(sf).replace(/\s+/g, '');
+          function normalize(text) {
+            return text.replace(/\s+/g, '').replace(/AddressEntry|InteractionEntry|Interaction/g, 'SharedType');
           }
 
           function removeRanges(source, ranges) {
-            const sorted = [...ranges].sort((a, b) => b.start - a.start);
             let next = source;
-            for (const { start, end } of sorted) next = next.slice(0, start) + next.slice(end);
+            for (const range of [...ranges].sort((a, b) => b.start - a.start)) {
+              next = next.slice(0, range.start) + next.slice(range.end);
+            }
             return next;
           }
 
           function insertAfterImports(file, source, importText) {
             const sf = parse(file, source);
             const imports = sf.statements.filter(ts.isImportDeclaration);
-            if (!imports.length) return `${importText}\n${source}`;
             const last = imports[imports.length - 1];
             return source.slice(0, last.end) + `\n${importText}` + source.slice(last.end);
           }
@@ -89,53 +76,45 @@ jobs:
           const createSf = parse(createPath, create);
           const editSf = parse(editPath, edit);
 
-          for (const name of constantNames) {
-            const a = normalizedInitializer(createSf, name);
-            const b = normalizedInitializer(editSf, name);
-            if (a !== b) throw new Error(`Create/Edit ${name} definitions differ; refusing automatic extraction`);
+          const createAddress = findInterface(createSf, 'AddressEntry');
+          const editAddress = findInterface(editSf, 'AddressEntry');
+          if (normalize(createAddress.getText(createSf)) !== normalize(editAddress.getText(editSf))) {
+            throw new Error('Create/Edit AddressEntry contracts differ');
           }
 
-          const constants = constantNames.map((name) => {
-            const { statement } = findVarStatement(createSf, name);
-            return statement.getText(createSf).replace(/^const\s+/, 'export const ');
-          }).join('\n\n');
-          fs.mkdirSync(path.dirname(constantsPath), { recursive: true });
-          fs.writeFileSync(constantsPath, `${constants}\n`);
-
-          const createRemoval = constantNames.map((name) => {
-            const { statement } = findVarStatement(createSf, name);
-            return { start: statement.getFullStart(), end: statement.end };
-          });
-          const editRemoval = constantNames.map((name) => {
-            const { statement } = findVarStatement(editSf, name);
-            return { start: statement.getFullStart(), end: statement.end };
-          });
-
-          const schema = findVarStatement(createSf, 'leadFormSchema');
-          if (!schema.declaration.initializer) throw new Error('leadFormSchema initializer missing');
-          const schemaInitializer = schema.declaration.initializer.getText(createSf);
-          fs.mkdirSync(path.dirname(schemaPath), { recursive: true });
-          fs.writeFileSync(schemaPath, `import { z } from "zod";\n\nexport const leadFormSchema = ${schemaInitializer};\n`);
-          createRemoval.push({ start: schema.statement.getFullStart(), end: schema.statement.end });
-
-          const zImport = createSf.statements.find((statement) =>
-            ts.isImportDeclaration(statement) && statement.moduleSpecifier.getText(createSf) === '"zod"'
-          );
-          if (!zImport) throw new Error('zod import not found in CreateLeadModal');
-          createRemoval.push({ start: zImport.getFullStart(), end: zImport.end });
-
-          create = removeRanges(create, createRemoval);
-          edit = removeRanges(edit, editRemoval);
-
-          const constantsImport = `import {\n  ${constantNames.join(',\n  ')},\n} from "../constants/leadFormOptions";`;
-          create = insertAfterImports(createPath, create, `${constantsImport}\nimport { leadFormSchema } from "../schemas/leadFormSchema";`);
-          edit = insertAfterImports(editPath, edit, constantsImport);
-
-          for (const name of constantNames) {
-            if ((create.match(new RegExp(`const\\s+${name}\\b`, 'g')) || []).length) throw new Error(`${name} still declared in CreateLeadModal`);
-            if ((edit.match(new RegExp(`const\\s+${name}\\b`, 'g')) || []).length) throw new Error(`${name} still declared in EditLeadModal`);
+          const createInteraction = findInterface(createSf, 'Interaction');
+          const editInteraction = findInterface(editSf, 'InteractionEntry');
+          if (normalize(createInteraction.getText(createSf)) !== normalize(editInteraction.getText(editSf))) {
+            throw new Error('Create/Edit interaction entry contracts differ');
           }
-          if (/const\s+leadFormSchema\b/.test(create)) throw new Error('leadFormSchema still declared in CreateLeadModal');
+
+          const createFormatter = findVar(createSf, 'formatCurrency');
+          const editFormatter = findVar(editSf, 'formatCurrency');
+          if (!createFormatter.declaration.initializer || !editFormatter.declaration.initializer) throw new Error('formatCurrency initializer missing');
+          if (normalize(createFormatter.declaration.initializer.getText(createSf)) !== normalize(editFormatter.declaration.initializer.getText(editSf))) {
+            throw new Error('Create/Edit formatCurrency implementations differ');
+          }
+
+          create = removeRanges(create, [
+            { start: createAddress.getFullStart(), end: createAddress.end },
+            { start: createInteraction.getFullStart(), end: createInteraction.end },
+            { start: createFormatter.statement.getFullStart(), end: createFormatter.statement.end },
+          ]);
+          edit = removeRanges(edit, [
+            { start: editAddress.getFullStart(), end: editAddress.end },
+            { start: editInteraction.getFullStart(), end: editInteraction.end },
+            { start: editFormatter.statement.getFullStart(), end: editFormatter.statement.end },
+          ]);
+
+          create = create.replace(/\bAddressEntry\b/g, 'LeadAddressEntry').replace(/\bInteraction\b/g, 'LeadInteractionEntry').replace(/\bformatCurrency\b/g, 'formatLeadCurrency');
+          edit = edit.replace(/\bAddressEntry\b/g, 'LeadAddressEntry').replace(/\bInteractionEntry\b/g, 'LeadInteractionEntry').replace(/\bformatCurrency\b/g, 'formatLeadCurrency');
+
+          const sharedImports = 'import type { LeadAddressEntry, LeadInteractionEntry } from "../types/leadForm";\nimport { formatLeadCurrency } from "../utils/leadForm";';
+          create = insertAfterImports(createPath, create, sharedImports);
+          edit = insertAfterImports(editPath, edit, sharedImports);
+
+          if (/interface\s+(AddressEntry|InteractionEntry)\b/.test(create + edit)) throw new Error('Duplicate lead entry interface remains');
+          if (/const\s+formatCurrency\b/.test(create + edit)) throw new Error('Duplicate lead currency formatter remains');
 
           fs.writeFileSync(createPath, create);
           fs.writeFileSync(editPath, edit);
@@ -145,11 +124,11 @@ jobs:
       - run: npm run typecheck
       - run: npx vitest run apps/web/src
       - run: npm run build
-      - name: Commit Leads domain extraction
+      - name: Commit shared Leads form contracts
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add apps/web/src/modules/crm/leads
           git diff --cached --quiet && exit 0
-          git commit -m "refactor(frontend): centralize lead form domain configuration"
+          git commit -m "refactor(frontend): share lead form contracts and formatting"
           git push origin HEAD:dev
