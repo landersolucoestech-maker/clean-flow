@@ -1705,12 +1705,12 @@ export function Payroll() {
                   </Popover>
                 </div>
 
-                <Button onClick={handleFilter} size="icon">
+                <Button onClick={handleFilter} size="icon" aria-label="Apply payroll filter">
                   <Search className="w-4 h-4" />
                 </Button>
 
                 {showClearButton && (
-                  <Button onClick={handleClearFilter} size="icon" variant="outline">
+                  <Button onClick={handleClearFilter} size="icon" variant="outline" aria-label="Clear payroll filter">
                     <X className="w-4 h-4" />
                   </Button>
                 )}
@@ -1853,7 +1853,7 @@ export function Payroll() {
                           <TableCell>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Payroll actions">
                                   <MoreHorizontal className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>

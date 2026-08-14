@@ -656,7 +656,7 @@ export function Communications() {
                 {selectedConversationData && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" aria-label="Conversation actions">
                         <Menu className="w-5 h-5" />
                       </Button>
                     </DropdownMenuTrigger>

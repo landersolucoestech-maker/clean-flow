@@ -17,7 +17,7 @@ export function PageHeader({ title, description, backTo, actions }: PageHeaderPr
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex min-w-0 items-start gap-3">
         {backTo && (
-          <Button variant="outline" size="icon" onClick={() => navigate(backTo)} className="mt-0.5 shrink-0">
+          <Button variant="outline" size="icon" onClick={() => navigate(backTo)} className="mt-0.5 shrink-0" aria-label="Go back">
             <ArrowLeft className="h-4 w-4" />
           </Button>
         )}

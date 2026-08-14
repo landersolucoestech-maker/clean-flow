@@ -311,7 +311,7 @@ export function TeamUserModal({
           {mode === "edit" && staff && canDelete && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button type="button" variant="destructive" size="icon" disabled={isPending}>
+                <Button type="button" variant="destructive" size="icon" disabled={isPending} aria-label="Delete team member">
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </AlertDialogTrigger>

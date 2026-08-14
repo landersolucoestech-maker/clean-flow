@@ -101,7 +101,7 @@ export function DialpadIntegrationPanel() {
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button variant="outline" size="icon" className="h-9 w-9 shrink-0" onClick={copyRedirectUri}>
+                      <Button variant="outline" size="icon" className="h-9 w-9 shrink-0" onClick={copyRedirectUri} aria-label="Copy Dialpad redirect URI">
                         {copied ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
                       </Button>
                     </TooltipTrigger>

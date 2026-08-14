@@ -552,7 +552,7 @@ export function Billing() {
                         <TableCell onClick={(e) => e.stopPropagation()}>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Invoice actions">
                                 <MoreHorizontal className="w-4 h-4" />
                               </Button>
                             </DropdownMenuTrigger>

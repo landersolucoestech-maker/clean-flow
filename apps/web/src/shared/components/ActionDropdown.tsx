@@ -27,7 +27,7 @@ export function ActionDropdown({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg text-muted-foreground hover:text-foreground">
+        <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg text-muted-foreground hover:text-foreground" aria-label="Actions">
           <MoreHorizontal className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>

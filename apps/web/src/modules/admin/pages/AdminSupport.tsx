@@ -305,7 +305,7 @@ export function AdminSupport() {
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                            <Button variant="ghost" size="icon" className="text-muted-foreground/70 hover:text-muted-foreground">
+                            <Button variant="ghost" size="icon" className="text-muted-foreground/70 hover:text-muted-foreground" aria-label="Ticket actions">
                               <MoreHorizontal className="w-4 h-4" />
                             </Button>
                           </DropdownMenuTrigger>

@@ -606,10 +606,10 @@ export function InvoiceModal({ open, onOpenChange, appointment, depositAmount, i
 
         <DialogFooter className="flex-col sm:flex-row gap-2">
           <div className="flex gap-2">
-            <Button variant="outline" size="icon" onClick={handlePrint}>
+            <Button variant="outline" size="icon" onClick={handlePrint} aria-label="Print invoice">
               <Printer className="w-4 h-4" />
             </Button>
-            <Button variant="outline" size="icon" onClick={handleDownload}>
+            <Button variant="outline" size="icon" onClick={handleDownload} aria-label="Download invoice">
               <Download className="w-4 h-4" />
             </Button>
           </div>

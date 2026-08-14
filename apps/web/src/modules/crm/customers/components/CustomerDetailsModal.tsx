@@ -820,7 +820,7 @@ export function CustomerDetailsModal({
                   onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
                   className="flex-1"
                 />
-                <Button onClick={handleSendMessage} size="icon">
+                <Button onClick={handleSendMessage} size="icon" aria-label="Send message">
                   <Send className="w-4 h-4" />
                 </Button>
               </div>

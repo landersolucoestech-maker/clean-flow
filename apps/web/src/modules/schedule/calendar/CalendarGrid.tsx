@@ -336,10 +336,10 @@ export function CalendarGrid({
         <div className="flex items-center p-4 border-b border-border relative">
           <h2 className="text-xl font-bold text-foreground absolute left-1/2 -translate-x-1/2">{monthYear}</h2>
           <div className="flex items-center space-x-2 ml-auto">
-            <Button variant="outline" size="icon" onClick={() => navigateWeek("prev")}>
+            <Button variant="outline" size="icon" onClick={() => navigateWeek("prev")} aria-label="Previous week">
               <ChevronLeft className="w-4 h-4" />
             </Button>
-            <Button variant="outline" size="icon" onClick={() => navigateWeek("next")}>
+            <Button variant="outline" size="icon" onClick={() => navigateWeek("next")} aria-label="Next week">
               <ChevronRight className="w-4 h-4" />
             </Button>
           </div>

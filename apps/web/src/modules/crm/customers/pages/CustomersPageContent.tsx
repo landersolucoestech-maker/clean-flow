@@ -570,7 +570,7 @@ export function Customers() {
                         <TableCell>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
+                              <Button variant="ghost" size="icon" aria-label="Customer actions">
                                 <MoreHorizontal className="w-4 h-4" />
                               </Button>
                             </DropdownMenuTrigger>
@@ -612,7 +612,7 @@ export function Customers() {
                           </div>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Customer actions">
                                 <MoreHorizontal className="w-4 h-4" />
                               </Button>
                             </DropdownMenuTrigger>

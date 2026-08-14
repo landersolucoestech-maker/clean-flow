@@ -125,7 +125,7 @@ export function Sidebar({ className }: SidebarProps) {
             </div>
           </div>
         )}
-        <Button variant="ghost" size="icon" onClick={() => setIsCollapsed(!isCollapsed)} className="ml-auto rounded-xl text-muted-foreground">
+        <Button variant="ghost" size="icon" onClick={() => setIsCollapsed(!isCollapsed)} className="ml-auto rounded-xl text-muted-foreground" aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}>
           {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </Button>
       </div>

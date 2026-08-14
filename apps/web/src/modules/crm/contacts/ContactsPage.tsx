@@ -200,7 +200,7 @@ export function Contacts() {
                             <TableCell><Badge variant={contact.status === "Active" ? "default" : "outline"}>{contact.status}</Badge></TableCell>
                             <TableCell>
                               <DropdownMenu>
-                                <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                                <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label="Contact actions"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                   <DropdownMenuItem onClick={() => openDetails(contact)}><Eye className="mr-2 h-4 w-4" />View</DropdownMenuItem>
                                   {mayEdit && <DropdownMenuItem onClick={() => openEdit(contact)}><Pencil className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>}
