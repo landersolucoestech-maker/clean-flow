@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { Loader2, CheckCircle, XCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { completeGoogleOAuth } from "./services/googleOAuthService";
 
 export default function GoogleCallback() {
   const [searchParams] = useSearchParams();
@@ -13,28 +13,28 @@ export default function GoogleCallback() {
 
   useEffect(() => {
     const notifyOpener = (success: boolean, error: string | null, data?: unknown) => {
-      if (window.opener) {
-        window.opener.postMessage(
-          {
-            type: "google-callback",
-            success,
-            error,
-            data,
-          },
-          window.location.origin
-        );
-      }
+      if (!window.opener) return;
+      window.opener.postMessage(
+        {
+          type: "google-callback",
+          success,
+          error,
+          data,
+        },
+        window.location.origin,
+      );
     };
 
     const handleCallback = async () => {
       const code = searchParams.get("code");
-      const error = searchParams.get("error");
+      const providerError = searchParams.get("error");
       const errorDescription = searchParams.get("error_description");
 
-      if (error) {
+      if (providerError) {
+        const errorMessage = errorDescription || "Autorização negada";
         setStatus("error");
-        setMessage(errorDescription || "Autorização negada");
-        notifyOpener(false, errorDescription || "Autorização negada");
+        setMessage(errorMessage);
+        notifyOpener(false, errorMessage);
         return;
       }
 
@@ -46,44 +46,29 @@ export default function GoogleCallback() {
       }
 
       try {
-        const { data, error: callbackError } = await supabase.functions.invoke("google-auth", {
-          body: {
-            action: "exchange-token",
-            code,
-            state: oauthState,
-          },
-        });
-
-        if (callbackError) {
-          throw new Error(callbackError.message);
-        }
-
+        const data = await completeGoogleOAuth(code, oauthState);
         setStatus("success");
         setMessage("Google conectado com sucesso!");
-
         notifyOpener(true, null);
 
-        // If this was opened as a popup, close it.
         if (window.opener) {
-          setTimeout(() => window.close(), 1200);
+          window.setTimeout(() => window.close(), 1200);
           return;
         }
 
-        // Otherwise, navigate back
-        setTimeout(() => {
-          const returnUrl = typeof data?.returnUrl === "string" ? new URL(data.returnUrl) : null;
+        window.setTimeout(() => {
+          const returnUrl = typeof data.returnUrl === "string" ? new URL(data.returnUrl) : null;
           window.location.assign(returnUrl?.origin === window.location.origin ? returnUrl.toString() : "/settings");
         }, 400);
-      } catch (err) {
-        console.error("Google callback error:", err);
-        const msg = err instanceof Error ? err.message : "Erro desconhecido";
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
         setStatus("error");
-        setMessage(msg);
-        notifyOpener(false, msg);
+        setMessage(errorMessage);
+        notifyOpener(false, errorMessage);
       }
     };
 
-    handleCallback();
+    void handleCallback();
   }, [oauthState, searchParams]);
 
   return (
