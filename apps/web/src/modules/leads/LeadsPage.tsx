@@ -2,8 +2,7 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { TablesInsert } from "@/integrations/supabase/types";
-import { Header } from "@/components/layout/Header";
-import { Sidebar } from "@/components/layout/Sidebar";
+import { PageLayout } from "@/components/layout/PageLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -744,25 +743,19 @@ export function Leads() {
   const visitScheduled = statsByStatus["visit_scheduled"] || 0;
 
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar />
-      
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
-        
-        <main className="flex-1 overflow-y-auto p-6 space-y-6">
+    <PageLayout>
+      <div className="space-y-6">
           {/* Page Header */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">{t("leads.title")}</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{t("leads.title")}</h1>
               <p className="text-muted-foreground">
                 {t("leads.subtitle")}
               </p>
             </div>
             <Button 
               variant="hero" 
-              size="lg" 
-              className="flex items-center space-x-2"
+              className="flex items-center gap-2"
               onClick={() => setCreateModalOpen(true)}
             >
               <Plus className="w-4 h-4" />
@@ -772,23 +765,23 @@ export function Leads() {
 
 
           {/* Pipeline Status Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
             {LEAD_STATUSES.map(status => (
               <Card 
                 key={status.value}
                 className={cn(
-                  "cursor-pointer transition-all hover:shadow-md",
+                  "cursor-pointer border-border/80 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md",
                   statusFilter === status.value && "ring-2 ring-primary"
                 )}
                 onClick={() => setStatusFilter(statusFilter === status.value ? "all" : status.value)}
               >
-                <CardContent className="p-3">
+                <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs font-medium text-muted-foreground truncate">{t(`leads.status.${status.value}`) || status.label}</p>
                       <p className="text-xl font-bold">{statsByStatus[status.value] || 0}</p>
                     </div>
-                    <div className={cn("w-3 h-3 rounded-full", status.color)} />
+                    <div className={cn("h-3 w-3 rounded-full ring-4 ring-background", status.color)} />
                   </div>
                 </CardContent>
               </Card>
@@ -796,8 +789,8 @@ export function Leads() {
           </div>
 
           {/* Filters and Search */}
-          <div className="flex items-center gap-4 flex-wrap">
-            <div className="relative flex-1 min-w-[200px] max-w-md">
+          <div className="flex flex-col gap-3 rounded-2xl border border-border/80 bg-card p-4 shadow-sm lg:flex-row lg:flex-wrap lg:items-center">
+            <div className="relative min-w-0 flex-1 lg:min-w-[240px]">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
                 placeholder={t("leads.searchPlaceholder")}
@@ -808,7 +801,7 @@ export function Leads() {
             </div>
 
             <Select value={originFilter} onValueChange={setOriginFilter}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full lg:w-[180px]">
                 <SelectValue placeholder={t("leads.origin")} />
               </SelectTrigger>
               <SelectContent>
@@ -820,7 +813,7 @@ export function Leads() {
             </Select>
 
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full lg:w-[180px]">
                 <SelectValue placeholder={t("common.status")} />
               </SelectTrigger>
               <SelectContent>
@@ -844,7 +837,7 @@ export function Leads() {
 
 
           {/* Leads Table */}
-          <Card>
+          <Card className="overflow-hidden border-border/80 shadow-sm">
             <CardContent className="p-0">
               {isLoading ? (
                 <div className="flex items-center justify-center h-64">
@@ -876,7 +869,7 @@ export function Leads() {
                       filteredEstimates.map((estimate) => {
                         const statusConfig = getStatusConfig(estimate.status);
                         return (
-                          <TableRow key={estimate.id} className="hover:bg-muted/50">
+                          <TableRow key={estimate.id}>
                             <TableCell>
                               <div>
                                 <p className="font-medium">{estimate.id}</p>
@@ -945,7 +938,7 @@ export function Leads() {
                                 
                                 if (bothPaid) {
                                   return (
-                                    <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 text-xs">
+                                    <Badge variant="outline" className="border-success/30 bg-success/10 text-xs text-success">
                                       100% Paid
                                     </Badge>
                                   );
@@ -953,7 +946,7 @@ export function Leads() {
                                 
                                 if (depositPaid && finalPending) {
                                   return (
-                                    <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 text-xs">
+                                    <Badge variant="outline" className="border-warning/30 bg-warning/10 text-xs text-warning-foreground">
                                       50% Paid
                                     </Badge>
                                   );
@@ -961,7 +954,7 @@ export function Leads() {
                                 
                                 if (depositPaid && invoiceStatus.final === "none") {
                                   return (
-                                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-xs">
+                                    <Badge variant="outline" className="border-primary/30 bg-primary-light text-xs text-primary-dark">
                                       Deposit Paid
                                     </Badge>
                                   );
@@ -969,7 +962,7 @@ export function Leads() {
                                 
                                 if (invoiceStatus.deposit === "pending") {
                                   return (
-                                    <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200 text-xs">
+                                    <Badge variant="outline" className="border-warning/30 bg-warning/10 text-xs text-warning-foreground">
                                       Deposit Pending
                                     </Badge>
                                   );
@@ -1006,11 +999,11 @@ export function Leads() {
                                   </DropdownMenuItem>
                                   <DropdownMenuSeparator />
                                   <DropdownMenuItem onClick={() => handleApprove(estimate.id)}>
-                                    <CheckCircle className="w-4 h-4 mr-2 text-green-500" />
+                                    <CheckCircle className="mr-2 h-4 w-4 text-success" />
                                     Aprovar
                                   </DropdownMenuItem>
                                   <DropdownMenuItem onClick={() => handleReject(estimate.id)}>
-                                    <XCircle className="w-4 h-4 mr-2 text-red-500" />
+                                    <XCircle className="mr-2 h-4 w-4 text-destructive" />
                                     Marcar como Perdido
                                   </DropdownMenuItem>
                                   <DropdownMenuSeparator />
@@ -1033,7 +1026,6 @@ export function Leads() {
               )}
             </CardContent>
           </Card>
-        </main>
       </div>
 
       {/* Modals */}
@@ -1112,6 +1104,6 @@ export function Leads() {
           invoiceType: 'deposit' as const,
         } : undefined}
       />
-    </div>
+    </PageLayout>
   );
 }
