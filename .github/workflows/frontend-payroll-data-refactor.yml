@@ -1,0 +1,94 @@
+name: Frontend Payroll Data Refactor
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - ".github/workflows/frontend-payroll-data-refactor.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  refactor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Isolate payroll queries and pure helpers
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = 'apps/web/src/modules/payroll/PayrollPage.tsx';
+          let src = fs.readFileSync(path, 'utf8');
+
+          src = src.replace('import { supabase } from "@/integrations/supabase/client";\n', '');
+          src = src.replace(
+            'import { buildPayrollListRows, sortPayrollRecords } from "./utils/payrollView";',
+            'import { buildPayrollListRows, isCompletedJobStatus, isUuid, normalizePayrollName, sortPayrollRecords } from "./utils/payrollView";\nimport { fetchExistingPayrollRecordKeys, fetchPayrollRecordsForPeriod, sendPayrollStatementSms, updatePayrollRecordValues } from "./services/payrollDataService";',
+          );
+
+          const firstFetchStart = src.indexOf('      // Fetch fresh records directly from database to ensure we have latest data');
+          const firstFetchEnd = src.indexOf('      // If there are no records yet, auto-generate them from finished jobs for this period', firstFetchStart);
+          if (firstFetchStart < 0 || firstFetchEnd < 0) throw new Error('Initial payroll fetch block missing');
+          src = src.slice(0, firstFetchStart) + '      let freshRecords = await fetchPayrollRecordsForPeriod(periodStartISO, periodEndISO);\n\n' + src.slice(firstFetchEnd);
+
+          const refetchStart = src.indexOf('        const refetch = await supabase');
+          const refetchEnd = src.indexOf('      }\n\n      if (!freshRecords || freshRecords.length === 0)', refetchStart);
+          if (refetchStart < 0 || refetchEnd < 0) throw new Error('Payroll refetch block missing');
+          src = src.slice(0, refetchStart) + '        freshRecords = await fetchPayrollRecordsForPeriod(periodStartISO, periodEndISO);\n' + src.slice(refetchEnd);
+
+          const normalizeBlock = `      const normalizeName = (value: string) =>\n        value\n          .normalize("NFKD")\n          .replace(/[\\u0300-\\u036f]/g, "")\n          .toLowerCase()\n          .replace(/[^a-z0-9 ]+/g, " ")\n          .replace(/\\s+/g, " ")\n          .trim();\n\n`;
+          if (!src.includes(normalizeBlock)) throw new Error('First normalizeName block missing');
+          src = src.replace(normalizeBlock, '');
+          src = src.replaceAll('normalizeName(', 'normalizePayrollName(');
+
+          const updateStart = src.indexOf('          const { error } = await supabase\n            .from("payroll_records")\n            .update({');
+          const updateEnd = src.indexOf('          updatedCount++;', updateStart);
+          if (updateStart < 0 || updateEnd < 0) throw new Error('Payroll record update block missing');
+          const updateReplacement = `          await updatePayrollRecordValues(record.id, {\n            base_value: unitValue,\n            bonus: bonusForThisRecord,\n            total: newTotal,\n          });\n\n`;
+          src = src.slice(0, updateStart) + updateReplacement + src.slice(updateEnd);
+
+          const secondNormalizeBlock = `    const normalizeName = (value: string) =>\n      value\n        .normalize("NFKD")\n        .replace(/[\\u0300-\\u036f]/g, "")\n        .toLowerCase()\n        .replace(/[^a-z0-9 ]+/g, " ")\n        .replace(/\\s+/g, " ")\n        .trim();\n\n`;
+          if (src.includes(secondNormalizeBlock)) src = src.replace(secondNormalizeBlock, '');
+
+          const uuidBlock = `    const isUuid = (value: string) =>\n      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);\n\n`;
+          if (!src.includes(uuidBlock)) throw new Error('Inline UUID helper missing');
+          src = src.replace(uuidBlock, '');
+
+          const completedStart = src.indexOf('    const isCompletedJob = (status: string | null) => {');
+          const completedEnd = src.indexOf('    setIsGeneratingFromJobs(true);', completedStart);
+          if (completedStart < 0 || completedEnd < 0) throw new Error('Completed job helper block missing');
+          src = src.slice(0, completedStart) + src.slice(completedEnd);
+          src = src.replaceAll('isCompletedJob(', 'isCompletedJobStatus(');
+
+          const existingStart = src.indexOf('      // Fetch existing records for this period (fresh) to avoid duplicates and allow re-runs safely');
+          const existingEnd = src.indexOf('      const existingKeys = new Set<string>(', existingStart);
+          if (existingStart < 0 || existingEnd < 0) throw new Error('Existing payroll records fetch block missing');
+          src = src.slice(0, existingStart) + '      const existingPeriodRecords = await fetchExistingPayrollRecordKeys(periodStartISO, periodEndISO);\n\n' + src.slice(existingEnd);
+          src = src.replace('(existingPeriodRecords || [])', 'existingPeriodRecords');
+
+          if (/supabase\.from\("payroll_records"\)/.test(src)) throw new Error('Direct payroll_records query remains');
+          fs.writeFileSync(path, src);
+          NODE
+      - run: node scripts/frontend-audit.mjs
+      - run: npx eslint apps/web/src packages --max-warnings=0
+      - run: npm run typecheck
+      - run: npx vitest run apps/web/src
+      - run: npm run build
+      - name: Commit payroll data access refactor
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/web/src/modules/payroll/PayrollPage.tsx apps/web/src/modules/payroll/services apps/web/src/modules/payroll/utils
+          git diff --cached --quiet && exit 0
+          git commit -m "refactor(frontend): isolate payroll data access"
+          git push origin HEAD:dev
