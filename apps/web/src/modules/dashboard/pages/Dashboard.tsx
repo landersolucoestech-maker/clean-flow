@@ -27,7 +27,6 @@ export function Dashboard() {
     const currentYear = now.getFullYear();
     const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
     const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
-
     const currentMonthInvoices = invoices.filter((invoice) => {
       if (!invoice.issue_date) return false;
       const date = new Date(invoice.issue_date);
@@ -38,56 +37,32 @@ export function Dashboard() {
       const date = new Date(invoice.issue_date);
       return date.getMonth() === lastMonth && date.getFullYear() === lastMonthYear;
     });
-
-    const currentMonthRevenue = currentMonthInvoices
-      .filter((invoice) => invoice.status === "paid")
-      .reduce((sum, invoice) => sum + (invoice.total || 0), 0);
-    const lastMonthRevenue = lastMonthInvoices
-      .filter((invoice) => invoice.status === "paid")
-      .reduce((sum, invoice) => sum + (invoice.total || 0), 0);
-
-    const revenueChange = lastMonthRevenue > 0
-      ? ((currentMonthRevenue - lastMonthRevenue) / lastMonthRevenue * 100).toFixed(1)
-      : currentMonthRevenue > 0 ? "+100" : "0";
-
+    const currentMonthRevenue = currentMonthInvoices.filter((invoice) => invoice.status === "paid").reduce((sum, invoice) => sum + (invoice.total || 0), 0);
+    const lastMonthRevenue = lastMonthInvoices.filter((invoice) => invoice.status === "paid").reduce((sum, invoice) => sum + (invoice.total || 0), 0);
+    const revenueChange = lastMonthRevenue > 0 ? ((currentMonthRevenue - lastMonthRevenue) / lastMonthRevenue * 100).toFixed(1) : currentMonthRevenue > 0 ? "+100" : "0";
     const activeCustomers = customers.filter((customer) => customer.status === "Active").length;
     const newCustomersThisMonth = customers.filter((customer) => {
       if (!customer.customer_since) return false;
       const date = new Date(customer.customer_since);
       return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
     }).length;
-
     const startOfWeek = new Date(now);
     startOfWeek.setDate(now.getDate() - now.getDay());
     startOfWeek.setHours(0, 0, 0, 0);
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 6);
     endOfWeek.setHours(23, 59, 59, 999);
-
     const jobsThisWeek = jobs.filter((job) => {
       if (!job.scheduled_date) return false;
       const date = new Date(job.scheduled_date);
       return date >= startOfWeek && date <= endOfWeek;
     });
-
     const completedThisWeek = jobsThisWeek.filter((job) => job.status === "completed").length;
     const pendingThisWeek = jobsThisWeek.filter((job) => job.status !== "completed" && job.status !== "cancelled").length;
     const totalCurrentMonth = currentMonthInvoices.reduce((sum, invoice) => sum + (invoice.total || 0), 0);
     const totalLastMonth = lastMonthInvoices.reduce((sum, invoice) => sum + (invoice.total || 0), 0);
-    const growthRate = totalLastMonth > 0
-      ? ((totalCurrentMonth - totalLastMonth) / totalLastMonth * 100).toFixed(0)
-      : totalCurrentMonth > 0 ? "100" : "0";
-
-    return {
-      monthlyRevenue: currentMonthRevenue,
-      revenueChange,
-      activeCustomers,
-      newCustomersThisMonth,
-      jobsThisWeek: jobsThisWeek.length,
-      completedThisWeek,
-      pendingThisWeek,
-      growthRate,
-    };
+    const growthRate = totalLastMonth > 0 ? ((totalCurrentMonth - totalLastMonth) / totalLastMonth * 100).toFixed(0) : totalCurrentMonth > 0 ? "100" : "0";
+    return { monthlyRevenue: currentMonthRevenue, revenueChange, activeCustomers, newCustomersThisMonth, jobsThisWeek: jobsThisWeek.length, completedThisWeek, pendingThisWeek, growthRate };
   }, [jobs, customers, invoices]);
 
   const formatCurrency = (value: number) => new Intl.NumberFormat(companySettings?.locale || "en-US", {
@@ -98,53 +73,38 @@ export function Dashboard() {
   }).format(value);
 
   return (
-    <PageLayout>
-      <section className="flex flex-col gap-1">
+    <PageLayout contentClassName="space-y-7 lg:space-y-8">
+      <section className="rounded-2xl border border-border/70 bg-card px-5 py-5 shadow-sm sm:px-6 lg:px-7 lg:py-6">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Overview</p>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-          {t("dashboard.welcome")}{currentStaff?.name ? `, ${currentStaff.name}` : ""}!
-        </h1>
-        <p className="text-sm text-muted-foreground">{t("dashboard.subtitle")}</p>
+        <div className="mt-1 flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+              {t("dashboard.welcome")}{currentStaff?.name ? `, ${currentStaff.name}` : ""}!
+            </h1>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">{t("dashboard.subtitle")}</p>
+          </div>
+          <p className="text-xs font-medium text-muted-foreground">Operational snapshot for your cleaning business</p>
+        </div>
       </section>
 
-      <section className={`grid grid-cols-1 gap-4 sm:grid-cols-2 ${canViewFinancials ? "xl:grid-cols-4" : "xl:grid-cols-2"}`}>
-        {canViewFinancials && (
-          <StatsCard
-            title={t("dashboard.monthlyRevenue")}
-            value={formatCurrency(stats.monthlyRevenue)}
-            change={`${Number(stats.revenueChange) >= 0 ? "+" : ""}${stats.revenueChange}% ${t("dashboard.fromLastMonth")}`}
-            changeType={Number(stats.revenueChange) >= 0 ? "positive" : "negative"}
-            icon={<DollarSign className="h-5 w-5 text-primary" />}
-          />
-        )}
-        <StatsCard
-          title={t("dashboard.activeCustomers")}
-          value={String(stats.activeCustomers)}
-          change={`+${stats.newCustomersThisMonth} ${t("dashboard.newThisMonth")}`}
-          changeType="positive"
-          icon={<Users className="h-5 w-5 text-primary" />}
-        />
-        <StatsCard
-          title={t("dashboard.jobsThisWeek")}
-          value={String(stats.jobsThisWeek)}
-          change={`${stats.completedThisWeek} ${t("dashboard.completed")}, ${stats.pendingThisWeek} ${t("payroll.pending").toLowerCase()}`}
-          changeType="neutral"
-          icon={<Calendar className="h-5 w-5 text-primary" />}
-        />
-        {canViewFinancials && (
-          <StatsCard
-            title={t("dashboard.growthRate")}
-            value={`${stats.growthRate}%`}
-            change={`${Number(stats.growthRate) >= 0 ? "+" : ""}${stats.growthRate}% ${t("dashboard.fromLastMonth")}`}
-            changeType={Number(stats.growthRate) >= 0 ? "positive" : "negative"}
-            icon={<TrendingUp className="h-5 w-5 text-primary" />}
-          />
-        )}
+      <section className="space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <div><h2 className="text-sm font-semibold text-foreground">Business snapshot</h2><p className="text-xs text-muted-foreground">Key indicators at a glance</p></div>
+        </div>
+        <div className={`grid grid-cols-1 gap-4 sm:grid-cols-2 ${canViewFinancials ? "2xl:grid-cols-4" : "xl:grid-cols-2"}`}>
+          {canViewFinancials && <StatsCard title={t("dashboard.monthlyRevenue")} value={formatCurrency(stats.monthlyRevenue)} change={`${Number(stats.revenueChange) >= 0 ? "+" : ""}${stats.revenueChange}% ${t("dashboard.fromLastMonth")}`} changeType={Number(stats.revenueChange) >= 0 ? "positive" : "negative"} icon={<DollarSign className="h-5 w-5 text-primary" />} />}
+          <StatsCard title={t("dashboard.activeCustomers")} value={String(stats.activeCustomers)} change={`+${stats.newCustomersThisMonth} ${t("dashboard.newThisMonth")}`} changeType="positive" icon={<Users className="h-5 w-5 text-primary" />} />
+          <StatsCard title={t("dashboard.jobsThisWeek")} value={String(stats.jobsThisWeek)} change={`${stats.completedThisWeek} ${t("dashboard.completed")}, ${stats.pendingThisWeek} ${t("payroll.pending").toLowerCase()}`} changeType="neutral" icon={<Calendar className="h-5 w-5 text-primary" />} />
+          {canViewFinancials && <StatsCard title={t("dashboard.growthRate")} value={`${stats.growthRate}%`} change={`${Number(stats.growthRate) >= 0 ? "+" : ""}${stats.growthRate}% ${t("dashboard.fromLastMonth")}`} changeType={Number(stats.growthRate) >= 0 ? "positive" : "negative"} icon={<TrendingUp className="h-5 w-5 text-primary" />} />}
+        </div>
       </section>
 
-      <section className="grid grid-cols-1 gap-5 xl:grid-cols-2">
-        <RecentActivity includeInvoices={canViewFinancials} />
-        <UpcomingJobs />
+      <section className="space-y-3">
+        <div><h2 className="text-sm font-semibold text-foreground">Operations</h2><p className="text-xs text-muted-foreground">Recent activity and upcoming work</p></div>
+        <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(360px,0.85fr)]">
+          <RecentActivity includeInvoices={canViewFinancials} />
+          <UpcomingJobs />
+        </div>
       </section>
     </PageLayout>
   );
