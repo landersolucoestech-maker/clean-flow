@@ -1,16 +1,13 @@
 name: Frontend Settings Service Refactor
 
 on:
-  push:
-    branches: [dev]
-    paths:
-      - ".github/workflows/frontend-settings-service-refactor.yml"
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  refactor:
+  validate:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -23,58 +20,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Move settings Supabase calls behind service
-        run: |
-          node <<'NODE'
-          const fs = require('node:fs');
-          const path = 'apps/web/src/modules/settings/SettingsPage.tsx';
-          let src = fs.readFileSync(path, 'utf8');
-
-          const supabaseImport = 'import { supabase } from "@/integrations/supabase/client";\n';
-          if (!src.includes(supabaseImport)) throw new Error('Settings Supabase import missing');
-          src = src.replace(supabaseImport, '');
-
-          const importAnchor = 'import { useCompanySettings, useUpdateCompanySettings, BusinessHours } from "@/hooks/useCompanySettings";';
-          if (!src.includes(importAnchor)) throw new Error('Settings service import anchor missing');
-          src = src.replace(importAnchor, `${importAnchor}\nimport { changeCurrentPassword, loadNotificationPreferences, saveCurrentProfile, saveNotificationPreferences } from "./services/settingsAccountService";`);
-
-          const loadStart = src.indexOf('  useEffect(() => {\n    let active = true;\n    void supabase.auth.getUser()');
-          const loadEnd = src.indexOf('  }, []);', loadStart);
-          if (loadStart < 0 || loadEnd < 0) throw new Error('Notification preference load block missing');
-          const loadReplacement = `  useEffect(() => {\n    let active = true;\n    void loadNotificationPreferences()\n      .then((preferences) => {\n        if (!active || !preferences) return;\n        setJobUpdatesEmail(preferences.job_updates_email);\n        setJobRemindersSms(preferences.job_reminders_sms);\n        setPaymentNotificationsEmail(preferences.payment_notifications_email);\n        setPaymentAlertsSms(preferences.payment_alerts_sms);\n        setCustomerFeedbackSms(preferences.customer_feedback_sms);\n        setSystemAlertsSms(preferences.system_alerts_sms);\n        setWeeklyReportsEmail(preferences.weekly_reports_email);\n      })\n      .catch(() => {\n        if (active) toast.error("Could not load notification preferences");\n      });\n    return () => { active = false; };\n  }, []);`;
-          src = src.slice(0, loadStart) + loadReplacement + src.slice(loadEnd + '  }, []);'.length);
-
-          const profileStart = src.indexOf('  const handleSaveProfile = async () => {');
-          const profileEnd = src.indexOf('  const handleSaveCompany = () => {', profileStart);
-          if (profileStart < 0 || profileEnd < 0) throw new Error('Profile handler block missing');
-          const profileReplacement = `  const handleSaveProfile = async () => {\n    if (!fullName.trim()) {\n      toast.error("Full name is required");\n      return;\n    }\n    try {\n      const data = await saveCurrentProfile(fullName.trim(), userPhone.trim() || null);\n      await queryClient.invalidateQueries({ queryKey: ["staff"] });\n      if (data?.auth_metadata_synced === false) {\n        toast.warning("Profile saved, but login metadata synchronization needs attention");\n      } else {\n        toast.success("Profile saved successfully!");\n      }\n    } catch {\n      toast.error("Could not save profile");\n    }\n  };\n\n`;
-          src = src.slice(0, profileStart) + profileReplacement + src.slice(profileEnd);
-
-          const notificationsStart = src.indexOf('  const handleSaveNotifications = async () => {');
-          const notificationsEnd = src.indexOf('  const handleOpenCreateUser = () => {', notificationsStart);
-          if (notificationsStart < 0 || notificationsEnd < 0) throw new Error('Notification save handler missing');
-          const notificationsReplacement = `  const handleSaveNotifications = async () => {\n    try {\n      await saveNotificationPreferences({\n        jobUpdatesEmail,\n        jobRemindersSms,\n        paymentNotificationsEmail,\n        paymentAlertsSms,\n        customerFeedbackSms,\n        systemAlertsSms,\n        weeklyReportsEmail,\n      });\n      toast.success("Notification preferences saved!");\n    } catch (error) {\n      if (error instanceof Error && error.message === "AUTHENTICATED_ACCOUNT_NOT_FOUND") {\n        toast.error("Authenticated account not found");\n        return;\n      }\n      toast.error("Could not save notification preferences");\n    }\n  };\n\n`;
-          src = src.slice(0, notificationsStart) + notificationsReplacement + src.slice(notificationsEnd);
-
-          const passwordStart = src.indexOf('  const handleChangePassword = async () => {');
-          const passwordEnd = src.indexOf('  const handleUpdateBusinessHours =', passwordStart);
-          if (passwordStart < 0 || passwordEnd < 0) throw new Error('Password handler missing');
-          const passwordReplacement = `  const handleChangePassword = async () => {\n    if (!currentPassword || !newPassword || !confirmPassword) {\n      toast.error("Please fill in all password fields");\n      return;\n    }\n    if (newPassword !== confirmPassword) {\n      toast.error("New passwords do not match");\n      return;\n    }\n    if (newPassword.length < 12) {\n      toast.error("Password must be at least 12 characters");\n      return;\n    }\n    try {\n      await changeCurrentPassword(currentPassword, newPassword);\n      toast.success("Password changed successfully");\n      setCurrentPassword("");\n      setNewPassword("");\n      setConfirmPassword("");\n    } catch (error) {\n      if (error instanceof Error && error.message === "AUTHENTICATED_ACCOUNT_NOT_FOUND") {\n        toast.error("Authenticated account not found");\n        return;\n      }\n      if (error instanceof Error && error.message === "CURRENT_PASSWORD_INCORRECT") {\n        toast.error("Current password is incorrect");\n        return;\n      }\n      toast.error("Could not change password");\n    }\n  };\n\n`;
-          src = src.slice(0, passwordStart) + passwordReplacement + src.slice(passwordEnd);
-
-          if (src.includes('supabase.')) throw new Error('Direct Supabase access remains in SettingsPage');
-          fs.writeFileSync(path, src);
-          NODE
       - run: node scripts/frontend-audit.mjs
       - run: npx eslint apps/web/src packages --max-warnings=0
       - run: npm run typecheck
       - run: npx vitest run apps/web/src
       - run: npm run build
-      - name: Commit settings service refactor
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/web/src/modules/settings/SettingsPage.tsx apps/web/src/modules/settings/services/settingsAccountService.ts
-          git diff --cached --quiet && exit 0
-          git commit -m "refactor(frontend): isolate settings account data access"
-          git push origin HEAD:dev
