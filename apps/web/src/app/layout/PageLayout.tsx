@@ -2,21 +2,30 @@ import { ReactNode } from "react";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { usePageLayoutTopContent } from "@/components/layout/usePageLayoutTopContent";
+import { cn } from "@/lib/utils";
 
 interface PageLayoutProps {
   children: ReactNode;
+  fullHeight?: boolean;
+  contentClassName?: string;
 }
 
-export function PageLayout({ children }: PageLayoutProps) {
+export function PageLayout({ children, fullHeight = false, contentClassName }: PageLayoutProps) {
   const topContent = usePageLayoutTopContent();
 
   return (
-    <div className="flex min-h-screen bg-background text-foreground">
+    <div className={cn("flex bg-background text-foreground", fullHeight ? "h-screen overflow-hidden" : "min-h-screen")}>
       <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col">
         <Header />
-        <main className="flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-[1600px] space-y-6 px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
+        <main className={cn("flex-1", fullHeight ? "overflow-hidden" : "overflow-y-auto")}>
+          <div
+            className={cn(
+              "mx-auto w-full px-4 py-5 sm:px-6 lg:px-8 lg:py-7",
+              fullHeight ? "flex h-full max-w-none flex-col gap-6" : "max-w-[1600px] space-y-6",
+              contentClassName,
+            )}
+          >
             {topContent}
             {children}
           </div>
