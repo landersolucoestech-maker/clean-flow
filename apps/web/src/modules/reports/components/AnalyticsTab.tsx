@@ -71,10 +71,10 @@ function MetricCard({
   };
 
   const getProgressColor = (p: number) => {
-    if (p >= 80) return "bg-green-500";
-    if (p >= 60) return "bg-blue-500";
-    if (p >= 40) return "bg-yellow-500";
-    return "bg-red-500";
+    if (p >= 80) return "bg-success";
+    if (p >= 60) return "bg-primary";
+    if (p >= 40) return "bg-warning";
+    return "bg-destructive";
   };
 
   const getStatusBadge = () => {

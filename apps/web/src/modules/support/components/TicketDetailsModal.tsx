@@ -54,11 +54,11 @@ export function TicketDetailsModal({ open, onOpenChange, ticket }: TicketDetails
 
   const getStatusColor = (status: TicketStatus) => {
     switch (status) {
-      case "open": return "bg-primary-light text-blue-800 dark:bg-blue-900 dark:text-blue-200";
-      case "in_progress": return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
-      case "waiting_customer": return "bg-warning/10 text-orange-800 dark:bg-orange-900 dark:text-orange-200";
-      case "resolved": return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
-      case "closed": return "bg-muted text-foreground dark:bg-gray-900 dark:text-gray-200";
+      case "open": return "bg-primary-light text-primary-dark";
+      case "in_progress": return "bg-warning/10 text-warning-foreground";
+      case "waiting_customer": return "bg-warning/15 text-warning-foreground";
+      case "resolved": return "bg-success/10 text-success";
+      case "closed": return "bg-muted text-muted-foreground";
       default: return "";
     }
   };
@@ -66,9 +66,9 @@ export function TicketDetailsModal({ open, onOpenChange, ticket }: TicketDetails
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case "low": return "bg-muted text-foreground";
-      case "medium": return "bg-primary-light text-blue-800";
-      case "high": return "bg-warning/10 text-orange-800";
-      case "urgent": return "bg-red-100 text-red-800";
+      case "medium": return "bg-primary-light text-primary-dark";
+      case "high": return "bg-warning/10 text-warning-foreground";
+      case "urgent": return "bg-destructive/10 text-destructive";
       default: return "";
     }
   };

@@ -152,7 +152,7 @@ function getStatusConfig(status: string) {
     case "completed":
       return {
         icon: CheckCircle,
-        colorClass: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+        colorClass: "bg-success/10 text-success border-success/20",
         label: "Cleaning Done",
       };
     case "in-progress":
@@ -170,13 +170,13 @@ function getStatusConfig(status: string) {
     case "cancelled":
       return {
         icon: AlertCircle,
-        colorClass: "bg-red-500/10 text-red-600 border-red-500/20",
+        colorClass: "bg-destructive/10 text-destructive border-destructive/20",
         label: "Cancelled",
       };
     default:
       return {
         icon: Clock,
-        colorClass: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+        colorClass: "bg-primary-light text-primary-dark border-primary/20",
         label: "Scheduled",
       };
   }

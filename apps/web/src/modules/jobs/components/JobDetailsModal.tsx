@@ -76,10 +76,10 @@ export function JobDetailsModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[550px]">
         <DialogHeader>
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
+          <div className="flex items-start gap-3 sm:items-center sm:gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary-light sm:h-14 sm:w-14">
               <Briefcase className="w-6 h-6 text-primary" />
             </div>
             <div>
@@ -115,7 +115,7 @@ export function JobDetailsModal({
           </div>
 
           {/* Job Details */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
             <div className="p-4 rounded-lg bg-muted/30 space-y-2">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Calendar className="w-4 h-4" />
@@ -230,7 +230,7 @@ export function JobDetailsModal({
           )}
         </div>
 
-        <DialogFooter className="flex gap-2 mt-4">
+        <DialogFooter className="mt-4 flex flex-col gap-2 sm:flex-row">
           <Button variant="outline" onClick={handleEdit} className="flex-1">
             <Pencil className="w-4 h-4 mr-2" />
             Editar

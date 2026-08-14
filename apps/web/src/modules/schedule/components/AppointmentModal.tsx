@@ -206,7 +206,7 @@ const getStatusConfig = (status: string) => {
     case "completed":
       return {
         icon: CheckCircle,
-        color: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+        color: "bg-success/10 text-success border-success/20",
         label: "Cleaning Done",
       };
     case "in-progress":
@@ -218,19 +218,19 @@ const getStatusConfig = (status: string) => {
     case "on-the-way":
       return {
         icon: Navigation,
-        color: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+        color: "bg-primary-light text-primary-dark border-primary/20",
         label: "On The Way",
       };
     case "cancelled":
       return {
         icon: AlertCircle,
-        color: "bg-red-500/10 text-red-600 border-red-500/20",
+        color: "bg-destructive/10 text-destructive border-destructive/20",
         label: "Cancelled",
       };
     default:
       return {
         icon: Clock,
-        color: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+        color: "bg-primary-light text-primary-dark border-primary/20",
         label: "Scheduled",
       };
   }

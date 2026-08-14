@@ -532,7 +532,7 @@ export function AuditTab() {
                               <Badge
                                 key={field.key}
                                 variant="secondary"
-                                className="text-xs bg-warning/10 text-warning-foreground dark:bg-orange-900/30 dark:text-orange-400"
+                                className="bg-warning/10 text-xs text-warning-foreground"
                               >
                                 {field.label}
                               </Badge>

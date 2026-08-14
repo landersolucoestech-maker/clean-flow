@@ -83,7 +83,7 @@ const StatusButton: React.FC<StatusButtonProps> = ({
   return (
     <div className={`
       relative p-3 rounded-lg border-2 transition-all
-      ${isCompleted ? "border-green-500 bg-green-50 dark:bg-green-950/20" : 
+      ${isCompleted ? "border-success bg-success/5" : 
         isActive ? "border-primary bg-primary/5" : 
         "border-muted bg-muted/20"}
     `}>
@@ -92,7 +92,7 @@ const StatusButton: React.FC<StatusButtonProps> = ({
           {icon}
           <span className="font-medium text-sm">{label}</span>
         </div>
-        {isCompleted && <CheckCircle2 className="h-4 w-4 text-green-500" />}
+        {isCompleted && <CheckCircle2 className="h-4 w-4 text-success" />}
       </div>
 
       {currentTime ? (
