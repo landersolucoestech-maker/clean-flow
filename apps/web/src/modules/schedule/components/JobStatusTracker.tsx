@@ -2,22 +2,22 @@ import React, { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  CheckCircle2, 
-  MapPin, 
-  Clock, 
+import {
+  CheckCircle2,
+  MapPin,
+  Clock,
   History,
   Loader2,
   AlertCircle,
-  Map
+  Map,
 } from "lucide-react";
 import { format } from "date-fns";
-import { 
-  useJobStatusHistory, 
-  useTrackJobStatus, 
+import {
+  useJobStatusHistory,
+  useTrackJobStatus,
   StatusType,
   canEditStatusManually,
-  canOnlyTriggerStatus 
+  canOnlyTriggerStatus,
 } from "@/hooks/useJobStatusTracking";
 import type { JobStatusTracking } from "@/hooks/useJobStatusTracking";
 import {
@@ -28,8 +28,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { getJobAddressMapUrl, getJobTrajectoryMapUrl } from "../services/jobMapService";
 
 interface JobStatusTrackerProps {
   jobId: string;
@@ -58,15 +58,11 @@ interface StatusButtonProps {
   disabled: boolean;
 }
 
-// Helper to format time - handles both ISO dates and time strings like "7:30 AM"
 const formatTimeDisplay = (timeValue: string): string => {
-  // Try parsing as ISO date first
   const isoDate = new Date(timeValue);
-  if (!isNaN(isoDate.getTime())) {
+  if (!Number.isNaN(isoDate.getTime())) {
     return format(isoDate, "MM/dd/yyyy 'at' hh:mm:ss a");
   }
-  
-  // If it's a time string like "7:30 AM", just display it as-is
   return timeValue;
 };
 
@@ -79,48 +75,41 @@ const StatusButton: React.FC<StatusButtonProps> = ({
   onTrigger,
   isLoading,
   disabled,
-}) => {
-  return (
-    <div className={`
-      relative p-3 rounded-lg border-2 transition-all
-      ${isCompleted ? "border-success bg-success/5" : 
-        isActive ? "border-primary bg-primary/5" : 
-        "border-muted bg-muted/20"}
-    `}>
-      <div className="flex items-center justify-between mb-1">
-        <div className="flex items-center gap-2">
-          {icon}
-          <span className="font-medium text-sm">{label}</span>
-        </div>
-        {isCompleted && <CheckCircle2 className="h-4 w-4 text-success" />}
+}) => (
+  <div className={`relative p-3 rounded-lg border-2 transition-all ${
+    isCompleted
+      ? "border-success bg-success/5"
+      : isActive
+        ? "border-primary bg-primary/5"
+        : "border-muted bg-muted/20"
+  }`}>
+    <div className="flex items-center justify-between mb-1">
+      <div className="flex items-center gap-2">
+        {icon}
+        <span className="font-medium text-sm">{label}</span>
       </div>
-
-      {currentTime ? (
-        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-          <Clock className="h-3 w-3" />
-          <span>{formatTimeDisplay(currentTime)}</span>
-        </div>
-      ) : (
-        <Button
-          onClick={onTrigger}
-          disabled={disabled || isLoading}
-          className="w-full mt-1 h-8"
-          size="sm"
-          variant={isActive ? "default" : "outline"}
-        >
-          {isLoading ? (
-            <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-          ) : (
-            <MapPin className="h-3 w-3 mr-1" />
-          )}
-          Mark
-        </Button>
-      )}
+      {isCompleted && <CheckCircle2 className="h-4 w-4 text-success" />}
     </div>
-  );
-};
+    {currentTime ? (
+      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+        <Clock className="h-3 w-3" />
+        <span>{formatTimeDisplay(currentTime)}</span>
+      </div>
+    ) : (
+      <Button
+        onClick={onTrigger}
+        disabled={disabled || isLoading}
+        className="w-full mt-1 h-8"
+        size="sm"
+        variant={isActive ? "default" : "outline"}
+      >
+        {isLoading ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <MapPin className="h-3 w-3 mr-1" />}
+        Mark
+      </Button>
+    )}
+  </div>
+);
 
-// GPS Map Component showing trajectory
 interface GPSMapViewProps {
   statusHistory: JobStatusTracking[];
   isLoading: boolean;
@@ -133,80 +122,58 @@ const GPSMapView: React.FC<GPSMapViewProps> = ({ statusHistory, isLoading, jobAd
   const [mapError, setMapError] = useState(false);
 
   const pointsWithGPS = useMemo(
-    () => statusHistory.filter((r) => r.latitude != null && r.longitude != null),
-    [statusHistory]
+    () => statusHistory.filter((record) => record.latitude != null && record.longitude != null),
+    [statusHistory],
   );
 
-  const pointsForMap = useMemo(() => {
-    // Show US map and ignore points clearly outside the US (e.g., old test data)
-    return pointsWithGPS.filter((p) => {
-      const lat = Number(p.latitude);
-      const lon = Number(p.longitude);
-      if (!Number.isFinite(lat) || !Number.isFinite(lon)) return false;
+  const pointsForMap = useMemo(() => pointsWithGPS.filter((point) => {
+    const lat = Number(point.latitude);
+    const lon = Number(point.longitude);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return false;
 
-      const addr = String(p.address_resolved ?? "").toLowerCase();
-      if (addr.includes("brazil") || addr.includes("brasil")) return false;
+    const address = String(point.address_resolved ?? "").toLowerCase();
+    if (address.includes("brazil") || address.includes("brasil")) return false;
 
-      // Approximate US boundaries (contiguous + Alaska + Hawaii)
-      const inContiguousUS = lat >= 24 && lat <= 49 && lon >= -125 && lon <= -66;
-      const inAlaska = lat >= 51 && lat <= 72 && lon >= -170 && lon <= -129;
-      const inHawaii = lat >= 18 && lat <= 23 && lon >= -161 && lon <= -154;
-
-      return inContiguousUS || inAlaska || inHawaii;
-    });
-  }, [pointsWithGPS]);
+    const inContiguousUS = lat >= 24 && lat <= 49 && lon >= -125 && lon <= -66;
+    const inAlaska = lat >= 51 && lat <= 72 && lon >= -170 && lon <= -129;
+    const inHawaii = lat >= 18 && lat <= 23 && lon >= -161 && lon <= -154;
+    return inContiguousUS || inAlaska || inHawaii;
+  }), [pointsWithGPS]);
 
   const hasAnyHistory = statusHistory.length > 0;
 
-  // Fetch map URL from backend functions - show marked location (GPS) when available
   useEffect(() => {
+    let active = true;
+
     const fetchMapUrl = async () => {
       setMapLoading(true);
       setMapError(false);
       setMapUrl(null);
 
       try {
-        // 1) Prefer GPS points from status tracking (filtered to USA)
-        if (pointsForMap.length > 0) {
-          const { data, error } = await supabase.functions.invoke("geoapify-map", {
-            body: {
-              points: pointsForMap.map((p, index) => ({
-                latitude: p.latitude,
-                longitude: p.longitude,
-                status_type: p.status_type,
-                index: index + 1,
-              })),
-            },
-          });
-
-          if (error) throw error;
-          if (data?.mapUrl) setMapUrl(data.mapUrl);
-          return;
-        }
-
-        // 2) Fallback: render map centered on job address (when no valid GPS points)
-        if (jobAddress) {
-          const { data, error } = await supabase.functions.invoke("geoapify-map-fallback", {
-            body: { address: jobAddress },
-          });
-
-          if (error) throw error;
-          if (data?.mapUrl) setMapUrl(data.mapUrl);
-        }
-      } catch (err) {
-        console.error("Error fetching map URL:", err);
-        setMapError(true);
+        const nextMapUrl = pointsForMap.length > 0
+          ? await getJobTrajectoryMapUrl(pointsForMap)
+          : jobAddress
+            ? await getJobAddressMapUrl(jobAddress)
+            : null;
+        if (active) setMapUrl(nextMapUrl);
+      } catch {
+        if (active) setMapError(true);
       } finally {
-        setMapLoading(false);
+        if (active) setMapLoading(false);
       }
     };
 
     if (pointsForMap.length > 0 || jobAddress) {
-      fetchMapUrl();
+      void fetchMapUrl();
     } else {
       setMapUrl(null);
       setMapLoading(false);
     }
+
+    return () => {
+      active = false;
+    };
   }, [pointsForMap, jobAddress]);
 
   if (isLoading) {
@@ -228,7 +195,6 @@ const GPSMapView: React.FC<GPSMapViewProps> = ({ statusHistory, isLoading, jobAd
 
   return (
     <div className="space-y-4">
-      {/* Static Map Image */}
       {mapLoading ? (
         <div className="flex items-center justify-center h-[400px] bg-muted/30 rounded-lg">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -258,7 +224,7 @@ const GPSMapView: React.FC<GPSMapViewProps> = ({ statusHistory, isLoading, jobAd
       {pointsForMap.length > 0 && (
         <div className="text-xs text-center text-muted-foreground">
           <a
-            href={`https://www.google.com/maps/dir/${pointsForMap.map((p) => `${p.latitude},${p.longitude}`).join("/")}`}
+            href={`https://www.google.com/maps/dir/${pointsForMap.map((point) => `${point.latitude},${point.longitude}`).join("/")}`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary hover:underline flex items-center justify-center gap-1"
@@ -281,133 +247,92 @@ export const JobStatusTracker: React.FC<JobStatusTrackerProps> = ({
   staffId,
   userRole,
   jobAddress,
+  customerId,
+  customerPhone,
+  customerName,
+  jobDate,
 }) => {
-  const [historyOpen, setHistoryOpen] = useState(false);
-  const [loadingStatus, setLoadingStatus] = useState<StatusType | null>(null);
-  const { data: statusHistory, isLoading: historyLoading } = useJobStatusHistory(jobId);
+  const { data: statusHistory = [], isLoading: historyLoading } = useJobStatusHistory(jobId);
   const trackStatus = useTrackJobStatus();
+  const [activeStatus, setActiveStatus] = useState<StatusType | null>(null);
 
-  const canOnlyTrigger = canOnlyTriggerStatus(userRole);
-  const canEdit = canEditStatusManually(userRole);
-  const canTrackStatus = Boolean(staffId && (canEdit || canOnlyTrigger));
-
-  const handleTriggerStatus = (statusType: StatusType) => {
-    if (!staffId) {
-      toast.error("Your login is not linked to an active staff member.");
-      return;
+  const triggerStatus = async (statusType: StatusType) => {
+    setActiveStatus(statusType);
+    try {
+      await trackStatus.mutateAsync({
+        jobId,
+        statusType,
+        staffId,
+        customerId,
+        customerPhone,
+        customerName,
+        jobDate,
+      });
+      toast.success("Status updated successfully");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to update status");
+    } finally {
+      setActiveStatus(null);
     }
-
-    setLoadingStatus(statusType);
-    trackStatus.mutate({
-      jobId,
-      statusType,
-      staffId,
-      isManualEdit: false,
-    }, {
-      onSettled: () => setLoadingStatus(null),
-    });
   };
 
-  const statusConfig = [
-    {
-      type: "on_our_way" as StatusType,
-      label: "On the Way",
-      icon: <span className="text-base">🚗</span>,
-      time: onOurWayTime,
-    },
-    {
-      type: "cleaning_now" as StatusType,
-      label: "Cleaning Now",
-      icon: <span className="text-base">🏠</span>,
-      time: timeStarted,
-    },
-    {
-      type: "cleaning_done" as StatusType,
-      label: "Completed",
-      icon: <span className="text-base">✓</span>,
-      time: timeFinished,
-    },
+  const canEdit = canEditStatusManually(userRole);
+  const triggerOnly = canOnlyTriggerStatus(userRole);
+  const statusSequence: Array<{
+    type: StatusType;
+    label: string;
+    time: string | null;
+    icon: React.ReactNode;
+  }> = [
+    { type: "on_our_way", label: "On Our Way", time: onOurWayTime, icon: <MapPin className="h-4 w-4" /> },
+    { type: "started", label: "Started", time: timeStarted, icon: <Clock className="h-4 w-4" /> },
+    { type: "finished", label: "Finished", time: timeFinished, icon: <CheckCircle2 className="h-4 w-4" /> },
   ];
-
-  const getStatusIndex = () => {
-    if (timeFinished) return 3;
-    if (timeStarted) return 2;
-    if (onOurWayTime) return 1;
-    if (currentStatus === "completed") return 3;
-    if (currentStatus === "in-progress") return 2;
-    if (currentStatus === "on-the-way") return 1;
-    return 0;
-  };
-
-  const currentIndex = getStatusIndex();
+  const completedIndex = statusSequence.reduce((last, item, index) => item.time ? index : last, -1);
 
   return (
-    <Card className="shadow-sm">
-      <CardHeader className="py-2 px-4">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-sm flex items-center gap-2">
-            <MapPin className="h-4 w-4" />
-            GPS Tracking
-          </CardTitle>
-          <Dialog open={historyOpen} onOpenChange={setHistoryOpen}>
+    <Card>
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between gap-3">
+          <CardTitle className="text-base">Job Status</CardTitle>
+          <Dialog>
             <DialogTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-7 px-2">
-                <History className="h-3 w-3 mr-1" />
-                <span className="text-xs">History</span>
+              <Button variant="outline" size="sm">
+                <History className="mr-2 h-4 w-4" /> History
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-3xl">
+            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  <Map className="h-5 w-5" />
-                  GPS Map
-                </DialogTitle>
-                <DialogDescription>
-                  Shows the position captured at the time of status marking.
-                </DialogDescription>
+                <DialogTitle>Status History</DialogTitle>
+                <DialogDescription>GPS points and status transitions captured for this job.</DialogDescription>
               </DialogHeader>
-              <GPSMapView statusHistory={statusHistory || []} isLoading={historyLoading} jobAddress={jobAddress ?? null} />
+              <GPSMapView statusHistory={statusHistory} isLoading={historyLoading} jobAddress={jobAddress} />
             </DialogContent>
           </Dialog>
         </div>
-
-        {canOnlyTrigger && (
-          <div className="flex items-center gap-2 text-xs text-amber-600 mt-1">
-            <AlertCircle className="h-3 w-3" />
-            <span>Your profile can only mark steps.</span>
-          </div>
-        )}
-
-        {!staffId && (
-          <div className="flex items-center gap-2 text-xs text-destructive mt-1">
-            <AlertCircle className="h-3 w-3" />
-            <span>Link this login email to an active staff member to update status.</span>
-          </div>
-        )}
       </CardHeader>
-
-      {canTrackStatus && (
-        <CardContent className="px-4 pb-3 pt-0">
-          <div className="grid gap-2 md:grid-cols-3">
-            {statusConfig.map((status, index) => (
-              <StatusButton
-                key={status.type}
-                statusType={status.type}
-                label={status.label}
-                icon={status.icon}
-                currentTime={status.time}
-                isActive={index === currentIndex}
-                isCompleted={index < currentIndex}
-                onTrigger={() => handleTriggerStatus(status.type)}
-                isLoading={loadingStatus === status.type}
-                disabled={!staffId || index > currentIndex}
-              />
-            ))}
-          </div>
-        </CardContent>
-      )}
+      <CardContent className="space-y-3">
+        <div className="grid gap-3 sm:grid-cols-3">
+          {statusSequence.map((item, index) => (
+            <StatusButton
+              key={item.type}
+              statusType={item.type}
+              label={item.label}
+              icon={item.icon}
+              currentTime={item.time}
+              isActive={index === completedIndex + 1}
+              isCompleted={Boolean(item.time)}
+              onTrigger={() => void triggerStatus(item.type)}
+              isLoading={trackStatus.isPending && activeStatus === item.type}
+              disabled={!canEdit && !triggerOnly}
+            />
+          ))}
+        </div>
+        <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+          <Badge variant="outline">Current: {currentStatus}</Badge>
+          {triggerOnly && <Badge variant="secondary">Trigger-only role</Badge>}
+        </div>
+      </CardContent>
     </Card>
   );
 };
-
-export default JobStatusTracker;
