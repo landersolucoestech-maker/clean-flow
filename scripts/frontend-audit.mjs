@@ -52,9 +52,7 @@ function findBusinessRecordArrays(file, source) {
       const objects = node.initializer.elements.filter(ts.isObjectLiteralExpression);
       if (objects.length >= 2 && objects.length === node.initializer.elements.length) {
         const qualifying = objects.filter((object) => {
-          const keys = object.properties
-            .map((property) => propertyName(property.name))
-            .filter(Boolean);
+          const keys = object.properties.map((property) => propertyName(property.name)).filter(Boolean);
           return keys.filter((key) => BUSINESS_RECORD_KEYS.has(key)).length >= 2;
         });
         if (qualifying.length >= 2) {
@@ -68,6 +66,35 @@ function findBusinessRecordArrays(file, source) {
 
   visit(sf);
   return results;
+}
+
+function findUnsafeHtml(file, source) {
+  if (!source.includes("dangerouslySetInnerHTML")) return [];
+  if (/DOMPurify\.sanitize\s*\(/.test(source)) return [];
+  return lineMatches(file, /dangerouslySetInnerHTML/);
+}
+
+function findUnsafeBlankTargets(file, source) {
+  const findings = [];
+  for (const match of source.matchAll(/<a\b[\s\S]*?>/gi)) {
+    const tag = match[0];
+    if (!/target\s*=\s*["']_blank["']/i.test(tag)) continue;
+    if (/rel\s*=\s*["'][^"']*\bnoopener\b[^"']*["']/i.test(tag)) continue;
+    const line = source.slice(0, match.index).split(/\r?\n/).length;
+    findings.push({ file: rel(file), line, text: tag.replace(/\s+/g, " ").slice(0, 220) });
+  }
+  return findings;
+}
+
+function findImagesWithoutAlt(file, source) {
+  const findings = [];
+  for (const match of source.matchAll(/<img\b[\s\S]*?>/gi)) {
+    const tag = match[0];
+    if (/\balt\s*=/.test(tag)) continue;
+    const line = source.slice(0, match.index).split(/\r?\n/).length;
+    findings.push({ file: rel(file), line, text: tag.replace(/\s+/g, " ").slice(0, 220) });
+  }
+  return findings;
 }
 
 const files = walk(ROOT);
@@ -107,27 +134,22 @@ for (const file of sourceFiles) {
   findings.timersOrRandom.push(...lineMatches(file, /Math\.random\s*\(|setTimeout\s*\(|setInterval\s*\(/));
   findings.directStorage.push(...lineMatches(file, /\b(localStorage|sessionStorage)\b/));
   findings.typeSafetySuppressions.push(...lineMatches(file, /@ts-(ignore|nocheck|expect-error)|eslint-disable|\bas\s+any\b|:\s*any\b/));
-  findings.unsafeHtml.push(...lineMatches(file, /dangerouslySetInnerHTML/));
-  findings.targetBlankWithoutRel.push(...lineMatches(file, /target=["']_blank["'](?![^>]*\brel=)/));
-  findings.imagesWithoutAlt.push(...lineMatches(file, /<img\b(?![^>]*\balt=)/i));
+  findings.unsafeHtml.push(...findUnsafeHtml(file, source));
+  findings.targetBlankWithoutRel.push(...findUnsafeBlankTargets(file, source));
+  findings.imagesWithoutAlt.push(...findImagesWithoutAlt(file, source));
 
-  if (/\.(tsx|jsx)$/.test(file) && !relative.includes("/hooks/") && !relative.includes("/services/") && /\bsupabase\.(from|rpc|functions|auth)\b/.test(source)) {
+  if (/\.(tsx|jsx)$/.test(file) && !relative.includes("/hooks/") && !relative.includes("/services/") && /\bsupabase\.(from|rpc|functions|auth|storage)\b/.test(source)) {
     findings.directSupabaseInUI.push({ file: relative });
   }
 
-  if (/Legacy|Critical|Old|Deprecated/i.test(path.basename(file))) {
-    findings.legacyFiles.push({ file: relative });
-  }
+  if (/Legacy|Critical|Old|Deprecated/i.test(path.basename(file))) findings.legacyFiles.push({ file: relative });
   if (lines >= 800) {
     (isStaticDataCatalog(relative) ? findings.staticDataCatalogs : findings.largeLogicFiles).push({ file: relative, lines });
   }
-  if (relative !== "apps/web/src/app/layout/PageLayout.tsx" && /<Sidebar\b|<Header\b/.test(source)) {
-    findings.duplicatedShell.push({ file: relative });
-  }
+  if (relative !== "apps/web/src/app/layout/PageLayout.tsx" && /<Sidebar\b|<Header\b/.test(source)) findings.duplicatedShell.push({ file: relative });
 
   if (path.extname(file) === ".tsx") {
-    const sourceLines = source.split(/\r?\n/);
-    sourceLines.forEach((line, index) => {
+    source.split(/\r?\n/).forEach((line, index) => {
       if (/<Button\b/.test(line) && /size=["']icon["']/.test(line) && !/(aria-label|title)=/.test(line)) {
         findings.iconButtonsWithoutAccessibleName.push({ file: relative, line: index + 1, text: line.trim().slice(0, 220) });
       }
@@ -138,9 +160,7 @@ for (const file of sourceFiles) {
 for (const key of Object.keys(findings)) {
   const values = findings[key];
   console.log(`\n=== ${key} (${values.length}) ===`);
-  for (const item of values.slice(0, 200)) {
-    console.log(JSON.stringify(item));
-  }
+  for (const item of values.slice(0, 200)) console.log(JSON.stringify(item));
   if (values.length > 200) console.log(`... ${values.length - 200} additional findings omitted`);
 }
 
