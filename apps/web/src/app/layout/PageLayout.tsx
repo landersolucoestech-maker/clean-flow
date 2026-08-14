@@ -8,16 +8,17 @@ interface PageLayoutProps {
   children: ReactNode;
   fullHeight?: boolean;
   contentClassName?: string;
+  headerActions?: ReactNode;
 }
 
-export function PageLayout({ children, fullHeight = false, contentClassName }: PageLayoutProps) {
+export function PageLayout({ children, fullHeight = false, contentClassName, headerActions }: PageLayoutProps) {
   const topContent = usePageLayoutTopContent();
 
   return (
     <div className={cn("flex bg-background text-foreground", fullHeight ? "h-screen overflow-hidden" : "min-h-screen")}>
       <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col">
-        <Header />
+        <Header actions={headerActions} />
         <main className={cn("flex-1", fullHeight ? "overflow-hidden" : "overflow-y-auto")}>
           <div
             className={cn(
