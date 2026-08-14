@@ -38,6 +38,7 @@ import { useGoogle } from "@/hooks/useGoogle";
 import { useRingCentral } from "@/hooks/useRingCentral";
 import { getSelectedCalendarId, setSelectedCalendarId, getLeadsCalendarId, setLeadsCalendarId } from "@/hooks/useGoogleCalendarSync";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { SUPABASE_URL } from "@/integrations/supabase/client";
 
 interface GoogleCalendar {
   id: string;
@@ -47,6 +48,7 @@ interface GoogleCalendar {
 }
 
 export function IntegrationsTab() {
+  const websiteLeadCaptureUrl = `${SUPABASE_URL}/functions/v1/website-lead-capture`;
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [calendars, setCalendars] = useState<GoogleCalendar[]>([]);
   const [selectedCalendar, setSelectedCalendar] = useState(getSelectedCalendarId());
@@ -552,7 +554,7 @@ export function IntegrationsTab() {
             <p className="text-sm font-medium mb-2">Webhook URL</p>
             <div className="flex items-center gap-2">
               <Input
-                value="https://uszeseqzmqsqjbstffgy.supabase.co/functions/v1/website-lead-capture"
+                value={websiteLeadCaptureUrl}
                 readOnly
                 className="font-mono text-xs h-8 bg-muted/50"
               />
@@ -565,7 +567,7 @@ export function IntegrationsTab() {
                       className="h-8 w-8 shrink-0"
                       onClick={() =>
                         copyToClipboard(
-                          "https://uszeseqzmqsqjbstffgy.supabase.co/functions/v1/website-lead-capture",
+                          websiteLeadCaptureUrl,
                           "website_webhook"
                         )
                       }

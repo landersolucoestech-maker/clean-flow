@@ -207,7 +207,6 @@ export function useQuickBooksSync() {
   // Auto-sync invoice when job is completed
   const syncJobCompletionInvoice = useCallback(async (jobId: string) => {
     if (!isConnected) {
-      console.log("QuickBooks not connected, skipping auto-sync");
       return null;
     }
 
@@ -231,7 +230,6 @@ export function useQuickBooksSync() {
         .maybeSingle();
 
       if (existingInvoice?.qb_invoice_id) {
-        console.log("Invoice already synced to QuickBooks");
         return existingInvoice;
       }
 
