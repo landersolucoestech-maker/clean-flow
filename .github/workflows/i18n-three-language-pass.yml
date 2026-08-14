@@ -12,7 +12,7 @@ permissions:
 jobs:
   i18n:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
         with:
@@ -22,14 +22,18 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - name: Apply i18n passes
+      - name: Apply existing catalog translations
         run: |
           python scripts/i18n_three_language_pass.py
           python scripts/i18n_fill_parity.py
           python scripts/i18n_replace_catalog_literals.py
+      - name: Translate residual static interface literals
+        run: |
+          python scripts/i18n_translate_unmatched.py
+          python scripts/i18n_replace_catalog_literals.py
       - name: Install dependencies
         run: npm ci
-      - name: Validate translation key parity
+      - name: Validate translation key parity and literal coverage
         run: |
           python - <<'PY'
           from pathlib import Path
@@ -44,9 +48,13 @@ jobs:
               missing = sorted(all_keys - sets[lang])
               if missing:
                   print(lang, 'missing', len(missing), 'keys')
-                  print('\n'.join(missing))
                   sys.exit(1)
-          print('PASS:', len(all_keys), 'keys present in en/pt/es')
+          residual = Path('i18n-unmatched-literals.txt').read_text().strip()
+          if residual:
+              print('Untranslated visible literals remain:')
+              print(residual[:12000])
+              sys.exit(1)
+          print('PASS:', len(all_keys), 'keys in en/pt/es; visible literal residual = 0')
           PY
       - name: Lint
         run: npx eslint apps/web/src packages --max-warnings=0
@@ -56,11 +64,11 @@ jobs:
         run: npx vitest run apps/web/src
       - name: Build
         run: npm run build
-      - name: Commit validated i18n pass
+      - name: Commit validated trilanguage interface
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/web/src i18n-visible-literals.txt i18n-unmatched-literals.txt
-          git commit -m "refactor(i18n): localize catalog-backed interface literals" || true
+          git add apps/web/src i18n-visible-literals.txt i18n-unmatched-literals.txt i18n-generated-literal-keys.json
+          git commit -m "refactor(i18n): complete trilanguage visible interface" || true
           git push origin HEAD:dev
