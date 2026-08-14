@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { generateLeadNumber } from "@/hooks/useLeads";
 import { useCustomers } from "@/hooks/useCustomers";
 import {
   Dialog,
@@ -65,6 +63,7 @@ import {
 import { leadFormSchema } from "../schemas/leadFormSchema";
 import type { LeadAddressEntry, LeadInteractionEntry } from "../types/leadForm";
 import { formatLeadCurrency } from "../utils/leadForm";
+import { createLeadWithRelations } from "../services/leadCreationService";
 
 export function CreateLeadModal({ open, onOpenChange }: CreateLeadModalProps) {
   const queryClient = useQueryClient();
@@ -330,175 +329,11 @@ export function CreateLeadModal({ open, onOpenChange }: CreateLeadModalProps) {
   };
 
   const handleCreateLead = async () => {
-    if (isSaving) return;
-
-    if (!validateForm()) return;
-
-    const customerName = formData.primaryContactName.trim();
-    const nonEmptyAddresses = addresses.filter((addr) => addr.address.trim());
-
-    const parseMoney = (value: string): number => {
-      const n = parseFloat(String(value || "").replace(/[^0-9.]/g, ""));
-      return Number.isFinite(n) ? n : 0;
-    };
+    if (isSaving || !validateForm()) return;
 
     setIsSaving(true);
     try {
-      const primaryAddress = nonEmptyAddresses[0];
-      const email = formData.email.trim() || null;
-      const phone = formData.phone.trim() || null;
-      const origin = formData.leadSource || null;
-
-      // Resolve or create customer
-      let customerId: string | null = null;
-
-      if (email) {
-        const { data, error } = await supabase
-          .from("customers")
-          .select("id")
-          .eq("email", email)
-          .limit(1);
-        if (error) throw error;
-        customerId = data?.[0]?.id ?? null;
-      }
-
-      if (!customerId) {
-        const { data, error } = await supabase
-          .from("customers")
-          .select("id")
-          .ilike("name", customerName)
-          .limit(1);
-        if (error) throw error;
-        customerId = data?.[0]?.id ?? null;
-      }
-
-      if (!customerId) {
-        const fullAddress = primaryAddress
-          ? `${primaryAddress.address}${primaryAddress.city ? `, ${primaryAddress.city}` : ""}${primaryAddress.state ? `, ${primaryAddress.state}` : ""} ${primaryAddress.postalCode || ""}`.trim()
-          : "";
-        const { data: newCustomer, error: createCustomerError } = await supabase
-          .from("customers")
-          .insert({
-            name: customerName,
-            email,
-            phone,
-            address: fullAddress || null,
-            city: primaryAddress.city || null,
-            state: primaryAddress.state || null,
-            zip_code: primaryAddress.postalCode || null,
-            source: origin,
-            status: "lead",
-            additional_info: formData.businessName ? `Business: ${formData.businessName}` : null,
-          })
-          .select("id")
-          .single();
-
-        if (createCustomerError) throw createCustomerError;
-        customerId = newCustomer.id;
-      }
-
-      const leadNumber = await generateLeadNumber();
-      const total = parseMoney(formData.agreedAmount);
-      const title = formData.serviceType 
-        ? SERVICE_TYPE_OPTIONS.find(s => s.value === formData.serviceType)?.label || "New Lead"
-        : "New Lead";
-
-      // Persist service areas as stable IDs (e.g. "kitchen") to keep UI in sync
-      const serviceAreasToSave =
-        formData.serviceAreas.length > 0 ? formData.serviceAreas : null;
-
-      const fullAddress = primaryAddress
-        ? `${primaryAddress.address}${primaryAddress.city ? `, ${primaryAddress.city}` : ""}${primaryAddress.state ? `, ${primaryAddress.state}` : ""} ${primaryAddress.postalCode || ""}`.trim()
-        : "";
-
-      // Create lead with all fields stored directly in the database
-      const { data: leadData, error: leadError } = await supabase
-        .from("leads")
-        .insert({
-          customer_id: customerId,
-          estimate_number: leadNumber,
-          title,
-          description: formData.businessName || null,
-          status: formData.stage,
-          subtotal: total,
-          tax_rate: 0,
-          tax_amount: 0,
-          total,
-          valid_until: formData.validUntil || null,
-          notes: formData.notes || null,
-          email,
-          phone,
-          origin,
-          has_job: false,
-          address: fullAddress || null,
-          preferred_days: formData.preferredDays.length > 0 ? formData.preferredDays : null,
-          preferred_time: formData.preferredTime || null,
-          frequency: formData.frequency || null,
-          service_type: formData.serviceType || null,
-          service_areas: serviceAreasToSave,
-          referral_customer_id: formData.leadSource === "referral" && formData.referralType === "existing" ? formData.referralCustomerId || null : null,
-          referral_name: formData.leadSource === "referral" && formData.referralType === "manual" ? formData.referralName || null : null,
-          visit_date: formData.visitDate || null,
-          agreed_amount: total,
-          // New property fields stored directly in the database
-          property_type: formData.propertyType || null,
-          residence_type: formData.residenceType || null,
-          square_feet: formData.squareFeet ? parseInt(formData.squareFeet) : null,
-          bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : null,
-          bathrooms: formData.bathrooms ? parseFloat(formData.bathrooms) : null,
-          has_pets: formData.hasPets,
-          add_on_services: formData.addOnServices.length > 0 ? formData.addOnServices : null,
-          business_name: formData.businessName || null,
-          tags: formData.tags.length > 0 ? formData.tags : null,
-          additional_notes: formData.additionalNotes || null,
-          special_instructions: formData.specialInstructions || null,
-        })
-        .select()
-        .single();
-
-      if (leadError) throw leadError;
-
-      // Create lead addresses with name field
-      if (nonEmptyAddresses.length > 0) {
-          const addressesToInsert = nonEmptyAddresses.map((addr) => ({
-            lead_id: leadData.id,
-            name: addr.name || "Home",
-            address: `${addr.address}${addr.city ? `, ${addr.city}` : ""}${addr.state ? `, ${addr.state}` : ""} ${addr.postalCode || ""}`.trim(),
-            street: addr.address || null,
-            city: addr.city || null,
-            state: addr.state || null,
-            postal_code: addr.postalCode || null,
-            notes: addr.notes || null,
-          }));
-
-        const { error: addrError } = await supabase
-          .from("lead_addresses")
-          .insert(addressesToInsert);
-
-        if (addrError) {
-          console.warn("Could not save lead addresses:", addrError);
-        }
-      }
-
-      // Create lead interactions
-      if (interactions.length > 0) {
-        const interactionsToInsert = interactions.map((int) => ({
-          lead_id: leadData.id,
-          interaction_type: int.type,
-          description: int.description || null,
-          interaction_date: `${int.date}T${int.time}:00`,
-          created_by: null,
-        }));
-
-        const { error: intError } = await supabase
-          .from("lead_interactions")
-          .insert(interactionsToInsert);
-
-        if (intError) {
-          console.warn("Could not save lead interactions:", intError);
-        }
-      }
-
+      await createLeadWithRelations(formData, addresses, interactions);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["leads"] }),
         queryClient.invalidateQueries({ queryKey: ["customers"] }),
@@ -507,8 +342,7 @@ export function CreateLeadModal({ open, onOpenChange }: CreateLeadModalProps) {
       toast.success("Lead created successfully!");
       onOpenChange(false);
       resetForm();
-    } catch (error) {
-      console.error("Error creating lead:", error);
+    } catch {
       toast.error("Error saving lead");
     } finally {
       setIsSaving(false);
