@@ -1,6 +1,6 @@
 name: Frontend Audit Fixes
 
-# One-shot AppointmentModal contract extraction runner.
+# Retry AppointmentModal contract extraction preserving team options.
 on:
   push:
     branches: [dev]
