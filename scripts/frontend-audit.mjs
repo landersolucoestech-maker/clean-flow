@@ -1,9 +1,15 @@
 import fs from "node:fs";
 import path from "node:path";
+import ts from "typescript";
 
 const ROOT = path.resolve("apps/web/src");
 const MOCK_ROOT = path.join(ROOT, "mocks");
 const ALLOWED_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx", ".css"]);
+const BUSINESS_RECORD_KEYS = new Set([
+  "name", "email", "phone", "phone2", "address", "customer", "customer_id",
+  "company", "company_id", "amount", "status", "employeeName", "employee_name",
+  "client", "businessName", "business_name",
+]);
 
 function walk(dir) {
   if (!fs.existsSync(dir)) return [];
@@ -30,16 +36,56 @@ function isStaticDataCatalog(relative) {
   return relative.startsWith("apps/web/src/app/i18n/") || relative.endsWith("/app/infrastructure/supabase/types.ts");
 }
 
+function propertyName(node) {
+  if (!node) return null;
+  if (ts.isIdentifier(node) || ts.isStringLiteral(node) || ts.isNumericLiteral(node)) return node.text;
+  return null;
+}
+
+function findBusinessRecordArrays(file, source) {
+  if (!/\.(ts|tsx)$/.test(file)) return [];
+  const sf = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true, file.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS);
+  const results = [];
+
+  function visit(node) {
+    if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && ts.isArrayLiteralExpression(node.initializer)) {
+      const objects = node.initializer.elements.filter(ts.isObjectLiteralExpression);
+      if (objects.length >= 2 && objects.length === node.initializer.elements.length) {
+        const qualifying = objects.filter((object) => {
+          const keys = object.properties
+            .map((property) => propertyName(property.name))
+            .filter(Boolean);
+          return keys.filter((key) => BUSINESS_RECORD_KEYS.has(key)).length >= 2;
+        });
+        if (qualifying.length >= 2) {
+          const { line } = sf.getLineAndCharacterOfPosition(node.getStart(sf));
+          results.push({ file: rel(file), line: line + 1, variable: node.name.text, records: objects.length });
+        }
+      }
+    }
+    ts.forEachChild(node, visit);
+  }
+
+  visit(sf);
+  return results;
+}
+
 const files = walk(ROOT);
 const sourceFiles = files.filter((file) => !file.includes(`${path.sep}mocks${path.sep}`));
 const findings = {
   commentMarkers: [],
   mockDataSignalsOutsideMocks: [],
+  businessRecordLiteralsOutsideMocks: [],
   uiExampleIdentities: [],
   hardcodedUrls: [],
   debugLogs: [],
   timersOrRandom: [],
   directStorage: [],
+  typeSafetySuppressions: [],
+  unsafeHtml: [],
+  targetBlankWithoutRel: [],
+  imagesWithoutAlt: [],
+  directSupabaseInUI: [],
   legacyFiles: [],
   largeLogicFiles: [],
   staticDataCatalogs: [],
@@ -54,11 +100,20 @@ for (const file of sourceFiles) {
 
   findings.commentMarkers.push(...lineMatches(file, /(?:\/\/|\/\*|\*)\s*(TODO|FIXME|HACK|XXX)\b/i));
   findings.mockDataSignalsOutsideMocks.push(...lineMatches(file, /\b(mockData|mock[A-Z][A-Za-z0-9_]*|fakeData|fixtureData|testFixtures|dummyData|demoData|sampleData|seedData)\b/));
+  findings.businessRecordLiteralsOutsideMocks.push(...findBusinessRecordArrays(file, source));
   findings.uiExampleIdentities.push(...lineMatches(file, /(?:[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}|\+?1?[\s.-]?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4})/i));
   findings.hardcodedUrls.push(...lineMatches(file, /https?:\/\/(?!schema\.org|www\.w3\.org|fonts\.googleapis\.com|fonts\.gstatic\.com)/i));
   findings.debugLogs.push(...lineMatches(file, /console\.(log|debug|trace)\s*\(/));
   findings.timersOrRandom.push(...lineMatches(file, /Math\.random\s*\(|setTimeout\s*\(|setInterval\s*\(/));
   findings.directStorage.push(...lineMatches(file, /\b(localStorage|sessionStorage)\b/));
+  findings.typeSafetySuppressions.push(...lineMatches(file, /@ts-(ignore|nocheck|expect-error)|eslint-disable|\bas\s+any\b|:\s*any\b/));
+  findings.unsafeHtml.push(...lineMatches(file, /dangerouslySetInnerHTML/));
+  findings.targetBlankWithoutRel.push(...lineMatches(file, /target=["']_blank["'](?![^>]*\brel=)/));
+  findings.imagesWithoutAlt.push(...lineMatches(file, /<img\b(?![^>]*\balt=)/i));
+
+  if (/\.(tsx|jsx)$/.test(file) && !relative.includes("/hooks/") && !relative.includes("/services/") && /\bsupabase\.(from|rpc|functions|auth)\b/.test(source)) {
+    findings.directSupabaseInUI.push({ file: relative });
+  }
 
   if (/Legacy|Critical|Old|Deprecated/i.test(path.basename(file))) {
     findings.legacyFiles.push({ file: relative });
