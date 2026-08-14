@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { verifyPlatformAdminCredentials } from "@/modules/auth/services/authService";
 import { Shield, Mail, Lock, Loader2, ArrowLeft, KeyRound } from "lucide-react";
 import { getErrorMessage } from "@/lib/errors";
 
@@ -19,28 +19,9 @@ export function AdminAuth() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      
-      if (authError) throw authError;
-
-      // Check if user is a platform admin
-      const { data: adminData, error: adminError } = await supabase
-        .from("platform_admins")
-        .select("*")
-        .eq("user_id", authData.user?.id)
-        .eq("is_active", true)
-        .maybeSingle();
-
-      if (adminError || !adminData) {
-        await supabase.auth.signOut();
-        throw new Error("Access denied. You are not a platform administrator.");
-      }
-      
+      await verifyPlatformAdminCredentials(email, password);
       toast({
         title: "Welcome, Admin!",
         description: "You have successfully logged in to the admin panel.",
@@ -59,27 +40,22 @@ export function AdminAuth() {
 
   return (
     <div className="min-h-screen flex relative overflow-hidden">
-      {/* Dark gradient background with mesh */}
       <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
-      
-      {/* Animated background effects */}
+
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/4 -left-20 w-96 h-96 bg-violet-600/20 rounded-full blur-[120px] animate-pulse" />
         <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-indigo-600/20 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[150px]" />
       </div>
-      
-      {/* Grid pattern overlay */}
-      <div 
+
+      <div
         className="absolute inset-0 opacity-[0.03]"
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
         }}
       />
 
-      {/* Content */}
       <div className="relative z-10 w-full flex flex-col items-center justify-center p-6">
-        {/* Back to user login */}
         <Button
           variant="ghost"
           onClick={() => navigate("/auth")}
@@ -90,7 +66,6 @@ export function AdminAuth() {
         </Button>
 
         <div className="w-full max-w-md">
-          {/* Logo */}
           <div className="flex flex-col items-center mb-8">
             <div className="w-20 h-20 bg-gradient-to-br from-violet-500 via-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-4 shadow-2xl shadow-purple-500/30">
               <Shield className="w-10 h-10 text-white" />
@@ -123,7 +98,7 @@ export function AdminAuth() {
                     />
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="password" className="text-slate-300">Password</Label>
                   <div className="relative">
@@ -140,8 +115,8 @@ export function AdminAuth() {
                   </div>
                 </div>
 
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="w-full h-12 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-medium shadow-lg shadow-violet-500/25 transition-all duration-300"
                   disabled={isLoading}
                 >
@@ -160,7 +135,7 @@ export function AdminAuth() {
                 <div className="flex items-center justify-center text-slate-500">
                   <div className="flex items-center gap-2 text-xs">
                     <Shield className="w-4 h-4" />
-                    <span>Authentication provided by Supabase Auth</span>
+                    <span>Secure platform authentication</span>
                   </div>
                 </div>
               </div>
