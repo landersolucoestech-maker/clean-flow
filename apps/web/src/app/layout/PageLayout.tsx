@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
-import { usePageLayoutTopContent } from "@/components/layout/PageLayoutTopContent";
+import { usePageLayoutTopContent } from "@/components/layout/usePageLayoutTopContent";
 
 interface PageLayoutProps {
   children: ReactNode;
