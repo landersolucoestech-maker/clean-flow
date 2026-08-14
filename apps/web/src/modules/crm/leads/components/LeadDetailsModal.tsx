@@ -51,7 +51,8 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { useLanguage } from "@/contexts/useLanguage";
 import { useCreateLeadInteraction, INTERACTION_TYPES } from "@/hooks/useLeads";
-import { supabase } from "@/integrations/supabase/client";
+import { LEAD_ROOM_SERVICES } from "../constants/leadRoomServices";
+import { createLeadDepositInvoice } from "../services/leadDepositInvoiceService";
 
 export interface Interaction {
   id: string;
@@ -133,100 +134,6 @@ interface LeadDetailsModalProps {
   onCreateJob?: (estimate: Lead) => void;
 }
 
-const ROOM_SERVICES = {
-  kitchen: {
-    label: "KITCHEN",
-    items: [
-      "Clean major appliance exteriors (interior upon request)",
-      "Dust window sills",
-      "Clean table and chairs",
-      "Clean microwave - interior & exterior",
-      "Clean/disinfect/polish sinks & faucets",
-      "Clean and disinfect counters & backsplash",
-      "Clean floors (vacuum, sweep, mop)",
-      "Wipe doors, handles & light switches",
-      "Wipe outside cabinets & drawers",
-      "Remove cobwebs",
-      "Empty trash and replace liner",
-      "Dust baseboards",
-    ],
-  },
-  bathroom: {
-    label: "BATHROOM",
-    items: [
-      "Clean tub shower door and inside of the shower",
-      "Clean and polish countertop, sinks, and faucets",
-      "Clean mirrors",
-      "Dust window sills",
-      "Clean and disinfect towel bars",
-      "Dust picture frames",
-      "Fold and hang towels neatly",
-      "Empty trash and replace liner",
-      "Remove cobwebs",
-      "Clean & sanitize toilets in/out",
-      "Wipe doors, handles & light switches",
-      "Clean floors (vacuum, sweep, mop)",
-      "Clean exterior of vanities",
-      "Dust baseboards",
-    ],
-  },
-  bedroom: {
-    label: "BEDROOM",
-    items: [
-      "Clean floors (vacuum, sweep, mop)",
-      "Dust baseboards",
-      "Dust furniture within reach (top, front & underneath)",
-      "Clean mirrors and glass surfaces",
-      "Dust window sills",
-      "Remove cobwebs",
-      "Dust lamps and lamp shades",
-      "Dust picture frames",
-      "Wipe doors, handles & light switches",
-      "Dust light fixtures, ceiling fans, and vents",
-      "Empty trash and replace liner",
-    ],
-  },
-  diningLiving: {
-    label: "DINING ROOM / LIVING AREAS",
-    items: [
-      "Vacuum/dust upholstered furniture",
-      "Dust lamps and lamp shades",
-      "Dust furniture within reach (top, front & underneath)",
-      "Dust picture frames",
-      "Dust windowsills",
-      "Clean counters & backsplash",
-      "Clean mirrors and glass surfaces",
-      "Empty trash and replace liner",
-      "Clean floors (vacuum, sweep, mop)",
-      "Remove cobwebs",
-      "Wipe doors & light switches",
-      "Dust baseboards",
-    ],
-  },
-  laundryRoom: {
-    label: "LAUNDRY ROOM",
-    items: [
-      "Dust windowsill",
-      "Wipe tops of washer and dryer",
-      "Empty trash and replace liner",
-      "Clean floors (vacuum, sweep, mop)",
-      "Remove cobwebs",
-      "Wipe doors, handles & light switches",
-      "Wipe outside cabinets and drawers",
-      "Dust baseboards",
-    ],
-  },
-  addOns: {
-    label: "ADD-ON SERVICES",
-    items: [
-      "Clean inside refrigerator",
-      "Clean inside oven",
-      "Clean the garage",
-      "Clean inside cabinets",
-      "*By request only",
-    ],
-  },
-} as const;
 
 export function LeadDetailsModal({ 
   open, 
@@ -321,51 +228,14 @@ export function LeadDetailsModal({
     return errors;
   };
 
-  // Generate 50% deposit invoice automatically
   const generateDepositInvoice = async () => {
     if (!estimate._dbId || !estimate._customerId) return null;
-    
-    const amountValue = parseFloat(estimate.amount.replace(/[^0-9.]/g, ''));
-    const depositAmount = amountValue * 0.5;
-
-    try {
-      // Generate invoice number
-      const { data: lastInvoice } = await supabase
-        .from("invoices")
-        .select("invoice_number")
-        .order("created_at", { ascending: false })
-        .limit(1);
-
-      let newInvoiceNumber = "INV-0001";
-      if (lastInvoice && lastInvoice.length > 0) {
-        const lastNumber = parseInt(lastInvoice[0].invoice_number.replace("INV-", ""));
-        newInvoiceNumber = `INV-${String(lastNumber + 1).padStart(4, "0")}`;
-      }
-
-      // Create the invoice
-      const { data: invoice, error } = await supabase
-        .from("invoices")
-        .insert({
-          invoice_number: newInvoiceNumber,
-          customer_id: estimate._customerId,
-          lead_id: estimate._dbId,
-          status: "pending",
-          total: depositAmount,
-          subtotal: depositAmount,
-          issue_date: new Date().toISOString().split("T")[0],
-          due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-          notes: `Depósito 50% - ${estimate.service}`,
-          auto_generated: true,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return invoice;
-    } catch (error) {
-      console.error("Error creating deposit invoice:", error);
-      throw error;
-    }
+    return createLeadDepositInvoice({
+      leadId: estimate._dbId,
+      customerId: estimate._customerId,
+      amount: estimate.amount,
+      service: estimate.service,
+    });
   };
 
   const handleApprove = async () => {
@@ -794,8 +664,8 @@ export function LeadDetailsModal({
                       <div className="space-y-2">
                         <p className="text-xs text-muted-foreground font-medium">{t("estimate.serviceAreas")}</p>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                          {(Object.keys(ROOM_SERVICES) as Array<keyof typeof ROOM_SERVICES>).map((roomKey) => {
-                            const room = ROOM_SERVICES[roomKey];
+                          {(Object.keys(LEAD_ROOM_SERVICES) as Array<keyof typeof LEAD_ROOM_SERVICES>).map((roomKey) => {
+                            const room = LEAD_ROOM_SERVICES[roomKey];
                             const isChecked = addr.rooms?.[roomKey];
                             const isExpanded = expandedRooms[addr.id]?.[roomKey] || false;
 
