@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Plus, Search, MoreHorizontal, UserPlus, Users, UserCheck, UserX, Repeat, Eye, Pencil, Trash2, LayoutGrid, List, Phone, Mail, MapPin, Upload, Download, Loader2 } from "lucide-react";
+import { Plus, Search, MoreHorizontal, Eye, Pencil, Trash2, LayoutGrid, List, Phone, Mail, MapPin, Upload, Download, Loader2 } from "lucide-react";
 import { CustomerModal } from "@/components/customers/CustomerModal";
 import { CustomerDetailsModal } from "@/components/customers/CustomerDetailsModal";
 import { useCustomers, useDeleteCustomer, useBulkDeleteCustomers, useImportCustomers, Customer, ImportedCustomerRow } from "@/hooks/useCustomers";
@@ -284,39 +284,6 @@ export function Customers() {
     }
   };
 
-  // Stats - Real data calculations
-  const activeCount = customers.filter(c => c.status === "Active").length;
-  const inactiveCount = customers.filter(c => c.status === "Inactive").length;
-  const totalCount = customers.length;
-  
-  // New customers this month
-  const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const startOfWeek = new Date(now);
-  startOfWeek.setDate(now.getDate() - now.getDay());
-  
-  const newCustomersThisMonth = customers.filter(c => {
-    if (!c.customer_since) return false;
-    const customerDate = new Date(c.customer_since);
-    return customerDate >= startOfMonth;
-  }).length;
-  
-  const newCustomersThisWeek = customers.filter(c => {
-    if (!c.customer_since) return false;
-    const customerDate = new Date(c.customer_since);
-    return customerDate >= startOfWeek;
-  }).length;
-  
-  // Recurring customers (frequency not 'one-time' AND status Active)
-  const recurringCount = customers.filter(c => 
-    c.frequency && c.frequency !== "one-time" && c.status === "Active"
-  ).length;
-  
-  // Percentages
-  const activePercentage = totalCount > 0 ? ((activeCount / totalCount) * 100).toFixed(1) : "0";
-  const inactivePercentage = totalCount > 0 ? ((inactiveCount / totalCount) * 100).toFixed(1) : "0";
-  const recurringPercentage = activeCount > 0 ? ((recurringCount / activeCount) * 100).toFixed(1) : "0";
-
   if (isLoading) {
     return (
       <PageLayout>
@@ -334,9 +301,9 @@ export function Customers() {
           {t("customers.addCustomer")}
         </Button>
       }
-      contentClassName="gap-5"
+      contentClassName="gap-4"
     >
-      <div className="space-y-5">
+      <div className="space-y-4">
           {/* Customer Modal - Create */}
           <CustomerModal open={isCustomerModalOpen} onOpenChange={setIsCustomerModalOpen} mode="create" />
 
@@ -346,90 +313,12 @@ export function Customers() {
           {/* Customer Details Modal */}
           <CustomerDetailsModal open={isDetailsModalOpen} onOpenChange={setIsDetailsModalOpen} customer={selectedCustomer} />
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
-            <Card className="rounded-md border-border/80 shadow-sm">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-medium text-muted-foreground">{t("customers.newCustomers")}</p>
-                    <p className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{newCustomersThisMonth}</p>
-                    <p className="text-xs text-success">+{newCustomersThisWeek} {t("common.thisWeek")}</p>
-                  </div>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-success/10">
-                    <UserPlus className="w-5 h-5 text-success" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="rounded-md border-border/80 shadow-sm">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-medium text-muted-foreground">{t("customers.activeCustomers")}</p>
-                    <p className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{activeCount}</p>
-                    <p className="text-xs text-success">{activePercentage}% {t("common.ofTotal")}</p>
-                  </div>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-light">
-                    <UserCheck className="w-5 h-5 text-primary" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="rounded-md border-border/80 shadow-sm">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-medium text-muted-foreground">{t("customers.inactiveCustomers")}</p>
-                    <p className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{inactiveCount}</p>
-                    <p className="text-xs text-muted-foreground">{inactivePercentage}% {t("common.ofTotal")}</p>
-                  </div>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10">
-                    <UserX className="w-5 h-5 text-destructive" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="rounded-md border-border/80 shadow-sm">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-medium text-muted-foreground">{t("customers.totalCustomers")}</p>
-                    <p className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{totalCount}</p>
-                    <p className="text-xs text-muted-foreground">{t("common.registered")}</p>
-                  </div>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary-light">
-                    <Users className="w-5 h-5 text-foreground" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="rounded-md border-border/80 shadow-sm">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-medium text-muted-foreground">{t("customers.recurringCustomers")}</p>
-                    <p className="mt-2 text-2xl font-semibold tracking-tight text-foreground">{recurringCount}</p>
-                    <p className="text-xs text-success">{recurringPercentage}% {t("common.ofActive")}</p>
-                  </div>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-warning/10">
-                    <Repeat className="w-5 h-5 text-warning" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
           {/* Customer workspace */}
           <Card className="overflow-hidden rounded-md border-border/80 shadow-sm">
-            <CardHeader className="border-b border-border/70 px-5 py-4">
+            <CardHeader className="border-b border-border/70 px-5 py-3">
               <div className="flex flex-col gap-1">
-                <CardTitle className="text-base">{t("customers.title")}</CardTitle>
-                <p className="text-sm text-muted-foreground">Search, filter and manage the customer directory.</p>
+                <CardTitle className="text-sm font-semibold">Customers</CardTitle>
+                <p className="text-xs text-muted-foreground">Search, filter and manage the customer directory.</p>
               </div>
             </CardHeader>
             <div className="flex flex-col gap-3 border-b border-border/70 bg-muted/10 p-4 lg:flex-row lg:items-center">
