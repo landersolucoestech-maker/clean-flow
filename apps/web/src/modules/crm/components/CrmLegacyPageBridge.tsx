@@ -1,5 +1,5 @@
-import { ReactNode, useLayoutEffect, useState } from "react";
-import { createPortal } from "react-dom";
+import { type ReactNode } from "react";
+import { PageLayoutTopContentProvider } from "@/components/layout/PageLayoutTopContent";
 import { CrmTabs } from "./CrmTabs";
 
 interface CrmLegacyPageBridgeProps {
@@ -7,33 +7,9 @@ interface CrmLegacyPageBridgeProps {
 }
 
 export function CrmLegacyPageBridge({ children }: CrmLegacyPageBridgeProps) {
-  const [host, setHost] = useState<HTMLElement | null>(null);
-
-  useLayoutEffect(() => {
-    const pageContent = document.querySelector("main > div");
-    if (!(pageContent instanceof HTMLElement)) return;
-
-    const existing = pageContent.querySelector<HTMLElement>("[data-crm-tabs-host]");
-    if (existing) {
-      setHost(existing);
-      return;
-    }
-
-    const container = document.createElement("div");
-    container.dataset.crmTabsHost = "true";
-    pageContent.prepend(container);
-    setHost(container);
-
-    return () => {
-      container.remove();
-      setHost(null);
-    };
-  }, []);
-
   return (
-    <>
+    <PageLayoutTopContentProvider content={<CrmTabs />}>
       {children}
-      {host ? createPortal(<CrmTabs />, host) : null}
-    </>
+    </PageLayoutTopContentProvider>
   );
 }
