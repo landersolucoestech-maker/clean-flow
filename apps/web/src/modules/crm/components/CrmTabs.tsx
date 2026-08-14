@@ -9,10 +9,7 @@ const tabs = [
 
 export function CrmTabs() {
   return (
-    <nav
-      className="inline-flex w-fit items-center rounded-md border border-border bg-muted/30 p-1"
-      aria-label="CRM navigation"
-    >
+    <nav className="flex w-full items-center gap-1 border-b border-border/70" aria-label="CRM navigation">
       {tabs.map((tab) => (
         <NavLink
           key={tab.href}
@@ -20,8 +17,8 @@ export function CrmTabs() {
           end={tab.end}
           className={({ isActive }) =>
             cn(
-              "rounded-sm px-4 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-              isActive && "bg-background text-foreground shadow-sm"
+              "relative px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+              isActive && "text-foreground after:absolute after:inset-x-2 after:-bottom-px after:h-0.5 after:rounded-full after:bg-primary",
             )
           }
         >
