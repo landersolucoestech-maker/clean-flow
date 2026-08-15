@@ -23,7 +23,9 @@ jobs:
           node-version: 22
           cache: npm
       - name: Apply density normalization
-        run: python scripts/visual_density_pass.py
+        run: |
+          python scripts/visual_density_pass.py
+          python scripts/crm_visual_cleanup.py
       - name: Install dependencies
         run: npm ci
       - name: Lint
@@ -47,7 +49,10 @@ jobs:
             apps/web/src/modules/billing/pages/BillingPage.tsx \
             apps/web/src/modules/settings/pages/SettingsPage.tsx \
             apps/web/src/modules/support/pages/SupportPage.tsx \
-            apps/web/src/modules/reports/pages/ReportsPage.tsx
+            apps/web/src/modules/reports/pages/ReportsPage.tsx \
+            apps/web/src/modules/crm/customers/pages/CustomersPageContent.tsx \
+            apps/web/src/modules/crm/leads/pages/LeadsPageContent.tsx \
+            apps/web/src/modules/crm/contacts/pages/ContactsPage.tsx
           git commit -m "refactor(ui): normalize professional page density" || true
           git pull --rebase origin dev
           git push origin HEAD:dev
