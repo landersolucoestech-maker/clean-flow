@@ -39,7 +39,12 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/web/src/modules/transactions/pages/TransactionsPage.tsx apps/web/src/modules/schedule/pages/SchedulePage.tsx apps/web/src/modules/communications/pages/CommunicationsPage.tsx
+          git add \
+            apps/web/src/modules/transactions/pages/TransactionsPage.tsx \
+            apps/web/src/modules/schedule/pages/SchedulePage.tsx \
+            apps/web/src/modules/communications/pages/CommunicationsPage.tsx \
+            apps/web/src/modules/payroll/pages/PayrollPage.tsx \
+            apps/web/src/modules/billing/pages/BillingPage.tsx
           git commit -m "refactor(ui): normalize operational page density" || true
           git pull --rebase origin dev
           git push origin HEAD:dev
