@@ -203,16 +203,16 @@ export function Support() {
             <Card className="overflow-hidden">
               <CardContent className="p-0">
                 {isLoading ? (
-                  <div className="p-8 text-center text-muted-foreground">
+                  <div className="p-6 text-center text-sm text-muted-foreground">
                     {t("common.loading")}...
                   </div>
                 ) : filteredTickets.length === 0 ? (
-                  <div className="p-8 text-center">
-                    <FileQuestion className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                  <div className="p-6 text-center">
+                    <FileQuestion className="mx-auto mb-2.5 h-7 w-7 text-muted-foreground" />
                     <p className="text-muted-foreground">{t("support.no_tickets")}</p>
                     <Button
                       variant="outline"
-                      className="mt-4"
+                      className="mt-3"
                       onClick={() => setShowCreateModal(true)}
                     >
                       <Plus className="w-4 h-4 mr-2" />
@@ -283,15 +283,15 @@ export function Support() {
                   {t("support.faq.title")}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-3">
                 {[
                   { q: t("support.faq.q1"), a: t("support.faq.a1") },
                   { q: t("support.faq.q2"), a: t("support.faq.a2") },
                   { q: t("support.faq.q3"), a: t("support.faq.a3") },
                   { q: t("support.faq.q4"), a: t("support.faq.a4") },
                 ].map((faq, index) => (
-                  <div key={index} className="border-b pb-4 last:border-0">
-                    <h4 className="font-medium mb-2">{faq.q}</h4>
+                  <div key={index} className="border-b pb-3 last:border-0">
+                    <h4 className="mb-1.5 text-sm font-medium">{faq.q}</h4>
                     <p className="text-muted-foreground text-sm">{faq.a}</p>
                   </div>
                 ))}
@@ -300,31 +300,31 @@ export function Support() {
           </TabsContent>
 
           <TabsContent value="docs">
-            <div className="grid md:grid-cols-3 gap-4">
-              <Card className="cursor-pointer border-border/80 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-                <CardContent className="p-6 text-center">
-                  <BookOpen className="w-12 h-12 mx-auto text-primary mb-4" />
-                  <h3 className="font-medium mb-2">{t("support.docs.getting_started")}</h3>
+            <div className="grid gap-3 md:grid-cols-3">
+              <Card className="cursor-pointer border-border/90 shadow-none transition-colors hover:border-primary/30">
+                <CardContent className="p-4 text-center">
+                  <BookOpen className="mx-auto mb-2.5 h-7 w-7 text-primary" />
+                  <h3 className="mb-1.5 text-sm font-medium">{t("support.docs.getting_started")}</h3>
                   <p className="text-sm text-muted-foreground">
                     {t("support.docs.getting_started_desc")}
                   </p>
                 </CardContent>
               </Card>
 
-              <Card className="cursor-pointer border-border/80 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-                <CardContent className="p-6 text-center">
-                  <MessageSquare className="w-12 h-12 mx-auto text-primary mb-4" />
-                  <h3 className="font-medium mb-2">{t("support.docs.integrations")}</h3>
+              <Card className="cursor-pointer border-border/90 shadow-none transition-colors hover:border-primary/30">
+                <CardContent className="p-4 text-center">
+                  <MessageSquare className="mx-auto mb-2.5 h-7 w-7 text-primary" />
+                  <h3 className="mb-1.5 text-sm font-medium">{t("support.docs.integrations")}</h3>
                   <p className="text-sm text-muted-foreground">
                     {t("support.docs.integrations_desc")}
                   </p>
                 </CardContent>
               </Card>
 
-              <Card className="cursor-pointer border-border/80 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-                <CardContent className="p-6 text-center">
-                  <HelpCircle className="w-12 h-12 mx-auto text-primary mb-4" />
-                  <h3 className="font-medium mb-2">{t("support.docs.troubleshooting")}</h3>
+              <Card className="cursor-pointer border-border/90 shadow-none transition-colors hover:border-primary/30">
+                <CardContent className="p-4 text-center">
+                  <HelpCircle className="mx-auto mb-2.5 h-7 w-7 text-primary" />
+                  <h3 className="mb-1.5 text-sm font-medium">{t("support.docs.troubleshooting")}</h3>
                   <p className="text-sm text-muted-foreground">
                     {t("support.docs.troubleshooting_desc")}
                   </p>

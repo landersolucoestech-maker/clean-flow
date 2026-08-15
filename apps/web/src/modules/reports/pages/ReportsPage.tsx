@@ -301,44 +301,29 @@ export function Reports() {
     ];
   }, [jobs, customers, invoices, leads, transactions, payrollRecords, staff, t]);
 
+  const exportAction = (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button size="sm" variant="outline" disabled={isLoading}>
+          {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileSpreadsheet className="mr-2 h-4 w-4" />}
+          {t("reports.exportExcel")}
+          <ChevronDown className="ml-2 h-3.5 w-3.5" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-52">
+        {reportsData.filter((report) => report.records > 0).map((report) => (
+          <DropdownMenuItem key={report.id} onClick={() => handleExportReport(report)} className="cursor-pointer text-xs">
+            <report.icon className={`mr-2 h-3.5 w-3.5 ${report.iconColor}`} />
+            {report.name}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
   return (
-    <PageLayout>
-      <div className="space-y-4">
-          {/* Report actions */}
-          <div className="flex justify-end">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button disabled={isLoading}>
-                  {isLoading ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <FileSpreadsheet className="w-4 h-4 mr-2" />
-                  )}
-                  {t("reports.exportExcel")}
-                  <ChevronDown className="w-4 h-4 ml-2" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                {reportsData
-                  .filter((report) => report.records > 0)
-                  .map((report) => (
-                    <DropdownMenuItem
-                      key={report.id}
-                      onClick={() => handleExportReport(report)}
-                      className="cursor-pointer"
-                    >
-                      <report.icon className={`w-4 h-4 mr-2 ${report.iconColor}`} />
-                      {report.name}
-                    </DropdownMenuItem>
-                  ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
-          {/* Analytics Content */}
-          <AnalyticsTab />
-
-      </div>
+    <PageLayout headerActions={exportAction}>
+      <AnalyticsTab />
     </PageLayout>
   );
 }

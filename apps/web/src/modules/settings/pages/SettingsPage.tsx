@@ -414,7 +414,7 @@ export function Settings() {
             </CardTitle>
             <CardDescription><T k="literal.settings.configure_review_links_for_customer_requests.c15a61fa" /></CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4 flex-1">
+          <CardContent className="flex-1 space-y-3">
             <div className="space-y-2">
               <Label className="flex items-center gap-2 text-sm">
                 <span>🌐</span>
@@ -508,7 +508,7 @@ export function Settings() {
             </CardTitle>
             <CardDescription><T k="literal.settings.configure_gps_tracking_and_alerts.a015d80e" /></CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4 flex-1">
+          <CardContent className="flex-1 space-y-3">
             <div className="space-y-2">
               <Label className="text-sm">{t("settings.gpsDistanceThreshold")}</Label>
               <div className="flex items-center gap-2">
@@ -571,7 +571,7 @@ export function Settings() {
             </CardTitle>
             <CardDescription><T k="literal.settings.configure_payment_receiving_methods.f9884c0e" /></CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4 flex-1">
+          <CardContent className="flex-1 space-y-3">
             <div className="space-y-2">
               <Label className="flex items-center gap-2 text-sm">
                 <DollarSign className="w-4 h-4 text-primary" />
@@ -606,7 +606,7 @@ export function Settings() {
 
             <Separator className="my-3" />
 
-            <div className="p-3 bg-muted/50 rounded-lg border border-border">
+            <div className="rounded-md border border-border bg-muted/35 p-2.5">
               <h4 className="font-medium text-xs flex items-center gap-2 mb-1">
                 <Zap className="w-3 h-3 text-warning" />
                 <T k="literal.settings.how_it_works.1dd6a17c" />
@@ -737,7 +737,7 @@ export function Settings() {
 
   return (
     <PageLayout>
-          <div className="space-y-6">
+          <div className="space-y-3">
 {/* Horizontal Tabs */}
             <SettingsTabsNavigation
               tabs={tabs}
