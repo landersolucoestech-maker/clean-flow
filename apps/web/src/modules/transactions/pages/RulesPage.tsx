@@ -202,7 +202,7 @@ export function Rules() {
       />
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <KPICard
           title="Total de Regras"
           value={totalRules}
@@ -253,7 +253,7 @@ export function Rules() {
             <TableBody>
               {filteredRules.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={6} className="text-center py-6 text-muted-foreground">
                     <T k="literal.transactions.nenhuma_regra_encontrada.9ed67392" />
                   </TableCell>
                 </TableRow>

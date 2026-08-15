@@ -477,12 +477,12 @@ export function CalculatePayrollModal({
         </div>
 
         {isLoading ? (
-          <div className="flex items-center justify-center py-12">
+          <div className="flex items-center justify-center py-8">
             <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
             <span className="ml-2 text-muted-foreground"><T k="literal.payroll.carregando_dados.423bd789" /></span>
           </div>
         ) : employeeData.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground">
+          <div className="text-center py-8 text-muted-foreground">
             <p>Nenhum job {includeNonCompleted ? "agendado ou completado" : "completado"} encontrado no período selecionado.</p>
             <p className="text-sm mt-2">
               {includeNonCompleted 

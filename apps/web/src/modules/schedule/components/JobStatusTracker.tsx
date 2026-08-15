@@ -74,7 +74,7 @@ const StatusButton: React.FC<StatusButtonProps> = ({
   isLoading,
   disabled,
 }) => (
-  <div className={`relative p-3 rounded-lg border-2 transition-all ${
+  <div className={`relative p-3 rounded-lg border-2 transition-colors ${
     isCompleted
       ? "border-success bg-success/5"
       : isActive
@@ -164,12 +164,12 @@ const GPSMapView: React.FC<GPSMapViewProps> = ({ statusHistory, isLoading, jobAd
   }, [pointsForMap, jobAddress]);
 
   if (isLoading) {
-    return <div className="flex items-center justify-center p-8"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
+    return <div className="flex items-center justify-center p-5"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
   }
   if (!statusHistory.length) {
     return (
-      <div className="text-center text-muted-foreground p-8">
-        <History className="h-12 w-12 mx-auto mb-4 opacity-50" />
+      <div className="text-center text-muted-foreground p-5">
+        <History className="h-8 w-8 mx-auto mb-4 opacity-50" />
         <p><T k="literal.schedule.no_status_records_found.24ae5c14" /></p>
       </div>
     );
@@ -188,7 +188,7 @@ const GPSMapView: React.FC<GPSMapViewProps> = ({ statusHistory, isLoading, jobAd
           <AlertCircle className="h-8 w-8 mb-2" /><p className="text-sm"><T k="literal.schedule.could_not_load_map.483f61e1" /></p>
         </div>
       ) : (
-        <div className="text-center text-muted-foreground p-6 bg-muted/30 rounded-lg">
+        <div className="text-center text-muted-foreground p-4 bg-muted/30 rounded-lg">
           <MapPin className="h-10 w-10 mx-auto mb-2 opacity-60" /><p className="text-sm"><T k="literal.schedule.no_map_available.be98ce00" /></p>
         </div>
       )}

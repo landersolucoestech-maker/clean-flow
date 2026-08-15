@@ -66,7 +66,7 @@ export function TeamSettingsSection({
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -108,7 +108,7 @@ export function TeamSettingsSection({
           <Separator />
 
           {isLoadingStaff ? (
-            <div className="py-8 text-center text-muted-foreground">{t("settings.loadingStaff")}</div>
+            <div className="py-6 text-center text-muted-foreground">{t("settings.loadingStaff")}</div>
           ) : (
             <div className="max-h-[500px] space-y-3 overflow-y-auto">
               {filteredStaff.map((staff) => {
@@ -158,7 +158,7 @@ export function TeamSettingsSection({
                 );
               })}
               {staffMembers.length === 0 && (
-                <div className="py-8 text-center text-muted-foreground">{t("settings.noStaffFound")}</div>
+                <div className="py-6 text-center text-muted-foreground">{t("settings.noStaffFound")}</div>
               )}
             </div>
           )}

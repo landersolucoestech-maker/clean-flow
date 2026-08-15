@@ -146,11 +146,11 @@ export function RecentActivity({ includeInvoices = true }: { includeInvoices?: b
 
   if (isLoading) {
     return (
-      <Card className="border-border/80 shadow-sm transition-shadow hover:shadow-md">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-semibold tracking-tight">{t("activity.recentActivity")}</CardTitle>
+      <Card className="border-border/90 shadow-none">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-semibold tracking-tight">{t("activity.recentActivity")}</CardTitle>
         </CardHeader>
-        <CardContent className="flex items-center justify-center py-12">
+        <CardContent className="flex items-center justify-center py-8">
           <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
         </CardContent>
       </Card>
@@ -158,23 +158,23 @@ export function RecentActivity({ includeInvoices = true }: { includeInvoices?: b
   }
 
   return (
-    <Card className="border-border/80 shadow-sm transition-shadow hover:shadow-md">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base font-semibold tracking-tight">{t("activity.recentActivity")}</CardTitle>
+    <Card className="border-border/90 shadow-none">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm font-semibold tracking-tight">{t("activity.recentActivity")}</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-2">
         {paginatedActivities.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
+          <div className="py-6 text-center text-xs text-muted-foreground">
             <p>{t("activity.noRecentActivity")}</p>
           </div>
         ) : (
           paginatedActivities.map((activity) => (
-            <div key={activity.id} className="flex items-start gap-3 rounded-xl border border-transparent p-2.5 transition-colors hover:border-border hover:bg-accent/40">
-              <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-light ${activity.color}`}>
+            <div key={activity.id} className="flex items-start gap-3 rounded-md border border-transparent p-2 transition-colors hover:border-border hover:bg-accent/40">
+              <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary-light ${activity.color}`}>
                 <activity.icon className="w-4 h-4" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground">
+                <p className="text-[13px] font-medium text-foreground">
                   {t(activity.descriptionKey)} {activity.customerName}
                 </p>
                 <div className="flex items-center gap-2 mt-1 flex-wrap">

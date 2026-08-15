@@ -157,9 +157,9 @@ export function PayrollRulesModal({ open, onOpenChange }: PayrollRulesModalProps
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] p-0 gap-0">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b">
+        <div className="flex items-center justify-between p-4 border-b">
           <div>
-            <h2 className="text-2xl font-semibold"><T k="literal.payroll.regras_de_pagamento_e_bonus.8dae6022" /></h2>
+            <h2 className="text-lg font-semibold"><T k="literal.payroll.regras_de_pagamento_e_bonus.8dae6022" /></h2>
             <p className="text-muted-foreground"><T k="literal.payroll.configure_as_regras_por_funcionario.b80f921f" /></p>
           </div>
           <Button 
@@ -181,7 +181,7 @@ export function PayrollRulesModal({ open, onOpenChange }: PayrollRulesModalProps
             <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
           </div>
         ) : (
-          <div className="flex min-h-[500px]">
+          <div className="flex min-h-[360px]">
             {/* Left column - Staff list */}
             <div className="w-[300px] border-r">
               <div className="p-4 border-b">
@@ -225,13 +225,13 @@ export function PayrollRulesModal({ open, onOpenChange }: PayrollRulesModalProps
             </div>
 
             {/* Right column - Staff details */}
-            <div className="flex-1 p-6">
+            <div className="flex-1 p-4">
               {selectedStaff ? (
-                <div className="space-y-6">
+                <div className="space-y-3">
                   {/* Staff header */}
                   <div>
                     <div className="flex items-center gap-3 flex-wrap">
-                      <h3 className="text-2xl font-semibold">{selectedStaff.staffName}</h3>
+                      <h3 className="text-lg font-semibold">{selectedStaff.staffName}</h3>
                       <Badge variant={getRoleBadgeVariant(selectedStaff.role)}>
                         {getRoleLabel(selectedStaff.role)}
                       </Badge>

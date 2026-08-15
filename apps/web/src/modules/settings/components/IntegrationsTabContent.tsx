@@ -127,7 +127,7 @@ export function IntegrationsTab() {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
       {/* Google Integration Card */}
       <Card className={`border-2 ${googleConnected ? 'border-success/50 bg-success/5' : 'border-google/30 bg-google/5'}`}>
         <CardHeader className="pb-3">

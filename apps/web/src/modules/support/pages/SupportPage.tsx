@@ -104,54 +104,54 @@ export function Support() {
         </Button>
       }
     >
-      <div className="space-y-4">
+      <div className="space-y-3">
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
           <Card>
-            <CardContent className="flex items-center gap-4 p-5">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-light">
-                <Ticket className="h-6 w-6 text-primary-dark" />
+            <CardContent className="flex items-center gap-3 p-3.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary-light">
+                <Ticket className="h-4 w-4 text-primary-dark" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{tickets.length}</p>
-                <p className="text-sm text-muted-foreground">{t("support.stats.total")}</p>
+                <p className="text-lg font-semibold leading-6">{tickets.length}</p>
+                <p className="text-xs text-muted-foreground">{t("support.stats.total")}</p>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="flex items-center gap-4 p-5">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-warning/10">
-                <Clock className="h-6 w-6 text-warning-foreground" />
+            <CardContent className="flex items-center gap-3 p-3.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-warning/10">
+                <Clock className="h-4 w-4 text-warning-foreground" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{openTickets.length}</p>
-                <p className="text-sm text-muted-foreground">{t("support.stats.open")}</p>
+                <p className="text-lg font-semibold leading-6">{openTickets.length}</p>
+                <p className="text-xs text-muted-foreground">{t("support.stats.open")}</p>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="flex items-center gap-4 p-5">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-warning/15">
-                <AlertCircle className="h-6 w-6 text-warning-foreground" />
+            <CardContent className="flex items-center gap-3 p-3.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-warning/15">
+                <AlertCircle className="h-4 w-4 text-warning-foreground" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{waitingTickets.length}</p>
-                <p className="text-sm text-muted-foreground">{t("support.stats.waiting")}</p>
+                <p className="text-lg font-semibold leading-6">{waitingTickets.length}</p>
+                <p className="text-xs text-muted-foreground">{t("support.stats.waiting")}</p>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="flex items-center gap-4 p-5">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-success/10">
-                <CheckCircle className="h-6 w-6 text-success" />
+            <CardContent className="flex items-center gap-3 p-3.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-success/10">
+                <CheckCircle className="h-4 w-4 text-success" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{resolvedTickets.length}</p>
-                <p className="text-sm text-muted-foreground">{t("support.stats.resolved")}</p>
+                <p className="text-lg font-semibold leading-6">{resolvedTickets.length}</p>
+                <p className="text-xs text-muted-foreground">{t("support.stats.resolved")}</p>
               </div>
             </CardContent>
           </Card>
@@ -173,9 +173,9 @@ export function Support() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="tickets" className="space-y-4">
+          <TabsContent value="tickets" className="space-y-3">
             {/* Filters */}
-            <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-3 sm:flex-row sm:items-center">
+            <div className="flex flex-col gap-2.5 rounded-md border border-border bg-card p-2.5 sm:flex-row sm:items-center">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                 <Input
@@ -260,10 +260,10 @@ export function Support() {
                               {t(`support.status.${ticket.status}`)}
                             </Badge>
                           </TableCell>
-                          <TableCell className="text-sm text-muted-foreground">
+                          <TableCell className="text-xs text-muted-foreground">
                             {format(new Date(ticket.created_at), "MM/dd/yyyy")}
                           </TableCell>
-                          <TableCell className="text-sm text-muted-foreground">
+                          <TableCell className="text-xs text-muted-foreground">
                             {format(new Date(ticket.updated_at), "MM/dd/yyyy HH:mm")}
                           </TableCell>
                         </TableRow>
@@ -305,7 +305,7 @@ export function Support() {
                 <CardContent className="p-4 text-center">
                   <BookOpen className="mx-auto mb-2.5 h-7 w-7 text-primary" />
                   <h3 className="mb-1.5 text-sm font-medium">{t("support.docs.getting_started")}</h3>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     {t("support.docs.getting_started_desc")}
                   </p>
                 </CardContent>
@@ -315,7 +315,7 @@ export function Support() {
                 <CardContent className="p-4 text-center">
                   <MessageSquare className="mx-auto mb-2.5 h-7 w-7 text-primary" />
                   <h3 className="mb-1.5 text-sm font-medium">{t("support.docs.integrations")}</h3>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     {t("support.docs.integrations_desc")}
                   </p>
                 </CardContent>
@@ -325,7 +325,7 @@ export function Support() {
                 <CardContent className="p-4 text-center">
                   <HelpCircle className="mx-auto mb-2.5 h-7 w-7 text-primary" />
                   <h3 className="mb-1.5 text-sm font-medium">{t("support.docs.troubleshooting")}</h3>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     {t("support.docs.troubleshooting_desc")}
                   </p>
                 </CardContent>

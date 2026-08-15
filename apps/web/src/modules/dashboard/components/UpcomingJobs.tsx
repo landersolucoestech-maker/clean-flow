@@ -241,11 +241,11 @@ export function UpcomingJobs() {
 
   if (isLoading) {
     return (
-      <Card className="border-border/80 shadow-sm transition-shadow hover:shadow-md">
-        <CardHeader className="flex flex-row items-center justify-between gap-3 pb-3">
-          <CardTitle className="text-base font-semibold tracking-tight">{t("upcomingJobs.title")}</CardTitle>
+      <Card className="border-border/90 shadow-none">
+        <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
+          <CardTitle className="text-sm font-semibold tracking-tight">{t("upcomingJobs.title")}</CardTitle>
         </CardHeader>
-        <CardContent className="flex items-center justify-center py-12">
+        <CardContent className="flex items-center justify-center py-8">
           <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
         </CardContent>
       </Card>
@@ -254,23 +254,23 @@ export function UpcomingJobs() {
 
   return (
     <>
-      <Card className="border-border/80 shadow-sm transition-shadow hover:shadow-md">
-        <CardHeader className="flex flex-row items-center justify-between gap-3 pb-3">
-          <CardTitle className="text-base font-semibold tracking-tight">{t("upcomingJobs.title")}</CardTitle>
+      <Card className="border-border/90 shadow-none">
+        <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
+          <CardTitle className="text-sm font-semibold tracking-tight">{t("upcomingJobs.title")}</CardTitle>
           <Button variant="outline" size="sm" onClick={handleViewAll}>
             {t("common.viewAll")}
           </Button>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-2">
           {paginatedJobs.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
+            <div className="py-6 text-center text-xs text-muted-foreground">
               <p>{t("upcomingJobs.noJobs")}</p>
             </div>
           ) : (
             paginatedJobs.map((job) => (
               <div
                 key={job.id}
-                className="flex items-center justify-between gap-4 rounded-xl border border-border/70 bg-card p-4 shadow-sm transition-colors hover:bg-accent/40"
+                className="flex items-center justify-between gap-3 rounded-md border border-border/70 bg-card p-2.5 transition-colors hover:bg-accent/40"
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-2">
@@ -300,7 +300,7 @@ export function UpcomingJobs() {
                     </Badge>
                   </div>
                   
-                  <div className="space-y-1.5 text-sm text-muted-foreground">
+                  <div className="space-y-1 text-xs text-muted-foreground">
                     <div className="flex items-center space-x-2">
                       <MapPin className="w-3 h-3 flex-shrink-0" />
                       <span className="truncate">{job.address || t("upcomingJobs.noAddress")}</span>
@@ -319,7 +319,7 @@ export function UpcomingJobs() {
                   </div>
                 </div>
                 
-                <div className="ml-4 flex-shrink-0">
+                <div className="ml-2 flex-shrink-0">
                   <Button variant="outline" size="sm" onClick={() => handleViewDetails(job)}>
                     {t("common.viewDetails")}
                   </Button>

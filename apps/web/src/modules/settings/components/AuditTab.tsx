@@ -359,60 +359,60 @@ export function AuditTab() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3.5">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-muted">
                 <ClipboardList className="w-5 h-5 text-muted-foreground" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">{t("audit.totalRecords")}</p>
-                <p className="text-2xl font-bold">{stats.totalRecords}</p>
+                <p className="text-lg font-bold">{stats.totalRecords}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3.5">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-success/10">
                 <CheckCircle className="w-5 h-5 text-success" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">{t("audit.completeRecords")}</p>
-                <p className="text-2xl font-bold text-success">{stats.completeRecords}</p>
+                <p className="text-lg font-bold text-success">{stats.completeRecords}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3.5">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-warning/10">
                 <AlertTriangle className="w-5 h-5 text-warning-foreground" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">{t("audit.incompleteRecords")}</p>
-                <p className="text-2xl font-bold text-warning-foreground">{stats.incompleteRecords}</p>
+                <p className="text-lg font-bold text-warning-foreground">{stats.incompleteRecords}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3.5">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-primary/10">
                 <Percent className="w-5 h-5 text-primary" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">{t("audit.completionRate")}</p>
-                <p className="text-2xl font-bold">{stats.completionRate}%</p>
+                <p className="text-lg font-bold">{stats.completionRate}%</p>
               </div>
             </div>
           </CardContent>
@@ -469,7 +469,7 @@ export function AuditTab() {
         <CardContent>
           {currentRecords.length === 0 ? (
             <div className="text-center py-12">
-              <CheckCircle className="w-12 h-12 text-success mx-auto mb-4" />
+              <CheckCircle className="h-8 w-8 text-success mx-auto mb-4" />
               <p className="text-lg font-medium text-foreground">{t("audit.allComplete")}</p>
               <p className="text-sm text-muted-foreground">{getEmptyStateMessage(selectedCategory)}</p>
             </div>

@@ -93,13 +93,13 @@ function MetricCard({
   };
 
   return (
-    <Card className="hover:shadow-lg transition-all duration-200">
-      <CardContent className="p-4">
+    <Card className="border-border/90 shadow-none">
+      <CardContent className="p-3.5">
         <div className="flex items-start gap-3">
-          <div className="p-2 bg-primary/10 rounded-lg shrink-0">{icon}</div>
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary/10">{icon}</div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm text-muted-foreground font-medium">{title}</p>
-            <p className="text-xl font-bold text-foreground mt-1">{value}</p>
+            <p className="text-[11px] font-medium text-muted-foreground">{title}</p>
+            <p className="mt-0.5 text-lg font-semibold text-foreground">{value}</p>
 
             <div className="mt-3 space-y-2">
               <div className="flex items-center justify-between text-sm">
@@ -401,7 +401,7 @@ export function AnalyticsTab() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
+      <div className="flex items-center justify-center py-8">
         <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
       </div>
     );
@@ -410,24 +410,24 @@ export function AnalyticsTab() {
   const percentileRank = 100 - metrics.overallScore;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       {/* AI Consultant Card */}
       <AIConsultantCard metrics={aiMetrics} />
 
       {/* Overall Score Card */}
-      <Card className="bg-gradient-to-br from-primary/5 via-primary/10 to-primary/5 border-primary/20">
+      <Card className="border-primary/20 bg-primary/[0.035] shadow-none">
         <CardHeader className="pb-2">
           <div className="flex items-center gap-2">
-            <Trophy className="w-6 h-6 text-primary" />
-            <CardTitle className="text-xl"><T k="literal.reports.overall_business_performance_score.0d6805cf" /></CardTitle>
+            <Trophy className="h-4 w-4 text-primary" />
+            <CardTitle className="text-sm"><T k="literal.reports.overall_business_performance_score.0d6805cf" /></CardTitle>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col md:flex-row md:items-center gap-6">
-            <div className="flex items-center gap-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center">
+            <div className="flex items-center gap-4">
               <div className="relative">
-                <div className="w-32 h-32 rounded-full border-8 border-primary/20 flex items-center justify-center bg-background">
-                  <span className="text-4xl font-bold text-primary">{metrics.overallScore}</span>
+                <div className="flex h-20 w-20 items-center justify-center rounded-md border border-primary/20 bg-background">
+                  <span className="text-2xl font-semibold text-primary">{metrics.overallScore}</span>
                 </div>
                 <div className="absolute -bottom-1 left-1/2 -translate-x-1/2">
                   <Badge className="bg-primary text-primary-foreground">
@@ -439,7 +439,7 @@ export function AnalyticsTab() {
                 <p className="text-muted-foreground text-sm">
                   <T k="literal.reports.compared_to_similar_service_based_companies_.128b963c" />
                 </p>
-                <div className="flex flex-wrap gap-2 mt-3">
+                <div className="mt-2 flex flex-wrap gap-1.5">
                   <Badge variant="outline" className="text-xs">
                     <TrendingUp className="w-3 h-3 mr-1" />
                     <T k="literal.reports.crescimento_de_customers.a68640df" />
@@ -465,7 +465,7 @@ export function AnalyticsTab() {
 
       {/* Financial Reports Section */}
       <div>
-        <div className="flex items-center gap-2 mb-4">
+        <div className="mb-2.5 flex items-center gap-2">
           <DollarSign className="w-5 h-5 text-primary" />
           <h2 className="text-lg font-semibold text-foreground"><T k="literal.reports.relatorios_financeiros.47d6fec1" /></h2>
         </div>
@@ -544,7 +544,7 @@ export function AnalyticsTab() {
 
       {/* Jobs Report (Operational) */}
       <div>
-        <div className="flex items-center gap-2 mb-4">
+        <div className="mb-2.5 flex items-center gap-2">
           <Briefcase className="w-5 h-5 text-primary" />
           <h2 className="text-lg font-semibold text-foreground"><T k="literal.reports.relatorio_de_jobs_operacional.ebad18eb" /></h2>
         </div>
@@ -595,7 +595,7 @@ export function AnalyticsTab() {
 
       {/* Schedule Report */}
       <div>
-        <div className="flex items-center gap-2 mb-4">
+        <div className="mb-2.5 flex items-center gap-2">
           <Calendar className="w-5 h-5 text-primary" />
           <h2 className="text-lg font-semibold text-foreground"><T k="literal.reports.relatorio_de_agendamentos.44ab20de" /></h2>
         </div>
@@ -630,7 +630,7 @@ export function AnalyticsTab() {
 
       {/* Customer Report */}
       <div>
-        <div className="flex items-center gap-2 mb-4">
+        <div className="mb-2.5 flex items-center gap-2">
           <Users className="w-5 h-5 text-primary" />
           <h2 className="text-lg font-semibold text-foreground"><T k="literal.reports.relatorio_de_clientes.96e177a3" /></h2>
         </div>
@@ -663,7 +663,7 @@ export function AnalyticsTab() {
 
       {/* Team Report (Payroll & Performance) */}
       <div>
-        <div className="flex items-center gap-2 mb-4">
+        <div className="mb-2.5 flex items-center gap-2">
           <UserCog className="w-5 h-5 text-primary" />
           <h2 className="text-lg font-semibold text-foreground"><T k="literal.reports.relatorio_de_equipe_payroll_performance.f53ef2e2" /></h2>
         </div>
@@ -743,7 +743,7 @@ export function AnalyticsTab() {
 
       {/* Communications Report */}
       <div>
-        <div className="flex items-center gap-2 mb-4">
+        <div className="mb-2.5 flex items-center gap-2">
           <MessageSquare className="w-5 h-5 text-primary" />
           <h2 className="text-lg font-semibold text-foreground"><T k="literal.reports.relatorio_de_comunicacoes.2c0eef7a" /></h2>
         </div>
