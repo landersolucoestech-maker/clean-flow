@@ -23,22 +23,40 @@ attribute_findings = []
 toast_findings = []
 locale_findings = []
 
+
+def quoted_values(prefix_pattern: str, text: str):
+    # Match double and single quoted literals independently. This prevents apostrophes
+    # inside double-quoted UI text (e.g. "Customer's file") from truncating the value.
+    patterns = [
+        re.compile(prefix_pattern + r'"((?:\\.|[^"\\])*)"'),
+        re.compile(prefix_pattern + r"'((?:\\.|[^'\\])*)'"),
+    ]
+    for pattern in patterns:
+        for match in pattern.finditer(text):
+            yield bytes(match.group(1), "utf-8").decode("unicode_escape") if "\\" in match.group(1) else match.group(1)
+
+
 for root in ROOTS:
     for path in root.rglob("*.tsx"):
         text = path.read_text()
         for attr in ATTRS:
-            for m in re.finditer(rf'\b{re.escape(attr)}\s*=\s*["\']([^"\']*[A-Za-zÀ-ÿ][^"\']*)["\']', text):
-                value = m.group(1).strip()
-                if value and not is_intentional(value):
+            prefix = rf'\b{re.escape(attr)}\s*=\s*'
+            for raw_value in quoted_values(prefix, text):
+                value = raw_value.strip()
+                if value and re.search(r"[A-Za-zÀ-ÿ]", value) and not is_intentional(value):
                     attribute_findings.append((path.as_posix(), attr, value))
-        patterns = [
-            r'\btoast\.(?:success|error|info|warning)\(\s*["\']([^"\']*[A-Za-zÀ-ÿ][^"\']*)["\']',
-            r'\btoast\(\s*\{[\s\S]{0,300}?\btitle:\s*["\']([^"\']*[A-Za-zÀ-ÿ][^"\']*)["\']',
-            r'\btoast\(\s*\{[\s\S]{0,500}?\bdescription:\s*["\']([^"\']*[A-Za-zÀ-ÿ][^"\']*)["\']',
+
+        toast_prefixes = [
+            r'\btoast\.(?:success|error|info|warning)\(\s*',
+            r'\btoast\(\s*\{[\s\S]{0,300}?\btitle:\s*',
+            r'\btoast\(\s*\{[\s\S]{0,500}?\bdescription:\s*',
         ]
-        for pattern in patterns:
-            for m in re.finditer(pattern, text):
-                toast_findings.append((path.as_posix(), m.group(1).strip()))
+        for prefix in toast_prefixes:
+            for raw_value in quoted_values(prefix, text):
+                value = raw_value.strip()
+                if value and re.search(r"[A-Za-zÀ-ÿ]", value):
+                    toast_findings.append((path.as_posix(), value))
+
         for m in re.finditer(r'toLocale(?:String|DateString|TimeString)\(\s*["\'](en-US|pt-BR|es-ES)["\']', text):
             locale_findings.append((path.as_posix(), m.group(0)))
         for m in re.finditer(r'new Intl\.(?:NumberFormat|DateTimeFormat)\(\s*["\'](en-US|pt-BR|es-ES)["\']', text):
