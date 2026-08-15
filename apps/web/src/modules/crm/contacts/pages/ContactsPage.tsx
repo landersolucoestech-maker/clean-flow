@@ -109,15 +109,8 @@ export function Contacts() {
         ) : (
           <>
             <Card className="overflow-hidden">
-            <div className="flex flex-col gap-3 border-b border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h2 className="text-base font-semibold text-foreground"><T k="crm.tabs.contacts" /></h2>
-                <p className="mt-0.5 text-sm text-muted-foreground"><T k="literal.crm.manage_suppliers_partners_service_providers_.1ef718fb" /></p>
-              </div>
-            </div>
-
-              <CardContent className="border-b border-border bg-muted/20 p-3">
-                <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_220px_180px]">
+              <CardContent className="border-b border-border bg-muted/20 p-2.5">
+                <div className="grid gap-2.5 md:grid-cols-[minmax(0,1fr)_200px_160px]">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input value={search} onChange={(event) => applySearch(event.target.value)} placeholder="Search contacts..." className="pl-9" />
@@ -140,27 +133,25 @@ export function Contacts() {
               </CardContent>
 
             {error && (
-              <Card className="border-destructive/40 bg-destructive/5">
-                <CardContent className="p-4">
-                  <p className="font-medium text-destructive"><T k="literal.crm.unable_to_load_contacts.543e081f" /></p>
-                  <p className="mt-1 text-sm text-muted-foreground">{error.message}</p>
-                </CardContent>
-              </Card>
+              <div className="border-b border-destructive/30 bg-destructive/5 px-3 py-2.5">
+                <p className="text-xs font-medium text-destructive"><T k="literal.crm.unable_to_load_contacts.543e081f" /></p>
+                <p className="mt-0.5 text-xs text-muted-foreground">{error.message}</p>
+              </div>
             )}
 
               <CardContent className="p-0">
                 {isLoading ? (
-                  <div className="space-y-3 p-5">
-                    {Array.from({ length: 5 }).map((_, index) => <Skeleton key={index} className="h-12 w-full" />)}
+                  <div className="space-y-2.5 p-4">
+                    {Array.from({ length: 5 }).map((_, index) => <Skeleton key={index} className="h-9 w-full" />)}
                   </div>
                 ) : pageContacts.length === 0 ? (
-                  <div className="flex min-h-72 flex-col items-center justify-center px-6 py-12 text-center">
-                    <div className="rounded-full bg-muted p-4"><ContactRound className="h-7 w-7 text-muted-foreground" /></div>
-                    <h2 className="mt-4 text-lg font-semibold"><T k="literal.crm.no_contacts_found.81601534" /></h2>
-                    <p className="mt-1 max-w-md text-sm text-muted-foreground">
+                  <div className="flex min-h-44 flex-col items-center justify-center px-4 py-8 text-center">
+                    <div className="rounded-md bg-muted p-2.5"><ContactRound className="h-5 w-5 text-muted-foreground" /></div>
+                    <h2 className="mt-2.5 text-sm font-semibold"><T k="literal.crm.no_contacts_found.81601534" /></h2>
+                    <p className="mt-1 max-w-md text-xs text-muted-foreground">
                       {contacts.length === 0 ? "Create the first corporate contact for this CRM." : "Adjust the search or filters to find a contact."}
                     </p>
-                    {contacts.length === 0 && mayCreate && <Button className="mt-5" onClick={openCreate}><Plus className="mr-2 h-4 w-4" /><T k="literal.crm.create_contact.e4a4312d" /></Button>}
+                    {contacts.length === 0 && mayCreate && <Button className="mt-3" onClick={openCreate}><Plus className="mr-2 h-4 w-4" /><T k="literal.crm.create_contact.e4a4312d" /></Button>}
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
@@ -212,7 +203,7 @@ export function Contacts() {
             </Card>
 
             {!isLoading && filteredContacts.length > 0 && (
-              <div className="flex flex-col gap-3 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col gap-2 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
                 <span>Showing {(safePage - 1) * PAGE_SIZE + 1}-{Math.min(safePage * PAGE_SIZE, filteredContacts.length)} of {filteredContacts.length}</span>
                 <div className="flex items-center gap-2">
                   <Button variant="outline" size="sm" disabled={safePage <= 1} onClick={() => setPage((current) => Math.max(1, current - 1))}><T k="audit.previous" /></Button>

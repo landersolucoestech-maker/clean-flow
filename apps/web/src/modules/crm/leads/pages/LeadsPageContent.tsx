@@ -667,17 +667,8 @@ export function Leads() {
     >
       <div className="space-y-3">
           <Card className="overflow-hidden">
-            <div className="border-b border-border px-4 py-3">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h2 className="text-base font-semibold text-foreground"><T k="leads.title" /></h2>
-                  <p className="mt-0.5 text-sm text-muted-foreground"><T k="literal.crm.manage_the_sales_pipeline_from_first_contact.d637847e" /></p>
-                </div>
-              </div>
-            </div>
-
           {/* Filters and Search */}
-          <div className="flex flex-col gap-3 border-b border-border bg-muted/20 p-3 lg:flex-row lg:flex-wrap lg:items-center">
+          <div className="flex flex-col gap-2.5 border-b border-border bg-muted/20 p-2.5 lg:flex-row lg:flex-wrap lg:items-center">
             <div className="relative min-w-0 flex-1 lg:min-w-[240px]">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
@@ -727,8 +718,8 @@ export function Leads() {
           {/* Leads Table */}
             <CardContent className="p-0">
               {isLoading ? (
-                <div className="flex items-center justify-center h-64">
-                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                <div className="flex h-40 items-center justify-center">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
                 </div>
               ) : (
                 <Table>
@@ -748,7 +739,7 @@ export function Leads() {
                   <TableBody>
                     {filteredEstimates.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
+                        <TableCell colSpan={10} className="py-6 text-center text-xs text-muted-foreground">
                           {t("leads.noLeadsFound")}
                         </TableCell>
                       </TableRow>

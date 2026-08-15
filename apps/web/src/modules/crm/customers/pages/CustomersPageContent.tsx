@@ -316,13 +316,7 @@ export function Customers() {
 
           {/* Customer workspace */}
           <Card className="overflow-hidden">
-            <CardHeader className="border-b border-border px-4 py-3">
-              <div className="flex flex-col gap-1">
-                <CardTitle className="text-sm font-semibold"><T k="customers.title" /></CardTitle>
-                <p className="text-xs text-muted-foreground"><T k="literal.crm.search_filter_and_manage_the_customer_direct.f86b665e" /></p>
-              </div>
-            </CardHeader>
-            <div className="flex flex-col gap-3 border-b border-border bg-muted/20 p-3 lg:flex-row lg:items-center">
+            <div className="flex flex-col gap-2.5 border-b border-border bg-muted/20 p-2.5 lg:flex-row lg:items-center">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input placeholder={searchField === "all" ? "Search by name, phone, email or address..." : searchField === "name" ? "Search by name..." : searchField === "phone" ? "Search by phone..." : searchField === "email" ? "Search by email..." : "Search by address..."} value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10" />
@@ -452,12 +446,12 @@ export function Customers() {
                       </TableRow>)}
                   </TableBody>
                 </Table>) : (/* Customer Grid */
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-                  {filteredCustomers.map(customer => <Card key={customer.id} className="relative border-border/80 shadow-sm transition-shadow hover:shadow-md">
-                      <CardContent className="p-4">
-                        <div className="flex items-start justify-between mb-3">
+            <div className="grid grid-cols-1 gap-3 p-3 md:grid-cols-2 xl:grid-cols-3">
+                  {filteredCustomers.map(customer => <Card key={customer.id} className="relative border-border/90 shadow-none transition-colors hover:border-primary/30">
+                      <CardContent className="p-3">
+                        <div className="mb-2.5 flex items-start justify-between">
                           <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-light">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary-light">
                               <span className="text-primary font-semibold text-sm">
                                 {(customer.name || "").split(' ').map(n => n[0]).join('').slice(0, 2) || "?"}
                               </span>
@@ -491,7 +485,7 @@ export function Customers() {
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </div>
-                        <div className="space-y-2 text-sm">
+                        <div className="space-y-1.5 text-xs">
                           <div className="flex items-center gap-2 text-muted-foreground">
                             <Mail className="w-4 h-4" />
                             <span className="truncate">{customer.email}</span>
@@ -505,7 +499,7 @@ export function Customers() {
                             <span className="truncate">{customer.address}</span>
                           </div>
                         </div>
-                        <div className="mt-4 flex items-center justify-between border-t border-border/80 pt-3">
+                        <div className="mt-3 flex items-center justify-between border-t border-border/80 pt-2.5">
                           <Badge variant={customer.status === "Active" ? "default" : "secondary"}>
                             {customer.status}
                           </Badge>
