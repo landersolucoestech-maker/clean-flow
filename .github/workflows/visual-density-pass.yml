@@ -28,6 +28,7 @@ jobs:
           python scripts/crm_visual_cleanup.py
           python scripts/visual_hotspot_cleanup.py
           python scripts/visual_final_hotspots.py
+          python scripts/auth_visual_cleanup.py
       - name: Audit remaining visual-density hotspots
         run: python scripts/visual_quality_audit.py
       - name: Install dependencies
