@@ -21,16 +21,18 @@ type Metric = {
 
 function MetricStrip({ metrics }: { metrics: Metric[] }) {
   return (
-    <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 2xl:grid-cols-5">
+    <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-3 2xl:grid-cols-5">
       {metrics.map((metric) => (
-        <div key={metric.label} className="flex min-h-[82px] items-center justify-between rounded-lg border border-border bg-card px-4 py-3">
-          <div className="min-w-0">
-            <p className="truncate text-xs font-medium text-muted-foreground">{metric.label}</p>
-            <p className="mt-1 text-xl font-semibold leading-none tracking-tight text-foreground">{metric.value}</p>
-            <p className="mt-1 truncate text-[11px] text-muted-foreground">{metric.helper}</p>
+        <div key={metric.label} className="flex min-h-[68px] min-w-0 items-center gap-3 rounded-md border border-border bg-card px-3.5 py-2.5">
+          <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md ${metric.tone}`}>
+            <metric.icon className="h-3.5 w-3.5" />
           </div>
-          <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md ${metric.tone}`}>
-            <metric.icon className="h-4 w-4" />
+          <div className="min-w-0 flex-1">
+            <div className="flex min-w-0 items-baseline justify-between gap-2">
+              <p className="truncate text-[11px] font-medium leading-4 text-muted-foreground">{metric.label}</p>
+              <p className="shrink-0 text-base font-semibold leading-5 tracking-tight text-foreground">{metric.value}</p>
+            </div>
+            <p className="mt-0.5 truncate text-[10px] leading-4 text-muted-foreground/80">{metric.helper}</p>
           </div>
         </div>
       ))}
@@ -89,7 +91,7 @@ function CrmWorkspaceHeader() {
   }
 
   return (
-    <section className="space-y-3">
+    <section className="space-y-2.5">
       <MetricStrip metrics={metrics} />
       <CrmTabs />
     </section>
