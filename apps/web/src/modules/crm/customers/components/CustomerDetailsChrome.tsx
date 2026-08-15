@@ -20,7 +20,7 @@ export function CustomerDetailsHeader({ customer, inactiveInfo }: CustomerDetail
 
   return (
     <div className="flex items-center gap-4">
-      <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
+      <div className="h-9 w-9 rounded-md bg-primary/10 flex items-center justify-center">
         <span className="text-primary font-bold text-lg">{initials}</span>
       </div>
       <div>

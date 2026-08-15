@@ -189,11 +189,11 @@ export function SyncLogs() {
 
   return (
     <PageLayout>
-      <div className="space-y-6">
+      <div className="space-y-3">
           {/* Page Header */}
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl"><T k="literal.settings.sync_logs.a85e431b" /></h1>
+              <h1 className="text-lg font-semibold tracking-tight text-foreground"><T k="literal.settings.sync_logs.a85e431b" /></h1>
               <p className="text-muted-foreground">
                 <T k="literal.settings.monitor_quickbooks_synchronization_activity_.7a340d46" />
               </p>
@@ -226,66 +226,66 @@ export function SyncLogs() {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <Card className="border-border/80 shadow-sm">
-              <CardContent className="p-6">
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
+            <Card className="border-border/90 shadow-none">
+              <CardContent className="p-3.5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground"><T k="literal.settings.total_syncs.ee787764" /></p>
-                    <p className="text-2xl font-bold text-foreground">{stats.total}</p>
+                    <p className="text-[11px] font-medium text-muted-foreground"><T k="literal.settings.total_syncs.ee787764" /></p>
+                    <p className="text-lg font-semibold text-foreground">{stats.total}</p>
                   </div>
-                  <RefreshCw className="w-8 h-8 text-primary" />
+                  <RefreshCw className="h-4 w-4 text-primary" />
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-border/80 shadow-sm">
-              <CardContent className="p-6">
+            <Card className="border-border/90 shadow-none">
+              <CardContent className="p-3.5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground"><T k="literal.settings.successful.d7932a29" /></p>
-                    <p className="text-2xl font-bold text-success">{stats.success}</p>
+                    <p className="text-[11px] font-medium text-muted-foreground"><T k="literal.settings.successful.d7932a29" /></p>
+                    <p className="text-lg font-semibold text-success">{stats.success}</p>
                   </div>
-                  <CheckCircle className="w-8 h-8 text-success" />
+                  <CheckCircle className="h-4 w-4 text-success" />
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-border/80 shadow-sm">
-              <CardContent className="p-6">
+            <Card className="border-border/90 shadow-none">
+              <CardContent className="p-3.5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground"><T k="literal.settings.errors.805e86a8" /></p>
-                    <p className="text-2xl font-bold text-destructive">{stats.error}</p>
+                    <p className="text-[11px] font-medium text-muted-foreground"><T k="literal.settings.errors.805e86a8" /></p>
+                    <p className="text-lg font-semibold text-destructive">{stats.error}</p>
                   </div>
-                  <XCircle className="w-8 h-8 text-destructive" />
+                  <XCircle className="h-4 w-4 text-destructive" />
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-border/80 shadow-sm">
-              <CardContent className="p-6">
+            <Card className="border-border/90 shadow-none">
+              <CardContent className="p-3.5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground"><T k="literal.settings.last_sync.2072a8ad" /></p>
-                    <p className="text-lg font-bold text-foreground">
+                    <p className="text-[11px] font-medium text-muted-foreground"><T k="literal.settings.last_sync.2072a8ad" /></p>
+                    <p className="text-sm font-semibold text-foreground">
                       {lastSyncAt 
                         ? format(new Date(lastSyncAt), "MMM d, h:mm a")
                         : "Never"
                       }
                     </p>
                   </div>
-                  <Clock className="w-8 h-8 text-muted-foreground" />
+                  <Clock className="h-4 w-4 text-muted-foreground" />
                 </div>
               </CardContent>
             </Card>
           </div>
 
           {/* Filters and Actions */}
-          <Card className="border-border/80 shadow-sm">
-            <CardHeader className="pb-4">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <CardTitle className="text-lg"><T k="literal.settings.sync_history.1fb44e19" /></CardTitle>
+          <Card className="border-border/90 shadow-none">
+            <CardHeader className="pb-2">
+              <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
+                <CardTitle className="text-sm"><T k="literal.settings.sync_history.1fb44e19" /></CardTitle>
                 <div className="flex items-center gap-2">
                   <Button variant="outline" size="sm" onClick={handleExportLogs}>
                     <Download className="w-4 h-4 mr-1" />
@@ -354,9 +354,9 @@ export function SyncLogs() {
 
               {/* Logs Table */}
               {filteredLogs.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  <RefreshCw className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p className="text-lg font-medium"><T k="literal.settings.no_sync_logs_found.9902442d" /></p>
+                <div className="py-7 text-center text-xs text-muted-foreground">
+                  <RefreshCw className="mx-auto mb-2 h-6 w-6 opacity-50" />
+                  <p className="text-sm font-medium"><T k="literal.settings.no_sync_logs_found.9902442d" /></p>
                   <p className="text-sm">
                     {syncLogs.length === 0 
                       ? "Sync activities will appear here once you start syncing with QuickBooks"

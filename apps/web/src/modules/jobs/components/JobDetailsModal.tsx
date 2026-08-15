@@ -80,7 +80,7 @@ export function JobDetailsModal({
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[550px]">
         <DialogHeader>
           <div className="flex items-start gap-3 sm:items-center sm:gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary-light sm:h-14 sm:w-14">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary-light sm:h-9 sm:w-14">
               <Briefcase className="w-6 h-6 text-primary" />
             </div>
             <div>
@@ -175,7 +175,7 @@ export function JobDetailsModal({
             </h4>
             <div className="space-y-2">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center">
                   <span className="text-primary font-semibold text-xs">
                     {job.staff1.split(' ').map(n => n[0]).join('').slice(0, 2)}
                   </span>
@@ -187,7 +187,7 @@ export function JobDetailsModal({
               </div>
               {job.staff2 && (
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-secondary/50 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-md bg-secondary/50 flex items-center justify-center">
                     <span className="text-foreground font-semibold text-xs">
                       {job.staff2.split(' ').map(n => n[0]).join('').slice(0, 2)}
                     </span>

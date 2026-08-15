@@ -138,22 +138,22 @@ export function AIConsultantCard({ metrics }: AIConsultantCardProps) {
   };
 
   return (
-    <Card className="bg-gradient-to-br from-violet-500/5 via-purple-500/10 to-fuchsia-500/5 border-purple-500/20">
+    <Card className="border-primary/20 bg-primary/[0.025] shadow-none">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="p-2 bg-purple-500/10 rounded-lg">
-              <Bot className="w-6 h-6 text-purple-500" />
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10">
+              <Bot className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-xl flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-sm">
                 <T k="literal.reports.consultor_ia_de_performance.f8ef44d9" />
-                <Badge variant="outline" className="text-purple-500 border-purple-500/30">
+                <Badge variant="outline" className="border-primary/20 text-primary">
                   <Sparkles className="w-3 h-3 mr-1" />
                   <T k="literal.reports.ai_powered.2650d468" />
                 </Badge>
               </CardTitle>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 <T k="literal.reports.analise_inteligente_do_seu_negocio_com_diagn.5dea3528" />
               </p>
             </div>
@@ -161,7 +161,7 @@ export function AIConsultantCard({ metrics }: AIConsultantCardProps) {
           <Button
             onClick={handleAnalyze}
             disabled={isLoading}
-            className="bg-purple-500 hover:bg-purple-600"
+            size="sm"
           >
             {isLoading ? (
               <>
@@ -184,12 +184,12 @@ export function AIConsultantCard({ metrics }: AIConsultantCardProps) {
       </CardHeader>
       <CardContent>
         {!hasAnalyzed && !isLoading && !analysis && (
-          <div className="flex flex-col items-center justify-center py-8 text-center">
-            <div className="p-4 bg-purple-500/10 rounded-full mb-4">
-              <Bot className="w-12 h-12 text-purple-500" />
+          <div className="flex flex-col items-center justify-center py-6 text-center">
+            <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-md bg-primary/10">
+              <Bot className="h-4 w-4 text-primary" />
             </div>
-            <h3 className="text-lg font-semibold mb-2"><T k="literal.reports.pronto_para_analisar_seu_negocio.e4679b34" /></h3>
-            <p className="text-muted-foreground max-w-md">
+            <h3 className="mb-1.5 text-sm font-semibold"><T k="literal.reports.pronto_para_analisar_seu_negocio.e4679b34" /></h3>
+            <p className="max-w-md text-xs text-muted-foreground">
               Clique em "Analisar Negócio" para receber diagnósticos, identificar gargalos, 
               antecipar riscos e obter ações práticas para melhorar sua performance.
             </p>
@@ -197,7 +197,7 @@ export function AIConsultantCard({ metrics }: AIConsultantCardProps) {
         )}
 
         {(isLoading || analysis) && (
-          <ScrollArea className="h-[400px] pr-4">
+          <ScrollArea className="h-[320px] pr-3">
             <div
               className="prose prose-sm dark:prose-invert max-w-none"
               dangerouslySetInnerHTML={{ __html: formatMarkdown(analysis) }}

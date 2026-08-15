@@ -70,15 +70,15 @@ export function CustomerDetailsModal({
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-4 mt-4">
             {/* Contact Info */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 rounded-lg bg-muted/30 space-y-2">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-md p-3 bg-muted/30 space-y-2">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Mail className="w-4 h-4" />
                   <span className="text-xs"><T k="common.email" /></span>
                 </div>
                 <p className="text-sm font-medium">{customer.email || "-"}</p>
               </div>
-              <div className="p-4 rounded-lg bg-muted/30 space-y-2">
+              <div className="rounded-md p-3 bg-muted/30 space-y-2">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Phone className="w-4 h-4" />
                   <span className="text-xs"><T k="estimate.phone1" /></span>
@@ -86,7 +86,7 @@ export function CustomerDetailsModal({
                 <p className="text-sm font-medium">{customer.phone || "-"}</p>
               </div>
               {customer.phone2 && (
-                <div className="p-4 rounded-lg bg-muted/30 space-y-2">
+                <div className="rounded-md p-3 bg-muted/30 space-y-2">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Phone className="w-4 h-4" />
                     <span className="text-xs"><T k="estimate.phone2" /></span>
@@ -94,7 +94,7 @@ export function CustomerDetailsModal({
                   <p className="text-sm font-medium">{customer.phone2}</p>
                 </div>
               )}
-              <div className="p-4 rounded-lg bg-muted/30 space-y-2">
+              <div className="rounded-md p-3 bg-muted/30 space-y-2">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Calendar className="w-4 h-4" />
                   <span className="text-xs"><T k="modal.customerSince" /></span>
@@ -105,21 +105,21 @@ export function CustomerDetailsModal({
 
             {/* Service Info */}
             <div className="grid grid-cols-3 gap-4">
-              <div className="p-4 rounded-lg bg-muted/30 space-y-2">
+              <div className="rounded-md p-3 bg-muted/30 space-y-2">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Calendar className="w-4 h-4" />
                   <span className="text-xs"><T k="customers.lastService" /></span>
                 </div>
                 <p className="text-sm font-medium">{formatCustomerDate(lastServiceDate)}</p>
               </div>
-              <div className="p-4 rounded-lg bg-muted/30 space-y-2">
+              <div className="rounded-md p-3 bg-muted/30 space-y-2">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Briefcase className="w-4 h-4" />
                   <span className="text-xs"><T k="customers.totalJobs" /></span>
                 </div>
                 <p className="text-sm font-medium">{customerJobs.length || customer.total_jobs || 0}</p>
               </div>
-              <div className="p-4 rounded-lg bg-muted/30 space-y-2">
+              <div className="rounded-md p-3 bg-muted/30 space-y-2">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <DollarSign className="w-4 h-4" />
                   <span className="text-xs"><T k="jobs.revenue" /></span>
@@ -129,15 +129,15 @@ export function CustomerDetailsModal({
             </div>
 
             {/* Payment & Source */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 rounded-lg bg-muted/30 space-y-2">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-md p-3 bg-muted/30 space-y-2">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <CreditCard className="w-4 h-4" />
                   <span className="text-xs"><T k="modal.paymentMethod" /></span>
                 </div>
                 <p className="text-sm font-medium capitalize">{customer.payment_method || "-"}</p>
               </div>
-              <div className="p-4 rounded-lg bg-muted/30 space-y-2">
+              <div className="rounded-md p-3 bg-muted/30 space-y-2">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <User className="w-4 h-4" />
                   <span className="text-xs"><T k="literal.crm.source.6da13add" /></span>
@@ -148,7 +148,7 @@ export function CustomerDetailsModal({
 
             {/* Referral Name - show only if source is Referral */}
             {customer.source?.toLowerCase() === 'referral' && customer.additional_info && (
-              <div className="p-4 rounded-lg bg-muted/30 space-y-2">
+              <div className="rounded-md p-3 bg-muted/30 space-y-2">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Users className="w-4 h-4" />
                   <span className="text-xs"><T k="leads.form.referredBy" /></span>
@@ -159,7 +159,7 @@ export function CustomerDetailsModal({
 
             {/* Primary Address */}
             {customer.address && (
-              <div className="p-4 rounded-lg bg-muted/30 space-y-2">
+              <div className="rounded-md p-3 bg-muted/30 space-y-2">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <MapPin className="w-4 h-4" />
                   <span className="text-xs"><T k="literal.crm.primary_address.181e292d" /></span>
@@ -170,7 +170,7 @@ export function CustomerDetailsModal({
 
             {/* Notes */}
             {customer.notes && (
-              <div className="p-4 rounded-lg bg-muted/30">
+              <div className="rounded-md p-3 bg-muted/30">
                 <div className="flex items-center gap-2 mb-2">
                   <Button
                     variant="ghost"
@@ -193,7 +193,7 @@ export function CustomerDetailsModal({
 
             {/* Additional Info */}
             {customer.additional_info && (
-              <div className="p-4 rounded-lg bg-muted/30">
+              <div className="rounded-md p-3 bg-muted/30">
                 <div className="flex items-center gap-2 mb-2">
                   <Button
                     variant="ghost"
@@ -225,12 +225,12 @@ export function CustomerDetailsModal({
 
             {/* Inactive Status Alert */}
             {customer.status === "Inactive" && inactiveInfo && (
-              <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20 space-y-3">
+              <div className="rounded-md p-3 bg-destructive/10 border border-destructive/20 space-y-3">
                 <div className="flex items-center gap-2">
                   <AlertCircle className="w-5 h-5 text-destructive" />
                   <span className="text-sm font-semibold text-destructive"><T k="literal.crm.customer_inactive.68b8ef4a" /></span>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <p className="text-xs text-muted-foreground"><T k="literal.crm.inactive_since.9ee466b9" /></p>
                     <p className="text-sm font-medium">{inactiveInfo.date ? formatCustomerDate(inactiveInfo.date) : "-"}</p>
@@ -248,11 +248,11 @@ export function CustomerDetailsModal({
 
             {/* Relationship Timeline */}
             {isLoadingRelationships ? (
-              <div className="flex items-center justify-center py-8">
+              <div className="flex items-center justify-center py-6">
                 <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
               </div>
             ) : customerRelationships.length === 0 ? (
-              <div className="border rounded-lg p-8 text-center">
+              <div className="rounded-md border p-5 text-center">
                 <History className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
                 <p className="text-sm text-muted-foreground"><T k="literal.crm.no_relationship_history_found.711590ca" /></p>
                 <p className="text-xs text-muted-foreground mt-1"><T k="literal.crm.history_will_appear_when_customer_status_cha.f0c3b599" /></p>
@@ -263,7 +263,7 @@ export function CustomerDetailsModal({
                   <div 
                     key={rel.id} 
                     className={cn(
-                      "p-4 rounded-lg border",
+                      "rounded-md p-3 border",
                       !rel.end_date 
                         ? "border-success/30 bg-success/5" 
                         : "border-border/50 bg-muted/30"
@@ -272,7 +272,7 @@ export function CustomerDetailsModal({
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-3">
                         <div className={cn(
-                          "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold",
+                          "flex h-7 w-7 items-center justify-center rounded-md text-[10px] font-semibold",
                           !rel.end_date 
                             ? "bg-success/15 text-success" 
                             : "bg-muted text-muted-foreground"
@@ -310,28 +310,28 @@ export function CustomerDetailsModal({
 
           {/* Contact Information Tab */}
           <TabsContent value="contact" className="space-y-3 mt-4">
-            <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/30">
+            <div className="flex items-center gap-3 rounded-md p-3 bg-muted/30">
               <Mail className="w-5 h-5 text-muted-foreground" />
               <div>
                 <p className="text-xs text-muted-foreground"><T k="common.email" /></p>
                 <p className="text-sm font-medium">{customer.email}</p>
               </div>
             </div>
-            <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/30">
+            <div className="flex items-center gap-3 rounded-md p-3 bg-muted/30">
               <Phone className="w-5 h-5 text-muted-foreground" />
               <div>
                 <p className="text-xs text-muted-foreground"><T k="estimate.phone1" /></p>
                 <p className="text-sm font-medium">{customer.phone}</p>
               </div>
             </div>
-            {customer.phone2 && <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/30">
+            {customer.phone2 && <div className="flex items-center gap-3 rounded-md p-3 bg-muted/30">
                 <Phone className="w-5 h-5 text-muted-foreground" />
                 <div>
                   <p className="text-xs text-muted-foreground"><T k="estimate.phone2" /></p>
                   <p className="text-sm font-medium">{customer.phone2}</p>
                 </div>
               </div>}
-            {customer.customer_since && <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/30">
+            {customer.customer_since && <div className="flex items-center gap-3 rounded-md p-3 bg-muted/30">
                 <Calendar className="w-5 h-5 text-muted-foreground" />
                 <div>
                   <p className="text-xs text-muted-foreground"><T k="modal.customerSince" /></p>
@@ -394,7 +394,7 @@ export function CustomerDetailsModal({
               const fullAddress = fullAddressParts.length > 0 ? fullAddressParts.join(', ') : '-';
 
               return (
-                <div key={index} className="p-4 rounded-lg bg-muted/30 space-y-4 border border-border/30">
+                <div key={index} className="rounded-md p-3 bg-muted/30 space-y-4 border border-border/30">
                   {/* Address Header */}
                   <div className="flex items-center gap-3 pb-3 border-b border-border/50">
                     <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
@@ -454,7 +454,7 @@ export function CustomerDetailsModal({
                 </div>
               );
             }) : (
-              <div className="p-4 rounded-lg bg-muted/30 border border-border/30">
+              <div className="rounded-md p-3 bg-muted/30 border border-border/30">
                 <div className="flex items-center gap-3 pb-3 border-b border-border/50 mb-4">
                   <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                     <MapPin className="w-4 h-4 text-primary" />
@@ -488,15 +488,15 @@ export function CustomerDetailsModal({
 
           {/* Jobs Tab */}
           <TabsContent value="jobs" className="space-y-4 mt-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 rounded-lg bg-muted/30 space-y-2">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-md p-3 bg-muted/30 space-y-2">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Calendar className="w-4 h-4" />
                   <span className="text-xs"><T k="customers.lastService" /></span>
                 </div>
                 <p className="text-sm font-medium">{formatCustomerDate(lastServiceDate)}</p>
               </div>
-              <div className="p-4 rounded-lg bg-muted/30 space-y-2">
+              <div className="rounded-md p-3 bg-muted/30 space-y-2">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Briefcase className="w-4 h-4" />
                   <span className="text-xs"><T k="customers.totalJobs" /></span>
@@ -506,11 +506,11 @@ export function CustomerDetailsModal({
             </div>
             
             {isLoadingJobs ? (
-              <div className="flex items-center justify-center py-8">
+              <div className="flex items-center justify-center py-6">
                 <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
               </div>
             ) : customerJobs.length === 0 ? (
-              <div className="border rounded-lg p-8 text-center">
+              <div className="rounded-md border p-5 text-center">
                 <Briefcase className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
                 <p className="text-sm text-muted-foreground"><T k="literal.crm.no_jobs_found_for_this_customer.75c1d6df" /></p>
               </div>
@@ -587,11 +587,11 @@ export function CustomerDetailsModal({
           {/* Invoices Tab */}
           <TabsContent value="invoices" className="space-y-4 mt-4">
             {isLoadingInvoices ? (
-              <div className="flex items-center justify-center py-8">
+              <div className="flex items-center justify-center py-6">
                 <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
               </div>
             ) : customerInvoices.length === 0 ? (
-              <div className="border rounded-lg p-8 text-center">
+              <div className="rounded-md border p-5 text-center">
                 <Receipt className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
                 <p className="text-sm text-muted-foreground"><T k="literal.crm.no_invoices_found_for_this_customer.f626280b" /></p>
               </div>
@@ -654,7 +654,7 @@ export function CustomerDetailsModal({
               </div>
             ) : customerTerms.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
+                <div className="h-8 w-8 rounded-full bg-muted/50 flex items-center justify-center mb-3">
                   <FileX className="w-6 h-6 text-muted-foreground" />
                 </div>
                 <p className="text-sm font-medium text-foreground mb-1"><T k="literal.crm.no_terms_signed.eca4a629" /></p>
@@ -683,7 +683,7 @@ export function CustomerDetailsModal({
                   
                   <div className="p-4 space-y-4">
                     {/* Signature Info */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-3">
                       <div className="p-3 rounded-lg bg-muted/30">
                         <p className="text-xs text-muted-foreground mb-1"><T k="literal.crm.signed_by.2e9a840a" /></p>
                         <p className="text-sm font-medium">{term.signed_by}</p>
@@ -704,7 +704,7 @@ export function CustomerDetailsModal({
 
                     {/* Notes if any */}
                     {term.notes && (
-                      <div className="p-4 rounded-lg bg-muted/20 border border-border">
+                      <div className="rounded-md p-3 bg-muted/20 border border-border">
                         <h5 className="text-sm font-medium mb-2"><T k="modal.notes" /></h5>
                         <p className="text-xs text-muted-foreground leading-relaxed">
                           {term.notes}
@@ -714,7 +714,7 @@ export function CustomerDetailsModal({
 
                     {/* Signature Display */}
                     {term.signature_text && (
-                      <div className="p-4 rounded-lg bg-muted/30 border border-border">
+                      <div className="rounded-md p-3 bg-muted/30 border border-border">
                         <p className="text-xs text-muted-foreground mb-2"><T k="literal.crm.customer_signature.36378087" /></p>
                         <div className="flex items-center gap-3">
                           <div className="flex-1 p-3 bg-background rounded border border-border">

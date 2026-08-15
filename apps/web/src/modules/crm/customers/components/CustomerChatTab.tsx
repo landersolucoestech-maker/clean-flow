@@ -66,7 +66,7 @@ export function CustomerChatTab() {
             ))
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-center">
-              <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
+              <div className="h-8 w-8 rounded-md bg-muted/50 flex items-center justify-center mb-3">
                 <MessageSquare className="w-6 h-6 text-muted-foreground" />
               </div>
               <p className="text-sm text-muted-foreground"><T k="support.no_messages" /></p>

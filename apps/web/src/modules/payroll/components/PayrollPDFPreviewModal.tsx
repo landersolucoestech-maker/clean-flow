@@ -64,7 +64,7 @@ export function PayrollPDFPreviewModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl max-h-[90vh]">
+      <DialogContent className="max-h-[86vh] sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileText className="w-5 h-5" />
@@ -75,33 +75,33 @@ export function PayrollPDFPreviewModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col items-center justify-center py-4 gap-4 min-h-[400px]">
+        <div className="flex min-h-[280px] flex-col items-center justify-center gap-3 py-3">
           {isGenerating ? (
             <>
-              <Loader2 className="w-12 h-12 animate-spin text-primary" />
+              <Loader2 className="h-7 w-7 animate-spin text-primary" />
               <p className="text-sm text-muted-foreground"><T k="literal.payroll.gerando_pdf.5e2900c2" /></p>
             </>
           ) : pdfUrl ? (
-            <div className="flex flex-col items-center gap-4 w-full">
-              <div className="border rounded-lg overflow-hidden bg-muted/30 max-h-[50vh] overflow-y-auto">
+            <div className="flex w-full flex-col items-center gap-3">
+              <div className="max-h-[48vh] overflow-y-auto rounded-md border bg-muted/20">
                 <Document
                   file={pdfUrl}
                   onLoadSuccess={onDocumentLoadSuccess}
                   loading={
-                    <div className="flex items-center justify-center p-8">
-                      <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                    <div className="flex items-center justify-center p-5">
+                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
                     </div>
                   }
                   error={
-                    <div className="flex flex-col items-center justify-center p-8 gap-2">
-                      <Eye className="w-8 h-8 text-muted-foreground" />
+                    <div className="flex flex-col items-center justify-center gap-2 p-5">
+                      <Eye className="h-6 w-6 text-muted-foreground" />
                       <p className="text-sm text-muted-foreground"><T k="literal.payroll.erro_ao_carregar_pdf.17546dc9" /></p>
                     </div>
                   }
                 >
                   <Page 
                     pageNumber={pageNumber} 
-                    width={500}
+                    width={460}
                     renderTextLayer={false}
                     renderAnnotationLayer={false}
                   />
@@ -134,7 +134,7 @@ export function PayrollPDFPreviewModal({
             </div>
           ) : (
             <>
-              <Eye className="w-12 h-12 text-muted-foreground" />
+              <Eye className="h-7 w-7 text-muted-foreground" />
               <p className="text-muted-foreground"><T k="literal.payroll.nenhum_pdf_disponivel.a128808a" /></p>
             </>
           )}
