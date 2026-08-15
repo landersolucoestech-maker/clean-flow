@@ -402,7 +402,7 @@ export function Schedule() {
   return (
     <PageLayout
       fullHeight
-      contentClassName="gap-4"
+      contentClassName="gap-3"
       headerActions={
         <Button variant="hero" size="sm" onClick={handleNewAppointment}>
           <Plus className="mr-2 h-4 w-4" />
@@ -438,7 +438,7 @@ export function Schedule() {
                     )}
                     {t("common.delete")} ({selectedIds.size})
                   </Button>
-                  <Button variant="outline" onClick={toggleSelectionMode}>
+                  <Button variant="outline" size="sm" onClick={toggleSelectionMode}>
                     <X className="w-4 h-4 mr-2" />
                     {t("common.cancel")}
                   </Button>
@@ -446,7 +446,7 @@ export function Schedule() {
               ) : (
                 <>
 
-                  <Button variant="outline" onClick={() => setFilterModal(true)}>
+                  <Button variant="outline" size="sm" onClick={() => setFilterModal(true)}>
                     <Filter className="w-4 h-4 mr-2" />
                     {t("common.filter") || "Filter"}
                     {activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}

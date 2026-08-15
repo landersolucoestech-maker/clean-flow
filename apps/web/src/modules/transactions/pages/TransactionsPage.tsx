@@ -317,17 +317,17 @@ export function Transactions() {
   );
 
   return (
-    <PageLayout headerActions={primaryActions} contentClassName="space-y-4">
+    <PageLayout headerActions={primaryActions} contentClassName="space-y-3">
       {/* KPI Cards - 5 cards */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-5">
         {/* Total Revenue */}
-        <Card className="border-border/80 shadow-sm">
-          <CardContent className="p-4">
+        <Card className="border-border/90 shadow-none">
+          <CardContent className="p-3.5">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-muted-foreground"><T k="transactions.totalRevenue" /></span>
               <DollarSign className="w-4 h-4 text-muted-foreground" />
             </div>
-            <p className="text-2xl font-bold tracking-tight text-success">{formatCurrency(kpis.receitaMensal)}</p>
+            <p className="text-lg font-semibold tracking-tight text-success">{formatCurrency(kpis.receitaMensal)}</p>
             <div className="flex items-center justify-between mt-1">
               <span className="text-xs text-muted-foreground"><T k="literal.transactions.paid_revenue.e1ab92a0" /></span>
               <span className="text-xs font-medium text-success">+0%</span>
@@ -336,13 +336,13 @@ export function Transactions() {
         </Card>
 
         {/* Total Expenses */}
-        <Card className="border-border/80 shadow-sm">
-          <CardContent className="p-4">
+        <Card className="border-border/90 shadow-none">
+          <CardContent className="p-3.5">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-muted-foreground"><T k="transactions.totalExpenses" /></span>
               <Receipt className="w-4 h-4 text-muted-foreground" />
             </div>
-            <p className="text-2xl font-bold tracking-tight text-destructive">{formatCurrency(kpis.despesasMensais)}</p>
+            <p className="text-lg font-semibold tracking-tight text-destructive">{formatCurrency(kpis.despesasMensais)}</p>
             <div className="flex items-center justify-between mt-1">
               <span className="text-xs text-muted-foreground"><T k="literal.transactions.paid_expenses.577bc7c5" /></span>
               <span className="text-xs font-medium text-success">+0%</span>
@@ -351,13 +351,13 @@ export function Transactions() {
         </Card>
 
         {/* Profit */}
-        <Card className="border-border/80 shadow-sm">
-          <CardContent className="p-4">
+        <Card className="border-border/90 shadow-none">
+          <CardContent className="p-3.5">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-muted-foreground"><T k="literal.transactions.profit.8544a477" /></span>
               <TrendingUp className="w-4 h-4 text-muted-foreground" />
             </div>
-            <p className="text-2xl font-bold tracking-tight text-primary-dark">{formatCurrency(kpis.lucroLiquido)}</p>
+            <p className="text-lg font-semibold tracking-tight text-primary-dark">{formatCurrency(kpis.lucroLiquido)}</p>
             <div className="flex items-center justify-between mt-1">
               <span className="text-xs text-muted-foreground">margin 0%</span>
               <span className="text-xs font-medium text-success">+0%</span>
@@ -366,13 +366,13 @@ export function Transactions() {
         </Card>
 
         {/* To Be Received */}
-        <Card className="border-border/80 shadow-sm">
-          <CardContent className="p-4">
+        <Card className="border-border/90 shadow-none">
+          <CardContent className="p-3.5">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-muted-foreground"><T k="literal.transactions.to_be_received.46d0dc4a" /></span>
               <ArrowUpRight className="w-4 h-4 text-muted-foreground" />
             </div>
-            <p className="text-2xl font-bold tracking-tight text-success">{formatCurrency(kpis.contasReceber)}</p>
+            <p className="text-lg font-semibold tracking-tight text-success">{formatCurrency(kpis.contasReceber)}</p>
             <div className="flex items-center justify-between mt-1">
               <span className="text-xs text-muted-foreground"><T k="literal.transactions.pending_revenue.464ae882" /></span>
               <span className="text-xs font-medium text-success">+0%</span>
@@ -381,13 +381,13 @@ export function Transactions() {
         </Card>
 
         {/* To Be Paid */}
-        <Card className="border-border/80 shadow-sm">
-          <CardContent className="p-4">
+        <Card className="border-border/90 shadow-none">
+          <CardContent className="p-3.5">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-muted-foreground"><T k="literal.transactions.to_be_paid.72acf352" /></span>
               <ArrowDownLeft className="w-4 h-4 text-muted-foreground" />
             </div>
-            <p className="text-2xl font-bold tracking-tight text-destructive">{formatCurrency(kpis.contasPagar)}</p>
+            <p className="text-lg font-semibold tracking-tight text-destructive">{formatCurrency(kpis.contasPagar)}</p>
             <div className="flex items-center justify-between mt-1">
               <span className="text-xs text-muted-foreground"><T k="literal.transactions.pending_expenses.7a7bf7c4" /></span>
               <span className="text-xs font-medium text-success">+0%</span>
@@ -397,7 +397,7 @@ export function Transactions() {
       </div>
 
       {/* Search and Filters Row */}
-      <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-3 lg:flex-row lg:flex-wrap lg:items-center">
+      <div className="flex flex-col gap-2.5 rounded-md border border-border bg-card p-2.5 lg:flex-row lg:flex-wrap lg:items-center">
         {/* Search Input */}
         <div className="relative w-full min-w-0 flex-1 lg:max-w-[360px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -494,7 +494,7 @@ export function Transactions() {
       <Card className="overflow-hidden">
         <CardContent className="overflow-x-auto p-0">
           {/* Table Header */}
-          <div className="flex min-w-[820px] items-center gap-4 border-b border-border bg-surface-muted/80 px-6 py-3">
+          <div className="flex min-w-[820px] items-center gap-3 border-b border-border bg-muted/30 px-3 py-2.5">
             <Checkbox 
               checked={selectedIds.length === filteredTransactions.length && filteredTransactions.length > 0}
               onCheckedChange={handleSelectAll}
@@ -502,31 +502,31 @@ export function Transactions() {
             />
             
             <div className="flex-1 min-w-0">
-              <span className="text-sm font-medium text-muted-foreground"><T k="common.name" /></span>
+              <span className="text-[11px] font-medium text-muted-foreground"><T k="common.name" /></span>
             </div>
             <div className="w-[100px] text-center">
-              <span className="text-sm font-medium text-muted-foreground"><T k="common.date" /></span>
+              <span className="text-[11px] font-medium text-muted-foreground"><T k="common.date" /></span>
             </div>
             <div className="w-[100px] text-center">
-              <span className="text-sm font-medium text-muted-foreground"><T k="transactions.type" /></span>
+              <span className="text-[11px] font-medium text-muted-foreground"><T k="transactions.type" /></span>
             </div>
             <div className="w-[120px] text-center">
-              <span className="text-sm font-medium text-muted-foreground"><T k="transactions.category" /></span>
+              <span className="text-[11px] font-medium text-muted-foreground"><T k="transactions.category" /></span>
             </div>
             <div className="w-[100px] text-center">
-              <span className="text-sm font-medium text-muted-foreground"><T k="common.status" /></span>
+              <span className="text-[11px] font-medium text-muted-foreground"><T k="common.status" /></span>
             </div>
             <div className="w-[120px] text-right">
-              <span className="text-sm font-medium text-muted-foreground"><T k="transactions.value" /></span>
+              <span className="text-[11px] font-medium text-muted-foreground"><T k="transactions.value" /></span>
             </div>
             <div className="w-[40px] text-center">
-              <span className="text-sm font-medium text-muted-foreground"><T k="common.actions" /></span>
+              <span className="text-[11px] font-medium text-muted-foreground"><T k="common.actions" /></span>
             </div>
           </div>
 
           {/* Transaction Items */}
           {filteredTransactions.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
+            <div className="text-center py-9 text-sm text-muted-foreground">
               {t("transactions.noTransactionsFound")}
             </div>
           ) : (
@@ -534,7 +534,7 @@ export function Transactions() {
               {filteredTransactions.map((transaction) => (
                 <div 
                   key={transaction.id} 
-                  className="flex min-w-[820px] items-center gap-4 px-6 py-4 transition-colors hover:bg-accent/40"
+                  className="flex min-w-[820px] items-center gap-3 px-3 py-2.5 transition-colors hover:bg-accent/40"
                 >
                   {/* Checkbox */}
                   <Checkbox 
