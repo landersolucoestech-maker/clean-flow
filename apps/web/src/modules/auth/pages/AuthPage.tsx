@@ -73,34 +73,34 @@ export function Auth() {
 
   return (
     <div className="min-h-screen flex">
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary via-primary-dark to-secondary relative overflow-hidden">
+      <div className="relative hidden border-r border-border bg-sidebar-background lg:flex lg:w-[42%]">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cud3MzLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48ZyBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDUiPjxwYXRoIGQ9Ik0zNiAzNHY2aDZ2LTZoLTZ6bTAtMzB2Nmg2di02aC02em0wIDEwdjZoNnYtNmgtNnptMCAxMHY2aDZ2LTZoLTZ6bS0xMC0xMHY2aDZ2LTZoLTZ6bTAgMTB2Nmg2di02aC02em0wLTIwdjZoNnYtNmgtNnptMCAzMHY2aDZ2LTZoLTZ6bS0xMC0xMHY2aDZ2LTZoLTZ6bTAgMTB2Nmg2di02aC02em0wLTIwdjZoNnYtNmgtNnptMC0xMHY2aDZ2LTZoLTZ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-30" />
 
-        <div className="relative z-10 flex flex-col justify-center px-12 xl:px-20">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-              <Sparkles className="w-7 h-7 text-white" />
+        <div className="relative z-10 flex flex-col justify-center px-10 xl:px-14">
+          <div className="mb-6 flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-sidebar-accent">
+              <Sparkles className="h-4 w-4 text-sidebar-primary" />
             </div>
-            <span className="text-3xl font-bold text-white">Clean Flow</span>
+            <span className="text-base font-semibold tracking-wide text-sidebar-foreground">Clean Flow</span>
           </div>
 
-          <h1 className="text-4xl xl:text-5xl font-bold text-white leading-tight mb-6">
+          <h1 className="mb-3 max-w-md text-2xl font-semibold leading-tight text-sidebar-foreground">
             <T k="literal.auth.manage_your_cleaning_business_with_ease.23eb0f28" />
           </h1>
 
-          <p className="text-xl text-white/80 mb-8 max-w-md">
+          <p className="mb-6 max-w-md text-sm leading-6 text-sidebar-foreground/70">
             <T k="literal.auth.streamline_scheduling_billing_and_customer_m.fe8a8bef" />
           </p>
 
-          <div className="space-y-4">
+          <div className="space-y-2.5">
             {[
               "Smart scheduling & dispatch",
               "Automated invoicing & payments",
               "Real-time team tracking",
               "Customer relationship management",
             ].map((feature) => (
-              <div key={feature} className="flex items-center gap-3 text-white/90">
-                <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
+              <div key={feature} className="flex items-center gap-2.5 text-sm text-sidebar-foreground/80">
+                <div className="flex h-5 w-5 items-center justify-center rounded-md bg-sidebar-accent">
                   <ArrowRight className="w-4 h-4" />
                 </div>
                 <span>{feature}</span>
@@ -109,28 +109,28 @@ export function Auth() {
           </div>
         </div>
 
-        <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-black/20 to-transparent" />
-        <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-white/10 rounded-full blur-3xl" />
-        <div className="absolute -top-20 -left-20 w-60 h-60 bg-secondary/30 rounded-full blur-3xl" />
+        <div className="hidden" />
+        <div className="hidden" />
+        <div className="hidden" />
       </div>
 
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 bg-background">
+      <div className="flex w-full items-center justify-center bg-background p-4 lg:w-[58%]">
         <div className="w-full max-w-md">
-          <div className="lg:hidden flex items-center justify-center gap-3 mb-8">
-            <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center">
-              <Sparkles className="w-6 h-6 text-white" />
+          <div className="mb-5 flex items-center justify-center gap-2.5 lg:hidden">
+            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10">
+              <Sparkles className="h-4 w-4 text-primary" />
             </div>
-            <span className="text-2xl font-bold text-foreground">Clean Flow</span>
+            <span className="text-base font-semibold text-foreground">Clean Flow</span>
           </div>
 
-          <Card className="border-0 shadow-xl bg-card">
+          <Card className="border border-border bg-card shadow-none">
             <CardHeader className="text-center pb-2">
-              <CardTitle className="text-2xl font-bold"><T k="literal.auth.welcome.ca4f9dcf" /></CardTitle>
+              <CardTitle className="text-lg font-semibold"><T k="literal.auth.welcome.ca4f9dcf" /></CardTitle>
               <CardDescription><T k="literal.auth.sign_in_with_an_owner_account_or_a_team_invi.2ad5795c" /></CardDescription>
             </CardHeader>
             <CardContent>
               <div className="w-full">
-                <form onSubmit={handleLogin} className="space-y-4">
+                <form onSubmit={handleLogin} className="space-y-2.5">
                   <div className="space-y-2">
                     <Label htmlFor="login-email"><T k="common.email" /></Label>
                     <div className="relative">
@@ -163,7 +163,7 @@ export function Auth() {
                     </div>
                   </div>
 
-                  <Button type="submit" className="w-full h-11" disabled={isLoading}>
+                  <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sign In"}
                   </Button>
                   <Button
@@ -177,7 +177,7 @@ export function Auth() {
                   </Button>
                 </form>
 
-                <div className="relative my-6">
+                <div className="relative my-4">
                   <div className="absolute inset-0 flex items-center">
                     <span className="w-full border-t border-border" />
                   </div>
@@ -189,7 +189,7 @@ export function Auth() {
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full h-11"
+                  className="w-full"
                   onClick={handleGoogleLogin}
                 >
                   <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" aria-hidden="true">
@@ -207,7 +207,7 @@ export function Auth() {
             </CardContent>
           </Card>
 
-          <p className="text-center text-sm text-muted-foreground mt-6">
+          <p className="mt-4 text-center text-xs text-muted-foreground">
             Are you a platform admin?{" "}
             <button
               type="button"

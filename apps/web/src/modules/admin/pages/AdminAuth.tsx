@@ -40,61 +40,61 @@ export function AdminAuth() {
   };
 
   return (
-    <div className="min-h-screen flex relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
+    <div className="relative flex min-h-screen overflow-hidden bg-slate-950">
+      <div className="absolute inset-0 bg-slate-950" />
 
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="hidden">
         <div className="absolute top-1/4 -left-20 w-96 h-96 bg-violet-600/20 rounded-full blur-[120px] animate-pulse" />
         <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-indigo-600/20 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[150px]" />
       </div>
 
       <div
-        className="absolute inset-0 opacity-[0.03]"
+        className="hidden"
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
         }}
       />
 
-      <div className="relative z-10 w-full flex flex-col items-center justify-center p-6">
+      <div className="relative z-10 flex w-full flex-col items-center justify-center p-4">
         <Button
           variant="ghost"
           onClick={() => navigate("/auth")}
-          className="absolute top-6 left-6 text-slate-400 hover:text-white hover:bg-white/10"
+          className="absolute left-4 top-4 text-slate-400 hover:text-white hover:bg-white/10"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           <T k="literal.admin.back_to_user_login.842948de" />
         </Button>
 
         <div className="w-full max-w-md">
-          <div className="flex flex-col items-center mb-8">
-            <div className="w-20 h-20 bg-gradient-to-br from-violet-500 via-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-4 shadow-2xl shadow-purple-500/30">
-              <Shield className="w-10 h-10 text-white" />
+          <div className="mb-5 flex flex-col items-center">
+            <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-md bg-violet-500/15">
+              <Shield className="h-4 w-4 text-violet-300" />
             </div>
-            <h1 className="text-3xl font-bold text-white"><T k="literal.admin.admin_portal.c864d803" /></h1>
-            <p className="text-slate-400 mt-2"><T k="literal.admin.platform_administration_access.c480ca44" /></p>
+            <h1 className="text-lg font-semibold text-white"><T k="literal.admin.admin_portal.c864d803" /></h1>
+            <p className="mt-1 text-xs text-slate-400"><T k="literal.admin.platform_administration_access.c480ca44" /></p>
           </div>
 
-          <Card className="border-0 shadow-2xl bg-slate-900/80 backdrop-blur-xl border border-slate-800">
+          <Card className="border border-slate-800 bg-slate-900 shadow-none">
             <CardHeader className="text-center pb-2">
-              <CardTitle className="text-xl text-white"><T k="literal.admin.secure_login.c09bb040" /></CardTitle>
+              <CardTitle className="text-base text-white"><T k="literal.admin.secure_login.c09bb040" /></CardTitle>
               <CardDescription className="text-slate-400">
                 <T k="literal.admin.enter_your_administrator_credentials.03a9f580" />
               </CardDescription>
             </CardHeader>
             <CardContent className="pt-4">
-              <form onSubmit={handleLogin} className="space-y-5">
+              <form onSubmit={handleLogin} className="space-y-3">
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-slate-300"><T k="leads.form.emailAddress" /></Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
                     <Input
                       id="email"
                       type="email"
                       placeholder="admin@platform.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="pl-11 h-12 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500 focus:border-violet-500 focus:ring-violet-500/20"
+                      className="h-9 pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500 focus:border-violet-500 focus:ring-violet-500/20"
                       required
                     />
                   </div>
@@ -103,14 +103,14 @@ export function AdminAuth() {
                 <div className="space-y-2">
                   <Label htmlFor="password" className="text-slate-300"><T k="literal.admin.password.8be3c943" /></Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
                     <Input
                       id="password"
                       type="password"
                       placeholder="••••••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="pl-11 h-12 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500 focus:border-violet-500 focus:ring-violet-500/20"
+                      className="h-9 pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500 focus:border-violet-500 focus:ring-violet-500/20"
                       required
                     />
                   </div>
@@ -118,7 +118,7 @@ export function AdminAuth() {
 
                 <Button
                   type="submit"
-                  className="w-full h-12 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-medium shadow-lg shadow-violet-500/25 transition-all duration-300"
+                  className="w-full bg-violet-600 text-white hover:bg-violet-700"
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -132,7 +132,7 @@ export function AdminAuth() {
                 </Button>
               </form>
 
-              <div className="mt-8 pt-6 border-t border-slate-800">
+              <div className="mt-4 border-t pt-3 border-slate-800">
                 <div className="flex items-center justify-center text-slate-500">
                   <div className="flex items-center gap-2 text-xs">
                     <Shield className="w-4 h-4" />
@@ -143,7 +143,7 @@ export function AdminAuth() {
             </CardContent>
           </Card>
 
-          <p className="text-center text-sm text-slate-500 mt-6">
+          <p className="mt-4 text-center text-xs text-slate-500">
             <T k="literal.admin.only_authorized_platform_administrators_can_.6acbe0ef" />
           </p>
         </div>
