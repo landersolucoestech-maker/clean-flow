@@ -1341,14 +1341,14 @@ export function Payroll() {
         </>
       }
     >
-      <div className="space-y-4">
+      <div className="space-y-3">
 
           {/* Filter Card */}
           <Card>
-            <CardContent className="p-4">
-              <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end">
+            <CardContent className="p-3.5">
+              <div className="flex flex-col gap-2.5 lg:flex-row lg:flex-wrap lg:items-end">
                 {/* Employee Combobox */}
-                <div className="min-w-0 flex-1 space-y-2 lg:min-w-[250px] lg:flex-none">
+                <div className="min-w-0 flex-1 space-y-1.5 lg:min-w-[220px] lg:flex-none">
                   <Label>{t("payroll.employee")}</Label>
                   <Popover open={employeeOpen} onOpenChange={setEmployeeOpen}>
                     <PopoverTrigger asChild>
@@ -1385,7 +1385,7 @@ export function Payroll() {
                 </div>
 
                 {/* Status Dropdown */}
-                <div className="min-w-0 flex-1 space-y-2 lg:min-w-[150px] lg:flex-none">
+                <div className="min-w-0 flex-1 space-y-1.5 lg:min-w-[140px] lg:flex-none">
                   <Label>{t("common.status")}</Label>
                   <Select value={selectedStatus} onValueChange={setSelectedStatus}>
                     <SelectTrigger className="bg-background">
@@ -1401,7 +1401,7 @@ export function Payroll() {
                 </div>
 
                 {/* Period Selector */}
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <Label>{t("payroll.startDate")}</Label>
                   <Popover>
                     <PopoverTrigger asChild>
@@ -1416,7 +1416,7 @@ export function Payroll() {
                   </Popover>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <Label>{t("payroll.endDate")}</Label>
                   <Popover>
                     <PopoverTrigger asChild>
@@ -1449,10 +1449,10 @@ export function Payroll() {
 
           {/* Payroll Table */}
           <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold tracking-tight">{t("payroll.payrollList")}</CardTitle>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-semibold tracking-tight">{t("payroll.payrollList")}</CardTitle>
             </CardHeader>
-            <CardContent className="px-4 pb-4">
+            <CardContent className="px-3.5 pb-3.5">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -1529,7 +1529,7 @@ export function Payroll() {
                   <TableBody>
                     {payrollListRows.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
+                        <TableCell colSpan={8} className="py-6 text-center text-xs text-muted-foreground">
                           {t("payroll.noRecordsFound")}
                         </TableCell>
                       </TableRow>

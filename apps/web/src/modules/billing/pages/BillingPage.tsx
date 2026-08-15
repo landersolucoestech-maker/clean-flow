@@ -321,7 +321,7 @@ export function Billing() {
         </>
       }
     >
-      <div className="space-y-4">
+      <div className="space-y-3">
 
           {/* Modals */}
           <CreateInvoiceModal open={createInvoiceOpen} onOpenChange={setCreateInvoiceOpen} />
@@ -333,62 +333,62 @@ export function Billing() {
           />
 
           {/* Stats Cards - Using QuickBooks synced data */}
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
             <Card className="cursor-pointer hover:border-warning/50 transition-colors" onClick={() => setStatusFilter("sent")}>
-              <CardContent className="p-4">
+              <CardContent className="p-3.5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">{t("billing.invoiceSent")}</p>
-                    <p className="text-2xl font-bold text-foreground">{stats?.sent || 0}</p>
-                    <p className="text-sm text-warning">{formatCurrency(stats?.sentTotal || 0)} {t("billing.awaitingPayment")}</p>
+                    <p className="text-[11px] font-medium text-muted-foreground">{t("billing.invoiceSent")}</p>
+                    <p className="text-lg font-semibold text-foreground">{stats?.sent || 0}</p>
+                    <p className="text-[11px] text-warning">{formatCurrency(stats?.sentTotal || 0)} {t("billing.awaitingPayment")}</p>
                   </div>
-                  <div className="p-3 bg-warning/10 rounded-lg">
-                    <Send className="w-6 h-6 text-warning" />
+                  <div className="flex h-8 w-8 items-center justify-center rounded-md bg-warning/10">
+                    <Send className="h-4 w-4 text-warning" />
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => setStatusFilter("viewed")}>
-              <CardContent className="p-4">
+              <CardContent className="p-3.5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">{t("billing.openedInvoices")}</p>
-                    <p className="text-2xl font-bold text-foreground">{stats?.viewed || 0}</p>
-                    <p className="text-sm text-primary">{formatCurrency(stats?.viewedTotal || 0)} viewed</p>
+                    <p className="text-[11px] font-medium text-muted-foreground">{t("billing.openedInvoices")}</p>
+                    <p className="text-lg font-semibold text-foreground">{stats?.viewed || 0}</p>
+                    <p className="text-[11px] text-primary">{formatCurrency(stats?.viewedTotal || 0)} viewed</p>
                   </div>
-                  <div className="p-3 bg-primary/10 rounded-lg">
-                    <Eye className="w-6 h-6 text-primary" />
+                  <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10">
+                    <Eye className="h-4 w-4 text-primary" />
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             <Card className="cursor-pointer hover:border-success/50 transition-colors" onClick={() => setStatusFilter("paid")}>
-              <CardContent className="p-4">
+              <CardContent className="p-3.5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">{t("billing.paidInvoices")}</p>
-                    <p className="text-2xl font-bold text-foreground">{stats?.paid || 0}</p>
-                    <p className="text-sm text-success">{formatCurrency(stats?.paidTotal || 0)} {t("billing.collectionRate")}</p>
+                    <p className="text-[11px] font-medium text-muted-foreground">{t("billing.paidInvoices")}</p>
+                    <p className="text-lg font-semibold text-foreground">{stats?.paid || 0}</p>
+                    <p className="text-[11px] text-success">{formatCurrency(stats?.paidTotal || 0)} {t("billing.collectionRate")}</p>
                   </div>
-                  <div className="p-3 bg-success/10 rounded-lg">
-                    <CheckCircle className="w-6 h-6 text-success" />
+                  <div className="flex h-8 w-8 items-center justify-center rounded-md bg-success/10">
+                    <CheckCircle className="h-4 w-4 text-success" />
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             <Card className="cursor-pointer hover:border-destructive/50 transition-colors" onClick={() => setStatusFilter("overdue")}>
-              <CardContent className="p-4">
+              <CardContent className="p-3.5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">{t("billing.overdueInvoices")}</p>
-                    <p className="text-2xl font-bold text-foreground">{stats?.overdue || 0}</p>
-                    <p className="text-sm text-destructive">{formatCurrency(stats?.overdueTotal || 0)} {t("billing.pastDue")}</p>
+                    <p className="text-[11px] font-medium text-muted-foreground">{t("billing.overdueInvoices")}</p>
+                    <p className="text-lg font-semibold text-foreground">{stats?.overdue || 0}</p>
+                    <p className="text-[11px] text-destructive">{formatCurrency(stats?.overdueTotal || 0)} {t("billing.pastDue")}</p>
                   </div>
-                  <div className="p-3 bg-destructive/10 rounded-lg">
-                    <AlertCircle className="w-6 h-6 text-destructive" />
+                  <div className="flex h-8 w-8 items-center justify-center rounded-md bg-destructive/10">
+                    <AlertCircle className="h-4 w-4 text-destructive" />
                   </div>
                 </div>
               </CardContent>
@@ -406,7 +406,7 @@ export function Billing() {
               )}
             </CardHeader>
             <CardContent>
-              <div className="mb-3 flex items-center gap-3">
+              <div className="mb-2.5 flex items-center gap-2.5">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
@@ -459,13 +459,13 @@ export function Billing() {
                 <TableBody>
                   {isLoading ? (
                     <TableRow>
-                      <TableCell colSpan={10} className="text-center py-8">
+                      <TableCell colSpan={10} className="py-6 text-center">
                         <Loader2 className="w-6 h-6 animate-spin mx-auto text-muted-foreground" />
                       </TableCell>
                     </TableRow>
                   ) : filteredInvoices.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
+                      <TableCell colSpan={10} className="py-6 text-center text-muted-foreground">
                         {t("billing.noInvoicesFound")}
                       </TableCell>
                     </TableRow>
