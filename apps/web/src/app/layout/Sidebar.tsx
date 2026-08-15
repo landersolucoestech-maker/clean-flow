@@ -1,7 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import {
   Calendar,
   Users,
@@ -52,6 +51,10 @@ const navigationItems: NavItem[] = [
   { icon: HelpCircle, labelKey: "sidebar.support", href: "/support" },
 ];
 
+const navBase = "group flex w-full items-center rounded-md text-left text-sidebar-foreground transition-colors duration-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring focus-visible:ring-offset-1 focus-visible:ring-offset-sidebar";
+const navIdle = "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground";
+const navActive = "bg-sidebar-accent text-sidebar-accent-foreground font-medium";
+
 export function Sidebar({ className }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
@@ -76,28 +79,32 @@ export function Sidebar({ className }: SidebarProps) {
   };
 
   return (
-    <div className={cn("relative flex h-screen shrink-0 flex-col border-r border-sidebar-border bg-sidebar-background transition-all duration-200", isCollapsed ? "w-[68px]" : "w-60", className)}>
-      <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-3">
+    <aside className={cn("relative flex h-screen shrink-0 flex-col border-r border-sidebar-border bg-sidebar-background text-sidebar-foreground transition-[width] duration-150", isCollapsed ? "w-14" : "w-56", className)}>
+      <div className="flex h-14 items-center border-b border-sidebar-border px-2.5">
         {!isCollapsed && (
-          <div className="flex min-w-0 items-center gap-2.5">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-light text-primary-dark">
-              <ClipboardList className="h-[18px] w-[18px]" />
+          <div className="flex min-w-0 flex-1 items-center gap-2.5 px-1">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-sidebar-primary/15 text-sidebar-primary">
+              <ClipboardList className="h-4 w-4" />
             </div>
             <div className="min-w-0">
-              <div className="truncate whitespace-nowrap">
-                <span className="text-base font-bold tracking-tight text-foreground">CLEAN </span>
-                <span className="text-base font-bold tracking-tight text-primary">FLOW</span>
+              <div className="truncate whitespace-nowrap text-[13px] font-semibold tracking-wide text-sidebar-foreground">
+                CLEAN <span className="text-sidebar-primary">FLOW</span>
               </div>
-              <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">{t("sidebar.operations")}</p>
+              <p className="truncate text-[9px] font-medium uppercase tracking-[0.14em] text-sidebar-foreground/60">{t("sidebar.operations")}</p>
             </div>
           </div>
         )}
-        <Button variant="ghost" size="icon" onClick={() => setIsCollapsed(!isCollapsed)} className="ml-auto h-8 w-8 rounded-lg text-muted-foreground" aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}>
+        <button
+          type="button"
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className={cn("ml-auto flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring", isCollapsed && "mx-auto")}
+          aria-label={isCollapsed ? t("sidebar.expand") : t("sidebar.collapse")}
+        >
           {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-        </Button>
+        </button>
       </div>
 
-      <nav className="scrollbar-thin flex-1 space-y-1 overflow-y-auto p-2.5">
+      <nav className="scrollbar-thin flex-1 space-y-0.5 overflow-y-auto px-2 py-2.5">
         {filteredNavigationItems.map((item) => {
           const label = item.label ?? t(item.labelKey);
           const activeItem = isActiveRoute(item);
@@ -107,19 +114,32 @@ export function Sidebar({ className }: SidebarProps) {
             return (
               <Collapsible key={item.labelKey} open={isOpen} onOpenChange={(open) => setOpenSubmenu(open ? item.labelKey : null)}>
                 <CollapsibleTrigger asChild>
-                  <Button variant="ghost" className={cn("h-10 w-full justify-start rounded-lg px-3 text-sidebar-foreground shadow-none hover:bg-sidebar-accent hover:text-primary", activeItem && "bg-sidebar-accent font-semibold text-primary", isCollapsed && "justify-center px-0")}>
-                    <item.icon className="h-[17px] w-[17px]" />
-                    {!isCollapsed && <><span className="ml-3 flex-1 text-sm">{label}</span><ChevronDown className={cn("h-3.5 w-3.5 transition-transform", isOpen && "rotate-180")} /></>}
-                  </Button>
+                  <button type="button" className={cn(navBase, "h-9 px-2.5 text-[13px]", activeItem ? navActive : navIdle, isCollapsed && "justify-center px-0")}>
+                    <item.icon className="h-4 w-4 shrink-0 text-current" />
+                    {!isCollapsed && (
+                      <>
+                        <span className="ml-2.5 min-w-0 flex-1 truncate">{label}</span>
+                        <ChevronDown className={cn("h-3.5 w-3.5 shrink-0 text-sidebar-foreground/60 transition-transform", isOpen && "rotate-180")} />
+                      </>
+                    )}
+                  </button>
                 </CollapsibleTrigger>
                 {!isCollapsed && (
-                  <CollapsibleContent className="mt-1 space-y-0.5 pl-3">
-                    {item.submenu.map((subItem) => (
-                      <Button key={subItem.href} variant="ghost" onClick={() => navigate(subItem.href)} className={cn("h-8 w-full justify-start rounded-lg px-3 text-sm text-muted-foreground hover:bg-sidebar-accent hover:text-primary", location.pathname === subItem.href && "bg-sidebar-accent font-semibold text-primary")}>
-                        <subItem.icon className="mr-2.5 h-3.5 w-3.5" />
-                        <span>{subItem.label ?? t(subItem.labelKey)}</span>
-                      </Button>
-                    ))}
+                  <CollapsibleContent className="mt-0.5 space-y-0.5 pl-5">
+                    {item.submenu.map((subItem) => {
+                      const subActive = location.pathname === subItem.href;
+                      return (
+                        <button
+                          type="button"
+                          key={subItem.href}
+                          onClick={() => navigate(subItem.href)}
+                          className={cn(navBase, "h-8 px-2.5 text-xs", subActive ? navActive : "text-sidebar-foreground/72 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground")}
+                        >
+                          <subItem.icon className="mr-2 h-3.5 w-3.5 shrink-0 text-current" />
+                          <span className="truncate">{subItem.label ?? t(subItem.labelKey)}</span>
+                        </button>
+                      );
+                    })}
                   </CollapsibleContent>
                 )}
               </Collapsible>
@@ -127,22 +147,24 @@ export function Sidebar({ className }: SidebarProps) {
           }
 
           return (
-            <Button key={item.labelKey} variant="ghost" onClick={() => item.href && navigate(item.href)} className={cn("h-10 w-full justify-start rounded-lg px-3 text-sidebar-foreground shadow-none hover:bg-sidebar-accent hover:text-primary", activeItem && "bg-sidebar-accent font-semibold text-primary", isCollapsed && "justify-center px-0")}>
-              <item.icon className="h-[17px] w-[17px]" />
-              {!isCollapsed && <span className="ml-3 text-sm">{label}</span>}
-            </Button>
+            <button
+              type="button"
+              key={item.labelKey}
+              onClick={() => item.href && navigate(item.href)}
+              className={cn(navBase, "h-9 px-2.5 text-[13px]", activeItem ? navActive : navIdle, isCollapsed && "justify-center px-0")}
+            >
+              <item.icon className="h-4 w-4 shrink-0 text-current" />
+              {!isCollapsed && <span className="ml-2.5 truncate">{label}</span>}
+            </button>
           );
         })}
       </nav>
 
-      <div className="border-t border-sidebar-border p-2.5">
-        {!isCollapsed && (
-          <div className="rounded-lg bg-surface-muted px-3 py-2">
-            <p className="text-xs font-semibold text-foreground">Clean Flow</p>
-            <p className="mt-0.5 text-[10px] text-muted-foreground">{t("sidebar.tagline")}</p>
-          </div>
-        )}
-      </div>
-    </div>
+      {!isCollapsed && (
+        <div className="border-t border-sidebar-border px-3 py-2.5">
+          <p className="text-[10px] leading-4 text-sidebar-foreground/55">{t("sidebar.tagline")}</p>
+        </div>
+      )}
+    </aside>
   );
 }
