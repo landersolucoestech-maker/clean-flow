@@ -13,7 +13,7 @@ import { DollarSign, Users, Calendar, TrendingUp } from "lucide-react";
 import { useMemo } from "react";
 
 export function Dashboard() {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
   const { data: jobs = [] } = useJobs();
   const { data: customers = [] } = useCustomers();
   const { data: currentStaff } = useCurrentStaff();
@@ -66,7 +66,7 @@ export function Dashboard() {
     return { monthlyRevenue: currentMonthRevenue, revenueChange, activeCustomers, newCustomersThisMonth, jobsThisWeek: jobsThisWeek.length, completedThisWeek, pendingThisWeek, growthRate };
   }, [jobs, customers, invoices]);
 
-  const formatCurrency = (value: number) => new Intl.NumberFormat(companySettings?.locale || "en-US", {
+  const formatCurrency = (value: number) => new Intl.NumberFormat(locale, {
     style: "currency",
     currency: companySettings?.currency || "USD",
     minimumFractionDigits: 0,
@@ -74,37 +74,30 @@ export function Dashboard() {
   }).format(value);
 
   return (
-    <PageLayout contentClassName="space-y-5 lg:space-y-6">
-      <section className="flex flex-col gap-1 border-b border-border/70 pb-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary"><T k="literal.crm.overview.0efc2e6b" /></p>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-[28px]">
-            {t("dashboard.welcome")}{currentStaff?.name ? `, ${currentStaff.name}` : ""}!
-          </h1>
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{t("dashboard.subtitle")}</p>
-        </div>
-        <p className="hidden text-xs text-muted-foreground lg:block"><T k="literal.dashboard.operational_snapshot_for_your_cleaning_busin.2e9ea692" /></p>
-      </section>
+    <PageLayout>
+      <div className="flex min-w-0 items-center justify-between gap-3">
+        <p className="truncate text-xs text-muted-foreground">
+          <span className="font-medium text-foreground">{t("dashboard.welcome")}{currentStaff?.name ? `, ${currentStaff.name}` : ""}.</span>{" "}
+          {t("dashboard.subtitle")}
+        </p>
+        <p className="hidden shrink-0 text-[11px] text-muted-foreground xl:block"><T k="literal.dashboard.operational_snapshot_for_your_cleaning_busin.2e9ea692" /></p>
+      </div>
 
-      <section className="space-y-3">
-        <div>
-          <h2 className="text-sm font-semibold text-foreground"><T k="literal.dashboard.business_snapshot.237ce5ca" /></h2>
-          <p className="text-xs text-muted-foreground"><T k="literal.dashboard.key_indicators_at_a_glance.b7f98e75" /></p>
-        </div>
-        <div className={`grid grid-cols-1 gap-3 sm:grid-cols-2 ${canViewFinancials ? "2xl:grid-cols-4" : "xl:grid-cols-2"}`}>
-          {canViewFinancials && <StatsCard title={t("dashboard.monthlyRevenue")} value={formatCurrency(stats.monthlyRevenue)} change={`${Number(stats.revenueChange) >= 0 ? "+" : ""}${stats.revenueChange}% ${t("dashboard.fromLastMonth")}`} changeType={Number(stats.revenueChange) >= 0 ? "positive" : "negative"} icon={<DollarSign className="h-5 w-5 text-primary" />} />}
-          <StatsCard title={t("dashboard.activeCustomers")} value={String(stats.activeCustomers)} change={`+${stats.newCustomersThisMonth} ${t("dashboard.newThisMonth")}`} changeType="positive" icon={<Users className="h-5 w-5 text-primary" />} />
-          <StatsCard title={t("dashboard.jobsThisWeek")} value={String(stats.jobsThisWeek)} change={`${stats.completedThisWeek} ${t("dashboard.completed")}, ${stats.pendingThisWeek} ${t("payroll.pending").toLowerCase()}`} changeType="neutral" icon={<Calendar className="h-5 w-5 text-primary" />} />
-          {canViewFinancials && <StatsCard title={t("dashboard.growthRate")} value={`${stats.growthRate}%`} change={`${Number(stats.growthRate) >= 0 ? "+" : ""}${stats.growthRate}% ${t("dashboard.fromLastMonth")}`} changeType={Number(stats.growthRate) >= 0 ? "positive" : "negative"} icon={<TrendingUp className="h-5 w-5 text-primary" />} />}
+      <section className="space-y-2.5">
+        <div className={`grid grid-cols-1 gap-2.5 sm:grid-cols-2 ${canViewFinancials ? "xl:grid-cols-4" : "xl:grid-cols-2"}`}>
+          {canViewFinancials && <StatsCard title={t("dashboard.monthlyRevenue")} value={formatCurrency(stats.monthlyRevenue)} change={`${Number(stats.revenueChange) >= 0 ? "+" : ""}${stats.revenueChange}% ${t("dashboard.fromLastMonth")}`} changeType={Number(stats.revenueChange) >= 0 ? "positive" : "negative"} icon={<DollarSign className="h-4 w-4 text-primary" />} />}
+          <StatsCard title={t("dashboard.activeCustomers")} value={String(stats.activeCustomers)} change={`+${stats.newCustomersThisMonth} ${t("dashboard.newThisMonth")}`} changeType="positive" icon={<Users className="h-4 w-4 text-primary" />} />
+          <StatsCard title={t("dashboard.jobsThisWeek")} value={String(stats.jobsThisWeek)} change={`${stats.completedThisWeek} ${t("dashboard.completed")}, ${stats.pendingThisWeek} ${t("payroll.pending").toLowerCase()}`} changeType="neutral" icon={<Calendar className="h-4 w-4 text-primary" />} />
+          {canViewFinancials && <StatsCard title={t("dashboard.growthRate")} value={`${stats.growthRate}%`} change={`${Number(stats.growthRate) >= 0 ? "+" : ""}${stats.growthRate}% ${t("dashboard.fromLastMonth")}`} changeType={Number(stats.growthRate) >= 0 ? "positive" : "negative"} icon={<TrendingUp className="h-4 w-4 text-primary" />} />}
         </div>
       </section>
 
-      <section className="space-y-3">
-        <div>
-          <h2 className="text-sm font-semibold text-foreground"><T k="sidebar.operations" /></h2>
-          <p className="text-xs text-muted-foreground"><T k="literal.dashboard.recent_activity_and_upcoming_work.f87c5c99" /></p>
+      <section className="space-y-2.5">
+        <div className="flex items-baseline justify-between gap-3 border-b border-border/70 pb-2">
+          <h2 className="text-xs font-semibold uppercase tracking-[0.04em] text-foreground"><T k="sidebar.operations" /></h2>
+          <p className="hidden text-[11px] text-muted-foreground sm:block"><T k="literal.dashboard.recent_activity_and_upcoming_work.f87c5c99" /></p>
         </div>
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(340px,0.85fr)]">
+        <div className="grid grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
           <RecentActivity includeInvoices={canViewFinancials} />
           <UpcomingJobs />
         </div>
