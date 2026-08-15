@@ -22,8 +22,8 @@ export function PageLayout({ children, fullHeight = false, contentClassName, hea
         <main className={cn("min-w-0 flex-1", fullHeight ? "overflow-hidden" : "overflow-y-auto")}>
           <div
             className={cn(
-              "mx-auto w-full px-4 py-4 sm:px-5 sm:py-5 lg:px-6 lg:py-6 xl:px-8",
-              fullHeight ? "flex h-full max-w-none flex-col gap-5" : "max-w-[1680px] space-y-5",
+              "mx-auto w-full px-3.5 py-3.5 sm:px-4 sm:py-4 lg:px-5 xl:px-6",
+              fullHeight ? "flex h-full max-w-none flex-col gap-3.5" : "max-w-[1680px] space-y-4",
               contentClassName,
             )}
           >
