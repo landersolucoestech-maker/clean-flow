@@ -67,7 +67,30 @@ REPLACEMENTS = {
         ('mb-3 flex items-center gap-3', 'mb-2.5 flex items-center gap-2.5'),
         ('text-center py-8', 'py-6 text-center'),
     ],
+    "apps/web/src/modules/settings/pages/SettingsPage.tsx": [
+        ('<div className="space-y-6">\n{/* Horizontal Tabs */}', '<div className="space-y-3">\n{/* Horizontal Tabs */}'),
+        ('<CardContent className="space-y-4 flex-1">', '<CardContent className="flex-1 space-y-3">'),
+        ('<div className="p-3 bg-muted/50 rounded-lg border border-border">', '<div className="rounded-md border border-border bg-muted/35 p-2.5">'),
+    ],
+    "apps/web/src/modules/support/pages/SupportPage.tsx": [
+        ('<div className="p-8 text-center text-muted-foreground">', '<div className="p-6 text-center text-sm text-muted-foreground">'),
+        ('<div className="p-8 text-center">', '<div className="p-6 text-center">'),
+        ('className="w-12 h-12 mx-auto text-muted-foreground mb-4"', 'className="mx-auto mb-2.5 h-7 w-7 text-muted-foreground"'),
+        ('className="mt-4"', 'className="mt-3"'),
+        ('<CardContent className="space-y-6">', '<CardContent className="space-y-3">'),
+        ('className="border-b pb-4 last:border-0"', 'className="border-b pb-3 last:border-0"'),
+        ('className="font-medium mb-2"', 'className="mb-1.5 text-sm font-medium"'),
+        ('<div className="grid md:grid-cols-3 gap-4">', '<div className="grid gap-3 md:grid-cols-3">'),
+        ('className="cursor-pointer border-border/80 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"', 'className="cursor-pointer border-border/90 shadow-none transition-colors hover:border-primary/30"'),
+        ('<CardContent className="p-6 text-center">', '<CardContent className="p-4 text-center">'),
+        ('className="w-12 h-12 mx-auto text-primary mb-4"', 'className="mx-auto mb-2.5 h-7 w-7 text-primary"'),
+        ('className="font-medium mb-2"', 'className="mb-1.5 text-sm font-medium"'),
+    ],
 }
+
+REPORTS_PATH = Path("apps/web/src/modules/reports/pages/ReportsPage.tsx")
+REPORTS_OLD = '''  return (\n    <PageLayout>\n      <div className="space-y-4">\n          {/* Report actions */}\n          <div className="flex justify-end">\n            <DropdownMenu>\n              <DropdownMenuTrigger asChild>\n                <Button disabled={isLoading}>\n                  {isLoading ? (\n                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />\n                  ) : (\n                    <FileSpreadsheet className="w-4 h-4 mr-2" />\n                  )}\n                  {t("reports.exportExcel")}\n                  <ChevronDown className="w-4 h-4 ml-2" />\n                </Button>\n              </DropdownMenuTrigger>\n              <DropdownMenuContent align="end" className="w-56">\n                {reportsData\n                  .filter((report) => report.records > 0)\n                  .map((report) => (\n                    <DropdownMenuItem\n                      key={report.id}\n                      onClick={() => handleExportReport(report)}\n                      className="cursor-pointer"\n                    >\n                      <report.icon className={`w-4 h-4 mr-2 ${report.iconColor}`} />\n                      {report.name}\n                    </DropdownMenuItem>\n                  ))}\n              </DropdownMenuContent>\n            </DropdownMenu>\n          </div>\n\n          {/* Analytics Content */}\n          <AnalyticsTab />\n\n      </div>\n    </PageLayout>\n  );'''
+REPORTS_NEW = '''  const exportAction = (\n    <DropdownMenu>\n      <DropdownMenuTrigger asChild>\n        <Button size="sm" variant="outline" disabled={isLoading}>\n          {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileSpreadsheet className="mr-2 h-4 w-4" />}\n          {t("reports.exportExcel")}\n          <ChevronDown className="ml-2 h-3.5 w-3.5" />\n        </Button>\n      </DropdownMenuTrigger>\n      <DropdownMenuContent align="end" className="w-52">\n        {reportsData.filter((report) => report.records > 0).map((report) => (\n          <DropdownMenuItem key={report.id} onClick={() => handleExportReport(report)} className="cursor-pointer text-xs">\n            <report.icon className={`mr-2 h-3.5 w-3.5 ${report.iconColor}`} />\n            {report.name}\n          </DropdownMenuItem>\n        ))}\n      </DropdownMenuContent>\n    </DropdownMenu>\n  );\n\n  return (\n    <PageLayout headerActions={exportAction}>\n      <AnalyticsTab />\n    </PageLayout>\n  );'''
 
 changed = []
 for file_name, replacements in REPLACEMENTS.items():
@@ -79,6 +102,11 @@ for file_name, replacements in REPLACEMENTS.items():
     if text != original:
         path.write_text(text)
         changed.append(file_name)
+
+reports_text = REPORTS_PATH.read_text()
+if REPORTS_OLD in reports_text:
+    REPORTS_PATH.write_text(reports_text.replace(REPORTS_OLD, REPORTS_NEW))
+    changed.append(REPORTS_PATH.as_posix())
 
 print("VISUAL_DENSITY_CHANGED", len(changed))
 for item in changed:
