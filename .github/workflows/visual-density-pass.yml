@@ -27,6 +27,7 @@ jobs:
           python scripts/visual_density_pass.py
           python scripts/crm_visual_cleanup.py
           python scripts/visual_hotspot_cleanup.py
+          python scripts/visual_final_hotspots.py
       - name: Audit remaining visual-density hotspots
         run: python scripts/visual_quality_audit.py
       - name: Install dependencies
@@ -45,6 +46,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add apps/web/src
-          git commit -m "refactor(ui): normalize professional interface density" || true
+          git commit -m "refactor(ui): finish professional interface cleanup" || true
           git pull --rebase origin dev
           git push origin HEAD:dev
