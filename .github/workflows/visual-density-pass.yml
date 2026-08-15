@@ -44,7 +44,10 @@ jobs:
             apps/web/src/modules/schedule/pages/SchedulePage.tsx \
             apps/web/src/modules/communications/pages/CommunicationsPage.tsx \
             apps/web/src/modules/payroll/pages/PayrollPage.tsx \
-            apps/web/src/modules/billing/pages/BillingPage.tsx
-          git commit -m "refactor(ui): normalize operational page density" || true
+            apps/web/src/modules/billing/pages/BillingPage.tsx \
+            apps/web/src/modules/settings/pages/SettingsPage.tsx \
+            apps/web/src/modules/support/pages/SupportPage.tsx \
+            apps/web/src/modules/reports/pages/ReportsPage.tsx
+          git commit -m "refactor(ui): normalize professional page density" || true
           git pull --rebase origin dev
           git push origin HEAD:dev
