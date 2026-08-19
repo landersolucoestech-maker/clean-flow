@@ -3,13 +3,12 @@ import { BriefcaseBusiness, ChevronRight, Plus, Search, X } from "lucide-react";
 import type { Job, JobStatus, RecurrenceRule } from "../../../../../packages/domain/job";
 import type { ServiceFrequency } from "../../../../../packages/domain/service";
 import { createJob, updateJobStatus } from "../../../../../packages/application/job";
-import { MockJobRepository } from "../../../../../packages/data/mock-job-repository";
-import { jobFixtures } from "../../../../../packages/test-fixtures/jobs";
 import { customerAccountFixtures } from "../../../../../packages/test-fixtures/customers";
 import { serviceFixtures } from "../../../../../packages/test-fixtures/services";
 import { staffFixtures, teamFixtures } from "../../../../../packages/test-fixtures/workforce";
+import { maidFlowRepositories } from "./repositories";
 
-const repository=new MockJobRepository(jobFixtures);
+const repository=maidFlowRepositories.jobs;
 const statuses:readonly JobStatus[]=["scheduled","on_the_way","in_progress","completed","cancelled"];
 const money=(minor:number)=>new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(minor/100);
 const customerName=(id:string)=>customerAccountFixtures.find((row)=>row.customer.id===id)?.primaryContact.displayName??"Unknown customer";
