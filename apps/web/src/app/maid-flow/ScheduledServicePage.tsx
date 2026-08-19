@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, CheckCircle2, ChevronRight, MapPin, Navigation, Play, XCircle } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
-import type { Job, JobStatus } from "../../../../../packages/domain/job";
+import type { CustomerAccount } from "../../../../../packages/application/customer-account";
 import { canTransitionJobStatus, updateJobStatus } from "../../../../../packages/application/job";
-import { customerAccountFixtures } from "../../../../../packages/test-fixtures/customers";
-import { serviceFixtures } from "../../../../../packages/test-fixtures/services";
-import { staffFixtures, teamFixtures } from "../../../../../packages/test-fixtures/workforce";
+import type { Job, JobStatus } from "../../../../../packages/domain/job";
+import type { ServiceDefinition } from "../../../../../packages/domain/service";
+import type { StaffMember, Team } from "../../../../../packages/domain/team";
 import { maidFlowRepositories } from "./repositories";
 
 const repository=maidFlowRepositories.schedule;
@@ -15,20 +15,24 @@ const nextStep:Partial<Record<JobStatus,{status:JobStatus;label:string}>>={sched
 export function ScheduledServicePage(){
   const { scheduledServiceId }=useParams();
   const [serviceOccurrence,setServiceOccurrence]=useState<Job|null>(null);
+  const [accounts,setAccounts]=useState<readonly CustomerAccount[]>([]);
+  const [services,setServices]=useState<readonly ServiceDefinition[]>([]);
+  const [staff,setStaff]=useState<readonly StaffMember[]>([]);
+  const [teams,setTeams]=useState<readonly Team[]>([]);
   const [loading,setLoading]=useState(true);
   const [saving,setSaving]=useState(false);
   const [error,setError]=useState<string|null>(null);
 
-  useEffect(()=>{let active=true;void repository.getById(scheduledServiceId??"").then((row)=>{if(active){setServiceOccurrence(row);setLoading(false)}});return()=>{active=false}},[scheduledServiceId]);
-  const account=useMemo(()=>serviceOccurrence?customerAccountFixtures.find((row)=>row.customer.id===serviceOccurrence.customerId):undefined,[serviceOccurrence]);
+  useEffect(()=>{let active=true;void Promise.all([repository.getById(scheduledServiceId??""),maidFlowRepositories.crm.customers.list(),maidFlowRepositories.services.list(),maidFlowRepositories.workforce.listStaff(),maidFlowRepositories.workforce.listTeams()]).then(([row,customerRows,serviceRows,people,groups])=>{if(active){setServiceOccurrence(row);setAccounts(customerRows);setServices(serviceRows);setStaff(people);setTeams(groups);setLoading(false)}});return()=>{active=false}},[scheduledServiceId]);
+  const account=useMemo(()=>serviceOccurrence?accounts.find((row)=>row.customer.id===serviceOccurrence.customerId):undefined,[accounts,serviceOccurrence]);
   const location=useMemo(()=>serviceOccurrence?account?.locations.find((row)=>row.id===serviceOccurrence.locationId):undefined,[account,serviceOccurrence]);
-  const service=useMemo(()=>serviceOccurrence?serviceFixtures.find((row)=>row.id===serviceOccurrence.serviceId):undefined,[serviceOccurrence]);
-  const assignment=useMemo(()=>{if(!serviceOccurrence)return"";if(serviceOccurrence.assignedTeamId)return teamFixtures.find((row)=>row.id===serviceOccurrence.assignedTeamId)?.name??"Unknown team";return serviceOccurrence.assignedStaffIds.map((id)=>staffFixtures.find((row)=>row.id===id)?.displayName??id).join(", ")||"Unassigned"},[serviceOccurrence]);
+  const service=useMemo(()=>serviceOccurrence?services.find((row)=>row.id===serviceOccurrence.serviceId):undefined,[services,serviceOccurrence]);
+  const assignment=useMemo(()=>{if(!serviceOccurrence)return"";if(serviceOccurrence.assignedTeamId)return teams.find((row)=>row.id===serviceOccurrence.assignedTeamId)?.name??"Unknown team";return serviceOccurrence.assignedStaffIds.map((id)=>staff.find((row)=>row.id===id)?.displayName??id).join(", ")||"Unassigned"},[serviceOccurrence,staff,teams]);
 
   async function transition(next:JobStatus){if(!serviceOccurrence||!canTransitionJobStatus(serviceOccurrence.status,next))return;setSaving(true);setError(null);try{setServiceOccurrence(await updateJobStatus(repository,serviceOccurrence.id,next))}catch(cause){setError(cause instanceof Error?cause.message:"Unable to update scheduled service")}finally{setSaving(false)}}
 
   if(loading)return <main className="min-w-0 flex-1 px-4 py-7 sm:px-6 lg:px-8"><div className="mx-auto max-w-[1200px]"><div className="h-7 w-52 animate-pulse rounded bg-muted"/><div className="mt-6 h-64 animate-pulse rounded-md bg-muted"/></div></main>;
-  if(!serviceOccurrence)return <main className="min-w-0 flex-1 px-4 py-7 sm:px-6 lg:px-8"><div className="mx-auto max-w-[1200px]"><Link to="/operations/schedule" className="inline-flex items-center gap-2 text-xs font-semibold text-primary"><ArrowLeft className="h-3.5 w-3.5"/>Back to schedule</Link><div className="mt-8 rounded-md border border-border bg-card p-8"><h1 className="text-xl font-semibold">Scheduled service not found</h1><p className="mt-2 text-sm text-muted-foreground">The requested service is not available in the current frontend dataset.</p></div></div></main>;
+  if(!serviceOccurrence)return <main className="min-w-0 flex-1 px-4 py-7 sm:px-6 lg:px-8"><div className="mx-auto max-w-[1200px]"><Link to="/operations/schedule" className="inline-flex items-center gap-2 text-xs font-semibold text-primary"><ArrowLeft className="h-3.5 w-3.5"/>Back to schedule</Link><div className="mt-8 rounded-md border border-border bg-card p-8"><h1 className="text-xl font-semibold">Scheduled service not found</h1><p className="mt-2 text-sm text-muted-foreground">The requested service could not be found.</p></div></div></main>;
 
   const primary=nextStep[serviceOccurrence.status];
   const address=location?`${location.street1}, ${location.city}, ${location.state} ${location.postalCode}`:"Unknown location";
