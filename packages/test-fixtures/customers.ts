@@ -1,0 +1,8 @@
+import type { CustomerAccount } from "../application/customer-account";
+import { contactFixtures } from "./contacts";
+
+export const customerAccountFixtures: readonly CustomerAccount[] = [
+  { customer: { id: "customer-1", primaryContactId: "contact-1", status: "active", source: "google", paymentMethod: "card", createdAt: "2026-03-12T12:00:00.000Z" }, primaryContact: contactFixtures[0], locations: [{ id: "location-1", customerId: "customer-1", name: "Home", street1: "842 Lake Nona Blvd", city: "Orlando", state: "FL", postalCode: "32827", frequency: "every_2_weeks", preferredDay: "thursday" }], totalJobs: 18, lifetimeRevenueMinor: 486000, lastServiceAt: "2026-08-15T13:00:00.000Z" },
+  { customer: { id: "customer-2", primaryContactId: "contact-2", status: "active", source: "referral", paymentMethod: "zelle", createdAt: "2026-05-04T12:00:00.000Z" }, primaryContact: contactFixtures[1], locations: [{ id: "location-2", customerId: "customer-2", name: "Residence", street1: "1174 Winter Park Rd", city: "Winter Park", state: "FL", postalCode: "32789", frequency: "weekly", preferredDay: "monday" }], totalJobs: 11, lifetimeRevenueMinor: 297500, lastServiceAt: "2026-08-17T14:30:00.000Z" },
+  { customer: { id: "customer-3", primaryContactId: "contact-3", status: "active", source: "website", paymentMethod: "ach", createdAt: "2026-06-21T12:00:00.000Z" }, primaryContact: contactFixtures[2], locations: [{ id: "location-3", customerId: "customer-3", name: "Main office", street1: "490 Central Ave", city: "Orlando", state: "FL", postalCode: "32801", frequency: "weekly", preferredDay: "friday" }], totalJobs: 7, lifetimeRevenueMinor: 385000, lastServiceAt: "2026-08-14T20:00:00.000Z" },
+];
