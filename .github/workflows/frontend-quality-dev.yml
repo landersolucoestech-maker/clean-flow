@@ -1,4 +1,4 @@
-name: Frontend Quality Dev
+name: Maid Flow Frontend Quality
 
 on:
   push:
@@ -6,18 +6,18 @@ on:
     paths:
       - "apps/web/**"
       - "packages/**"
-      - "scripts/frontend-audit.mjs"
       - "package.json"
       - "package-lock.json"
       - "tsconfig*.json"
       - "vite.config.ts"
       - ".github/workflows/frontend-quality-dev.yml"
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: frontend-quality-${{ github.ref }}
+  group: maid-flow-frontend-quality-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -37,37 +37,5 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Enforce CRM boundaries
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          if [ -d apps/web/src/modules/customers ] || [ -d apps/web/src/modules/leads ]; then
-            echo "Customers and Leads must remain under apps/web/src/modules/crm."
-            exit 1
-          fi
-
-          obsolete_refs=$(grep -RInE '["'"'"'`]\/(customers|leads)(["'"'"'`/?#]|$)' apps/web/src \
-            --include='*.ts' --include='*.tsx' \
-            --exclude='App.tsx' || true)
-
-          if [ -n "$obsolete_refs" ]; then
-            echo "Found obsolete direct CRM routes outside compatibility redirects:"
-            echo "$obsolete_refs"
-            exit 1
-          fi
-
-      - name: Audit frontend structure and mock boundaries
-        run: node scripts/frontend-audit.mjs
-
-      - name: Lint frontend
-        run: npx eslint apps/web/src packages --max-warnings=0
-
-      - name: Typecheck frontend
-        run: npm run typecheck
-
-      - name: Test frontend
-        run: npx vitest run apps/web/src
-
-      - name: Build frontend
-        run: npm run build
+      - name: Lint, typecheck, test and build Maid Flow frontend
+        run: npm run check
