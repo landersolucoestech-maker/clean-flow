@@ -2,10 +2,9 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { ChevronRight, Plus, Search, X } from "lucide-react";
 import type { StaffMember, StaffRole, Team } from "../../../../../packages/domain/team";
 import { createTeam, deactivateStaff } from "../../../../../packages/application/workforce";
-import { MockWorkforceRepository } from "../../../../../packages/data/mock-workforce-repository";
-import { staffFixtures, teamFixtures } from "../../../../../packages/test-fixtures/workforce";
+import { maidFlowRepositories } from "./repositories";
 
-const repository=new MockWorkforceRepository([...staffFixtures],[...teamFixtures]);
+const repository=maidFlowRepositories.workforce;
 const roleLabels:Record<StaffRole,string>={office_manager:"Office manager",cleaning_manager:"Cleaning manager",virtual_assistant:"Virtual assistant",cleaner:"Cleaner",driver:"Driver"};
 
 type StaffDraft={displayName:string;email:string;phone:string;role:StaffRole;canDrive:boolean};
