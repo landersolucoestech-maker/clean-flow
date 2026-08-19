@@ -13,13 +13,13 @@ const money=(minor:number)=>new Intl.NumberFormat("en-US",{style:"currency",curr
 const nextStep:Partial<Record<JobStatus,{status:JobStatus;label:string}>>={scheduled:{status:"on_the_way",label:"Mark on the way"},on_the_way:{status:"in_progress",label:"Start service"},in_progress:{status:"completed",label:"Complete service"}};
 
 export function ScheduledServicePage(){
-  const { jobId }=useParams();
+  const { scheduledServiceId }=useParams();
   const [serviceOccurrence,setServiceOccurrence]=useState<Job|null>(null);
   const [loading,setLoading]=useState(true);
   const [saving,setSaving]=useState(false);
   const [error,setError]=useState<string|null>(null);
 
-  useEffect(()=>{let active=true;void repository.getById(jobId??"").then((row)=>{if(active){setServiceOccurrence(row);setLoading(false)}});return()=>{active=false}},[jobId]);
+  useEffect(()=>{let active=true;void repository.getById(scheduledServiceId??"").then((row)=>{if(active){setServiceOccurrence(row);setLoading(false)}});return()=>{active=false}},[scheduledServiceId]);
   const account=useMemo(()=>serviceOccurrence?customerAccountFixtures.find((row)=>row.customer.id===serviceOccurrence.customerId):undefined,[serviceOccurrence]);
   const location=useMemo(()=>serviceOccurrence?account?.locations.find((row)=>row.id===serviceOccurrence.locationId):undefined,[account,serviceOccurrence]);
   const service=useMemo(()=>serviceOccurrence?serviceFixtures.find((row)=>row.id===serviceOccurrence.serviceId):undefined,[serviceOccurrence]);
