@@ -6,7 +6,9 @@ import { MockInvoiceRepository, MockPaymentRepository, MockTransactionRepository
 import { MockJobRepository } from "../../../../../packages/data/mock-job-repository";
 import { MockLeadRepository } from "../../../../../packages/data/mock-lead-repository";
 import { MockPayrollRepository } from "../../../../../packages/data/mock-payroll-repository";
+import { MockServiceRepository } from "../../../../../packages/data/mock-service-repository";
 import { MockSupportRepository } from "../../../../../packages/data/mock-support-repository";
+import { MockWorkforceRepository } from "../../../../../packages/data/mock-workforce-repository";
 import { automationFixtures } from "../../../../../packages/test-fixtures/automations";
 import { communicationFixtures } from "../../../../../packages/test-fixtures/communications";
 import { contactFixtures } from "../../../../../packages/test-fixtures/contacts";
@@ -15,7 +17,9 @@ import { invoiceFixtures, paymentFixtures, transactionFixtures } from "../../../
 import { jobFixtures } from "../../../../../packages/test-fixtures/jobs";
 import { leadFixtures } from "../../../../../packages/test-fixtures/leads";
 import { payrollFixtures } from "../../../../../packages/test-fixtures/payroll";
+import { serviceFixtures } from "../../../../../packages/test-fixtures/services";
 import { supportFixtures } from "../../../../../packages/test-fixtures/support";
+import { staffFixtures, teamFixtures } from "../../../../../packages/test-fixtures/workforce";
 
 /** Frontend-only composition root for the Maid Flow rebuild. */
 export const maidFlowRepositories = {
@@ -24,6 +28,8 @@ export const maidFlowRepositories = {
     customers: new MockCustomerAccountRepository(customerAccountFixtures),
     leads: new MockLeadRepository(leadFixtures),
   },
+  services: new MockServiceRepository(serviceFixtures),
+  workforce: new MockWorkforceRepository([...staffFixtures],[...teamFixtures]),
   schedule: new MockJobRepository(jobFixtures),
   communications: new MockCommunicationRepository(communicationFixtures),
   automations: new MockAutomationRepository(automationFixtures),
