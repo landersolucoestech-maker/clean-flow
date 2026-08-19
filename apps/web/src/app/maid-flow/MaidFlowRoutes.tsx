@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
+import { CommunicationsPage } from "./CommunicationsPage";
 import { CrmPage } from "./CrmPage";
 import { JobExecutionPage } from "./JobExecutionPage";
 import { SchedulePage } from "./SchedulePage";
@@ -16,6 +17,7 @@ export function MaidFlowRoutes({ fallback }: { fallback: ReactNode }) {
       <Route path="/crm/leads" element={<Navigate replace to="/crm?tab=leads" />} />
       <Route path="/operations/schedule" element={<SchedulePage />} />
       <Route path="/operations/schedule/:jobId" element={<JobExecutionPage />} />
+      <Route path="/communications/inbox" element={<CommunicationsPage />} />
       <Route path="/settings" element={<SettingsPage />} />
       <Route path="/settings/team" element={<WorkforcePage />} />
       <Route path="/settings/services" element={<ServiceCatalogPage />} />
