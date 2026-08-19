@@ -1,10 +1,20 @@
 import type { EntityId, ISODateTime } from "./identity";
 
+export type ContactKind = "person" | "business";
+export type ContactStatus = "active" | "archived";
 export type Contact = Readonly<{
   id: EntityId;
+  kind: ContactKind;
   displayName: string;
+  firstName?: string;
+  lastName?: string;
+  companyName?: string;
   email?: string;
   phone?: string;
+  preferredLanguage: "en" | "pt" | "es";
+  status: ContactStatus;
+  tags: readonly string[];
+  createdAt: ISODateTime;
 }>;
 
 export type CustomerStatus = "active" | "inactive";
