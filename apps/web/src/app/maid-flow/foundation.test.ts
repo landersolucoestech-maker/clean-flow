@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { allNavigationItems } from "./navigation";
 
@@ -11,10 +13,21 @@ describe("Maid Flow foundation navigation", () => {
     expect(allNavigationItems.some((item) => item.label === "Dashboard" && item.path === "/")).toBe(true);
   });
 
-  it("keeps CRM as one navigation surface", () => {
+  it("keeps CRM as one navigation and routed surface with three internal tabs", () => {
     expect(allNavigationItems.filter((item) => item.path.startsWith("/crm"))).toEqual([
       expect.objectContaining({ label: "CRM", path: "/crm" }),
     ]);
+
+    const routes = readFileSync(join(process.cwd(), "apps/web/src/app/maid-flow/MaidFlowRoutes.tsx"), "utf8");
+    const crm = readFileSync(join(process.cwd(), "apps/web/src/app/maid-flow/CrmPage.tsx"), "utf8");
+
+    expect(routes).toContain('path="/crm"');
+    expect(routes).not.toContain('/crm/customers');
+    expect(routes).not.toContain('/crm/contacts');
+    expect(routes).not.toContain('/crm/leads');
+    expect(crm).toContain('label: "Customers"');
+    expect(crm).toContain('label: "Contacts"');
+    expect(crm).toContain('label: "Leads"');
   });
 
   it("keeps Schedule as the only operations navigation surface", () => {
