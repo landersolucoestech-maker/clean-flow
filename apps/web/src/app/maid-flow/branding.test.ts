@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 
-function collectTextFiles(root:string):string[]{return readdirSync(root).flatMap((name)=>{const path=join(root,name);return statSync(path).isDirectory()?collectTextFiles(path):/\.(ts|tsx|css|md)$/.test(name)?[path]:[]})}
+function collectTextFiles(root:string):string[]{return readdirSync(root).flatMap((name)=>{const path=join(root,name);if(name==="branding.test.ts")return[];return statSync(path).isDirectory()?collectTextFiles(path):/\.(ts|tsx|css|md)$/.test(name)?[path]:[]})}
 
 describe("Maid Flow branding",()=>{
   it("does not reintroduce historical product names in the active rebuild",()=>{
