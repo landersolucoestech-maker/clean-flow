@@ -17,3 +17,11 @@ Operational SaaS UI: controlled density, precise hierarchy, restrained surfaces,
 ## Module completion gate
 
 A module is complete only after domain model, use cases, mock adapter, routes, states, forms, validation, responsive behavior, accessibility and relevant tests are validated.
+
+## Current reconstruction sequence
+
+1. Contacts — active module.
+2. Customers.
+3. Leads.
+4. Estimates.
+5. Service catalog and workforce dependencies before operational scheduling.
