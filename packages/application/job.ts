@@ -7,6 +7,16 @@ export type CreateJobInput = Omit<Job,"id"|"status"> & { status?: JobStatus; ser
 export type UpdateJobInput = Partial<Omit<Job,"id">>;
 export type JobRepository = Repository<Job,CreateJobInput,UpdateJobInput>;
 
+const allowedStatusTransitions:Readonly<Record<JobStatus,readonly JobStatus[]>>={
+  scheduled:["on_the_way","cancelled"],
+  on_the_way:["in_progress","cancelled"],
+  in_progress:["completed","cancelled"],
+  completed:[],
+  cancelled:[],
+};
+
+export function canTransitionJobStatus(current:JobStatus,next:JobStatus){return current===next||allowedStatusTransitions[current].includes(next)}
+
 export async function createJob(repository:JobRepository,input:CreateJobInput,service:ServiceDefinition){
   if(!input.customerId||!input.locationId) throw new Error("Customer and service location are required");
   if(input.durationMinutes<=0) throw new Error("Job duration must be greater than zero");
@@ -16,4 +26,10 @@ export async function createJob(repository:JobRepository,input:CreateJobInput,se
   return repository.create(input);
 }
 
-export async function updateJobStatus(repository:JobRepository,id:string,status:JobStatus){return repository.update(id,{status});}
+export async function updateJobStatus(repository:JobRepository,id:string,status:JobStatus){
+  const current=await repository.getById(id);
+  if(!current) throw new Error("Job not found");
+  if(!canTransitionJobStatus(current.status,status)) throw new Error(`Invalid job status transition: ${current.status} -> ${status}`);
+  if(current.status===status)return current;
+  return repository.update(id,{status});
+}
