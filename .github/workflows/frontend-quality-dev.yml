@@ -7,7 +7,6 @@ on:
       - "apps/web/**"
       - "packages/**"
       - "package.json"
-      - "package-lock.json"
       - "tsconfig*.json"
       - "vite.config.ts"
       - ".github/workflows/frontend-quality-dev.yml"
@@ -32,10 +31,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Install frontend dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
 
       - name: Lint, typecheck, test and build Maid Flow frontend
         run: npm run check
