@@ -1,12 +1,10 @@
+import { MockCommunicationRepository } from "../../../../../packages/data/mock-communication-repository";
 import { MockJobRepository } from "../../../../../packages/data/mock-job-repository";
+import { communicationFixtures } from "../../../../../packages/test-fixtures/communications";
 import { jobFixtures } from "../../../../../packages/test-fixtures/jobs";
 
-/**
- * Frontend composition root for the Maid Flow rebuild.
- *
- * Repositories live here so operational projections such as Jobs and Schedule
- * observe the same in-memory state during the frontend-only phase.
- */
+/** Frontend-only composition root for the Maid Flow rebuild. */
 export const maidFlowRepositories = {
-  jobs: new MockJobRepository(jobFixtures),
+  schedule: new MockJobRepository(jobFixtures),
+  communications: new MockCommunicationRepository(communicationFixtures),
 } as const;
