@@ -2,10 +2,12 @@ import { MockAutomationRepository } from "../../../../../packages/data/mock-auto
 import { MockCommunicationRepository } from "../../../../../packages/data/mock-communication-repository";
 import { MockInvoiceRepository, MockPaymentRepository, MockTransactionRepository } from "../../../../../packages/data/mock-finance-repositories";
 import { MockJobRepository } from "../../../../../packages/data/mock-job-repository";
+import { MockPayrollRepository } from "../../../../../packages/data/mock-payroll-repository";
 import { automationFixtures } from "../../../../../packages/test-fixtures/automations";
 import { communicationFixtures } from "../../../../../packages/test-fixtures/communications";
 import { invoiceFixtures, paymentFixtures, transactionFixtures } from "../../../../../packages/test-fixtures/finance";
 import { jobFixtures } from "../../../../../packages/test-fixtures/jobs";
+import { payrollFixtures } from "../../../../../packages/test-fixtures/payroll";
 
 const scheduleRepository = new MockJobRepository(jobFixtures);
 
@@ -18,4 +20,5 @@ export const maidFlowRepositories = {
   invoices: new MockInvoiceRepository(invoiceFixtures),
   payments: new MockPaymentRepository(paymentFixtures),
   transactions: new MockTransactionRepository(transactionFixtures),
+  payroll: new MockPayrollRepository(payrollFixtures),
 } as const;
