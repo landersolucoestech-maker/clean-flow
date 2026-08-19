@@ -2,10 +2,9 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Archive, Filter, MoreHorizontal, Pencil, Plus, Search, X } from "lucide-react";
 import type { Contact, ContactKind, ContactStatus } from "../../../../../packages/domain/crm";
 import { archiveContact, createContact, updateContact } from "../../../../../packages/application/contact";
-import { MockContactRepository } from "../../../../../packages/data/mock-contact-repository";
-import { contactFixtures } from "../../../../../packages/test-fixtures/contacts";
+import { maidFlowRepositories } from "./repositories";
 
-const repository = new MockContactRepository(contactFixtures);
+const repository = maidFlowRepositories.crm.contacts;
 type StatusFilter = "all" | ContactStatus;
 type ContactDraft = { kind: ContactKind; displayName: string; email: string; phone: string; preferredLanguage: Contact["preferredLanguage"] };
 const emptyDraft: ContactDraft = { kind: "person", displayName: "", email: "", phone: "", preferredLanguage: "en" };
