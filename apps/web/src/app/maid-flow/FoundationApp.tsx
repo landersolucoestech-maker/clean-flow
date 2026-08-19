@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { BrowserRouter, Link, Route, Routes, useLocation } from "react-router-dom";
 import { Bell, ChevronRight, Menu, Search, X } from "lucide-react";
 import { allNavigationItems, navigationGroups } from "./navigation";
+import { ContactsPage } from "./ContactsPage";
 
 const placeholderCopy: Record<string, { eyebrow: string; title: string; description: string }> = {
   "/": {
@@ -9,7 +10,6 @@ const placeholderCopy: Record<string, { eyebrow: string; title: string; descript
     title: "Maid Flow",
     description: "The new frontend foundation is active. Functional modules will be rebuilt one at a time on top of this system.",
   },
-  "/crm/contacts": { eyebrow: "CRM", title: "Contacts", description: "Canonical people and business contacts shared across the customer lifecycle." },
   "/crm/customers": { eyebrow: "CRM", title: "Customers", description: "Customer accounts, service locations, preferences and relationship history." },
   "/crm/leads": { eyebrow: "CRM", title: "Leads", description: "Sales opportunities, qualification, activities and conversion workflow." },
   "/crm/estimates": { eyebrow: "CRM", title: "Estimates", description: "Structured service proposals separated from leads and customers." },
@@ -53,12 +53,7 @@ function Sidebar({ mobile, onNavigate }: { mobile?: boolean; onNavigate?: () => 
                 const active = item.path === "/" ? location.pathname === "/" : location.pathname.startsWith(item.path);
                 const Icon = item.icon;
                 return (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    onClick={onNavigate}
-                    className={`group flex h-9 items-center gap-2.5 rounded-md px-2.5 text-[13px] transition-colors ${active ? "bg-white/[0.09] font-medium text-white" : "text-slate-300 hover:bg-white/[0.055] hover:text-white"}`}
-                  >
+                  <Link key={item.path} to={item.path} onClick={onNavigate} className={`group flex h-9 items-center gap-2.5 rounded-md px-2.5 text-[13px] transition-colors ${active ? "bg-white/[0.09] font-medium text-white" : "text-slate-300 hover:bg-white/[0.055] hover:text-white"}`}>
                     <Icon className={`h-[15px] w-[15px] ${active ? "text-emerald-300" : "text-slate-500 group-hover:text-slate-300"}`} strokeWidth={1.8} />
                     <span className="truncate">{item.label}</span>
                   </Link>
@@ -71,10 +66,7 @@ function Sidebar({ mobile, onNavigate }: { mobile?: boolean; onNavigate?: () => 
       <div className="border-t border-white/[0.07] p-3">
         <button className="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-left hover:bg-white/[0.05]" type="button">
           <div className="grid h-7 w-7 place-items-center rounded-full bg-slate-700 text-[10px] font-semibold text-slate-100">AM</div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-xs font-medium text-slate-100">Admin preview</p>
-            <p className="truncate text-[10px] text-slate-500">Frontend persona</p>
-          </div>
+          <div className="min-w-0 flex-1"><p className="truncate text-xs font-medium text-slate-100">Admin preview</p><p className="truncate text-[10px] text-slate-500">Frontend persona</p></div>
         </button>
       </div>
     </aside>
@@ -89,25 +81,13 @@ function PagePlaceholder() {
   return (
     <main className="min-w-0 flex-1 px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
       <div className="mx-auto w-full max-w-[1500px]">
-        <div className="mb-6 flex min-w-0 items-center gap-1.5 text-[11px] text-muted-foreground">
-          <span>Maid Flow</span><ChevronRight className="h-3 w-3" /><span className="truncate text-foreground/80">{current?.label ?? "Foundation"}</span>
-        </div>
-
+        <div className="mb-6 flex min-w-0 items-center gap-1.5 text-[11px] text-muted-foreground"><span>Maid Flow</span><ChevronRight className="h-3 w-3" /><span className="truncate text-foreground/80">{current?.label ?? "Foundation"}</span></div>
         <header className="border-b border-border pb-5">
           <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.13em] text-primary">{content.eyebrow}</p>
           <h1 className="text-[26px] font-semibold tracking-[-0.035em] text-foreground sm:text-[29px]">{content.title}</h1>
           <p className="mt-1.5 max-w-3xl text-[13px] leading-5 text-muted-foreground">{content.description}</p>
         </header>
-
-        <section className="py-8">
-          <div className="max-w-4xl border-l-2 border-primary/35 pl-5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Current phase</p>
-            <h2 className="mt-2 text-base font-semibold tracking-[-0.015em] text-foreground">Frontend foundation only</h2>
-            <p className="mt-1.5 max-w-2xl text-sm leading-6 text-muted-foreground">
-              This route is intentionally a structural placeholder. Its functional module will be designed, implemented and validated independently before it becomes part of the finished product.
-            </p>
-          </div>
-        </section>
+        <section className="py-8"><div className="max-w-4xl border-l-2 border-primary/35 pl-5"><p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Current phase</p><h2 className="mt-2 text-base font-semibold tracking-[-0.015em] text-foreground">Frontend foundation only</h2><p className="mt-1.5 max-w-2xl text-sm leading-6 text-muted-foreground">This route is intentionally a structural placeholder. Its functional module will be designed, implemented and validated independently before it becomes part of the finished product.</p></div></section>
       </div>
     </main>
   );
@@ -121,30 +101,14 @@ function ApplicationFrame() {
   return (
     <div className="flex min-h-screen bg-background text-foreground">
       <Sidebar />
-      {mobileOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <button aria-label="Close navigation" className="absolute inset-0 bg-slate-950/45" onClick={() => setMobileOpen(false)} type="button" />
-          <div className="relative h-full w-[280px] max-w-[86vw] shadow-2xl">
-            <button aria-label="Close navigation" className="absolute right-3 top-3 z-10 grid h-8 w-8 place-items-center rounded-md text-slate-400 hover:bg-white/10 hover:text-white" onClick={() => setMobileOpen(false)} type="button"><X className="h-4 w-4" /></button>
-            <Sidebar mobile onNavigate={() => setMobileOpen(false)} />
-          </div>
-        </div>
-      )}
-
+      {mobileOpen && <div className="fixed inset-0 z-50 lg:hidden"><button aria-label="Close navigation" className="absolute inset-0 bg-slate-950/45" onClick={() => setMobileOpen(false)} type="button" /><div className="relative h-full w-[280px] max-w-[86vw] shadow-2xl"><button aria-label="Close navigation" className="absolute right-3 top-3 z-10 grid h-8 w-8 place-items-center rounded-md text-slate-400 hover:bg-white/10 hover:text-white" onClick={() => setMobileOpen(false)} type="button"><X className="h-4 w-4" /></button><Sidebar mobile onNavigate={() => setMobileOpen(false)} /></div></div>}
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-30 flex h-16 items-center border-b border-border bg-background/95 px-4 backdrop-blur sm:px-6 lg:px-8">
           <button aria-label="Open navigation" className="mr-3 grid h-8 w-8 place-items-center rounded-md border border-border bg-card text-muted-foreground lg:hidden" onClick={() => setMobileOpen(true)} type="button"><Menu className="h-4 w-4" /></button>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-[13px] font-medium tracking-[-0.01em] text-foreground">{activeLabel}</p>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <button aria-label="Search" className="hidden h-8 items-center gap-2 rounded-md border border-border bg-card px-2.5 text-xs text-muted-foreground transition-colors hover:bg-muted sm:flex" type="button"><Search className="h-3.5 w-3.5" /><span className="hidden md:inline">Search</span><kbd className="ml-2 hidden rounded border border-border bg-background px-1.5 py-0.5 font-sans text-[9px] text-muted-foreground md:inline">⌘K</kbd></button>
-            <button aria-label="Notifications" className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground" type="button"><Bell className="h-[15px] w-[15px]" /></button>
-          </div>
+          <div className="min-w-0 flex-1"><p className="truncate text-[13px] font-medium tracking-[-0.01em] text-foreground">{activeLabel}</p></div>
+          <div className="flex items-center gap-1.5"><button aria-label="Search" className="hidden h-8 items-center gap-2 rounded-md border border-border bg-card px-2.5 text-xs text-muted-foreground transition-colors hover:bg-muted sm:flex" type="button"><Search className="h-3.5 w-3.5" /><span className="hidden md:inline">Search</span><kbd className="ml-2 hidden rounded border border-border bg-background px-1.5 py-0.5 font-sans text-[9px] text-muted-foreground md:inline">⌘K</kbd></button><button aria-label="Notifications" className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground" type="button"><Bell className="h-[15px] w-[15px]" /></button></div>
         </header>
-        <Routes>
-          <Route path="*" element={<PagePlaceholder />} />
-        </Routes>
+        <Routes><Route path="/crm/contacts" element={<ContactsPage />} /><Route path="*" element={<PagePlaceholder />} /></Routes>
       </div>
     </div>
   );
