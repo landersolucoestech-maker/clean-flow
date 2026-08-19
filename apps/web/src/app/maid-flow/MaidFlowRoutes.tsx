@@ -10,11 +10,13 @@ import { InvoicesPage } from "./InvoicesPage";
 import { JobExecutionPage } from "./JobExecutionPage";
 import { PaymentsPage } from "./PaymentsPage";
 import { PayrollPage } from "./PayrollPage";
+import { PlatformPage } from "./PlatformPage";
 import { ReportsPage } from "./ReportsPage";
 import { SchedulePage } from "./SchedulePage";
 import { SecuritySettingsPage } from "./SecuritySettingsPage";
 import { ServiceCatalogPage } from "./ServiceCatalogPage";
 import { SettingsPage } from "./SettingsPage";
+import { SupportPage } from "./SupportPage";
 import { TransactionsPage } from "./TransactionsPage";
 import { WorkforcePage } from "./WorkforcePage";
 
@@ -41,6 +43,8 @@ export function MaidFlowRoutes({ fallback }: { fallback: ReactNode }) {
       <Route path="/settings/automations" element={<AutomationsPage />} />
       <Route path="/settings/integrations" element={<IntegrationsPage />} />
       <Route path="/settings/security" element={<SecuritySettingsPage />} />
+      <Route path="/support" element={<SupportPage />} />
+      <Route path="/platform" element={<PlatformPage />} />
       <Route path="*" element={fallback} />
     </Routes>
   );
