@@ -1,0 +1,7 @@
+import type { Lead } from "../domain/crm";
+
+export const leadFixtures: readonly Lead[] = [
+  { id: "lead-1", contactId: "contact-5", title: "Recurring home cleaning", stage: "qualifying", source: "website", serviceDefinitionId: "service-regular", frequency: "every_2_weeks", propertyType: "residential", squareFeet: 2400, bedrooms: 4, bathrooms: 3, hasPets: true, preferredDays: ["tuesday", "thursday"], preferredTime: "morning", location: { street1: "9207 Laureate Blvd", city: "Orlando", state: "FL", postalCode: "32827" }, createdAt: "2026-08-19T11:25:00.000Z", updatedAt: "2026-08-19T11:25:00.000Z" },
+  { id: "lead-2", contactId: "contact-6", title: "Studio weekly service", stage: "visit_scheduled", source: "google", serviceDefinitionId: "service-commercial", frequency: "weekly", propertyType: "commercial", squareFeet: 5100, preferredDays: ["saturday"], preferredTime: "afternoon", location: { street1: "1810 E Colonial Dr", city: "Orlando", state: "FL", postalCode: "32803" }, createdAt: "2026-08-18T18:20:00.000Z", updatedAt: "2026-08-19T08:45:00.000Z" },
+  { id: "lead-3", contactId: "contact-2", title: "Move-out cleaning", stage: "estimate_pending", source: "referral", serviceDefinitionId: "service-move", frequency: "one_time", propertyType: "residential", preferredDays: ["friday"], preferredTime: "morning", location: { street1: "360 Park Ave", city: "Winter Park", state: "FL", postalCode: "32789" }, createdAt: "2026-08-17T15:05:00.000Z", updatedAt: "2026-08-19T09:10:00.000Z" },
+];
