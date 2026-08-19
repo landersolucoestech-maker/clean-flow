@@ -16,7 +16,6 @@ const scheduleRepository = new MockJobRepository(jobFixtures);
 /** Frontend-only composition root for the Maid Flow rebuild. */
 export const maidFlowRepositories = {
   schedule: scheduleRepository,
-  jobs: scheduleRepository,
   communications: new MockCommunicationRepository(communicationFixtures),
   automations: new MockAutomationRepository(automationFixtures),
   invoices: new MockInvoiceRepository(invoiceFixtures),
