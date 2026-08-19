@@ -18,7 +18,9 @@
     "baseUrl": ".",
     "paths": {
       "@maid-flow/domain/*": ["./packages/domain/*"],
+      "@maid-flow/application/*": ["./packages/application/*"],
       "@maid-flow/contracts/*": ["./packages/contracts/*"],
+      "@maid-flow/data/*": ["./packages/data/*"],
       "@maid-flow/design-tokens/*": ["./packages/design-tokens/*"],
       "@maid-flow/i18n/*": ["./packages/i18n/*"],
       "@maid-flow/test-fixtures/*": ["./packages/test-fixtures/*"],
@@ -30,7 +32,9 @@
     "apps/web/src/app/App.tsx",
     "apps/web/src/app/maid-flow",
     "packages/domain",
+    "packages/application",
     "packages/contracts/repository.ts",
+    "packages/data",
     "packages/design-tokens",
     "packages/i18n",
     "packages/test-fixtures"

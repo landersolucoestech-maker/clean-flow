@@ -7,8 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "build:dev": "vite build --mode development",
-    "lint": "eslint apps/web/src/app/maid-flow apps/web/src/app/App.tsx apps/web/src/main.tsx packages/domain packages/design-tokens packages/i18n packages/test-fixtures",
-    "test": "vitest run apps/web/src/app/maid-flow",
+    "lint": "eslint apps/web/src/app/maid-flow apps/web/src/app/App.tsx apps/web/src/main.tsx packages/domain packages/application packages/data packages/design-tokens packages/i18n packages/test-fixtures",
+    "test": "vitest run apps/web/src/app/maid-flow packages/domain packages/application packages/data",
     "typecheck": "tsc -b --pretty false",
     "check": "npm run lint && npm run typecheck && npm run test && npm run build",
     "preview": "vite preview"
