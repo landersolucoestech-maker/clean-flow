@@ -1,7 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./app/App.tsx";
-import { Button } from "./shared/components/ui/button";
 import "./index.css";
 
 interface ErrorBoundaryState {
@@ -27,16 +26,12 @@ class ErrorBoundary extends Component<{ children: ReactNode }, ErrorBoundaryStat
   render() {
     if (!this.state.hasError) return this.props.children;
     return (
-      <main className="flex min-h-screen items-center justify-center bg-background px-6 text-foreground">
-        <section className="w-full max-w-lg rounded-2xl border bg-card p-8 text-center shadow-sm">
-          <p className="text-sm font-medium text-muted-foreground">CleanFlow</p>
-          <h1 className="mt-2 text-2xl font-semibold">Não foi possível carregar esta tela</h1>
-          <p className="mt-3 text-sm text-muted-foreground">
-            Um erro inesperado interrompeu a renderização. Recarregue a aplicação para tentar novamente.
-          </p>
-          <Button className="mt-6" onClick={() => window.location.reload()}>
-            Recarregar aplicação
-          </Button>
+      <main className="grid min-h-screen place-items-center bg-background px-6 text-foreground">
+        <section className="w-full max-w-lg border-l-2 border-primary/40 pl-5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-primary">Maid Flow</p>
+          <h1 className="mt-2 text-xl font-semibold tracking-[-0.02em]">Unable to load this screen</h1>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">An unexpected rendering error occurred. Reload the application to try again.</p>
+          <button className="mt-5 h-9 rounded-md bg-foreground px-3.5 text-sm font-medium text-background" onClick={() => window.location.reload()} type="button">Reload application</button>
         </section>
       </main>
     );
