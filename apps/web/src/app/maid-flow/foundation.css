@@ -1,0 +1,20 @@
+:root {
+  --mf-control-h: 2.25rem;
+  --mf-control-h-compact: 2rem;
+  --mf-page-max: 93.75rem;
+  --mf-page-x: 2rem;
+  --mf-page-y: 1.75rem;
+  --mf-section-gap: 1.5rem;
+}
+
+.mf-focus-ring:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+@media (max-width: 639px) {
+  :root {
+    --mf-page-x: 1rem;
+    --mf-page-y: 1.25rem;
+  }
+}
