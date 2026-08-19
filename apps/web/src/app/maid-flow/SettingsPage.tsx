@@ -1,10 +1,11 @@
-import { ChevronRight, Plug, ShieldCheck, SlidersHorizontal, UsersRound, Wrench } from "lucide-react";
+import { Bot, ChevronRight, Plug, ShieldCheck, SlidersHorizontal, UsersRound, Wrench } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const sections = [
   { title: "Company", description: "Business identity, locale, currency and operating preferences.", path: "/settings/company", icon: SlidersHorizontal },
   { title: "Team", description: "Staff members, roles and operational teams.", path: "/settings/team", icon: UsersRound },
   { title: "Services", description: "Service catalog, durations, allowed frequencies and add-ons.", path: "/settings/services", icon: Wrench },
+  { title: "Automations", description: "Frontend configuration of triggers, delays and message templates.", path: "/settings/automations", icon: Bot },
   { title: "Integrations", description: "Connection states and future provider configuration.", path: "/settings/integrations", icon: Plug },
   { title: "Security", description: "Frontend security and access-management surfaces.", path: "/settings/security", icon: ShieldCheck },
 ] as const;
