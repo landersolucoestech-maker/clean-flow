@@ -19,8 +19,8 @@ export function canTransitionJobStatus(current:JobStatus,next:JobStatus){return 
 
 export async function createJob(repository:JobRepository,input:CreateJobInput,service:ServiceDefinition){
   if(!input.customerId||!input.locationId) throw new Error("Customer and service location are required");
-  if(input.durationMinutes<=0) throw new Error("Job duration must be greater than zero");
-  if(input.price.amountMinor<0) throw new Error("Job price cannot be negative");
+  if(input.durationMinutes<=0) throw new Error("Scheduled service duration must be greater than zero");
+  if(input.price.amountMinor<0) throw new Error("Scheduled service price cannot be negative");
   if(!service.active) throw new Error("Inactive services cannot be scheduled");
   if(input.serviceFrequency&&!isFrequencyAllowed(service,input.serviceFrequency)) throw new Error("Frequency is not allowed for this service");
   return repository.create(input);
@@ -28,8 +28,8 @@ export async function createJob(repository:JobRepository,input:CreateJobInput,se
 
 export async function updateJobStatus(repository:JobRepository,id:string,status:JobStatus){
   const current=await repository.getById(id);
-  if(!current) throw new Error("Job not found");
-  if(!canTransitionJobStatus(current.status,status)) throw new Error(`Invalid job status transition: ${current.status} -> ${status}`);
+  if(!current) throw new Error("Scheduled service not found");
+  if(!canTransitionJobStatus(current.status,status)) throw new Error(`Invalid scheduled service status transition: ${current.status} -> ${status}`);
   if(current.status===status)return current;
   return repository.update(id,{status});
 }
