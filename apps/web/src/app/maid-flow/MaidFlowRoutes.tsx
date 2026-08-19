@@ -4,11 +4,13 @@ import { AutomationsPage } from "./AutomationsPage";
 import { CommunicationsPage } from "./CommunicationsPage";
 import { CompanySettingsPage } from "./CompanySettingsPage";
 import { CrmPage } from "./CrmPage";
+import { DashboardPage } from "./DashboardPage";
 import { IntegrationsPage } from "./IntegrationsPage";
 import { InvoicesPage } from "./InvoicesPage";
 import { JobExecutionPage } from "./JobExecutionPage";
 import { PaymentsPage } from "./PaymentsPage";
 import { PayrollPage } from "./PayrollPage";
+import { ReportsPage } from "./ReportsPage";
 import { SchedulePage } from "./SchedulePage";
 import { SecuritySettingsPage } from "./SecuritySettingsPage";
 import { ServiceCatalogPage } from "./ServiceCatalogPage";
@@ -19,6 +21,7 @@ import { WorkforcePage } from "./WorkforcePage";
 export function MaidFlowRoutes({ fallback }: { fallback: ReactNode }) {
   return (
     <Routes>
+      <Route path="/" element={<DashboardPage />} />
       <Route path="/crm" element={<CrmPage />} />
       <Route path="/crm/customers" element={<Navigate replace to="/crm" />} />
       <Route path="/crm/contacts" element={<Navigate replace to="/crm?tab=contacts" />} />
@@ -30,6 +33,7 @@ export function MaidFlowRoutes({ fallback }: { fallback: ReactNode }) {
       <Route path="/finance/payments" element={<PaymentsPage />} />
       <Route path="/finance/transactions" element={<TransactionsPage />} />
       <Route path="/finance/payroll" element={<PayrollPage />} />
+      <Route path="/reports" element={<ReportsPage />} />
       <Route path="/settings" element={<SettingsPage />} />
       <Route path="/settings/company" element={<CompanySettingsPage />} />
       <Route path="/settings/team" element={<WorkforcePage />} />
