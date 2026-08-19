@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
+import { AutomationsPage } from "./AutomationsPage";
 import { CommunicationsPage } from "./CommunicationsPage";
 import { CrmPage } from "./CrmPage";
 import { JobExecutionPage } from "./JobExecutionPage";
@@ -21,6 +22,7 @@ export function MaidFlowRoutes({ fallback }: { fallback: ReactNode }) {
       <Route path="/settings" element={<SettingsPage />} />
       <Route path="/settings/team" element={<WorkforcePage />} />
       <Route path="/settings/services" element={<ServiceCatalogPage />} />
+      <Route path="/settings/automations" element={<AutomationsPage />} />
       <Route path="*" element={fallback} />
     </Routes>
   );
