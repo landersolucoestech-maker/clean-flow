@@ -1,0 +1,7 @@
+import type { Estimate } from "../domain/crm";
+
+export const estimateFixtures: readonly Estimate[] = [
+  { id: "estimate-1", number: "EST-1001", leadId: "lead-1", status: "draft", validUntil: "2026-08-31", lineItems: [{ id: "line-1", description: "First Cleaning", quantity: 1, unitPrice: { amountMinor: 28500, currency: "USD" } }], taxRateBps: 0, subtotal: { amountMinor: 28500, currency: "USD" }, tax: { amountMinor: 0, currency: "USD" }, total: { amountMinor: 28500, currency: "USD" }, createdAt: "2026-08-19T12:00:00.000Z", updatedAt: "2026-08-19T12:00:00.000Z" },
+  { id: "estimate-2", number: "EST-1002", leadId: "lead-2", status: "sent", validUntil: "2026-08-28", lineItems: [{ id: "line-2", description: "Commercial Cleaning", quantity: 1, unitPrice: { amountMinor: 42000, currency: "USD" } }], taxRateBps: 0, subtotal: { amountMinor: 42000, currency: "USD" }, tax: { amountMinor: 0, currency: "USD" }, total: { amountMinor: 42000, currency: "USD" }, createdAt: "2026-08-18T19:00:00.000Z", updatedAt: "2026-08-19T09:00:00.000Z" },
+  { id: "estimate-3", number: "EST-1003", customerId: "customer-2", status: "accepted", validUntil: "2026-08-24", lineItems: [{ id: "line-3", description: "Move-Out Cleaning", quantity: 1, unitPrice: { amountMinor: 36000, currency: "USD" } }], taxRateBps: 0, subtotal: { amountMinor: 36000, currency: "USD" }, tax: { amountMinor: 0, currency: "USD" }, total: { amountMinor: 36000, currency: "USD" }, createdAt: "2026-08-17T16:00:00.000Z", updatedAt: "2026-08-19T10:00:00.000Z" },
+];
