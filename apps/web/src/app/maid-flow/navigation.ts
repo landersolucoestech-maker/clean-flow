@@ -1,7 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
   BarChart3,
-  BriefcaseBusiness,
   CalendarDays,
   CircleDollarSign,
   Inbox,
@@ -35,10 +34,7 @@ export const navigationGroups: NavigationGroup[] = [
   },
   {
     label: "Operations",
-    items: [
-      { label: "Schedule", path: "/operations/schedule", icon: CalendarDays },
-      { label: "Jobs", path: "/operations/jobs", icon: BriefcaseBusiness },
-    ],
+    items: [{ label: "Schedule", path: "/operations/schedule", icon: CalendarDays }],
   },
   {
     label: "Communications",
