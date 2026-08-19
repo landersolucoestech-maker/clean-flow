@@ -26,7 +26,7 @@ export function MaidFlowRoutes({ fallback }: { fallback: ReactNode }) {
       <Route path="/" element={<DashboardPage />} />
       <Route path="/crm" element={<CrmPage />} />
       <Route path="/operations/schedule" element={<SchedulePage />} />
-      <Route path="/operations/schedule/:jobId" element={<ScheduledServicePage />} />
+      <Route path="/operations/schedule/:scheduledServiceId" element={<ScheduledServicePage />} />
       <Route path="/communications/inbox" element={<CommunicationsPage />} />
       <Route path="/finance/invoices" element={<InvoicesPage />} />
       <Route path="/finance/payments" element={<PaymentsPage />} />
