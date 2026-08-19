@@ -1,92 +1,112 @@
-import { useMemo, useState } from "react";
-import { ChevronRight, Filter, MoreHorizontal, Plus, Search } from "lucide-react";
-import type { Contact, ContactStatus } from "../../../../../packages/domain/crm";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { ChevronRight, Filter, MoreHorizontal, Plus, Search, X } from "lucide-react";
+import type { Contact, ContactKind, ContactStatus } from "../../../../../packages/domain/crm";
+import { createContact } from "../../../../../packages/application/contact";
 import { MockContactRepository } from "../../../../../packages/data/mock-contact-repository";
 import { contactFixtures } from "../../../../../packages/test-fixtures/contacts";
 
 const repository = new MockContactRepository(contactFixtures);
-
 type StatusFilter = "all" | ContactStatus;
+
+type ContactDraft = {
+  kind: ContactKind;
+  displayName: string;
+  email: string;
+  phone: string;
+  preferredLanguage: Contact["preferredLanguage"];
+};
+
+const emptyDraft: ContactDraft = { kind: "person", displayName: "", email: "", phone: "", preferredLanguage: "en" };
 
 function languageLabel(language: Contact["preferredLanguage"]) {
   return language === "pt" ? "Portuguese" : language === "es" ? "Spanish" : "English";
 }
 
+function ContactForm({ onClose, onCreated }: { onClose: () => void; onCreated: (contact: Contact) => void }) {
+  const [draft, setDraft] = useState<ContactDraft>(emptyDraft);
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError(null);
+    setSubmitting(true);
+    try {
+      const contact = await createContact(repository, {
+        kind: draft.kind,
+        displayName: draft.displayName.trim(),
+        email: draft.email.trim() || undefined,
+        phone: draft.phone.trim() || undefined,
+        preferredLanguage: draft.preferredLanguage,
+        tags: [],
+      });
+      onCreated(contact);
+      onClose();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Unable to create contact");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-labelledby="new-contact-title">
+      <button type="button" aria-label="Close new contact form" className="absolute inset-0 bg-slate-950/30" onClick={onClose} />
+      <div className="relative flex h-full w-full max-w-[460px] flex-col border-l border-border bg-background shadow-xl">
+        <div className="flex h-16 items-center justify-between border-b border-border px-5">
+          <div><h2 id="new-contact-title" className="text-sm font-semibold">New contact</h2><p className="mt-0.5 text-[11px] text-muted-foreground">Add a person or business to CRM.</p></div>
+          <button type="button" aria-label="Close" onClick={onClose} className="mf-focus-ring grid h-8 w-8 place-items-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"><X className="h-4 w-4" /></button>
+        </div>
+        <form onSubmit={submit} className="flex min-h-0 flex-1 flex-col">
+          <div className="flex-1 space-y-5 overflow-y-auto p-5">
+            <fieldset><legend className="mb-2 text-[11px] font-semibold text-foreground">Contact type</legend><div className="grid grid-cols-2 gap-2">{(["person", "business"] as const).map((kind) => <button key={kind} type="button" onClick={() => setDraft((current) => ({ ...current, kind }))} className={`mf-focus-ring h-9 rounded-md border text-xs font-medium capitalize ${draft.kind === kind ? "border-primary bg-primary/5 text-primary" : "border-border bg-card text-muted-foreground hover:bg-muted"}`}>{kind}</button>)}</div></fieldset>
+            <label className="block"><span className="mb-1.5 block text-[11px] font-semibold">Name <span className="text-destructive">*</span></span><input autoFocus value={draft.displayName} onChange={(event) => setDraft((current) => ({ ...current, displayName: event.target.value }))} placeholder={draft.kind === "business" ? "Business name" : "Full name"} className="mf-focus-ring h-9 w-full rounded-md border border-input bg-card px-3 text-xs outline-none placeholder:text-muted-foreground" /></label>
+            <div className="grid gap-4 sm:grid-cols-2"><label className="block"><span className="mb-1.5 block text-[11px] font-semibold">Email</span><input type="email" value={draft.email} onChange={(event) => setDraft((current) => ({ ...current, email: event.target.value }))} placeholder="name@example.com" className="mf-focus-ring h-9 w-full rounded-md border border-input bg-card px-3 text-xs outline-none placeholder:text-muted-foreground" /></label><label className="block"><span className="mb-1.5 block text-[11px] font-semibold">Phone</span><input type="tel" value={draft.phone} onChange={(event) => setDraft((current) => ({ ...current, phone: event.target.value }))} placeholder="+1 (000) 000-0000" className="mf-focus-ring h-9 w-full rounded-md border border-input bg-card px-3 text-xs outline-none placeholder:text-muted-foreground" /></label></div>
+            <label className="block"><span className="mb-1.5 block text-[11px] font-semibold">Preferred language</span><select value={draft.preferredLanguage} onChange={(event) => setDraft((current) => ({ ...current, preferredLanguage: event.target.value as Contact["preferredLanguage"] }))} className="mf-focus-ring h-9 w-full rounded-md border border-input bg-card px-3 text-xs outline-none"><option value="en">English</option><option value="es">Spanish</option><option value="pt">Portuguese</option></select></label>
+            <p className="text-[11px] leading-5 text-muted-foreground">A contact requires at least an email address or phone number. Lead and customer status are managed separately.</p>
+            {error && <div role="alert" className="border-l-2 border-destructive bg-destructive/5 px-3 py-2 text-xs text-destructive">{error}</div>}
+          </div>
+          <div className="flex items-center justify-end gap-2 border-t border-border p-4"><button type="button" onClick={onClose} className="mf-focus-ring h-9 rounded-md border border-border bg-card px-3.5 text-xs font-semibold hover:bg-muted">Cancel</button><button type="submit" disabled={submitting} className="mf-focus-ring h-9 rounded-md bg-primary px-3.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60">{submitting ? "Creating…" : "Create contact"}</button></div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 export function ContactsPage() {
-  const [contacts] = useState<readonly Contact[]>(contactFixtures);
+  const [contacts, setContacts] = useState<readonly Contact[]>([]);
+  const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<StatusFilter>("active");
+  const [creating, setCreating] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    void repository.list().then((records) => { if (active) { setContacts(records); setLoading(false); } });
+    return () => { active = false; };
+  }, []);
 
   const filtered = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     return contacts.filter((contact) => {
       if (status !== "all" && contact.status !== status) return false;
       if (!normalized) return true;
-      return [contact.displayName, contact.email, contact.phone, contact.companyName, ...contact.tags]
-        .filter(Boolean)
-        .some((value) => value!.toLowerCase().includes(normalized));
+      return [contact.displayName, contact.email, contact.phone, contact.companyName, ...contact.tags].filter(Boolean).some((value) => value!.toLowerCase().includes(normalized));
     });
   }, [contacts, query, status]);
 
   return (
     <main className="min-w-0 flex-1 px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
       <div className="mx-auto w-full max-w-[1500px]">
-        <div className="mb-6 flex items-center gap-1.5 text-[11px] text-muted-foreground">
-          <span>Maid Flow</span><ChevronRight className="h-3 w-3" /><span>CRM</span><ChevronRight className="h-3 w-3" /><span className="text-foreground/80">Contacts</span>
-        </div>
-
-        <header className="flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.13em] text-primary">CRM</p>
-            <h1 className="text-[26px] font-semibold tracking-[-0.035em] sm:text-[29px]">Contacts</h1>
-            <p className="mt-1.5 max-w-2xl text-[13px] leading-5 text-muted-foreground">People and businesses known to your operation, independent of their lead or customer status.</p>
-          </div>
-          <button type="button" className="mf-focus-ring inline-flex h-9 items-center justify-center gap-2 rounded-md bg-primary px-3.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90">
-            <Plus className="h-3.5 w-3.5" />New contact
-          </button>
-        </header>
-
+        <div className="mb-6 flex items-center gap-1.5 text-[11px] text-muted-foreground"><span>Maid Flow</span><ChevronRight className="h-3 w-3" /><span>CRM</span><ChevronRight className="h-3 w-3" /><span className="text-foreground/80">Contacts</span></div>
+        <header className="flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-end sm:justify-between"><div><p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.13em] text-primary">CRM</p><h1 className="text-[26px] font-semibold tracking-[-0.035em] sm:text-[29px]">Contacts</h1><p className="mt-1.5 max-w-2xl text-[13px] leading-5 text-muted-foreground">People and businesses known to your operation, independent of their lead or customer status.</p></div><button type="button" onClick={() => setCreating(true)} className="mf-focus-ring inline-flex h-9 items-center justify-center gap-2 rounded-md bg-primary px-3.5 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90"><Plus className="h-3.5 w-3.5" />New contact</button></header>
         <section className="pt-5" aria-label="Contact list">
-          <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div className="relative w-full sm:max-w-sm">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-              <input aria-label="Search contacts" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search name, email, phone or tag" className="mf-focus-ring h-9 w-full rounded-md border border-input bg-card pl-9 pr-3 text-xs outline-none placeholder:text-muted-foreground" />
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="inline-flex h-9 items-center rounded-md border border-border bg-card p-0.5" aria-label="Contact status filter">
-                {(["active", "archived", "all"] as const).map((value) => <button key={value} type="button" onClick={() => setStatus(value)} className={`h-7 rounded px-2.5 text-[11px] font-medium capitalize transition-colors ${status === value ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground"}`}>{value}</button>)}
-              </div>
-              <button type="button" aria-label="More filters" className="mf-focus-ring grid h-9 w-9 place-items-center rounded-md border border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground"><Filter className="h-3.5 w-3.5" /></button>
-            </div>
-          </div>
-
-          <div className="mb-2 text-[11px] text-muted-foreground">{filtered.length} {filtered.length === 1 ? "contact" : "contacts"}</div>
-
-          <div className="overflow-x-auto border-y border-border bg-card sm:border sm:rounded-md">
-            <table className="min-w-[880px] w-full text-left text-[13px]">
-              <thead className="border-b border-border bg-muted/45 text-[11px] font-semibold text-muted-foreground">
-                <tr><th className="px-4 py-2.5">Name</th><th className="px-4 py-2.5">Type</th><th className="px-4 py-2.5">Email</th><th className="px-4 py-2.5">Phone</th><th className="px-4 py-2.5">Language</th><th className="px-4 py-2.5">Tags</th><th className="w-12 px-2 py-2.5"><span className="sr-only">Actions</span></th></tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {filtered.map((contact) => (
-                  <tr key={contact.id} className="group h-12 transition-colors hover:bg-muted/25">
-                    <td className="px-4"><div className="font-medium text-foreground">{contact.displayName}</div>{contact.companyName && contact.kind === "person" ? <div className="mt-0.5 text-[11px] text-muted-foreground">{contact.companyName}</div> : null}</td>
-                    <td className="px-4 text-muted-foreground capitalize">{contact.kind}</td>
-                    <td className="px-4 text-muted-foreground">{contact.email ?? "—"}</td>
-                    <td className="px-4 text-muted-foreground">{contact.phone ?? "—"}</td>
-                    <td className="px-4 text-muted-foreground">{languageLabel(contact.preferredLanguage)}</td>
-                    <td className="px-4"><div className="flex gap-1.5">{contact.tags.length ? contact.tags.map((tag) => <span key={tag} className="rounded border border-border bg-background px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">{tag}</span>) : <span className="text-muted-foreground">—</span>}</div></td>
-                    <td className="px-2"><button type="button" aria-label={`Actions for ${contact.displayName}`} className="mf-focus-ring grid h-8 w-8 place-items-center rounded-md text-muted-foreground opacity-70 hover:bg-muted hover:text-foreground group-hover:opacity-100"><MoreHorizontal className="h-4 w-4" /></button></td>
-                  </tr>
-                ))}
-                {!filtered.length && <tr><td colSpan={7} className="px-4 py-14 text-center"><p className="text-sm font-medium">No contacts found</p><p className="mt-1 text-xs text-muted-foreground">Adjust your search or status filter.</p></td></tr>}
-              </tbody>
-            </table>
-          </div>
+          <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"><div className="relative w-full sm:max-w-sm"><Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" /><input aria-label="Search contacts" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search name, email, phone or tag" className="mf-focus-ring h-9 w-full rounded-md border border-input bg-card pl-9 pr-3 text-xs outline-none placeholder:text-muted-foreground" /></div><div className="flex items-center gap-2"><div className="inline-flex h-9 items-center rounded-md border border-border bg-card p-0.5" aria-label="Contact status filter">{(["active", "archived", "all"] as const).map((value) => <button key={value} type="button" onClick={() => setStatus(value)} className={`h-7 rounded px-2.5 text-[11px] font-medium capitalize transition-colors ${status === value ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground"}`}>{value}</button>)}</div><button type="button" aria-label="More filters" className="mf-focus-ring grid h-9 w-9 place-items-center rounded-md border border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground"><Filter className="h-3.5 w-3.5" /></button></div></div>
+          <div className="mb-2 text-[11px] text-muted-foreground">{loading ? "Loading contacts…" : `${filtered.length} ${filtered.length === 1 ? "contact" : "contacts"}`}</div>
+          <div className="overflow-x-auto border-y border-border bg-card sm:rounded-md sm:border"><table className="min-w-[880px] w-full text-left text-[13px]"><thead className="border-b border-border bg-muted/45 text-[11px] font-semibold text-muted-foreground"><tr><th className="px-4 py-2.5">Name</th><th className="px-4 py-2.5">Type</th><th className="px-4 py-2.5">Email</th><th className="px-4 py-2.5">Phone</th><th className="px-4 py-2.5">Language</th><th className="px-4 py-2.5">Tags</th><th className="w-12 px-2 py-2.5"><span className="sr-only">Actions</span></th></tr></thead><tbody className="divide-y divide-border">{loading ? [0,1,2].map((row) => <tr key={row} className="h-12"><td colSpan={7} className="px-4"><div className="h-3 w-2/3 max-w-sm animate-pulse rounded bg-muted" /></td></tr>) : filtered.map((contact) => <tr key={contact.id} className="group h-12 transition-colors hover:bg-muted/25"><td className="px-4"><div className="font-medium text-foreground">{contact.displayName}</div></td><td className="px-4 text-muted-foreground capitalize">{contact.kind}</td><td className="px-4 text-muted-foreground">{contact.email ?? "—"}</td><td className="px-4 text-muted-foreground">{contact.phone ?? "—"}</td><td className="px-4 text-muted-foreground">{languageLabel(contact.preferredLanguage)}</td><td className="px-4"><div className="flex gap-1.5">{contact.tags.length ? contact.tags.map((tag) => <span key={tag} className="rounded border border-border bg-background px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">{tag}</span>) : <span className="text-muted-foreground">—</span>}</div></td><td className="px-2"><button type="button" aria-label={`Actions for ${contact.displayName}`} className="mf-focus-ring grid h-8 w-8 place-items-center rounded-md text-muted-foreground opacity-70 hover:bg-muted hover:text-foreground group-hover:opacity-100"><MoreHorizontal className="h-4 w-4" /></button></td></tr>)}{!loading && !filtered.length && <tr><td colSpan={7} className="px-4 py-14 text-center"><p className="text-sm font-medium">No contacts found</p><p className="mt-1 text-xs text-muted-foreground">Adjust your search or status filter.</p></td></tr>}</tbody></table></div>
         </section>
       </div>
+      {creating && <ContactForm onClose={() => setCreating(false)} onCreated={(contact) => setContacts((current) => [...current, contact])} />}
     </main>
   );
 }
-
-void repository;
