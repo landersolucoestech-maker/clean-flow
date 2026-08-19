@@ -1,0 +1,21 @@
+export const en = {
+  product: { name: "Maid Flow" },
+  navigation: {
+    dashboard: "Dashboard",
+    contacts: "Contacts",
+    customers: "Customers",
+    leads: "Leads",
+    estimates: "Estimates",
+    schedule: "Schedule",
+    jobs: "Jobs",
+    inbox: "Inbox",
+    invoices: "Invoices",
+    payments: "Payments",
+    transactions: "Transactions",
+    payroll: "Payroll",
+    reports: "Reports",
+    settings: "Settings",
+    support: "Support",
+    platform: "Platform",
+  },
+} as const;
