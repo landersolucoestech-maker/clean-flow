@@ -4,12 +4,9 @@ import {
   BriefcaseBusiness,
   CalendarDays,
   CircleDollarSign,
-  ContactRound,
-  FileText,
   Inbox,
   LayoutDashboard,
   LifeBuoy,
-  Megaphone,
   ReceiptText,
   Settings,
   ShieldCheck,
@@ -33,13 +30,8 @@ export const navigationGroups: NavigationGroup[] = [
     items: [{ label: "Dashboard", path: "/", icon: LayoutDashboard }],
   },
   {
-    label: "CRM",
-    items: [
-      { label: "Contacts", path: "/crm/contacts", icon: ContactRound },
-      { label: "Customers", path: "/crm/customers", icon: UsersRound },
-      { label: "Leads", path: "/crm/leads", icon: Megaphone },
-      { label: "Estimates", path: "/crm/estimates", icon: FileText },
-    ],
+    label: "Workspace",
+    items: [{ label: "CRM", path: "/crm", icon: UsersRound }],
   },
   {
     label: "Operations",
