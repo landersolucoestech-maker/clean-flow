@@ -7,12 +7,12 @@ import { CrmPage } from "./CrmPage";
 import { DashboardPage } from "./DashboardPage";
 import { IntegrationsPage } from "./IntegrationsPage";
 import { InvoicesPage } from "./InvoicesPage";
-import { JobExecutionPage } from "./JobExecutionPage";
 import { PaymentsPage } from "./PaymentsPage";
 import { PayrollPage } from "./PayrollPage";
 import { PlatformPage } from "./PlatformPage";
 import { ReportsPage } from "./ReportsPage";
 import { SchedulePage } from "./SchedulePage";
+import { ScheduledServicePage } from "./ScheduledServicePage";
 import { SecuritySettingsPage } from "./SecuritySettingsPage";
 import { ServiceCatalogPage } from "./ServiceCatalogPage";
 import { SettingsPage } from "./SettingsPage";
@@ -29,7 +29,7 @@ export function MaidFlowRoutes({ fallback }: { fallback: ReactNode }) {
       <Route path="/crm/contacts" element={<Navigate replace to="/crm?tab=contacts" />} />
       <Route path="/crm/leads" element={<Navigate replace to="/crm?tab=leads" />} />
       <Route path="/operations/schedule" element={<SchedulePage />} />
-      <Route path="/operations/schedule/:jobId" element={<JobExecutionPage />} />
+      <Route path="/operations/schedule/:jobId" element={<ScheduledServicePage />} />
       <Route path="/communications/inbox" element={<CommunicationsPage />} />
       <Route path="/finance/invoices" element={<InvoicesPage />} />
       <Route path="/finance/payments" element={<PaymentsPage />} />
