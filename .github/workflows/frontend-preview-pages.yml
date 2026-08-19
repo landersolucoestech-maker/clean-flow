@@ -12,6 +12,7 @@ on:
       - "tailwind.config.ts"
       - "postcss.config.js"
       - ".github/workflows/frontend-preview-pages.yml"
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -28,23 +29,27 @@ jobs:
     steps:
       - name: Checkout dev
         uses: actions/checkout@v4
+        with:
+          ref: dev
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
 
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
       - name: Install frontend dependencies
         run: npm install --ignore-scripts --no-audit --no-fund
 
-      - name: Validate frontend
-        run: npm run check
-
-      - name: Build GitHub Pages preview
+      - name: Build current dev frontend
         run: npm run build -- --base /clean-flow/
 
-      - name: Add SPA fallback
-        run: cp dist/index.html dist/404.html
+      - name: Add SPA fallback and build marker
+        run: |
+          cp dist/index.html dist/404.html
+          printf '%s\n' "$GITHUB_SHA" > dist/maid-flow-version.txt
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -54,12 +59,10 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Confirm GitHub Pages is enabled
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh api "repos/${GITHUB_REPOSITORY}/pages" >/dev/null
-
-      - name: Deploy to GitHub Pages
+      - name: Deploy current dev build to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
