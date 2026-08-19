@@ -7,7 +7,7 @@ import { serviceFixtures } from "../../../../../packages/test-fixtures/services"
 import { staffFixtures, teamFixtures } from "../../../../../packages/test-fixtures/workforce";
 import { maidFlowRepositories } from "./repositories";
 
-const repository=maidFlowRepositories.jobs;
+const repository=maidFlowRepositories.schedule;
 const DAY_MS=86_400_000;
 const statusOptions:readonly (JobStatus|"all")[]=["all","scheduled","on_the_way","in_progress","completed","cancelled"];
 const customerName=(id:string)=>customerAccountFixtures.find((row)=>row.customer.id===id)?.primaryContact.displayName??"Unknown customer";
